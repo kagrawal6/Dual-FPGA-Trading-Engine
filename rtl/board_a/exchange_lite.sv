@@ -36,10 +36,116 @@ module exchange_lite
     output logic [COUNTER_W-1:0] rejects_sent
 );
 
-    // TODO: Implementation
-    // Decode ORDER frame: symbol_id, side, limit_price, qty, order_id, timestamp.
-    // BUY:  limit_price >= best_ask[symbol] → FILLED at ask; else REJECTED.
-    // SELL: limit_price <= best_bid[symbol] → FILLED at bid; else REJECTED.
-    // Pack FILL frame per §4.5.3, echo order_id and timestamp as ts_echo.
+    // Fill status encoding per spec:
+    //   3'b000 = FILLED, 3'b001 = REJECTED
+    localparam logic [2:0] STATUS_FILLED   = 3'b000;
+    localparam logic [2:0] STATUS_REJECTED = 3'b001;
+
+    // Side encoding from ORDER frame:
+    //   1'b0 = BUY, 1'b1 = SELL
+    localparam logic SIDE_BUY  = 1'b0;
+    localparam logic SIDE_SELL = 1'b1;
+
+    // Stage-1 decode / lookup registers
+    logic        p1_valid;
+    logic [7:0]  p1_symbol;
+    logic        p1_side;
+    logic [31:0] p1_limit_price;
+    logic [15:0] p1_qty;
+    logic [15:0] p1_order_id;
+    logic [15:0] p1_timestamp;
+    logic [31:0] p1_cur_bid, p1_cur_ask;
+
+    // Stage-2 match results
+    logic        is_filled;
+    logic [31:0] fill_price_val;
+    logic [15:0] fill_qty_val;
+
+    // ---------------------------------------------------------------------
+    // Stage 1: decode ORDER frame + market lookup
+    // ---------------------------------------------------------------------
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            p1_valid    <= 1'b0;
+            p1_symbol   <= '0;
+            p1_side     <= 1'b0;
+            p1_limit_price <= '0;
+            p1_qty      <= '0;
+            p1_order_id <= '0;
+            p1_timestamp <= '0;
+            p1_cur_bid  <= '0;
+            p1_cur_ask  <= '0;
+            orders_rcvd <= '0;
+        end else begin
+            p1_valid <= 1'b0;
+
+            if (enable && order_valid && (order_frame[127:124] == MSG_ORDER)) begin
+                p1_symbol      <= order_frame[123:116];
+                p1_side        <= order_frame[115];
+                p1_limit_price <= order_frame[111:80];
+                p1_qty         <= order_frame[79:64];
+                p1_order_id    <= order_frame[63:48];
+                p1_timestamp   <= order_frame[31:16];
+
+                // Only process valid symbol IDs. Out-of-range symbols are ignored.
+                if (order_frame[123:116] < NUM_SYM[7:0]) begin
+                    p1_cur_bid <= best_bid[order_frame[123:116]];
+                    p1_cur_ask <= best_ask[order_frame[123:116]];
+                    p1_valid   <= 1'b1;
+                end
+
+                orders_rcvd <= orders_rcvd + 1'b1;
+            end
+        end
+    end
+
+    // ---------------------------------------------------------------------
+    // Stage 2: matching
+    // BUY  fills at ask if limit >= ask
+    // SELL fills at bid if limit <= bid
+    // ---------------------------------------------------------------------
+    always_comb begin
+        if (p1_side == SIDE_BUY) begin
+            is_filled = (p1_limit_price >= p1_cur_ask);
+        end else begin
+            is_filled = (p1_limit_price <= p1_cur_bid);
+        end
+
+        fill_price_val = is_filled ? ((p1_side == SIDE_BUY) ? p1_cur_ask : p1_cur_bid) : 32'h0;
+        fill_qty_val   = is_filled ? p1_qty : 16'h0;
+    end
+
+    // ---------------------------------------------------------------------
+    // Stage 2 output register / counters
+    // ---------------------------------------------------------------------
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            fill_frame   <= '0;
+            fill_valid   <= 1'b0;
+            fills_sent   <= '0;
+            rejects_sent <= '0;
+        end else begin
+            fill_valid <= 1'b0; // pulse
+
+            // honor output backpressure
+            if (enable && p1_valid && fill_ready) begin
+                fill_frame <= {
+                    MSG_FILL,                                    // [127:124]
+                    p1_symbol,                                   // [123:116]
+                    p1_side,                                     // [115]
+                    (is_filled ? STATUS_FILLED : STATUS_REJECTED),// [114:112]
+                    fill_price_val,                              // [111:80]
+                    fill_qty_val,                                // [79:64]
+                    p1_order_id,                                 // [63:48]
+                    p1_timestamp,                                // [47:32] ts_echo
+                    32'h0                                        // [31:0] reserved
+                };
+                fill_valid <= 1'b1;
+
+                if (is_filled) fills_sent <= fills_sent + 1'b1;
+                else           rejects_sent <= rejects_sent + 1'b1;
+            end
+        end
+    end
 
 endmodule
