@@ -52,9 +52,195 @@ module tb_exchange_lite;
         .rejects_sent(rejects_sent)
     );
 
+    int err_count = 0;
+
+    task automatic check(input string msg, input logic cond);
+        if (!cond) begin
+            $error("FAIL: %s", msg);
+            err_count++;
+        end
+    endtask
+
+    // ORDER frame builder per spec:
+    // [127:124]=MSG_ORDER, [123:116]=symbol, [115]=side, [114:112]=reserved
+    // [111:80]=limit_price, [79:64]=qty, [63:48]=order_id, [47:32]=reserved,
+    // [31:16]=timestamp, [15:0]=seq_num(reserved for this TB)
+    function automatic logic [127:0] build_order(
+        input logic [7:0]  sym,
+        input logic        side,
+        input logic [31:0] limit_price,
+        input logic [15:0] qty,
+        input logic [15:0] oid,
+        input logic [15:0] ts
+    );
+        build_order = {
+            MSG_ORDER, sym, side, 3'b000,
+            limit_price, qty, oid, 16'h0000, ts, 16'h0000
+        };
+    endfunction
+
+    task automatic send_order(input logic [127:0] frame);
+        begin
+            order_frame = frame;
+            order_valid = 1'b1;
+            @(posedge clk);
+            order_valid = 1'b0;
+        end
+    endtask
+
+    task automatic wait_for_fill(input int timeout_cycles, input string why);
+        int i;
+        begin
+            i = 0;
+            while (!fill_valid && i < timeout_cycles) begin
+                @(posedge clk);
+                i++;
+            end
+            check($sformatf("%s: fill_valid should assert within %0d cycles", why, timeout_cycles),
+                  fill_valid);
+        end
+    endtask
+
+    task automatic expect_no_fill_for_cycles(input int cycles, input string why);
+        begin
+            for (int i = 0; i < cycles; i++) begin
+                @(posedge clk);
+                check($sformatf("%s (cycle %0d): no fill_valid expected", why, i), !fill_valid);
+            end
+        end
+    endtask
+
+    // Waveform dump
     initial begin
-        // TODO: Add test stimulus
-        #1000;
+        $dumpfile("tb_exchange_lite.vcd");
+        $dumpvars(0, tb_exchange_lite);
+    end
+
+    initial begin
+        // Defaults
+        enable      = 1'b0;
+        order_frame = '0;
+        order_valid = 1'b0;
+        fill_ready  = 1'b1;
+
+        // Seed best bid/ask
+        for (int s = 0; s < 4; s++) begin
+            best_bid[s] = 32'h0064_0000; // 100.0
+            best_ask[s] = 32'h0065_0000; // 101.0
+        end
+        // Symbol 1 has different prices to verify symbol routing
+        best_bid[1] = 32'h0032_0000; // 50.0
+        best_ask[1] = 32'h0033_0000; // 51.0
+
+        // Wait reset release
+        @(posedge clk);
+        wait (rst_n === 1'b1);
+        @(posedge clk);
+        enable = 1'b1;
+
+        // -------------------------------------------------------------
+        // 1) BUY at ask -> FILLED at ask
+        // -------------------------------------------------------------
+        send_order(build_order(8'd0, 1'b0, 32'h0065_0000, 16'd50, 16'd1, 16'hAAAA));
+        wait_for_fill(4, "BUY at ask");
+        check("BUY at ask: fill_valid", fill_valid);
+        check("BUY at ask: msg_type=FILL", fill_frame[127:124] == MSG_FILL);
+        check("BUY at ask: symbol echoed", fill_frame[123:116] == 8'd0);
+        check("BUY at ask: side echoed", fill_frame[115] == 1'b0);
+        check("BUY at ask: status=FILLED", fill_frame[114:112] == 3'b000);
+        check("BUY at ask: fill_price=ask", fill_frame[111:80] == 32'h0065_0000);
+        check("BUY at ask: fill_qty=order qty", fill_frame[79:64] == 16'd50);
+        check("BUY at ask: order_id echoed", fill_frame[63:48] == 16'd1);
+        check("BUY at ask: ts_echo echoed", fill_frame[47:32] == 16'hAAAA);
+        check("BUY at ask: reserved low bits zero", fill_frame[31:0] == 32'h0);
+        @(posedge clk);
+
+        // -------------------------------------------------------------
+        // 2) BUY below ask -> REJECT
+        // -------------------------------------------------------------
+        send_order(build_order(8'd0, 1'b0, 32'h0063_0000, 16'd25, 16'd2, 16'hBBBB));
+        wait_for_fill(4, "BUY below ask");
+        check("BUY below ask: fill_valid", fill_valid);
+        check("BUY below ask: status=REJECTED", fill_frame[114:112] == 3'b001);
+        check("BUY below ask: fill_price=0", fill_frame[111:80] == 32'h0);
+        check("BUY below ask: fill_qty=0", fill_frame[79:64] == 16'h0);
+        check("BUY below ask: order_id echoed", fill_frame[63:48] == 16'd2);
+        check("BUY below ask: ts_echo echoed", fill_frame[47:32] == 16'hBBBB);
+        @(posedge clk);
+
+        // -------------------------------------------------------------
+        // 3) SELL at bid -> FILLED at bid
+        // -------------------------------------------------------------
+        send_order(build_order(8'd0, 1'b1, 32'h0064_0000, 16'd30, 16'd3, 16'hCCCC));
+        wait_for_fill(4, "SELL at bid");
+        check("SELL at bid: fill_valid", fill_valid);
+        check("SELL at bid: status=FILLED", fill_frame[114:112] == 3'b000);
+        check("SELL at bid: fill_price=bid", fill_frame[111:80] == 32'h0064_0000);
+        check("SELL at bid: fill_qty=order qty", fill_frame[79:64] == 16'd30);
+        @(posedge clk);
+
+        // -------------------------------------------------------------
+        // 4) SELL above bid -> REJECT
+        // -------------------------------------------------------------
+        send_order(build_order(8'd0, 1'b1, 32'h0066_0000, 16'd30, 16'd4, 16'hDDDD));
+        wait_for_fill(4, "SELL above bid");
+        check("SELL above bid: fill_valid", fill_valid);
+        check("SELL above bid: status=REJECTED", fill_frame[114:112] == 3'b001);
+        check("SELL above bid: fill_price=0", fill_frame[111:80] == 32'h0);
+        check("SELL above bid: fill_qty=0", fill_frame[79:64] == 16'h0);
+        @(posedge clk);
+
+        // -------------------------------------------------------------
+        // 5) Symbol routing: use symbol 1 bid/ask
+        // -------------------------------------------------------------
+        send_order(build_order(8'd1, 1'b0, 32'h0033_0000, 16'd10, 16'd5, 16'hEEEE));
+        wait_for_fill(4, "Symbol1 BUY at ask");
+        check("Symbol1 BUY at ask: fill_valid", fill_valid);
+        check("Symbol1 BUY at ask: symbol echoed", fill_frame[123:116] == 8'd1);
+        check("Symbol1 BUY at ask: fill_price uses symbol1 ask", fill_frame[111:80] == 32'h0033_0000);
+        @(posedge clk);
+
+        // -------------------------------------------------------------
+        // 6) Backpressure: fill_ready=0 should suppress output pulse/counters
+        // -------------------------------------------------------------
+        fill_ready = 1'b0;
+        send_order(build_order(8'd0, 1'b0, 32'h0065_0000, 16'd11, 16'd6, 16'h1234));
+        expect_no_fill_for_cycles(5, "fill_ready low");
+        fill_ready = 1'b1;
+        // After re-enabling ready, no stale fill should appear for this dropped event.
+        expect_no_fill_for_cycles(3, "stale fill after fill_ready re-enable");
+
+        // -------------------------------------------------------------
+        // 7) enable=0 should suppress processing
+        // -------------------------------------------------------------
+        enable = 1'b0;
+        send_order(build_order(8'd0, 1'b0, 32'h0065_0000, 16'd12, 16'd7, 16'h5678));
+        expect_no_fill_for_cycles(4, "enable low");
+        enable = 1'b1;
+
+        // -------------------------------------------------------------
+        // 8) Invalid msg_type should be ignored (no order count increment)
+        // -------------------------------------------------------------
+        order_frame = {4'hF, 124'h0};
+        order_valid = 1'b1;
+        @(posedge clk);
+        order_valid = 1'b0;
+        expect_no_fill_for_cycles(3, "invalid msg_type");
+
+        // Counter checks
+        // Processed valid ORDER frames while enable=1 and msg_type==ORDER:
+        // tests 1,2,3,4,5,6 => 6 orders_rcvd (test 7 is enable=0; test 8 invalid type)
+        check("orders_rcvd count", orders_rcvd == 32'd6);
+        // Filled tests: 1,3,5 -> 3
+        check("fills_sent count", fills_sent == 32'd3);
+        // Rejected tests: 2,4 -> 2 (test 6 dropped by fill_ready=0)
+        check("rejects_sent count", rejects_sent == 32'd2);
+
+        if (err_count == 0)
+            $display("tb_exchange_lite: PASS (all checks passed, VCD: tb_exchange_lite.vcd)");
+        else
+            $display("tb_exchange_lite: FAIL (%0d errors)", err_count);
+
         $finish;
     end
 
