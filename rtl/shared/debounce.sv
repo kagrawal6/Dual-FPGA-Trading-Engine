@@ -3,14 +3,6 @@
 // Button debouncer: raw input must stay stable for 2^COUNTER_W consecutive
 // clock cycles before btn_out updates. Produces a single-cycle rising-edge
 // pulse on btn_out when it transitions 0→1.
-//
-// Default COUNTER_W = 20 → 2^20 cycles ≈ 10.5 ms at 100 MHz, covering
-// typical mechanical bounce (design spec §4.4.3 discusses ~1–10 ms bounce).
-//
-// Note: updated_design_specification.md also describes a 20-bit *shift-register*
-// filter (~200 ns window at 100 MHz — the “200 us” figure in that section is
-// inconsistent with 20×10 ns). This counter-based filter is the timing used
-// for synthesis and matches board_*_ctrl integration (rst_n, port names).
 // ============================================================================
 
 `timescale 1ns / 1ps
