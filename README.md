@@ -1,4 +1,4 @@
-# HFT Capstone — New Implementation
+# ECE 554 Capstone
 
 Dual-FPGA low-latency trading engine for ECE 554.
 
