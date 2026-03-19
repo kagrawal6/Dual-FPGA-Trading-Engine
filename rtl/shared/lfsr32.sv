@@ -24,23 +24,8 @@ module lfsr32
     localparam logic [31:0] LFSR_TAPS = 32'h0040_0007;
 
     // The visible pseudo-random word is the full register (same as market_sim
-    // raw_step = rand_out[4:0]).  Kept in one always_ff block so ModelSim
-    // waveforms show a single clean state vector advancing in lockstep with clk.
+    // raw_step = rand_out[4:0]).  
     logic [31:0] lfsr_reg;
-
-    // -------------------------------------------------------------------------
-    // Galois LFSR update (Appendix E.1, updated_design_specification.md)
-    // -------------------------------------------------------------------------
-    // Right-shift configuration: if the bit shifting out (LSB) is 1, XOR the
-    // fixed tap mask into the shifted word.  This is equivalent to XOR-at-taps
-    // in parallel and matches LFSR_TAPS = 32'h00400007 in hft_pkg.
-    //
-    // next = lfsr[0] ? (lfsr >> 1) ^ LFSR_TAPS : (lfsr >> 1);
-    //
-    // Priority: asynchronous reset > synchronous load > enable advance > hold.
-    // load wins over enable on the same cycle so a seed pulse is not corrupted
-    // by an accidental simultaneous advance.
-    // -------------------------------------------------------------------------
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             // Known non-zero power-on default.  Board A overwrites via load on
