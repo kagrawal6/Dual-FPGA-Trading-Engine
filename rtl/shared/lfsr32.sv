@@ -1,7 +1,7 @@
 // ============================================================================
 // Module: lfsr32
 // 32-bit Galois LFSR with maximal-length polynomial (x^32+x^22+x^2+x+1).
-// Produces one pseudo-random 32-bit value per enabled clock cycle.
+// Produces one new 32-bit value LFSR state per enabled cycle.
 // Seed is loaded via the load/seed_in interface on the IDLE→RUNNING transition.
 // ============================================================================
 
