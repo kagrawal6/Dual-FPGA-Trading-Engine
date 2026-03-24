@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import random
+from collections import Counter
 from typing import List
 
 from pynq import Overlay, MMIO
@@ -179,6 +180,16 @@ def main() -> None:
     for sector_name, tickers in sector_groups.items():
         joined = ", ".join(tickers)
         print(f"{sector_name}: {joined}")
+
+    # RTL scales per-sector noise by active population in each sector_id.
+    by_sector_name = Counter(x["sector"] for x in loaded)
+    by_sector_id = Counter(x["sector_id"] for x in loaded)
+    print("Sector population (hardware sector_id counts — used for noise gain):")
+    for sid in sorted(by_sector_id.keys()):
+        print(f"  sector_id {sid}: {by_sector_id[sid]} symbol(s)")
+    print("Sector population (by name, demo / debug):")
+    for name, cnt in sorted(by_sector_name.items(), key=lambda z: (-z[1], z[0])):
+        print(f"  {name}: {cnt}")
 
     # ADDITION: write extended metadata config into AXI-Lite map.
     ol = Overlay("overlays/board_a.bit")

@@ -52,7 +52,7 @@ module board_a_axi_regs
     output logic [31:0]                    lfsr_seed,
     output price_t                         sym_init_mid    [NUM_SYM],
     output price_t                         sym_init_spread [NUM_SYM],
-    output logic [2:0]                     sym_sector_id [NUM_SYM],
+    output logic [SECTOR_ID_W-1:0]         sym_sector_id [NUM_SYM],
     output logic [15:0]                    sym_company_token [NUM_SYM],
     output logic [7:0]                     active_sym_count,
 
@@ -150,7 +150,7 @@ module board_a_axi_regs
                     if (idx < NUM_SYM) sym_init_spread[idx] <= price_t'((s_axi_wdata == 32'h0) ? 32'h1 : s_axi_wdata);
                 end else if ((wr_addr >= ADDR_SECTOR_BASE) && (wr_addr < (ADDR_SECTOR_BASE + NUM_SYM*4))) begin
                     idx = (wr_addr - ADDR_SECTOR_BASE) >> 2;
-                    if (idx < NUM_SYM) sym_sector_id[idx] <= s_axi_wdata[2:0];
+                    if (idx < NUM_SYM) sym_sector_id[idx] <= s_axi_wdata[SECTOR_ID_W-1:0];
                 end else if ((wr_addr >= ADDR_TOKEN_BASE) && (wr_addr < (ADDR_TOKEN_BASE + ((NUM_SYM+1)/2)*4))) begin
                     // ADDITION: packed tokens, 2x16b per 32b word.
                     tok_idx = ((wr_addr - ADDR_TOKEN_BASE) >> 2) * 2;
@@ -183,7 +183,8 @@ module board_a_axi_regs
                     if (idx < NUM_SYM) s_axi_rdata <= sym_init_spread[idx];
                 end else if ((rd_addr >= ADDR_SECTOR_BASE) && (rd_addr < (ADDR_SECTOR_BASE + NUM_SYM*4))) begin
                     idx = (rd_addr - ADDR_SECTOR_BASE) >> 2;
-                    if (idx < NUM_SYM) s_axi_rdata <= {{29{1'b0}}, sym_sector_id[idx]};
+                    if (idx < NUM_SYM)
+                        s_axi_rdata <= {{(32 - SECTOR_ID_W){1'b0}}, sym_sector_id[idx]};
                 end else if ((rd_addr >= ADDR_TOKEN_BASE) && (rd_addr < (ADDR_TOKEN_BASE + ((NUM_SYM+1)/2)*4))) begin
                     tok_idx = ((rd_addr - ADDR_TOKEN_BASE) >> 2) * 2;
                     s_axi_rdata[15:0] <= (tok_idx < NUM_SYM) ? sym_company_token[tok_idx] : 16'h0;

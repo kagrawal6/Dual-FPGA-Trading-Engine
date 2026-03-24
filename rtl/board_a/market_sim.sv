@@ -1,9 +1,23 @@
 // ============================================================================
 // Module: market_sim
-// LFSR-driven market simulator. Maintains per-symbol mid_price and spread.
-// Each quote_interval cycles, updates one symbol's prices using a scaled
-// pseudo-random step, builds a 128-bit QUOTE frame, and round-robins
-// through all symbols. Exports live bid/ask arrays for exchange_lite.
+// Sector-aware market simulator. Maintains per-symbol mid price and spread.
+//
+// Price step: market_noise_gen.step_out_q16_16[s] is a signed Q16.16-style
+// increment (global + sector drift + per-symbol drift, see market_noise_gen).
+// market_sim scales it by regime step_size_q16_16 (also Q16.16):
+//   delta_price_Q16_16 = (step_out * step_size) >>> 16
+// so the product is Q32.32-aligned then brought back to Q16.16 for mid_price.
+//
+// Quote scheduling: quote_interval==0 means tick every enabled cycle (fastest).
+// Otherwise one quote attempt when quote_ctr reaches quote_interval-1.
+//
+// quote_valid / quote_ready: do_quote = tick_raw && quote_ready, so a quote is
+// only emitted when the consumer is already ready — quote_valid is a 1-cycle
+// pulse (not a held-valid skid). Intentional for this FIFO-style sink.
+//
+// Spread model: each update sets spread from base_spread_q16_16 (regime only).
+// init_spread[] applies on async reset or lfsr_load only (no sector/company
+// spread dynamics).
 // ============================================================================
 
 `timescale 1ns / 1ps
@@ -11,29 +25,29 @@
 module market_sim
     import hft_pkg::*;
 #(
-    parameter NUM_SYM = NUM_SYMBOLS
+    parameter int NUM_SYM     = NUM_SYMBOLS,
+    parameter int NUM_SECTORS = hft_pkg::NUM_SECTORS
 )(
     input  logic                 clk,
     input  logic                 rst_n,
     input  logic                 enable,              // high when FSM is RUNNING
 
-    // LFSR control
-    input  logic                 lfsr_load,            // pulse: load seed (IDLE→RUNNING)
+    // LFSR / config reload (pulse on IDLE→RUNNING): reload symbol state + noise seeds
+    input  logic                 lfsr_load,
     input  logic [31:0]          lfsr_seed,            // from AXI register
 
     // Configuration
     input  regime_e              active_regime,
-    input  logic [31:0]          quote_interval,       // cycles between quote rounds
-    // ADDITION: runtime-active symbol count + per-symbol sector metadata.
+    input  logic [31:0]          quote_interval,       // 0 = every cycle; else cycles between quote ticks
     input  logic [7:0]           active_sym_count,
-    input  logic [2:0]           sector_id   [NUM_SYM],
-    input  price_t               init_mid    [NUM_SYM], // per-symbol initial mid prices
-    input  price_t               init_spread [NUM_SYM], // per-symbol initial spreads
+    input  logic [SECTOR_ID_W-1:0] sector_id [NUM_SYM],
+    input  price_t               init_mid    [NUM_SYM],
+    input  price_t               init_spread [NUM_SYM],
 
     // Quote frame output (to quote FIFO / tx_arbiter)
     output logic [FRAME_W-1:0]  quote_frame,
-    output logic                 quote_valid,
-    input  logic                 quote_ready,          // backpressure
+    output logic                 quote_valid,          // 1-cycle pulse when do_quote (requires quote_ready)
+    input  logic                 quote_ready,
 
     // Live prices (for exchange_lite order matching)
     output price_t               best_bid [NUM_SYM],
@@ -43,51 +57,15 @@ module market_sim
     output logic [COUNTER_W-1:0] quotes_generated
 );
 
-    // ADDITION: market_noise_gen integration signals.
+    localparam sprice_t MIN_PRICE_Q16_16 = sprice_t'(32'h0001_0000);
+    localparam sprice_t MAX_PRICE_Q16_16 = sprice_t'(32'h2710_0000);
+    localparam logic [7:0] NUM_SYM_U8 = 8'(NUM_SYM);
 
-    // ---------------------------------------------------------------------
-    // Constants (Q16.16)
-    // ---------------------------------------------------------------------
-    localparam sprice_t MIN_PRICE_Q16_16 = sprice_t'(32'h0001_0000); // $1.00
-    localparam sprice_t MAX_PRICE_Q16_16 = sprice_t'(32'h2710_0000); // $10,000.00
+    // Signed 32b price delta (Q16.16) after scaling; typedef cast is tool-clear vs plain 32'().
+    typedef logic signed [31:0] price_delta_s32_t;
 
-    // ---------------------------------------------------------------------
-    // LFSR instance (one pseudo-random step per quote generation)
-    // ---------------------------------------------------------------------
-    logic [31:0] lfsr_rand;
-    logic        lfsr_enable;
-
-    lfsr32 u_lfsr32 (
-        .clk     (clk),
-        .rst_n   (rst_n),
-        .enable  (lfsr_enable),
-        .load    (lfsr_load),
-        .seed_in (lfsr_seed),
-        .rand_out(lfsr_rand)
-    );
-
-    // ---------------------------------------------------------------------
-    // Per-symbol state
-    // ---------------------------------------------------------------------
-    price_t mid_price [NUM_SYM];
-    price_t spread    [NUM_SYM];
-    logic   [15:0] seq_num [NUM_SYM];
-
-    // Round-robin pointer and quote interval counter
-    localparam int SYM_PTR_W = (NUM_SYM > 1) ? $clog2(NUM_SYM) : 1;
-    logic [SYM_PTR_W-1:0] sym_ptr;
-    logic [31:0]          quote_ctr;
-
-    // ---------------------------------------------------------------------
-    // Regime parameter mapping (Q16.16)
-    // ---------------------------------------------------------------------
     price_t step_size_q16_16;
     price_t base_spread_q16_16;
-    logic [7:0] active_count_eff;
-    logic signed [31:0] n_global;
-    logic signed [31:0] n_sector [8];
-    logic signed [31:0] n_company [NUM_SYM];
-    logic signed [31:0] n_step_out [NUM_SYM];
 
     always_comb begin
         unique case (active_regime)
@@ -110,51 +88,153 @@ module market_sim
         endcase
     end
 
-    // ADDITION: clamp runtime count into [1, NUM_SYM].
+    logic [7:0] active_count_eff;
     assign active_count_eff = (active_sym_count == 8'd0) ? 8'd1 :
-                              (active_sym_count > NUM_SYM[7:0]) ? NUM_SYM[7:0] :
+                              (active_sym_count > NUM_SYM_U8) ? NUM_SYM_U8 :
                               active_sym_count;
 
-    // ---------------------------------------------------------------------
-    // Quote scheduling: generate exactly one QUOTE per quote_interval cycles,
-    // but only when quote_ready is asserted.
-    // ---------------------------------------------------------------------
+    // Per-symbol state (before combinational quote step that reads mid_price[sym_ptr])
+    price_t mid_price [NUM_SYM];
+    price_t spread    [NUM_SYM];
+    logic   [15:0] seq_num [NUM_SYM];
+
+    localparam int SYM_PTR_W = (NUM_SYM > 1) ? $clog2(NUM_SYM) : 1;
+    logic [SYM_PTR_W-1:0] sym_ptr;
+    logic [31:0]          quote_ctr;
+
     logic tick_raw;
     logic do_quote;
-
+    // quote_interval==0: quote opportunity every enabled cycle (fastest path).
     assign tick_raw = enable && (
         (quote_interval == 32'd0) ? 1'b1 : (quote_ctr == (quote_interval - 1))
     );
+    // Producer only fires when sink is ready (pulse valid, not held-valid AXI-style).
     assign do_quote = tick_raw && quote_ready;
 
-    // Advance LFSR only when generating a quote.
-    assign lfsr_enable = do_quote;
+    logic signed [31:0] n_global;
+    logic signed [31:0] n_sector [NUM_SECTORS];
+    logic signed [31:0] n_company [NUM_SYM];
+    logic signed [31:0] n_step_out [NUM_SYM];
 
-    // ADDITION: executable sector-aware noise path (independent per-symbol RNG inside module).
     market_noise_gen #(
         .NUM_SYM(NUM_SYM),
-        .NUM_SECTORS(8)
+        .NUM_SECTORS(NUM_SECTORS)
     ) u_market_noise_gen (
-        .clk                (clk),
-        .rst_n              (rst_n),
-        .enable             (enable),
-        .tick               (do_quote),
-        .base_seed          (lfsr_seed),
-        .active_sym_count   (active_count_eff),
-        .sector_id          (sector_id),
-        .global_noise_q16_16(n_global),
-        .sector_noise_q16_16(n_sector),
-        .company_noise_q16_16(n_company),
-        .step_out_q16_16    (n_step_out)
+        .clk                  (clk),
+        .rst_n                (rst_n),
+        .enable               (enable),
+        .lfsr_load            (lfsr_load),
+        .tick                 (do_quote),
+        .base_seed            (lfsr_seed),
+        .active_sym_count     (active_count_eff),
+        .sector_id            (sector_id),
+        .global_noise_q16_16  (n_global),
+        .sector_noise_q16_16  (n_sector),
+        .company_noise_q16_16 (n_company),
+        .step_out_q16_16      (n_step_out)
     );
 
-    // ---------------------------------------------------------------------
-    // Frame registers
-    // ---------------------------------------------------------------------
-    logic [FRAME_W-1:0] quote_frame_next;
     logic [FRAME_W-1:0] quote_frame_hold;
 
-    integer s;
+    // Combinational quote-step math (when do_quote):
+    // step_out_q16_16 and step_size_q16_16 are both Q16.16; product >>> 16 => Q16.16 delta.
+    logic signed [63:0] delta_mul_c;
+    logic signed [31:0] delta_scaled_c;
+    logic signed [31:0] mid_s_c;
+    logic signed [31:0] new_mid_s_c;
+    logic [31:0]        new_mid_u_c;
+    price_t             new_spread_q_c;
+    sprice_t            spr_h_s_c;
+    sprice_t            bid_s2_c, ask_s2_c;
+    price_t             bid_calc_c, ask_calc_c;
+    logic [15:0]        bid_size_calc_c, ask_size_calc_c;
+    logic [FRAME_W-1:0] quote_frame_next_c;
+
+    always_comb begin
+        delta_mul_c    = 64'sd0;
+        delta_scaled_c = 32'sd0;
+        mid_s_c        = 32'sd0;
+        new_mid_s_c    = 32'sd0;
+        new_mid_u_c    = 32'd0;
+        new_spread_q_c = 32'd0;
+        spr_h_s_c      = 32'sd0;
+        bid_s2_c       = 32'sd0;
+        ask_s2_c       = 32'sd0;
+        bid_calc_c     = 32'd0;
+        ask_calc_c     = 32'd0;
+        bid_size_calc_c = 16'd0;
+        ask_size_calc_c = 16'd0;
+        quote_frame_next_c = '0;
+
+        if (do_quote) begin
+            // step_size_q16_16 is nonnegative Q16.16; $signed is stylistic width/sign alignment.
+            delta_mul_c = $signed(n_step_out[sym_ptr]) * $signed(step_size_q16_16);
+            // Arithmetic shift then cast to signed 32b Q16.16 delta (see header for unit contract).
+            delta_scaled_c = price_delta_s32_t'(delta_mul_c >>> 16);
+
+            mid_s_c         = $signed(mid_price[sym_ptr]);
+            new_mid_s_c     = mid_s_c + delta_scaled_c;
+
+            if (new_mid_s_c < MIN_PRICE_Q16_16) new_mid_u_c = price_t'(MIN_PRICE_Q16_16);
+            else if (new_mid_s_c > MAX_PRICE_Q16_16) new_mid_u_c = price_t'(MAX_PRICE_Q16_16);
+            else new_mid_u_c = price_t'(new_mid_s_c);
+
+            // Static per-regime spread each tick (no sector/company spread evolution).
+            new_spread_q_c = base_spread_q16_16;
+            if (new_spread_q_c == '0) new_spread_q_c = 32'h0000_0001;
+
+            spr_h_s_c = sprice_t'(new_spread_q_c) >>> 1;
+            bid_s2_c  = sprice_t'(new_mid_u_c) - spr_h_s_c;
+            ask_s2_c  = sprice_t'(new_mid_u_c) + spr_h_s_c;
+
+            if (bid_s2_c < MIN_PRICE_Q16_16) bid_calc_c = price_t'(MIN_PRICE_Q16_16);
+            else if (bid_s2_c > MAX_PRICE_Q16_16) bid_calc_c = price_t'(MAX_PRICE_Q16_16);
+            else bid_calc_c = price_t'(bid_s2_c);
+
+            if (ask_s2_c < MIN_PRICE_Q16_16) ask_calc_c = price_t'(MIN_PRICE_Q16_16);
+            else if (ask_s2_c > MAX_PRICE_Q16_16) ask_calc_c = price_t'(MAX_PRICE_Q16_16);
+            else ask_calc_c = price_t'(ask_s2_c);
+
+            bid_size_calc_c = 16'd1000;
+            ask_size_calc_c = 16'd1000;
+
+            quote_frame_next_c[127:124] = MSG_QUOTE;
+            quote_frame_next_c[123:116] = symbol_t'(sym_ptr);
+            quote_frame_next_c[115:114] = active_regime;
+            quote_frame_next_c[113:112] = 2'b00;
+            quote_frame_next_c[111:80]  = bid_calc_c;
+            quote_frame_next_c[79:48]   = ask_calc_c;
+            quote_frame_next_c[47:32]   = bid_size_calc_c;
+            quote_frame_next_c[31:16]   = ask_size_calc_c;
+            // Convention: frame carries seq for this emission; register increments after commit (first quote = 0).
+            quote_frame_next_c[15:0]    = seq_num[sym_ptr];
+        end
+    end
+
+    // Initialize prices, spread, bid/ask from init_* (reset or config reload pulse)
+    task automatic init_symbol_tables;
+        int             ti;
+        sprice_t        mid_sv, spr_sv, spr_hv, bid_sv, ask_sv;
+        for (ti = 0; ti < NUM_SYM; ti++) begin
+            mid_price[ti] <= init_mid[ti];
+            spread[ti]    <= (init_spread[ti] == '0) ? 32'h0000_0001 : init_spread[ti];
+            seq_num[ti]   <= 16'd0;
+
+            mid_sv = sprice_t'(init_mid[ti]);
+            spr_sv = sprice_t'((init_spread[ti] == '0) ? 32'h0000_0001 : init_spread[ti]);
+            spr_hv = spr_sv >>> 1;
+            bid_sv = mid_sv - spr_hv;
+            ask_sv = mid_sv + spr_hv;
+
+            if (bid_sv < MIN_PRICE_Q16_16) best_bid[ti] <= price_t'(MIN_PRICE_Q16_16);
+            else if (bid_sv > MAX_PRICE_Q16_16) best_bid[ti] <= price_t'(MAX_PRICE_Q16_16);
+            else best_bid[ti] <= price_t'(bid_sv);
+
+            if (ask_sv < MIN_PRICE_Q16_16) best_ask[ti] <= price_t'(MIN_PRICE_Q16_16);
+            else if (ask_sv > MAX_PRICE_Q16_16) best_ask[ti] <= price_t'(MAX_PRICE_Q16_16);
+            else best_ask[ti] <= price_t'(ask_sv);
+        end
+    endtask
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -163,124 +243,41 @@ module market_sim
             quote_valid      <= 1'b0;
             quote_frame_hold <= '0;
             quotes_generated <= '0;
-
-            for (s = 0; s < NUM_SYM; s++) begin
-                mid_price[s] <= init_mid[s];
-                spread[s]    <= (init_spread[s] == '0) ? 32'h0000_0001 : init_spread[s];
-                seq_num[s]   <= '0;
-
-                // Initialize best bid/ask from init_* values.
-                begin
-                    sprice_t mid_s = sprice_t'(init_mid[s]);
-                    sprice_t spr_s = sprice_t'((init_spread[s] == '0) ? 32'h0000_0001 : init_spread[s]);
-                    sprice_t spr_h = spr_s >>> 1;
-                    sprice_t bid_s = mid_s - spr_h;
-                    sprice_t ask_s = mid_s + spr_h;
-
-                    if (bid_s < MIN_PRICE_Q16_16) best_bid[s] <= price_t'(MIN_PRICE_Q16_16);
-                    else if (bid_s > MAX_PRICE_Q16_16) best_bid[s] <= price_t'(MAX_PRICE_Q16_16);
-                    else best_bid[s] <= price_t'(bid_s);
-
-                    if (ask_s < MIN_PRICE_Q16_16) best_ask[s] <= price_t'(MIN_PRICE_Q16_16);
-                    else if (ask_s > MAX_PRICE_Q16_16) best_ask[s] <= price_t'(MAX_PRICE_Q16_16);
-                    else best_ask[s] <= price_t'(ask_s);
-                end
-            end
+            init_symbol_tables();
+        end else if (lfsr_load) begin
+            // Reload symbol state from init_* without full chip reset (new run / reconfig).
+            sym_ptr          <= '0;
+            quote_ctr        <= 32'd0;
+            quote_valid      <= 1'b0;
+            quote_frame_hold <= '0;
+            quotes_generated <= '0;
+            init_symbol_tables();
         end else begin
-            // Default: one-cycle pulse on quote_valid
+            // Default: pulse semantics — deassert unless this cycle commits a quote.
             quote_valid <= 1'b0;
 
-            // When not enabled, stall counters.
             if (!enable) begin
                 quote_ctr <= 32'd0;
-                sym_ptr   <= sym_ptr;
             end else begin
                 if (tick_raw) begin
-                    if (!quote_ready) begin
-                        // Hold at the threshold until downstream accepts.
-                        quote_ctr <= quote_ctr;
-                    end else begin
-                        quote_ctr <= 32'd0;
-                    end
+                    if (!quote_ready) quote_ctr <= quote_ctr;
+                    else              quote_ctr <= 32'd0;
                 end else begin
                     quote_ctr <= quote_ctr + 32'd1;
                 end
 
                 if (do_quote) begin
-                    // ----------------------------
-                    // Price evolution step
-                    // ----------------------------
-                    logic signed [31:0] delta_s;
+                    mid_price[sym_ptr] <= price_t'(new_mid_u_c);
+                    spread[sym_ptr]    <= new_spread_q_c;
+                    best_bid[sym_ptr]  <= bid_calc_c;
+                    best_ask[sym_ptr]  <= ask_calc_c;
 
-                    logic signed [31:0] mid_s;
-                    logic signed [31:0] new_mid_s;
-                    logic [31:0]        new_mid_u;
-
-                    // Declare all temps up-front (Verilator is picky about
-                    // declarations after statements).
-                    price_t  new_spread_q;
-                    sprice_t spr_h_s;
-                    sprice_t bid_s2, ask_s2;
-                    price_t  bid_calc, ask_calc;
-                    logic [15:0] bid_size_calc, ask_size_calc;
-
-                    delta_s = n_step_out[sym_ptr];
-
-                    // ADDITION: use sector-aware / symbol-local step generated by market_noise_gen.
-                    mid_s     = $signed(mid_price[sym_ptr]);
-                    new_mid_s = mid_s + delta_s;
-
-                    if (new_mid_s < MIN_PRICE_Q16_16) new_mid_u = price_t'(MIN_PRICE_Q16_16);
-                    else if (new_mid_s > MAX_PRICE_Q16_16) new_mid_u = price_t'(MAX_PRICE_Q16_16);
-                    else new_mid_u = price_t'(new_mid_s);
-
-                    // Spread is kept as regime base_spread.
-                    new_spread_q = base_spread_q16_16;
-                    if (new_spread_q == '0) new_spread_q = 32'h0000_0001;
-
-                    // Bid/ask from mid +/- (spread>>1), with saturation.
-                    spr_h_s = sprice_t'(new_spread_q) >>> 1;
-                    bid_s2  = sprice_t'(new_mid_u) - spr_h_s;
-                    ask_s2  = sprice_t'(new_mid_u) + spr_h_s;
-
-                    if (bid_s2 < MIN_PRICE_Q16_16) bid_calc = price_t'(MIN_PRICE_Q16_16);
-                    else if (bid_s2 > MAX_PRICE_Q16_16) bid_calc = price_t'(MAX_PRICE_Q16_16);
-                    else bid_calc = price_t'(bid_s2);
-
-                    if (ask_s2 < MIN_PRICE_Q16_16) ask_calc = price_t'(MIN_PRICE_Q16_16);
-                    else if (ask_s2 > MAX_PRICE_Q16_16) ask_calc = price_t'(MAX_PRICE_Q16_16);
-                    else ask_calc = price_t'(ask_s2);
-
-                    // ----------------------------
-                    // Commit state + outputs
-                    // ----------------------------
-                    mid_price[sym_ptr] <= price_t'(new_mid_u);
-                    spread[sym_ptr]    <= new_spread_q;
-                    best_bid[sym_ptr]  <= bid_calc;
-                    best_ask[sym_ptr]  <= ask_calc;
-
-                    // Sizes kept constant but non-zero.
-                    bid_size_calc = 16'd1000;
-                    ask_size_calc = 16'd1000;
-
-                    quote_frame_next = '0;
-                    quote_frame_next[127:124] = MSG_QUOTE;
-                    quote_frame_next[123:116] = price_t'(sym_ptr); // zero-extend
-                    quote_frame_next[115:114] = active_regime;
-                    quote_frame_next[113:112] = 2'b00;
-                    quote_frame_next[111:80]  = bid_calc;
-                    quote_frame_next[79:48]   = ask_calc;
-                    quote_frame_next[47:32]  = bid_size_calc;
-                    quote_frame_next[31:16]  = ask_size_calc;
-                    quote_frame_next[15:0]    = seq_num[sym_ptr];
-
-                    quote_frame_hold <= quote_frame_next;
+                    quote_frame_hold <= quote_frame_next_c;
                     quote_valid      <= 1'b1;
                     quotes_generated <= quotes_generated + 1'b1;
 
-                    // Increment sequence + round-robin pointer.
                     seq_num[sym_ptr] <= seq_num[sym_ptr] + 16'd1;
-                    if (sym_ptr == (active_count_eff-1)) sym_ptr <= '0;
+                    if (sym_ptr == SYM_PTR_W'(active_count_eff - 8'd1)) sym_ptr <= '0;
                     else sym_ptr <= sym_ptr + 1'b1;
                 end
             end
