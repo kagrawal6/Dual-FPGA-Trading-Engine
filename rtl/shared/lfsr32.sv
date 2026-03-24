@@ -1,7 +1,7 @@
 // ============================================================================
 // Module: lfsr32
 // 32-bit Galois LFSR with maximal-length polynomial (x^32+x^22+x^2+x+1).
-// Produces one new 32-bit value LFSR state per enabled cycle.
+// Produces one new pseudo-random 32-bit state per enabled cycle.
 // Seed is loaded via the load/seed_in interface on the IDLE→RUNNING transition.
 // ============================================================================
 
@@ -20,11 +20,12 @@ module lfsr32
     // -------------------------------------------------------------------------
     // Internal state
     // -------------------------------------------------------------------------
-    // Local copy of the LFSR taps (same as hft_pkg::LFSR_TAPS = 32'h00400007).
-    localparam logic [31:0] LFSR_TAPS = 32'h0040_0007;
-
+    
     // The visible pseudo-random word is the full register (same as market_sim
     // raw_step = rand_out[4:0]).  
+
+    import hft_pkg::*;
+    
     logic [31:0] lfsr_reg;
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -37,13 +38,13 @@ module lfsr32
             lfsr_reg <= (seed_in == 32'h0) ? 32'h1 : seed_in;
         end
         else if (enable) begin
-            lfsr_reg <= lfsr_reg[0] ? ((lfsr_reg >> 1) ^ LFSR_TAPS)
+            lfsr_reg <= lfsr_reg[0] ? ((lfsr_reg >> 1) ^ hft_pkg::LFSR_TAPS)
                                     : (lfsr_reg >> 1);
         end
-        // else: hold last value (e.g. market paused, or LFSR clock-gated)
+        // else: hold last value (e.g. market paused or advance disabled)
     end
 
-    // Registered output — probe `rand_out` in waves; it equals lfsr_reg.
+    // Output mirrors the registered LFSR state.
     assign rand_out = lfsr_reg;
 
 endmodule

@@ -12,7 +12,7 @@ package hft_pkg;
     localparam int BEATS_PER_FRAME = FRAME_W / LINK_DATA_W;  // 32
 
     // ── Symbol configuration ────────────────────────────────────────────────
-    localparam int NUM_SYMBOLS     = 4;
+    localparam int NUM_SYMBOLS     = 16;
     localparam int SYMBOL_W        = 8;
 
     // ── Data widths ─────────────────────────────────────────────────────────
