@@ -345,122 +345,125 @@ What this gives you:
 5. **Sector-id encoding width assumptions:** current sector correlation logic assumes a compact `sector_id` width (e.g., 3 bits) and a bounded number of sectors. If the software’s sector-id assignment exceeds what the RTL expects, correlation will be incorrect.
 6. **Determinism verification:** `market_noise_gen` uses multiple LFSRs with derived seeds; deterministic behavior depends on consistent seeding and reset/load semantics.
 
-## Implemented Changes In This Repo
+## Implemented Changes In This Repo (Final State)
 
-This section describes the concrete code changes that were added after the PDF extract.
+This section captures what is actually implemented now, why it was done, and what it means behaviorally.
 
-### 1) Software Symbol Universe and Stable Tokens
-
-- File: `sw/board_a/symbol_universe.py`
-- Added full S&P 500-aware symbol loading (with offline fallback).
-- Added deterministic sector mapping fields in `SYMBOL_DB`:
-  - `sector`
-  - `sector_id`
-  - `init_price`
-- Added stable global tokenization:
-  - `COMPANY_TOKEN_BY_TICKER`
-  - `TICKER_BY_COMPANY_TOKEN`
-  - `token_for_ticker()`
-  - `ticker_for_token()`
-- Added in-place symbol enrichment:
-  - `SYMBOL_DB[ticker]["company_token"]`
-
-**Runtime effect:** users can refer to companies by either symbol or stable numeric token.
-
-### 2) Software Loader Supports Symbol/Token/File/Random Selection
-
-- File: `sw/board_a/config_symbols.py`
-- Added multi-mode input selection:
-  - `--symbols`
-  - `--tokens`
-  - `--symbols-file`
-  - `--random-count` (+ `--random-seed`)
-- Added configurable slot count:
-  - `--hw-slots` (default 16)
-  - `--allow-truncate`
-- Added write paths for extended metadata:
-  - `INIT_MID_BASE` (`0x10 + 4*i`)
-  - `INIT_SPREAD_BASE` (`0x50 + 4*i`)
-  - `SECTOR_ID_BASE` (`0x90 + 4*i`)
-  - `TOKEN_BASE` (`0xD0 + 4*j`, two 16-bit tokens packed into one 32-bit word)
-  - `ACTIVE_SYM_COUNT` (`0xF0`)
-- Added optional flags:
-  - `--write-sector-id`
-  - `--write-token-id`
-
-**Runtime effect:** script can load 8-16 (or any `--hw-slots`) selected symbols and program active count + metadata consistently.
-
-### 3) Hardware Symbol Capacity Increased
+### 1) Shared Package Constants and Type Safety
 
 - File: `rtl/shared/hft_pkg.sv`
-- `NUM_SYMBOLS` changed from `4` to `16`.
+- `NUM_SYMBOLS` increased to `16`.
+- Added sector constants:
+  - `NUM_SECTORS = 8`
+  - `SECTOR_ID_W = $clog2(NUM_SECTORS)`
+- Added shared noise saturation constant:
+  - `MARKET_NOISE_DRIFT_SAT_Q16`
 
-**Runtime effect:** design-wide symbol arrays and loops now compile for 16 slots (subject to full top-level integration and timing closure).
+**Why:** keep sector dimensions and saturation policy centralized and consistent across RTL + testbenches.  
+**Meaning:** sector-id width and drift limits are explicit project-wide, reducing silent mismatch risk.
 
-### 4) Executable Sector-Aware Noise Generator
+### 2) Software Universe + Loader (User UX and MMIO Programming)
 
-- File: `rtl/board_a/market_noise_gen.sv`
-- Converted scaffold to executable RTL.
-- Implements:
-  - one independent LFSR per symbol
-  - per-symbol local drift state
-  - per-sector drift accumulation
-  - shared global term
-  - output decomposition:
-    - `global_noise_q16_16`
-    - `sector_noise_q16_16`
-    - `company_noise_q16_16`
-    - `step_out_q16_16[s] = global + sector + company`
-- Uses `active_sym_count` to gate active symbols.
-
-**Runtime effect:** symbol-local randomness and sector correlation are now generated in hardware logic.
-
-### 5) AXI-Lite Register Logic Implemented for New Metadata
-
-- File: `rtl/board_a/board_a_axi_regs.sv`
-- Implemented active AXI read/write logic with extended register map:
-  - base config: `CTRL`, `QUOTE_INTERVAL`, `LFSR_SEED`, `REGIME`
-  - per-symbol arrays: init mid/spread, sector id, company token
-  - runtime active symbol count
-  - readback for status and counters
-- Added outputs:
-  - `sym_sector_id[NUM_SYM]`
-  - `sym_company_token[NUM_SYM]`
-  - `active_sym_count`
-
-**Runtime effect:** Board A register block can store and expose all metadata needed by symbol-aware datapath.
-
-### 6) Market Simulator Integrated With Noise Generator
-
-- File: `rtl/board_a/market_sim.sv`
-- Added inputs:
-  - `active_sym_count`
-  - `sector_id[NUM_SYM]`
-- Instantiates `market_noise_gen`.
-- Replaced prior scalar random-step update with:
-  - `delta_s = n_step_out[sym_ptr]`
-- Added `active_count_eff` clamp to keep runtime count in `[1, NUM_SYM]`.
-- Round-robin pointer wraps at `active_count_eff - 1`.
-
-**Runtime effect:** quote evolution uses sector-aware, symbol-local noise and respects runtime active symbol count.
-
-### 7) Added Logistic Comment Headers
-
-- Files updated with explicit `ADDITION` comments:
-  - `rtl/board_a/board_a_axi_regs.sv`
-  - `rtl/board_a/market_sim.sv`
-  - `rtl/board_a/market_noise_gen.sv`
+- Files:
   - `sw/board_a/symbol_universe.py`
   - `sw/board_a/config_symbols.py`
+- Supports ticker/token/file/random selection workflows.
+- Supports stable per-company tokens.
+- Programs symbol metadata via AXI map:
+  - init mid/spread
+  - sector id
+  - packed token words
+  - active symbol count
+- Prints sector grouping summaries and sector population counts (including hardware sector-id counts).
 
-**Runtime effect:** no logic change from these comments; improves collaborator readability and review.
+**Why:** preserve a friendly “select real companies by ticker” interface while hardware consumes only numeric metadata.  
+**Meaning:** no runtime string handling in RTL; deterministic, inspectable pre-run configuration.
 
-### 8) Current Integration Status
+### 3) AXI Register Block Extended for Symbol Metadata
 
-- Implemented modules now support:
-  - stable company tokens
-  - variable active symbol count
-  - per-symbol independent random sources
-  - sector-aware movement
-- End-to-end behavior still depends on top-level module wiring consistency (especially `board_a_top.sv`) and bitstream rebuild.
+- File: `rtl/board_a/board_a_axi_regs.sv`
+- Implements read/write decode for:
+  - `CTRL`, `QUOTE_INTERVAL`, `LFSR_SEED`, `REGIME`
+  - per-symbol init mid / init spread / sector id / token
+  - `ACTIVE_SYM_COUNT`
+  - status/counter readback
+- Uses `SECTOR_ID_W` consistently for sector-id IO and readback formatting.
+
+**Why:** software needed a complete, scalable register interface to load symbol/sector/token state.  
+**Meaning:** Board A dataplane can be parameterized at runtime without recompiling RTL.
+
+### 4) market_noise_gen Reworked to Population-Scaled Sector Model
+
+- File: `rtl/board_a/market_noise_gen.sv`
+- Noise architecture now includes:
+  - one global LFSR
+  - one per-symbol LFSR (company path)
+  - one per-sector LFSR (sector base path)
+- Sector population model:
+  - builds `sector_pop[k]` from active symbols
+  - computes sector base delta once per sector
+  - scales by `sector_pop[k]`
+  - accumulates into sector drift with saturation
+- Company drift remains per-symbol and saturated.
+- Output decomposition remains:
+  - `step_out[s] = global + sector[sector_id[s]] + company[s]`
+- Inactive symbols still output zero.
+- Defensive clamp added:
+  - internal `active_count_eff = min(active_sym_count, NUM_SYM)`
+- `lfsr_load` semantics aligned to “fresh run”:
+  - reseeds RNGs and clears sector/company drift state.
+
+**Why:** gives predictable sector correlation with explicit intensity scaling based on selected active sector population, and aligns reload semantics with `market_sim`.  
+**Meaning:** sectors with more selected names move more aggressively by design; behavior is deterministic under fixed seed/config.
+
+### 5) market_sim Integration and Runtime Behavior
+
+- File: `rtl/board_a/market_sim.sv`
+- Consumes the noise decomposition buses from `market_noise_gen`.
+- Uses runtime `active_sym_count` clamp (`active_count_eff`) for safe symbol scheduling.
+- Round-robin wraps at `active_count_eff - 1`.
+- Keeps documented valid/ready pulse behavior and `quote_interval==0` fast-path semantics.
+- Supports `lfsr_load` reload of market state/counters.
+
+**Why:** runtime-selected active symbols and sector-aware noise needed to feed quote generation safely and deterministically.  
+**Meaning:** quote stream reflects current active subset, regime scaling, and reload behavior without requiring reset.
+
+### 6) Verification Coverage (What Is Tested)
+
+- Files:
+  - `tb/board_a/tb_market_sim.sv`
+  - `tb/board_a/tb_market_noise_gen.sv`
+
+`tb_market_sim` now checks:
+- round-robin and sequence behavior
+- regime-switch handling
+- backpressure behavior (`quote_ready=0`) including `quotes_generated` stability
+- `active_sym_count < NUM_SYM` subset wrap behavior
+- mid-run `lfsr_load` reload behavior
+- `quote_interval==0` path
+- pulse-style `quote_valid` semantics in a non-back-to-back interval case
+- final `quotes_generated` expectations
+
+`tb_market_noise_gen` now checks:
+- deterministic repeatability for same seed/config
+- decomposition identity:
+  - `step_out = global + sector + company` (active symbols)
+- inactive symbol zero outputs
+- reset/lfsr_load state expectations
+- sector population scaling trend:
+  - cumulative `|sector_noise[0]| > |sector_noise[1]|` for pop 3 vs 1 (sanity/trend check, not strict theorem)
+- drift saturation bounds at outputs
+
+**Why:** this closes the key behavioral gaps around gating, active subsets, reload semantics, decomposition correctness, and boundedness.  
+**Meaning:** we now test both integration-level quote behavior and standalone noise-model properties.
+
+### 7) What This Means for Bring-Up
+
+- Current repo state is logically strong for this feature set.
+- Remaining practical dependency is top-level wiring and bitstream parity:
+  - `board_a_top.sv` integration
+  - matching software offsets with the running bitstream
+  - post-integration synthesis/timing/board validation
+
+In other words: feature logic and tests are in place; hardware bring-up risk is now mostly integration/toolflow rather than missing model behavior.
 
