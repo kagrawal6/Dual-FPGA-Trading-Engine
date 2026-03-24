@@ -10,6 +10,8 @@ import hft_pkg::*;
 
 module tb_risk_manager;
 
+    localparam int TB_NUM_SYM = 4;
+
     logic                     clk;
     logic                     rst_n;
     logic                     clear;
@@ -43,7 +45,9 @@ module tb_risk_manager;
         rst_n = 1;
     end
 
-    risk_manager dut (
+    risk_manager #(
+        .NUM_SYM(TB_NUM_SYM)
+    ) dut (
         .clk             (clk),
         .rst_n           (rst_n),
         .clear           (clear),

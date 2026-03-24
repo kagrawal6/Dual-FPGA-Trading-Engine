@@ -47,6 +47,7 @@ module tb_market_sim;
         .clk              (clk),
         .rst_n            (rst_n),
         .enable           (enable),
+        .counter_clr      (1'b0),
         .lfsr_load        (lfsr_load),
         .lfsr_seed        (lfsr_seed),
         .active_regime    (active_regime),

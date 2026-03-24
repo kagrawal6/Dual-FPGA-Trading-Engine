@@ -11,40 +11,79 @@
 
 module board_a_ctrl
     import hft_pkg::*;
-(
+#(
+    parameter int BTN_DEB_W = 16
+)(
     input  logic        clk,
     input  logic        rst_n,
 
-    // ── Raw physical inputs ─────────────────────────────────────────────────
-    input  logic [3:0]  btn,                // BTN[3:0] active-high
-    input  logic [7:0]  sw,                 // SW[7:0] active-high
+    input  logic [3:0]  btn,
+    input  logic [7:0]  sw,
 
-    // ── Debounced button pulses (single-cycle) ──────────────────────────────
-    output logic        ctrl_start_pulse,   // BTN[0] rising edge
-    output logic        ctrl_stop_pulse,    // BTN[1] rising edge
-    output logic        ctrl_reset_pulse,   // BTN[2] rising edge
+    output logic        ctrl_start_pulse,
+    output logic        ctrl_stop_pulse,
+    output logic        ctrl_reset_pulse,
 
-    // ── Switch-derived config ───────────────────────────────────────────────
-    output regime_e     regime_sw,          // SW[1:0] → regime when override active
-    output logic        sw_override,        // SW[2]   → use regime_sw instead of PS
+    output regime_e     regime_sw,
+    output logic        sw_override,
 
-    // ── Status inputs (for LED/RGB driving) ─────────────────────────────────
-    input  a_state_e    fsm_state,
     input  logic        running,
     input  regime_e     active_regime,
     input  logic        link_up,
-    input  logic        link_error,         // any link errors detected
+    input  logic        link_error,
 
-    // ── LED/RGB outputs ─────────────────────────────────────────────────────
     output logic [7:0]  led,
-    output logic [2:0]  rgb0,               // regime indicator color
-    output logic [2:0]  rgb1                // link health indicator
+    output logic [2:0]  rgb0,
+    output logic [2:0]  rgb1
 );
 
-    // TODO: Implementation
-    // Instantiate debounce x4 for btn[3:0].
-    // LED mapping: [1:0]=regime, [2]=running, [3]=blink, [4]=link_up, etc.
-    // RGB0: CALM=green, VOLATILE=yellow, BURST=red, ADVERSARIAL=purple.
-    // RGB1: link_up & !error=green, link_up & error=yellow, !link_up=red.
+    logic db0, db1, db2, db3;
+    logic p0, p1, p2, p3;
+
+    debounce #(.COUNTER_W(BTN_DEB_W)) u_db0 (.clk(clk), .rst_n(rst_n), .btn_in(btn[0]), .btn_out(db0), .btn_pulse(p0));
+    debounce #(.COUNTER_W(BTN_DEB_W)) u_db1 (.clk(clk), .rst_n(rst_n), .btn_in(btn[1]), .btn_out(db1), .btn_pulse(p1));
+    debounce #(.COUNTER_W(BTN_DEB_W)) u_db2 (.clk(clk), .rst_n(rst_n), .btn_in(btn[2]), .btn_out(db2), .btn_pulse(p2));
+    debounce #(.COUNTER_W(BTN_DEB_W)) u_db3 (.clk(clk), .rst_n(rst_n), .btn_in(btn[3]), .btn_out(db3), .btn_pulse(p3));
+
+    assign ctrl_start_pulse = p0;
+    assign ctrl_stop_pulse  = p1;
+    assign ctrl_reset_pulse = p2;
+
+    assign regime_sw   = regime_e'(sw[1:0]);
+    assign sw_override = sw[2];
+
+    logic [24:0] blink_ctr;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n)
+            blink_ctr <= '0;
+        else
+            blink_ctr <= blink_ctr + 1'b1;
+    end
+
+    assign led[1:0] = active_regime;
+    assign led[2]   = running;
+    assign led[3]   = running & blink_ctr[24];
+    assign led[4]   = link_up;
+    assign led[5]   = link_error;
+    assign led[7:6] = 2'b00;
+
+    always_comb begin
+        unique case (active_regime)
+            REGIME_CALM:        rgb0 = 3'b010;
+            REGIME_VOLATILE:    rgb0 = 3'b110;
+            REGIME_BURST:       rgb0 = 3'b100;
+            REGIME_ADVERSARIAL: rgb0 = 3'b101;
+            default:              rgb0 = 3'b000;
+        endcase
+    end
+
+    always_comb begin
+        if (!link_up)
+            rgb1 = 3'b100;
+        else if (link_error)
+            rgb1 = 3'b110;
+        else
+            rgb1 = 3'b010;
+    end
 
 endmodule

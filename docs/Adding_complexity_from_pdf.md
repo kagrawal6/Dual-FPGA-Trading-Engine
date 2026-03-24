@@ -467,3 +467,19 @@ This section captures what is actually implemented now, why it was done, and wha
 
 In other words: feature logic and tests are in place; hardware bring-up risk is now mostly integration/toolflow rather than missing model behavior.
 
+### 8) exchange_lite Contract (Current Minimal Version)
+
+Current limitation
+- `exchange_lite` does not queue incoming orders while a response is pending.
+- If `order_valid` is asserted while Stage 1 is blocked or a response is being held (`fill_valid=1 && !fill_ready`), that order is not captured.
+- This is intentional for the current minimal demo implementation.
+
+Future upgrade path
+- Add a small input FIFO or one-entry pending-order buffer.
+- That allows accepting a new order while a previous response is still waiting on `fill_ready`.
+- This removes the intentional throughput bubble and makes the exchange behavior more realistic under bursts.
+
+Bottom line
+- The updated `tb_exchange_lite.sv` now checks the implemented contract instead of assuming deeper buffering.
+- For the current project phase, `exchange_lite.sv` is considered locked as the minimal version.
+

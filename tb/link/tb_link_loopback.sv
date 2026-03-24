@@ -1,7 +1,6 @@
 // ============================================================================
 // Testbench: tb_link_loopback
-// Tests link_tx connected to link_rx in a loopback configuration. Verifies
-// end-to-end frame transmission: frame_in → link_tx → pmod → link_rx → frame_out.
+// link_tx → link_rx wire loopback; one QUOTE frame end-to-end.
 // ============================================================================
 
 `timescale 1ns / 1ps
@@ -13,27 +12,24 @@ module tb_link_loopback;
     logic                  clk;
     logic                  rst_n;
 
-    // link_tx inputs
     logic [127:0]          frame_in;
     logic                  frame_in_valid;
     logic                  frame_in_ready;
 
-    // link_rx outputs
     logic [127:0]          frame_out;
     logic                  frame_out_valid;
     logic                  link_up;
     logic [31:0]           error_count;
 
-    // Loopback connection: link_tx → link_rx
     logic [3:0]            pmod_data;
     logic                  pmod_valid;
-    logic                  remote_ready;   // link_rx local_ready → link_tx remote_ready
+    logic                  link_remote_ready;
 
-    // Clock generation (100 MHz)
+    int err_count = 0;
+
     initial clk = 0;
     always #5 clk = ~clk;
 
-    // Reset generation (active-low, deassert after 100ns)
     initial begin
         rst_n = 0;
         #100;
@@ -51,7 +47,7 @@ module tb_link_loopback;
         .frame_in_ready (frame_in_ready),
         .pmod_data      (pmod_data),
         .pmod_valid     (pmod_valid),
-        .remote_ready   (remote_ready)
+        .remote_ready   (link_remote_ready)
     );
 
     link_rx #(
@@ -59,18 +55,54 @@ module tb_link_loopback;
         .DATA_W  (4)
     ) u_link_rx (
         .clk             (clk),
-        .rst_n            (rst_n),
-        .pmod_data        (pmod_data),
-        .pmod_valid       (pmod_valid),
-        .local_ready      (remote_ready),
-        .frame_out        (frame_out),
-        .frame_out_valid  (frame_out_valid),
-        .link_up          (link_up),
-        .error_count      (error_count)
+        .rst_n           (rst_n),
+        .counter_clr     (1'b0),
+        .pmod_data       (pmod_data),
+        .pmod_valid      (pmod_valid),
+        .local_ready     (link_remote_ready),
+        .frame_out       (frame_out),
+        .frame_out_valid (frame_out_valid),
+        .link_up         (link_up),
+        .error_count     (error_count)
     );
 
+    task automatic check(input string msg, input logic cond);
+        if (!cond) begin
+            $error("FAIL: %s", msg);
+            err_count++;
+        end
+    endtask
+
     initial begin
-        // TODO: Add test stimulus
+        logic [127:0] payload;
+        frame_in       = '0;
+        frame_in_valid = 1'b0;
+
+        @(posedge clk);
+        wait (rst_n === 1'b1);
+        @(posedge clk);
+
+        payload = {4'h1, 4'h0, 120'h1234_5678_9abc_def0_0000_0000_0011};
+
+        @(posedge clk);
+        frame_in       = payload;
+        frame_in_valid = 1'b1;
+        do begin
+            @(posedge clk);
+        end while (!(frame_in_ready && frame_in_valid));
+        @(posedge clk);
+        frame_in_valid = 1'b0;
+
+        wait (frame_out_valid === 1'b1);
+        @(posedge clk);
+        check("loopback frame match", frame_out === payload);
+        check("link_up", link_up == 1'b1);
+        check("no errors", error_count == 32'h0);
+
+        if (err_count == 0)
+            $display("tb_link_loopback: PASS (all checks passed)");
+        else
+            $display("tb_link_loopback: FAIL (%0d errors)", err_count);
         $finish;
     end
 

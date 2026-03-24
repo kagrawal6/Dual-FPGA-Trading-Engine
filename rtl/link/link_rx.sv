@@ -14,6 +14,7 @@ module link_rx #(
 )(
     input  logic                  clk,
     input  logic                  rst_n,
+    input  logic                  counter_clr,       // FSM RESET: clear error counter
 
     // PMOD input pins (directly from external — synchronized internally)
     input  logic [DATA_W-1:0]    pmod_data,
@@ -153,6 +154,9 @@ module link_rx #(
 
                 default: state <= S_IDLE;
             endcase
+
+            if (counter_clr)
+                error_count <= '0;
         end
     end
 

@@ -37,6 +37,7 @@ module tb_link_rx;
     ) dut (
         .clk             (clk),
         .rst_n            (rst_n),
+        .counter_clr      (1'b0),
         .pmod_data        (pmod_data),
         .pmod_valid       (pmod_valid),
         .local_ready      (local_ready),

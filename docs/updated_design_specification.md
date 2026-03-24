@@ -166,15 +166,15 @@ Fill (or reject) generated ─────────────────�
 
 ```
      ┌─────────────────┐    2x PMOD cables    ┌─────────────────┐
-     │   Board A        │◄────────────────────►│   Board B        │
-     │   (Exchange)      │                      │   (Trader)        │
-     │   AUP-ZU3 #1     │                      │   AUP-ZU3 #2     │
+     │   Board A       │◄────────────────────►│   Board B       │
+     │   (Exchange)    │                      │   (Trader)      │
+     │   AUP-ZU3 #1    │                      │   AUP-ZU3 #2    │
      └─────────────────┘                      └────────┬────────┘
                                                        │ USB-C UART
                                                        ▼
                                                ┌───────────────┐
-                                               │    Laptop      │
-                                               │  (Dashboard)   │
+                                               │    Laptop     │
+                                               │  (Dashboard)  │
                                                └───────────────┘
 ```
 
@@ -333,7 +333,7 @@ Clock Domains (per board):
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                               BOARD A  (PL)                                 ║
+║                               BOARD A  (PL)                                  ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║                                                                              ║
 ║                                                                              ║
@@ -351,7 +351,7 @@ Clock Domains (per board):
 ║  │  + status  │                             ▼        │                       ║
 ║  │  from all  │                      ┌────────────┐  │                       ║
 ║  │  modules:  │                      │            │  │                       ║
-║  │            │<─ ─ ─ ─ ─ ─ ─ ─ ─ ─ │ QUOTE FIFO │  │                       ║
+║  │            │<─ ─ ─ ─ ─ ─ ─ ─ ─ ─ │ QUOTE FIFO  │  │                       ║
 ║  │ quotes_sent│  fifo_fill_level     │ (64x128b)  │  │                       ║
 ║  │ orders_rcvd│                      │            │  │                       ║
 ║  │ fills_sent │                      └──────┬─────┘  │                       ║
@@ -365,7 +365,7 @@ Clock Domains (per board):
 ║        │ params    FILL/REJECT│      │ TX ARBITER │  │                       ║
 ║        ▼           frames    │       │            │  │                       ║
 ║  ┌────────────┐    (high     │       │ fills      │  │                       ║
-║  │            │    priority)  │       │  before    │  │                       ║
+║  │            │    priority)  │       │  before   │  │                       ║
 ║  │   CTRL     │              │       │   quotes   │  │                       ║
 ║  │            │              │       └──────┬─────┘  │                       ║
 ║  │  btn[3:0]  │              │              │        │                       ║

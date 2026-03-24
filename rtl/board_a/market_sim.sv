@@ -31,6 +31,7 @@ module market_sim
     input  logic                 clk,
     input  logic                 rst_n,
     input  logic                 enable,              // high when FSM is RUNNING
+    input  logic                 counter_clr,         // FSM RESET: clear quote counter only
 
     // LFSR / config reload (pulse on IDLE→RUNNING): reload symbol state + noise seeds
     input  logic                 lfsr_load,
@@ -244,6 +245,8 @@ module market_sim
             quote_frame_hold <= '0;
             quotes_generated <= '0;
             init_symbol_tables();
+        end else if (counter_clr) begin
+            quotes_generated <= '0;
         end else if (lfsr_load) begin
             // Reload symbol state from init_* without full chip reset (new run / reconfig).
             sym_ptr          <= '0;

@@ -192,7 +192,8 @@ module board_a_axi_regs
                 end else if (rd_addr == ADDR_ACTIVE_CNT) begin
                     s_axi_rdata <= {{24{1'b0}}, active_sym_count};
                 end else if (rd_addr == ADDR_STATUS) begin
-                    s_axi_rdata <= {21'd0, fifo_fill, 5'd0, active_regime, link_up, running};
+                    // {16 spare, fifo_fill[6:0], 5 spare, regime[1:0], link_up, running} = 32b
+                    s_axi_rdata <= {16'd0, fifo_fill, 5'd0, active_regime, link_up, running};
                 end else if (rd_addr == ADDR_QUOTES_SENT) begin
                     s_axi_rdata <= quotes_sent;
                 end else if (rd_addr == ADDR_ORDERS_RCVD) begin
