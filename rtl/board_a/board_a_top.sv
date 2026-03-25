@@ -142,8 +142,10 @@ module board_a_top
     assign fifo_flush   = (fsm_state == A_RESET);
     assign lfsr_load    = (fsm_state == A_IDLE) && (fsm_next == A_RUNNING);
 
+    // exchange only when market is live (Option A — clean demo: frozen market ⇒ no matching).
+    // Alternate (spec “drain in STOPPED”): assign exchange_enable = running || (fsm_state==A_STOPPED);
     logic exchange_enable;
-    assign exchange_enable = (fsm_state == A_RUNNING) || (fsm_state == A_STOPPED);
+    assign exchange_enable = running;
 
     // Quote FIFO (write side = market_sim, read side = tx_arbiter)
     logic quote_fifo_wr_en;
@@ -157,6 +159,7 @@ module board_a_top
     assign quote_valid_fifo = !quote_fifo_empty;
     assign quote_fifo_rd_en = quote_ready_arb && quote_valid_fifo;
 
+    // Same-cycle: frame_out stable while frame_out_valid (link_rx pulse); OK for single-slot exchange_lite.
     assign order_valid_rx = frame_out_valid && (frame_out[127:124] == MSG_ORDER);
 
     assign fifo_fill_level = quote_fifo_count[6:0];
@@ -334,5 +337,20 @@ module board_a_top
     );
 
     assign link_errors = COUNTER_W'(rx_error_count);
+
+    // -------------------------------------------------------------------------
+    // FUTURE IMPROVEMENTS (not in core demo)
+    // -------------------------------------------------------------------------
+    // 1. Exchange decoupling: small FIFO between link_rx and exchange_lite for
+    //    multi-beat / multi-order buffering and cleaner timing closure.
+    // 2. Multi-order pipeline: replace single-slot exchange_lite with deeper
+    //    or pipelined matching.
+    // 3. tx_arbiter fairness: strict fill>quote today; optional weighted or RR.
+    // 4. Latency instrumentation: timestamp capture at RX/TX link boundaries.
+    // 5. Link layer: CRC / framing robustness / retry (beyond error_count).
+    // 6. market_sim: richer sector/volatility coupling if product needs it.
+    // 7. STOPPED semantics: if exchange should drain pending orders while quotes
+    //    are off, revert exchange_enable to (RUNNING || STOPPED) and document.
+    // -------------------------------------------------------------------------
 
 endmodule

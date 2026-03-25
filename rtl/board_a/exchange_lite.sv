@@ -4,6 +4,9 @@
 // compares limit_price against live bid/ask from market_sim, and generates
 // FILL frames (FILLED or REJECTED). Echoes order_id and timestamp for
 // round-trip latency measurement.
+//
+// counter_clr: synchronous clear from Board A FSM RESET (counters + pipeline);
+//              must match instantiation in board_a_top (and TB tie-off).
 // ============================================================================
 
 `timescale 1ns / 1ps
