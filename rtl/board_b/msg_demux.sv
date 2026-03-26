@@ -19,11 +19,11 @@ module msg_demux
     input  logic [FRAME_W-1:0] frame_in,
     input  logic                frame_in_valid,
 
-    // QUOTE output → quote_book
+    // QUOTE output -> quote_book
     output logic [FRAME_W-1:0] quote_frame,
     output logic                quote_valid,
 
-    // FILL output → position_tracker
+    // FILL output -> position_tracker
     output logic [FRAME_W-1:0] fill_frame,
     output logic                fill_valid,
 
@@ -32,10 +32,43 @@ module msg_demux
     output logic [COUNTER_W-1:0] demux_errors
 );
 
-    // TODO: Implementation
-    // Combinational decode of frame_in[127:124]:
-    //   MSG_QUOTE → quote_frame/quote_valid
-    //   MSG_FILL  → fill_frame/fill_valid
-    //   other     → discard, increment demux_errors
+    msg_type_e msg_type;
+    assign msg_type = msg_type_e'(frame_in[127:124]);
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            quote_frame  <= '0;
+            quote_valid  <= 1'b0;
+            fill_frame   <= '0;
+            fill_valid   <= 1'b0;
+            quotes_rcvd  <= '0;
+            demux_errors <= '0;
+        end else if (clear) begin
+            quote_valid  <= 1'b0;
+            fill_valid   <= 1'b0;
+            quotes_rcvd  <= '0;
+            demux_errors <= '0;
+        end else begin
+            quote_valid <= 1'b0;
+            fill_valid  <= 1'b0;
+
+            if (frame_in_valid) begin
+                case (msg_type)
+                    MSG_QUOTE: begin
+                        quote_frame <= frame_in;
+                        quote_valid <= 1'b1;
+                        quotes_rcvd <= quotes_rcvd + 1;
+                    end
+                    MSG_FILL: begin
+                        fill_frame <= frame_in;
+                        fill_valid <= 1'b1;
+                    end
+                    default: begin
+                        demux_errors <= demux_errors + 1;
+                    end
+                endcase
+            end
+        end
+    end
 
 endmodule

@@ -30,11 +30,62 @@ module quote_book
     output logic                book_valid
 );
 
-    // TODO: Implementation
-    // Decode QUOTE frame fields per §4.5.3:
-    //   [127:124]=msg_type, [123:116]=symbol_id, [115:114]=regime,
-    //   [111:80]=bid_price, [79:48]=ask_price, [47:32]=bid_size, [31:16]=ask_size
-    // Store in register array: best_bid[NUM_SYM], best_ask[NUM_SYM], etc.
-    // On quote_valid: update registers, output that symbol's data with book_valid=1.
+    // Per-symbol register file
+    price_t  best_bid  [NUM_SYM];
+    price_t  best_ask  [NUM_SYM];
+    qty_t    best_bsz  [NUM_SYM];
+    qty_t    best_asz  [NUM_SYM];
+
+    // Frame field extraction (combinational)
+    symbol_t  frame_sym;
+    regime_e  frame_regime;
+    price_t   frame_bid;
+    price_t   frame_ask;
+    qty_t     frame_bsz;
+    qty_t     frame_asz;
+
+    assign frame_sym    = quote_frame[123:116];
+    assign frame_regime = regime_e'(quote_frame[115:114]);
+    assign frame_bid    = quote_frame[111:80];
+    assign frame_ask    = quote_frame[79:48];
+    assign frame_bsz    = quote_frame[47:32];
+    assign frame_asz    = quote_frame[31:16];
+
+    integer i;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            for (i = 0; i < NUM_SYM; i++) begin
+                best_bid[i] <= '0;
+                best_ask[i] <= '0;
+                best_bsz[i] <= '0;
+                best_asz[i] <= '0;
+            end
+            bid_price  <= '0;
+            ask_price  <= '0;
+            bid_size   <= '0;
+            ask_size   <= '0;
+            symbol_id  <= '0;
+            regime     <= REGIME_CALM;
+            book_valid <= 1'b0;
+        end else begin
+            book_valid <= 1'b0;
+
+            if (quote_valid && (frame_sym < NUM_SYM[SYMBOL_W-1:0])) begin
+                best_bid[frame_sym] <= frame_bid;
+                best_ask[frame_sym] <= frame_ask;
+                best_bsz[frame_sym] <= frame_bsz;
+                best_asz[frame_sym] <= frame_asz;
+
+                bid_price  <= frame_bid;
+                ask_price  <= frame_ask;
+                bid_size   <= frame_bsz;
+                ask_size   <= frame_asz;
+                symbol_id  <= frame_sym;
+                regime     <= frame_regime;
+                book_valid <= 1'b1;
+            end
+        end
+    end
 
 endmodule

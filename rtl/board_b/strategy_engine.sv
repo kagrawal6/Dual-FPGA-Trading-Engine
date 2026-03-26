@@ -25,7 +25,7 @@ module strategy_engine
     input  price_t      threshold,          // deviation threshold (Q16.16)
     input  qty_t        base_qty,           // shares per order
 
-    // Trade signal output → risk_manager
+    // Trade signal output -> risk_manager
     output logic        signal_valid,
     output logic        signal_side,        // 0 = BUY, 1 = SELL
     output price_t      signal_price,       // limit price (ask for BUY, bid for SELL)
@@ -33,10 +33,40 @@ module strategy_engine
     output symbol_t     signal_symbol
 );
 
-    // TODO: Implementation
-    // Registered comparison (1 cycle):
-    //   if (deviation > +threshold)  → SELL at bid_price
-    //   if (deviation < -threshold)  → BUY  at ask_price
-    //   else                         → signal_valid = 0 (no trade)
+    sprice_t pos_threshold;
+    sprice_t neg_threshold;
+
+    assign pos_threshold =  $signed({1'b0, threshold});
+    assign neg_threshold = -$signed({1'b0, threshold});
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            signal_valid  <= 1'b0;
+            signal_side   <= 1'b0;
+            signal_price  <= '0;
+            signal_qty    <= '0;
+            signal_symbol <= '0;
+        end else begin
+            signal_valid <= 1'b0;
+
+            if (feature_valid) begin
+                if (deviation > pos_threshold) begin
+                    // Price above average -> SELL at bid (expect reversion down)
+                    signal_valid  <= 1'b1;
+                    signal_side   <= 1'b1;  // SELL
+                    signal_price  <= bid_price;
+                    signal_qty    <= base_qty;
+                    signal_symbol <= symbol_id;
+                end else if (deviation < neg_threshold) begin
+                    // Price below average -> BUY at ask (expect reversion up)
+                    signal_valid  <= 1'b1;
+                    signal_side   <= 1'b0;  // BUY
+                    signal_price  <= ask_price;
+                    signal_qty    <= base_qty;
+                    signal_symbol <= symbol_id;
+                end
+            end
+        end
+    end
 
 endmodule
