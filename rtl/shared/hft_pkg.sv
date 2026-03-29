@@ -17,8 +17,10 @@ package hft_pkg;
     // Sector metadata for market_noise_gen / MMIO (must match $clog2(NUM_SECTORS)).
     localparam int NUM_SECTORS     = 8;
     localparam int SECTOR_ID_W     = (NUM_SECTORS > 1) ? $clog2(NUM_SECTORS) : 1;
-    // market_noise_gen sym/sec drift integrator clamp (Q16.16 scale).
-    localparam logic signed [31:0] MARKET_NOISE_DRIFT_SAT_Q16 = 32'sh0200_0000;
+    // market_noise_gen sym/sec drift integrator clamp.
+    localparam logic signed [31:0] MARKET_NOISE_DRIFT_SAT_Q16 = 32'sh0000_1000;
+    // Mean-reversion restoring force: pull_back = (init_mid - mid_price) >>> PULLBACK_SHIFT
+    localparam int PULLBACK_SHIFT = 5;
 
     // ── Data widths ─────────────────────────────────────────────────────────
     localparam int PRICE_W         = 32;     // Q16.16 fixed-point

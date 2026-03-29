@@ -4,6 +4,9 @@
 // at 50 MHz effective rate (clock-enable toggle at 100 MHz). Asserts
 // pmod_valid for the duration of frame transmission. Respects remote_ready
 // backpressure before starting a new frame.
+//
+// remote_ready crosses from the remote board's clock domain, so it is
+// internally synchronized with a 2-FF chain (same pattern as link_rx).
 // ============================================================================
 
 `timescale 1ns / 1ps
@@ -22,8 +25,23 @@ module link_tx #(
     output logic [DATA_W-1:0]    pmod_data,
     output logic                  pmod_valid,
 
-    input  logic                  remote_ready
+    input  logic                  remote_ready      // async from remote board
 );
+
+    // -----------------------------------------------------------------
+    // 2-FF synchronizer for remote_ready (crosses clock domains)
+    // -----------------------------------------------------------------
+    logic remote_ready_s1, remote_ready_sync;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            remote_ready_s1   <= 1'b0;
+            remote_ready_sync <= 1'b0;
+        end else begin
+            remote_ready_s1   <= remote_ready;
+            remote_ready_sync <= remote_ready_s1;
+        end
+    end
 
     localparam int BEATS   = FRAME_W / DATA_W;
     localparam int BEAT_W  = (BEATS > 1) ? $clog2(BEATS) : 1;
@@ -36,7 +54,7 @@ module link_tx #(
     logic               half_nibble;
 
     assign pmod_data      = shifter[FRAME_W-1:FRAME_W-DATA_W];
-    assign frame_in_ready = (st == ST_IDLE) && remote_ready;
+    assign frame_in_ready = (st == ST_IDLE) && remote_ready_sync;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin

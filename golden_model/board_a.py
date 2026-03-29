@@ -21,7 +21,7 @@ All classes are in this one file so you can read the full Board A logic top-to-b
 """
 from common import (
     NUM_SYMBOLS, NUM_SECTORS, MASK_16, MASK_32,
-    MIN_PRICE, MAX_PRICE, DRIFT_SATURATION,
+    MIN_PRICE, MAX_PRICE, DRIFT_SATURATION, PULLBACK_SHIFT,
     GOLDEN, GLOBAL_SEED_XOR, SECTOR_SEED_XOR,
     Regime, REGIME_PARAMS, MsgType, FillStatus,
     SIDE_BUY, SIDE_SELL,
@@ -89,7 +89,10 @@ class NoiseGen:
         # ── Read CURRENT LFSR values (before stepping) ──
         # RTL: rand_out = lfsr_reg (shows pre-clock-edge value)
         gr = self.global_lfsr.value
-        global_noise = ((gr & 0x3F) - 32) << 6
+        g_raw = (gr & 0x3F) - 32
+        if g_raw == -32:
+            g_raw = 0  # clamp to symmetric range [-31..+31], mean=0
+        global_noise = g_raw << 6
 
         sec_rand = [self.sec_lfsrs[k].value for k in range(self.num_sectors)]
         sym_rand = [self.sym_lfsrs[i].value for i in range(self.num_sym)]
@@ -110,12 +113,18 @@ class NoiseGen:
 
         # ── Update drift accumulators (takes effect next call) ──
         for k in range(self.num_sectors):
-            base_delta = (((sec_rand[k] >> 12) & 0x3F) - 32) << 2
+            sec_raw = ((sec_rand[k] >> 12) & 0x3F) - 32
+            if sec_raw == -32:
+                sec_raw = 0  # clamp to symmetric [-31..+31], mean=0
+            base_delta = sec_raw << 2
             scaled = clamp(base_delta * sector_pop[k], -0x8000_0000, 0x7FFF_FFFF)
             self.sec_drift[k] = self._sat_add(self.sec_drift[k], scaled)
 
         for i in range(active):
-            delta = (((sym_rand[i] >> 6) & 0x3F) - 32) << 3
+            sym_raw = ((sym_rand[i] >> 6) & 0x3F) - 32
+            if sym_raw == -32:
+                sym_raw = 0  # clamp to symmetric [-31..+31], mean=0
+            delta = sym_raw << 3
             self.sym_drift[i] = self._sat_add(self.sym_drift[i], delta)
 
         return step_out
@@ -141,6 +150,7 @@ class MarketSim:
         self.noise = NoiseGen(num_sym, num_sectors)
 
         self.mid_price = [0] * num_sym    # Q16.16 per symbol
+        self.init_mid_ref = [0] * num_sym # saved for pull-back force
         self.best_bid = [0] * num_sym
         self.best_ask = [0] * num_sym
         self.seq_num = [0] * num_sym
@@ -155,6 +165,7 @@ class MarketSim:
         self.noise.seed(seed)
         for i in range(self.num_sym):
             self.mid_price[i] = init_mid[i]
+            self.init_mid_ref[i] = init_mid[i]
             sp = init_spread[i] or 1
             half = sext32(sp) >> 1
             self.best_bid[i] = self._clamp(sext32(init_mid[i]) - half)
@@ -177,7 +188,12 @@ class MarketSim:
 
         # Update mid-price: delta = (noise * step_size) >> 16
         delta = (step_out[s] * sext32(step_size)) >> 16
-        new_mid = self._clamp(sext32(self.mid_price[s]) + delta)
+
+        # Ornstein-Uhlenbeck pull-back: restoring force toward initial price
+        displacement = sext32(self.init_mid_ref[s]) - sext32(self.mid_price[s])
+        pull_back = displacement >> PULLBACK_SHIFT
+
+        new_mid = self._clamp(sext32(self.mid_price[s]) + delta + pull_back)
 
         # Compute bid/ask from spread
         half_spread = sext32(base_spread) >> 1

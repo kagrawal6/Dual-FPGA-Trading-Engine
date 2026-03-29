@@ -42,7 +42,7 @@
      - 4.6.8 [Scalability and Parameterization](#468-scalability-and-parameterization)
 5. [PS and Laptop Software Specification](#5-ps-and-laptop-software-specification)
    - 5.1 [PS Software Architecture](#51-ps-software-architecture)
-     - 5.1.1 [Board A PS Script](#511-board-a-ps-script--config_exchangepy)
+     - 5.1.1 [Board A PS Script](#511-board-a-ps-script--config_symbolspy)
      - 5.1.2 [Board B PS Script](#512-board-b-ps-script--telemetry_serverpy)
    - 5.2 [Board B to Laptop Connection](#52-board-b-to-laptop-connection)
      - 5.2.1 [Physical Path](#521-physical-path)
@@ -420,10 +420,21 @@ Clock Domains (per board):
 **Data Flow — Step by Step**:
 
 1. **Configuration (PS → AXI-Lite Registers → Market Sim)**
-   The PS ARM writes configuration parameters via AXI-Lite: the market `regime` (CALM / VOLATILE / BURST / ADVERSARIAL), `quote_interval` (cycles between quote rounds), `lfsr_seed` (32-bit PRNG seed), and per-symbol `init_mid` and `init_spread` values (Q16.16 fixed-point). These flow from the AXI-Lite Register block into the Market Simulator. The Ctrl block also receives config params for button/switch override behavior (e.g., SW[1:0] can override the regime register).
+   The PS ARM writes configuration parameters via AXI-Lite using windowed addressing for up to 16 symbols: `regime` (CALM / VOLATILE / BURST / ADVERSARIAL) at offset `0x0C`, `quote_interval` (cycles between quote rounds) at `0x04`, `lfsr_seed` (32-bit PRNG seed) at `0x08`, per-symbol `init_mid[i]` at `0x10+4i`, `init_spread[i]` at `0x50+4i`, `sector_id[i]` at `0x90+4i`, packed `company_token` pairs at `0xD0+4j`, and `active_sym_count` at `0xF0` (all Q16.16 fixed-point where applicable). These flow from the AXI-Lite Register block into the Market Simulator and noise generator. The Ctrl block handles button/switch override behavior — SW[1:0] can override the regime register when SW[2] is high.
 
 2. **Quote Generation (Market Sim → QUOTE frames)**
-   The Market Simulator contains a 32-bit Galois LFSR that produces a pseudo-random 5-bit value each cycle. This is converted to a signed step, scaled by the regime-dependent `step_size`, and added to the symbol's `mid_price`. From the updated mid-price it computes `bid = mid - spread/2` and `ask = mid + spread/2`, then packs a 128-bit QUOTE frame containing `{msg_type, symbol_id, regime, bid_price, ask_price, bid_size, ask_size, seq_num}`. Symbols are generated in round-robin order (0 → 1 → 2 → 3 → 0 ...), one per `quote_interval` tick. The Market Sim also exposes the current `bid_price[s]` and `ask_price[s]` arrays directly to Exchange Lite for order matching.
+   The Market Simulator uses a 3-tier noise generator (`market_noise_gen`) with global, sector, and per-company LFSRs and drift accumulators to produce correlated random price steps. The raw noise `step_out` is scaled by the regime-dependent `step_size` to produce a price delta. An **Ornstein-Uhlenbeck pull-back force** is then applied: `pull_back = (init_mid[s] - mid_price[s]) >>> PULLBACK_SHIFT`, creating a restoring force toward the initial price. This ensures prices oscillate around their initial values rather than drifting unboundedly, producing the mean-reverting price dynamics required by the Board B trading strategy. The new mid-price is: `new_mid = old_mid + delta + pull_back`, clamped to `[MIN_PRICE, MAX_PRICE]`. From the updated mid-price it computes `bid = mid - spread/2` and `ask = mid + spread/2`, then packs a 128-bit QUOTE frame containing `{msg_type, symbol_id, regime, bid_price, ask_price, bid_size, ask_size, seq_num}`. Symbols are generated in round-robin order (0 → 1 → ... → N-1 → 0 ...), one per `quote_interval` tick. The Market Sim also exposes the current `bid_price[s]` and `ask_price[s]` arrays directly to Exchange Lite for order matching.
+
+   **Key parameters** (defined in `hft_pkg.sv`):
+   - `MARKET_NOISE_DRIFT_SAT_Q16 = 0x1000`: Drift accumulator saturation (fast saturation → bounded noise amplitude)
+   - `PULLBACK_SHIFT = 5`: Pull-back spring constant (displacement >>> 5 = 1/32 of displacement per tick)
+   - Regime step sizes / spreads (Q16.16):
+     | Regime | step_size | spread | Behavior |
+     |--------|-----------|--------|----------|
+     | CALM | 0x0400 | 0x1000 ($0.0625) | Small moves, tight spread |
+     | VOLATILE | 0x8000 | 0x4000 ($0.25) | Moderate moves, medium spread |
+     | BURST | 0x0400 | 0x1000 ($0.0625) | Reserved (same as CALM) |
+     | ADVERSARIAL | 0x10000 | 0x8000 ($0.50) | Large moves, wide spread |
 
 3. **Quote Buffering (QUOTE frames → Quote FIFO)**
    Generated QUOTE frames enter a 64-entry deep, 128-bit wide synchronous FIFO. This absorbs timing mismatches between the quote generation rate and the link's frame transmission rate. The FIFO provides backpressure to the Market Sim — if the FIFO is full, quote generation stalls (no data is lost).
@@ -445,10 +456,10 @@ Clock Domains (per board):
    The result is a 128-bit FILL frame (with `fill_price`, `fill_qty`, echoed `order_id` and `ts_echo`) or a REJECT frame (with zero fill fields). This frame feeds back to the TX Arbiter at high priority, completing the loop.
 
 8. **Status Reporting (all modules → AXI-Lite Registers → PS)**
-   Every data-plane module maintains 32-bit counters: `quotes_sent`, `orders_received`, `fills_sent`, `rejects_sent`, `link_errors`. These are continuously written to AXI-Lite status registers and are readable by the PS at any time. A `running` status bit and `link_up` indicator are also reported.
+   Data-plane modules maintain 32-bit counters: `quotes_generated` (from `market_sim`), `orders_rcvd`, `fills_sent`, `rejects_sent` (from `exchange_lite`), and `link_errors` (from `link_rx`). These are wired to the AXI register module, but in the current implementation only `STATUS` (at `0xF4`, packing `running`, `link_up`, `active_regime`, and `fifo_fill`), `QUOTES_SENT` (at `0xF8`), and `ORDERS_RCVD` (at `0xFC`) are readable via AXI-Lite. `fills_sent`, `rejects_sent`, and `link_errors` are available as inputs to the register module but have no read-back addresses assigned — they can be observed via Vivado ILA probes.
 
 9. **Physical I/O (Ctrl block)**
-   The Ctrl block handles all button, switch, LED, and RGB LED logic. Buttons pass through a 20 ms debounce filter before generating single-cycle edge pulses (e.g., BTN[0] = start, BTN[1] = stop, BTN[2] = reset). Switches are sampled directly (e.g., SW[1:0] = regime override). LEDs reflect system state — lower 4 LEDs show regime in binary, upper 4 flash on link frame TX/RX activity. RGB LEDs indicate regime color and link health.
+   The Ctrl block handles all button, switch, LED, and RGB LED logic. Buttons pass through a stability-counter debounce filter (`COUNTER_W=16`, requiring ~0.66 ms of stable input at 100 MHz) before generating single-cycle edge pulses (BTN[0] = start, BTN[1] = stop, BTN[2] = reset, BTN[3] = reserved). Switches are sampled directly (SW[1:0] = regime override value, SW[2] = override enable). LEDs: `[1:0]` = regime (binary), `[2]` = running, `[3]` = running blink (~3 Hz via 25-bit counter), `[4]` = link_up, `[5]` = link_error (any errors present), `[7:6]` = off. RGB0 = regime color (green/yellow/red/purple for CALM/VOLATILE/BURST/ADVERSARIAL). RGB1 = link health (red = no link, yellow = link with errors, green = healthy).
 
 #### 4.3.2 Board B — Trader (Strategy + Risk + Telemetry)
 
@@ -859,21 +870,21 @@ In auto mode (11), the `regime_detector` module selects the strategy based on re
 
 All 4 buttons on each board pass through `debounce.sv` before use. Mechanical pushbuttons produce electrical bounce — rapid on/off transitions lasting 1-10 ms after a press — which would register as multiple false triggers without filtering.
 
-**Debounce mechanism**: A 20-bit shift register clocked at 100 MHz. The raw button signal is shifted in every cycle. The debounced output only changes when **all 20 samples agree** (all 1s or all 0s). This creates a ~200 us debounce window (20 bits × 10 ns), well above typical mechanical bounce duration.
+**Debounce mechanism**: A `(COUNTER_W+1)`-bit stability counter (default `COUNTER_W=20`). While the raw input disagrees with the current debounced output, the counter increments each clock cycle. When it reaches `2^COUNTER_W` (1,048,576 cycles = ~10.5 ms at 100 MHz), the debounced output adopts the new input level and the counter resets. If the raw input matches the debounced output at any point before the threshold, the counter resets immediately — any bounce or noise restarts the timer. The default `COUNTER_W=20` is defined in `debounce.sv`; `board_a_ctrl` overrides it to `BTN_DEB_W=16` (2^16 = 65,536 cycles = ~0.66 ms at 100 MHz).
 
 ```
 Raw button input (with bounce):
   ____/‾‾\__/‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\___
        ^^^^
-       bounce
+       bounce (resets counter each time)
 
 Debounced output (clean):
   __________/‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\___
              ^                              ^
-             200 us delay                   200 us delay
+             counter reaches threshold      counter reaches threshold
 ```
 
-**Edge detection**: After debounce, a 1-cycle rising-edge pulse is generated by comparing the current debounced value to the previous cycle's value: `pulse = debounced & ~debounced_prev`. This gives a single clean trigger per button press, regardless of how long the button is held.
+**Edge detection**: After debounce, a 1-cycle rising-edge pulse is generated by comparing the current debounced value to the previous cycle's value: `btn_pulse = btn_out & ~btn_out_prev`. This gives a single clean trigger per button press, regardless of how long the button is held.
 
 **Dual trigger**: The `board_x_ctrl` module ORs the hardware button pulse with the corresponding AXI-Lite register write pulse. This means the same action (start, stop, reset) can be triggered either by pressing a physical button or by the PS writing to a control register — useful for scripted demos where you don't want to manually press buttons.
 
@@ -1879,10 +1890,10 @@ These modules are instantiated on **both boards** and contain no board-specific 
 
 | # | Module | Description | Key Ports | Est. Resources |
 |---|--------|-------------|-----------|---------------|
-| 1 | `hft_pkg.sv` | **Package** — all compile-time parameters, typedefs (`price_t`, `pnl_t`, `qty_t`, `symbol_t`, `order_id_t`, `timestamp_t`), message type enum (`MSG_QUOTE`, `MSG_ORDER`, `MSG_FILL`), regime enum, frame width constants. **Single source of truth** for all parameterization. | N/A (package) | — |
-| 2 | `lfsr32.sv` | 32-bit Galois LFSR with configurable polynomial. Outputs a pseudo-random 32-bit value each cycle. Used by `market_sim` for price evolution. `load` input latches a new seed from the AXI-Lite register. | `clk`, `rst`, `load`, `seed_in[31:0]` → `rand_out[31:0]` | 32 FFs |
-| 3 | `debounce.sv` | 20-bit shift register debouncer for mechanical pushbuttons. Raw input is shifted in every cycle; output changes only when all 20 samples agree. Parameterized filter width. | `clk`, `rst`, `raw_in` → `clean_out` | ~20 FFs |
-| 4 | `sync_fifo.sv` | Parameterized synchronous FIFO (single-clock domain). Configurable depth and width via parameters. Provides `almost_full` for backpressure and `count` for monitoring. Used for quote buffering (Board A), link RX output buffering (both boards). | `clk`, `rst`, `wr_en`, `wr_data`, `rd_en` → `rd_data`, `full`, `empty`, `almost_full`, `count` | Depth-dependent: ~64×128b = 4 BRAM18K (or distributed RAM for shallow FIFOs) |
+| 1 | `hft_pkg.sv` | **Package** — all compile-time parameters, typedefs (`price_t`, `sprice_t`, `qty_t`, `symbol_t`, `order_id_t`, `timestamp_t`, `cash_t`, `position_t`), message type enum (`MSG_QUOTE`, `MSG_ORDER`, `MSG_FILL`), regime enum (`REGIME_CALM/VOLATILE/BURST/ADVERSARIAL`), strategy enum, Board A/B FSM state enums (`a_state_e`, `b_state_e`), fill status enum (`FILL_OK`, `FILL_REJECTED`), frame/link constants (`FRAME_W=128`, `LINK_DATA_W=4`, `BEATS_PER_FRAME=32`), symbol config (`NUM_SYMBOLS=16`, `SYMBOL_W=8`, `NUM_SECTORS=8`, `SECTOR_ID_W`), data widths (`PRICE_W=32`, `QTY_W=16`, `CASH_W=48`, `POSITION_W=32`, `COUNTER_W=32`), histogram params, LFSR taps (`0x00400007`), and market sim constants (`MARKET_NOISE_DRIFT_SAT_Q16=0x1000`, `PULLBACK_SHIFT=5`). **Single source of truth** for all parameterization. | N/A (package) | — |
+| 2 | `lfsr32.sv` | 32-bit Galois LFSR with maximal-length polynomial (`x^32+x^22+x^2+x+1`). Outputs a pseudo-random 32-bit value each **enabled** cycle. Steps only when `enable` is high; holds its state otherwise. `load` input synchronously latches a new seed (zero seed is remapped to 1 to prevent the all-zero fixed point). Used by `market_noise_gen` — one instance per symbol, per sector, plus one global. | `clk`, `rst_n`, `enable`, `load`, `seed_in[31:0]` → `rand_out[31:0]` | 32 FFs |
+| 3 | `debounce.sv` | Stability-counter debouncer for mechanical pushbuttons. A `(COUNTER_W+1)`-bit counter increments while the raw input disagrees with the debounced output; when it reaches `2^COUNTER_W`, the output adopts the input. Any agreement resets the counter. Also produces a 1-cycle rising-edge pulse (`btn_pulse`) on 0→1 transition of the debounced output. Parameterized by `COUNTER_W` (default 20; `board_a_ctrl` uses 16). | `clk`, `rst_n`, `btn_in` → `btn_out`, `btn_pulse` | ~24 FFs |
+| 4 | `sync_fifo.sv` | Parameterized synchronous FIFO (single-clock domain). Configurable `DATA_W` (default 128) and `DEPTH` (default 64) via parameters. Provides `almost_full` (threshold-configurable via `ALMOST_FULL_THRESH`, default `DEPTH-4`) for backpressure and `count` for monitoring. Supports synchronous `flush` to reset pointers and count. Simultaneous read+write leaves count unchanged. Combinational read: `rd_data = mem[rd_ptr]`. Used for quote buffering (Board A) and link RX output buffering (both boards). | `clk`, `rst_n`, `flush`, `wr_en`, `wr_data` → `full`; `rd_en` → `rd_data`, `empty`; `almost_full`, `count` | Depth-dependent: ~64×128b = 4 BRAM18K (or distributed RAM for shallow FIFOs) |
 
 **Why `sync_fifo` is a shared module**: Both boards need FIFO buffering — Board A for quote/fill queuing before the TX arbiter, and both boards for link RX output buffering. A single parameterized module avoids duplication. The `almost_full` output is critical: it drives the `ready` backpressure signal on the link.
 
@@ -1904,14 +1915,27 @@ Transfer when:    out_valid && out_ready (both high on same rising edge)
 
 #### 4.6.4 Board A Modules
 
-| # | Category | Module | Description | Key I/O (beyond clk/rst) | Est. Resources |
+| # | Category | Module | Description | Key I/O (beyond clk/rst_n) | Est. Resources |
 |---|----------|--------|-------------|--------------------------|---------------|
-| 7 | Data | `market_sim.sv` | LFSR-driven price random walk. Maintains per-symbol `mid_price[NUM_SYMBOLS]` and `spread[NUM_SYMBOLS]`. On each `quote_interval` cycle (when `running` is high), updates one symbol's prices using the LFSR output scaled by `step_size` (regime-dependent). Builds a 128-bit QUOTE frame and pushes to quote_fifo. Round-robins through symbols. | `running`, `regime[1:0]`, `quote_interval`, `load_seed`, `seed[31:0]`, `sym_init_mid[0:N-1]`, `sym_init_spread[0:N-1]` → `quote_frame[127:0]`, `quote_valid`, `bid_price[0:N-1]`, `ask_price[0:N-1]`, `quotes_sent[31:0]` | ~500 LUTs, 1 DSP48E2, ~NUM_SYMBOLS×64 FFs |
-| 8 | Data | `exchange_lite.sv` | Order matching engine. Receives ORDER frames from link_rx. Extracts `symbol_id`, `side`, `limit_price`. Compares against live bid/ask from market_sim. BUY fills at ask if `limit_price >= ask_price`; SELL fills at bid if `limit_price <= bid_price`; else REJECT. Builds 128-bit FILL frame with echoed `order_id` and `ts_echo`. | `order_frame[127:0]`, `order_valid`, `bid_price[0:N-1]`, `ask_price[0:N-1]` → `fill_frame[127:0]`, `fill_valid`, `orders_rcvd[31:0]`, `fills_sent[31:0]`, `rejects_sent[31:0]` | ~300 LUTs |
-| 9 | Data | `tx_arbiter.sv` | Strict-priority 2:1 frame mux. Two input ports: fill (high priority) and quote (low priority). When both have valid frames, fills always go first. Outputs one frame at a time to link_tx. Ensures no frame starvation: once a quote starts serialization, it completes before a fill can preempt. | `fill_frame`, `fill_valid`, `quote_frame`, `quote_valid`, `tx_ready` → `out_frame[127:0]`, `out_valid`, `fill_ready`, `quote_ready` | ~100 LUTs |
-| 10 | Control | `board_a_axi_regs.sv` | AXI-Lite slave interface. Config registers: CTRL (start/reset/regime), QUOTE_INTERVAL, LFSR_SEED, SYMx_INIT_MID, SYMx_INIT_SPREAD. Status registers (read-only): STATUS (running, link_up), quotes_sent, orders_rcvd, fills_sent, rejects_sent, link_errors, fifo_fill_level. Generates single-cycle pulses on CTRL write. | AXI-Lite bus (awaddr, wdata, araddr, rdata, etc.) → config outputs, ← status inputs | ~400 LUTs |
-| 11 | Control | `board_a_ctrl.sv` | Physical I/O manager. Instantiates 4× `debounce` for buttons. Generates `btn_pulse[0..2]` (start/stop/reset). Samples switches for `regime_sw[1:0]` and `sw_override`. Drives LEDs: [1:0]=regime, [2]=running, [3]=running blink, [4]=link_up, [5]=link_errors. Drives RGB0=regime color, RGB1=link health. | `btn[3:0]`, `sw[7:0]`, `running`, `active_regime`, `link_up`, `link_error_count` → `btn_pulse[2:0]`, `regime_sw[1:0]`, `sw_override`, `led[7:0]`, `rgb0[2:0]`, `rgb1[2:0]` | ~150 LUTs |
-| 12 | Top | `board_a_top.sv` | Structural wiring: instantiates all Board A modules. Contains the 4-state FSM (RESET/IDLE/RUNNING/STOPPED). Combines button + AXI trigger signals. Routes config from AXI regs to data-plane modules. Routes status from data-plane back to AXI regs and ctrl. | Top-level FPGA ports: PMOD_A, PMOD_B, btn, sw, led, rgb, AXI-Lite bus | — (structural) |
+| 7 | Data | `market_sim.sv` | Sector-aware market simulator with Ornstein-Uhlenbeck mean-reversion. Maintains per-symbol `mid_price`, `spread`, `best_bid`, `best_ask`, and `seq_num` arrays. On each `quote_interval` tick (when `enable` is high and `quote_ready` asserts), updates one symbol's prices using the 3-tier noise output from `market_noise_gen` scaled by a regime-dependent `step_size`, plus a **pull-back restoring force** toward `init_mid`: `new_mid = old_mid + (step_out × step_size >>> 16) + ((init_mid - mid) >>> PULLBACK_SHIFT)`. Spread is set to the regime's `base_spread` each tick (no per-symbol spread evolution). Prices are clamped to `[MIN_PRICE=$1, MAX_PRICE=$10000]` (Q16.16). Bid/ask sizes are fixed at 1000 per quote. `quote_valid` is a 1-cycle pulse (not held-valid); the producer only fires when the downstream FIFO is ready. Symbols are generated in round-robin order `0 → 1 → ... → active_sym_count-1 → 0 ...`. Instantiates `market_noise_gen` internally. | `enable`, `counter_clr`, `lfsr_load`, `lfsr_seed[31:0]`, `active_regime`, `quote_interval[31:0]`, `active_sym_count[7:0]`, `sector_id[0:N-1]`, `init_mid[0:N-1]`, `init_spread[0:N-1]` → `quote_frame[127:0]`, `quote_valid`; ← `quote_ready`; → `best_bid[0:N-1]`, `best_ask[0:N-1]`, `quotes_generated[31:0]` | ~500 LUTs, ~NUM_SYMBOLS×64 FFs |
+| 7a | Data | `market_noise_gen.sv` | 3-tier correlated noise generator instantiated by `market_sim`. Creates `NUM_SYM + NUM_SECTORS + 1` `lfsr32` instances (one per symbol, one per sector, one global). Each tier extracts a 6-bit field from its LFSR output, centers it at zero (`raw - 32`, clamped to [-31..+31] for zero-mean), and scales it. **Global noise**: `(raw <<< 6)`, provides market-wide jitter. **Sector drift**: `(raw <<< 2) × sector_pop[k]` accumulated in a saturated integrator (±`DRIFT_SAT_Q16`), so crowded sectors drift faster. **Company drift**: `(raw <<< 3)` accumulated in a per-symbol saturated integrator. Output: `step_out[s] = global + sec_drift[sector_id[s]] + sym_drift[s]` (signed Q16.16). All LFSRs are reseeded and drift registers cleared on `lfsr_load`. Each LFSR's seed is derived from `base_seed` XOR'd with a golden-ratio-based constant unique to each instance. | `enable`, `lfsr_load`, `tick`, `base_seed[31:0]`, `active_sym_count[7:0]`, `sector_id[0:N-1]` → `global_noise_q16_16`, `sector_noise_q16_16[0:K-1]`, `company_noise_q16_16[0:N-1]`, `step_out_q16_16[0:N-1]` (all signed 32-bit) | ~(N+K+1)×32 FFs (LFSRs), ~(N+K)×32 FFs (drift accumulators) |
+| 8 | Data | `exchange_lite.sv` | Minimal order matching engine. Single-slot pipeline: accepts one ORDER frame when the stage-1 register and output register are both free. Extracts `symbol_id`, `side`, `limit_price`, `qty`, `order_id`, `timestamp`. Compares against live bid/ask from `market_sim`: BUY fills at `ask_price` if `limit_price >= ask_price`; SELL fills at `bid_price` if `limit_price <= bid_price`; out-of-range `symbol_id` → reject. Builds 128-bit FILL frame with echoed `order_id` and `ts_echo`. `fill_valid` is held until `fill_ready` — no response is dropped under backpressure. Disabled when `enable` is low. `counter_clr` resets all counters and pipeline registers. | `enable`, `counter_clr`, `best_bid[0:N-1]`, `best_ask[0:N-1]`, `order_frame[127:0]`, `order_valid` → `fill_frame[127:0]`, `fill_valid`; ← `fill_ready`; → `orders_rcvd[31:0]`, `fills_sent[31:0]`, `rejects_sent[31:0]` | ~300 LUTs |
+| 8a | Data | `exchange_plus.sv` | **Optional** upgraded exchange (not instantiated in `board_a_top` — available for future use). Adds: one-entry input queue (`ENABLE_INPUT_QUEUE`), partial fills (`ENABLE_PARTIAL_FILL`), visible liquidity depletion (`ENABLE_SIZE_DEPLETION`), and one resting-order slot per symbol (`ENABLE_RESTING_ORDER`). Each feature is independently controlled by a `parameter bit`. Additional status: `PARTIAL` and `RESTING_ACCEPTED` fill statuses. Resting orders are scanned combinationally and executed when market prices become favorable. Orders are intentionally dropped if both stage-1 and queue are full. | Same as `exchange_lite` plus: `best_bid_qty[0:N-1]`, `best_ask_qty[0:N-1]`, `market_refresh` → `partials_sent[31:0]`, `resting_accepted[31:0]` | ~600 LUTs |
+| 9 | Data | `tx_arbiter.sv` | Strict-priority 2:1 frame mux with one-entry output buffer. Two input ports: fill (high priority) and quote (low priority). `fill_ready = !tx_buf_valid`; `quote_ready = !tx_buf_valid && !fill_valid` — fills always win. Once the output buffer is consumed by `tx_ready`, a 1-cycle bubble occurs before the next frame can be accepted. No frame dropping under backpressure. No preemption of in-progress frames (the buffer holds a complete frame, not a partial one). | `fill_frame[127:0]`, `fill_valid` → `fill_ready`; `quote_frame[127:0]`, `quote_valid` → `quote_ready`; → `tx_frame[127:0]`, `tx_valid`; ← `tx_ready` | ~100 LUTs |
+| 10 | Control | `board_a_axi_regs.sv` | AXI-Lite slave interface (8-bit address space). **Config registers** (R/W): `CTRL` (start/reset pulses), `QUOTE_INTERVAL`, `LFSR_SEED`, `REGIME`, per-symbol `INIT_MID` (window at 0x10), `INIT_SPREAD` (0x50), `SECTOR_ID` (0x90), `COMPANY_TOKEN` (0xD0, packed 2×16b per word), `ACTIVE_SYM_COUNT` (0xF0). **Status registers** (R): `STATUS` at 0xF4 packing `{fifo_fill[6:0], active_regime[1:0], link_up, running}`, `QUOTES_SENT` (0xF8), `ORDERS_RCVD` (0xFC). Generates 1-cycle pulses on CTRL write. Accepts `fills_sent`, `rejects_sent`, `link_errors` as inputs but **these are not mapped to read addresses** in the current implementation (readable only via STATUS packing or debug). See Appendix D.1 for the full register map. | AXI-Lite bus → `axi_start_pulse`, `axi_reset_pulse`, `regime_from_ps`, `quote_interval`, `lfsr_seed`, `sym_init_mid[0:N-1]`, `sym_init_spread[0:N-1]`, `sym_sector_id[0:N-1]`, `sym_company_token[0:N-1]`, `active_sym_count`; ← status inputs | ~400 LUTs |
+| 11 | Control | `board_a_ctrl.sv` | Physical I/O manager. Instantiates 4× `debounce` with `COUNTER_W=BTN_DEB_W` (default 16). Generates single-cycle pulses: `ctrl_start_pulse` (BTN[0]), `ctrl_stop_pulse` (BTN[1]), `ctrl_reset_pulse` (BTN[2]). BTN[3] is debounced but unused. Samples `sw[1:0]` → `regime_sw`, `sw[2]` → `sw_override`. Drives LEDs: `[1:0]=active_regime` (binary), `[2]=running`, `[3]=running AND blink` (25-bit free-running counter bit 24), `[4]=link_up`, `[5]=link_error` (boolean: `link_errors != 0`), `[7:6]=0`. RGB0 = regime color: CALM=green, VOLATILE=yellow, BURST=red, ADVERSARIAL=purple. RGB1 = link health: no link=red, link with errors=yellow, healthy=green. | `btn[3:0]`, `sw[7:0]`, `running`, `active_regime`, `link_up`, `link_error` (1-bit) → `ctrl_start_pulse`, `ctrl_stop_pulse`, `ctrl_reset_pulse`, `regime_sw`, `sw_override`, `led[7:0]`, `rgb0[2:0]`, `rgb1[2:0]` | ~150 LUTs |
+| 12 | Top | `board_a_top.sv` | Structural wiring: instantiates all Board A modules. Contains the 4-state Moore FSM (`a_state_e`: `A_RESET→A_IDLE→A_RUNNING→A_STOPPED`). Derives control signals: `running = (state == A_RUNNING)`, `counter_clr = (state == A_RESET)`, `fifo_flush = (state == A_RESET)`, `lfsr_load = (state == A_IDLE && next == A_RUNNING)`. Combines button + AXI trigger signals via OR: `start_combined = axi_start_pulse OR ctrl_start_pulse`, `stop_combined = ctrl_stop_pulse`, `reset_combined = axi_reset_pulse OR ctrl_reset_pulse`. Routes `active_regime = sw_override ? regime_sw : regime_from_ps`. Exchange is only enabled when `running` (frozen market = no matching while stopped). ORDER frames from `link_rx` are filtered by `msg_type == MSG_ORDER` before routing to `exchange_lite`. | Top-level FPGA ports: PMOD JA (out), PMOD JB (in), `btn[3:0]`, `sw[7:0]`, `led[7:0]`, `rgb0[2:0]`, `rgb1[2:0]`, AXI-Lite bus | — (structural) |
+
+**Board A Implementation Notes** (differences from earlier spec revisions and known gaps):
+
+1. **3-tier noise model**: The original spec described a single-LFSR price step. The implemented RTL uses `market_noise_gen` with `NUM_SYM + NUM_SECTORS + 1` LFSRs and drift accumulators for correlated sector-aware noise. This is the definitive implementation.
+2. **Ornstein-Uhlenbeck pull-back**: Added to `market_sim` to create bounded, mean-reverting price dynamics. Without this, prices drift unboundedly and the Board B mean-reversion strategy cannot profit.
+3. **Windowed AXI register map**: Expanded from the original 4-symbol interleaved layout to support 16 symbols using base+offset windowed addressing. Sector IDs and company tokens are also configurable via AXI.
+4. **AXI read-back gap**: `fills_sent`, `rejects_sent`, and `link_errors` counters are wired into `board_a_axi_regs` but have no read-back addresses assigned. A future revision should map them to unused offsets (e.g., `0x100`–`0x10C` if the address space is widened to 9 bits).
+5. **`exchange_plus.sv`**: A feature-rich optional exchange module exists in `rtl/board_a/` but is **not instantiated** by `board_a_top`. It can be swapped in by changing one instantiation if partial fills, liquidity depletion, or resting orders are desired.
+6. **`debounce.sv` comment reference**: The module header says "Default matches `hft_pkg::DEBOUNCE_COUNTER_W`" but this constant does not exist in `hft_pkg`. The comment is aspirational; `debounce` uses its own parameter default of `COUNTER_W=20`, and `board_a_ctrl` overrides it to 16.
+7. **Bid/ask sizes**: Currently hardcoded to 1000 per quote in `market_sim`. A future improvement could make this regime-dependent or symbol-dependent.
+8. **No CDC in Board A PL**: All logic runs in a single `clk` domain. The only CDC boundary is the 2-FF synchronizer inside `link_rx` for the incoming PMOD signals.
 
 #### 4.6.5 Board B Modules
 
@@ -1968,11 +1992,15 @@ You can add S1 alone (just mean-rev + momentum), S1+S2 (all three strategies, ma
 │  board_a_top.sv                                        │
 │  ├── board_a_axi_regs.sv ◄══ AXI-Lite ══► PS          │
 │  ├── board_a_ctrl.sv                                   │
-│  │   └── debounce.sv ×4                                │
+│  │   └── debounce.sv ×4 (COUNTER_W=16)                 │
 │  ├── market_sim.sv                                     │
-│  │   └── lfsr32.sv                                     │
+│  │   └── market_noise_gen.sv                           │
+│  │       ├── lfsr32.sv ×1  (global)                    │
+│  │       ├── lfsr32.sv ×8  (per-sector, NUM_SECTORS=8) │
+│  │       └── lfsr32.sv ×16 (per-symbol, NUM_SYMBOLS=16)│
 │  ├── sync_fifo.sv (quote_fifo, 64×128)                 │
 │  ├── exchange_lite.sv                                  │
+│  │   (exchange_plus.sv available but not instantiated)  │
 │  ├── tx_arbiter.sv                                     │
 │  ├── link_tx.sv (A→B direction)                        │
 │  └── link_rx.sv (B→A direction)                        │
@@ -2018,35 +2046,51 @@ All parameters live in `hft_pkg.sv` (single source of truth):
 
 ```systemverilog
 package hft_pkg;
-    localparam int NUM_SYMBOLS     = 4;     // 4 for core, 8+ for stretch
-    localparam int LINK_DATA_W     = 4;     // 4 for core, 8 for stretch
-    localparam int FRAME_WIDTH     = 128;
-    localparam int BEATS_PER_FRAME = FRAME_WIDTH / LINK_DATA_W;
-    localparam int NUM_HIST_BINS   = 16;
-    localparam int BIN_SHIFT       = 5;     // 32-cycle histogram bins
+    // Frame / link
+    localparam int FRAME_W         = 128;
+    localparam int LINK_DATA_W     = 4;      // 4 for core, 8 for stretch
+    localparam int BEATS_PER_FRAME = FRAME_W / LINK_DATA_W;  // 32
+
+    // Symbol configuration
+    localparam int NUM_SYMBOLS     = 16;     // 16 symbols in current build
+    localparam int SYMBOL_W        = 8;
+    localparam int NUM_SECTORS     = 8;
+    localparam int SECTOR_ID_W     = (NUM_SECTORS > 1) ? $clog2(NUM_SECTORS) : 1;
+
+    // Market simulator constants
+    localparam logic signed [31:0] MARKET_NOISE_DRIFT_SAT_Q16 = 32'sh0000_1000;
+    localparam int PULLBACK_SHIFT = 5;       // OU restoring force = displacement >>> 5
+
+    // Data widths
+    localparam int PRICE_W    = 32;          // Q16.16 fixed-point
+    localparam int QTY_W      = 16;
+    localparam int CASH_W     = 48;          // Q32.16 (large accumulator)
+    localparam int POSITION_W = 32;          // signed integer
+    localparam int COUNTER_W  = 32;
+    // ... (ALPHA_W, ORDER_ID_W, TIMESTAMP_W, SEQ_NUM_W, HIST_BINS, etc.)
 
     // Type definitions
-    typedef logic [31:0]        price_t;
-    typedef logic signed [31:0] pnl_t;
-    typedef logic [15:0]        qty_t;
-    typedef logic [7:0]         symbol_t;
-    typedef logic [15:0]        order_id_t;
-    typedef logic [15:0]        timestamp_t;
+    typedef logic [PRICE_W-1:0]           price_t;
+    typedef logic signed [PRICE_W-1:0]    sprice_t;
+    typedef logic signed [POSITION_W-1:0] position_t;
+    typedef logic [QTY_W-1:0]             qty_t;
+    typedef logic [SYMBOL_W-1:0]          symbol_t;
+    typedef logic signed [CASH_W-1:0]     cash_t;
+    // ... (order_id_t, timestamp_t)
 
     // Message types
     typedef enum logic [3:0] {
-        MSG_QUOTE = 4'h1,
-        MSG_ORDER = 4'h2,
-        MSG_FILL  = 4'h3
+        MSG_QUOTE = 4'h1, MSG_ORDER = 4'h2, MSG_FILL = 4'h3
     } msg_type_e;
 
     // Market regimes
     typedef enum logic [1:0] {
-        REGIME_CALM        = 2'b00,
-        REGIME_VOLATILE    = 2'b01,
-        REGIME_BURST       = 2'b10,
-        REGIME_ADVERSARIAL = 2'b11
+        REGIME_CALM = 2'b00, REGIME_VOLATILE = 2'b01,
+        REGIME_BURST = 2'b10, REGIME_ADVERSARIAL = 2'b11
     } regime_e;
+
+    // FSM states, strategy enum, fill_status enum, LFSR taps ...
+    localparam logic [31:0] LFSR_TAPS = 32'h00400007;
 endpackage
 ```
 
@@ -2164,15 +2208,15 @@ We do **not** implement a soft-core processor (MicroBlaze, RISC-V, or custom ISA
 │                                                                  │
 │  ┌──────────────────────────┐  ┌───────────────────────────┐   │
 │  │  Board A:                │  │  Board B:                  │   │
-│  │  config_exchange.py      │  │  telemetry_server.py       │   │
+│  │  config_symbols.py       │  │  telemetry_server.py       │   │
 │  │  (configure + start)     │  │  (configure + poll + UART) │   │
 │  └──────────────────────────┘  └───────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-#### 5.1.1 Board A PS Script — `config_exchange.py`
+#### 5.1.1 Board A PS Script — `config_symbols.py`
 
-**Purpose**: Configure the exchange simulator and start quote generation. This script runs once at boot (or when the operator wants to reconfigure), not in a loop.
+**Purpose**: Configure the exchange simulator's symbol universe (up to 16 symbols with per-symbol prices, spreads, sector assignments, and company tokens) and start quote generation. This script runs once at boot (or when the operator wants to reconfigure), not in a loop. The actual script is `sw/board_a/config_symbols.py` and defines the symbol universe programmatically.
 
 **Workflow**:
 
@@ -2181,29 +2225,45 @@ We do **not** implement a soft-core processor (MicroBlaze, RISC-V, or custom ISA
    ol = Overlay("board_a.bit")
    mmio = MMIO(base_addr, 0x100)
 
-2. Write configuration registers
-   mmio.write(LFSR_SEED,        0xDEADBEEF)
-   mmio.write(QUOTE_INTERVAL,   1000)          # cycles between quotes
-   mmio.write(REGIME,           0)              # 0=CALM (unless switch override)
-   mmio.write(SYM0_INIT_MID,    0x0096_4000)   # $150.25 in Q16.16
-   mmio.write(SYM0_INIT_SPREAD, 0x0000_2000)   # $0.125 spread
-   ... (repeat for SYM1..SYM3)
+2. Write global configuration
+   mmio.write(0x04, 1000)              # QUOTE_INTERVAL: cycles between quotes
+   mmio.write(0x08, 0xDEADBEEF)       # LFSR_SEED
+   mmio.write(0x0C, 0)                # REGIME: 0=CALM (unless switch override)
 
-3. Start simulation
-   mmio.write(CTRL, 0x01)       # set start bit (single-cycle pulse)
-   # FSM transitions IDLE → RUNNING, LFSR seed loaded, quotes begin
+3. Write per-symbol configuration (windowed addressing, up to 16 symbols)
+   for i, sym in enumerate(symbols):
+       mmio.write(0x10 + 4*i, sym.init_mid)      # INIT_MID[i] (Q16.16)
+       mmio.write(0x50 + 4*i, sym.init_spread)    # INIT_SPREAD[i] (Q16.16)
+       mmio.write(0x90 + 4*i, sym.sector_id)      # SECTOR_ID[i] (0–7)
 
-4. (Optional) Live regime change
-   mmio.write(CTRL, (new_regime << 2))
-   # Only effective if sw_override is low (physical switches not overriding)
+   # Pack company tokens 2 per word
+   for j in range(0, num_sym, 2):
+       lo = symbols[j].token
+       hi = symbols[j+1].token if (j+1 < num_sym) else 0
+       mmio.write(0xD0 + 4*(j//2), (hi << 16) | lo)
 
-5. (Optional) Read status
-   status = mmio.read(STATUS)
-   quotes  = mmio.read(QUOTES_SENT)
-   print(f"Running: {status & 1}, Quotes sent: {quotes}")
+   mmio.write(0xF0, num_sym)          # ACTIVE_SYM_COUNT
+
+4. Start simulation
+   mmio.write(0x00, 0x01)             # CTRL bit 0 = start pulse
+   # FSM transitions IDLE → RUNNING, LFSRs seeded, quotes begin
+
+5. (Optional) Live regime change
+   mmio.write(0x0C, new_regime)       # REGIME register (separate from CTRL)
+   # Only effective if sw_override (SW[2]) is low
+
+6. (Optional) Read status
+   status = mmio.read(0xF4)           # STATUS register
+   running     = status & 1
+   link_up     = (status >> 1) & 1
+   regime      = (status >> 2) & 3
+   fifo_fill   = (status >> 9) & 0x7F
+   quotes_sent = mmio.read(0xF8)
+   orders_rcvd = mmio.read(0xFC)
+   print(f"Running: {running}, Quotes: {quotes_sent}, FIFO: {fifo_fill}/64")
 ```
 
-**Key design choice**: Board A's PS script is simple — configure and fire. Board A has no telemetry loop. All Board A status (quotes_sent, link_errors, etc.) is available via AXI-Lite registers, but in the core demo we only read these manually for debugging. The real-time monitoring happens on Board B.
+**Key design choice**: Board A's PS script is simple — configure and fire. Board A has no telemetry loop. All Board A status (quotes_sent, orders_rcvd, etc.) is available via AXI-Lite registers, but in the core demo we only read these manually for debugging. The real-time monitoring happens on Board B. Note that `fills_sent`, `rejects_sent`, and `link_errors` are not exposed in the current register map read addresses — they require ILA probes or a future register map extension.
 
 #### 5.1.2 Board B PS Script — `telemetry_server.py`
 
@@ -2473,9 +2533,9 @@ The dashboard handles gracefully:
 |------|----------|-------------|
 | `board_a.bit` | `/home/xilinx/overlays/` | Vivado-generated bitstream for Board A PL |
 | `board_a.hwh` | `/home/xilinx/overlays/` | Hardware handshake file (register map metadata) |
-| `config_exchange.py` | `/home/xilinx/` | Config + start script (see §5.1.1) |
+| `config_symbols.py` | `/home/xilinx/` | Config + start script (see §5.1.1) |
 
-**Usage**: SSH into Board A (or use Jupyter), run `python3 config_exchange.py`. Script exits after starting the simulation. To reconfigure, stop the FSM (BTN[1] or AXI reset), edit parameters in the script, re-run.
+**Usage**: SSH into Board A (or use Jupyter), run `python3 config_symbols.py`. Script exits after starting the simulation. To reconfigure, stop the FSM (BTN[1] or AXI reset), edit parameters in the script, re-run.
 
 #### 5.5.2 Files on Board B PS (SD card, PYNQ image)
 
@@ -2569,7 +2629,7 @@ Step  Who           Action
                       - Board B PROG port → laptop (for telemetry UART)
                       - PMOD ribbon cables between boards (already connected)
  3    Operator      On laptop: identify COM ports (Board A = COMx, Board B = COMy)
- 4    Operator      SSH into Board A:  python3 config_exchange.py
+ 4    Operator      SSH into Board A:  python3 config_symbols.py
                       → Overlay loads, config written, start bit set
                       → Board A FSM: RESET → IDLE → RUNNING
                       → Quotes begin flowing over PMOD A → Board B
@@ -2816,9 +2876,9 @@ Every synthesizable module from §4.6 gets a dedicated self-checking testbench. 
 
 | TB | Module Under Test | Stimulus | Key Checks | Edge Cases |
 |----|-------------------|----------|------------|------------|
-| `tb_lfsr32` | `lfsr32.sv` | Provide seed, clock 100 cycles, then load new seed | Output never zero; sequence matches known Galois polynomial output; `load` correctly latches new seed | seed = 0 (prevented or handled), seed = all-ones, load during active output |
-| `tb_debounce` | `debounce.sv` | Drive raw input with bounce pattern (rapid toggling for 1000 cycles, then stable) | Output stays stable during bounce; transitions only after all 20 samples agree; rising edge pulse fires once | Held button (no bounce), very fast bounce (every cycle), release bounce |
-| `tb_sync_fifo` | `sync_fifo.sv` | Write until full, read until empty, simultaneous read/write | FIFO count tracks correctly; `full`/`empty`/`almost_full` flags accurate; data integrity (read order = write order) | Write when full (should not corrupt), read when empty (should not corrupt), `almost_full` threshold |
+| `tb_lfsr32` | `lfsr32.sv` | Provide seed, clock 100 cycles with `enable` high, then `load` new seed | Output never zero; sequence matches known Galois polynomial output; `load` correctly latches new seed; zero seed remapped to 1; holds state when `enable` is low | seed = 0 (remapped to 1), seed = all-ones, load during active output, enable toggling mid-sequence |
+| `tb_debounce` | `debounce.sv` | Drive `btn_in` with bounce pattern (rapid toggling for 1000 cycles, then stable) | `btn_out` stays stable during bounce; transitions only after counter reaches `2^COUNTER_W`; `btn_pulse` fires once on 0→1 of `btn_out` | Held button (no bounce), very fast bounce (every cycle), release bounce, counter reset on glitch |
+| `tb_sync_fifo` | `sync_fifo.sv` | Write until full, read until empty, simultaneous read/write, `flush` mid-operation | FIFO count tracks correctly; `full`/`empty`/`almost_full` flags accurate; data integrity (read order = write order); `flush` resets pointers and count; simultaneous read+write keeps count unchanged | Write when full (should not corrupt), read when empty (should not corrupt), `almost_full` threshold, flush during active traffic |
 
 #### 7.2.2 Link Layer Tests
 
@@ -2832,9 +2892,9 @@ Every synthesizable module from §4.6 gets a dedicated self-checking testbench. 
 
 | TB | Module | Stimulus | Key Checks | Edge Cases |
 |----|--------|----------|------------|------------|
-| `tb_market_sim` | `market_sim.sv` | Set CALM regime, run 100 quote cycles; then switch regime mid-run | Prices within expected range; spread > 0 always; `seq_num` incrementing per symbol; correct round-robin order; regime change takes effect on next quote | All 4 regimes, `NUM_SYMBOLS = 1`, `running` toggled mid-stream, `load_seed` during active generation |
-| `tb_exchange_lite` | `exchange_lite.sv` | BUY order at ask, BUY below ask, SELL at bid, SELL above bid | FILL with correct `fill_price` and echoed `order_id`/`ts_echo`; REJECT with zero fill fields; counters (`orders_rcvd`, `fills_sent`, `rejects_sent`) accurate | Exact boundary (limit = ask for BUY, limit = bid for SELL), unknown `symbol_id`, rapid back-to-back orders |
-| `tb_tx_arbiter` | `tx_arbiter.sv` | Simultaneous quote + fill available | Fill sent first (strict priority); no frame corruption; both `quote_ready` and `fill_ready` properly handshake | Only quotes, only fills, alternating, rapid toggle |
+| `tb_market_sim` | `market_sim.sv` + `market_noise_gen.sv` | Set CALM regime with 16 symbols (with sector assignments), run 100 quote cycles; then switch regime mid-run; verify pull-back force keeps prices near init_mid | Prices within expected range and bounded by OU pull-back; spread = `base_spread[regime]` always; `seq_num` incrementing per symbol; correct round-robin order up to `active_sym_count`; regime change takes effect on next quote; `quote_valid` is 1-cycle pulse gated by `quote_ready`; bid/ask arrays update in sync | All 4 regimes, `active_sym_count = 1` (single symbol), `enable` toggled mid-stream, `lfsr_load` during active generation, `counter_clr` resets `quotes_generated` only, FIFO backpressure (`quote_ready` deasserted) stalls quote scheduling |
+| `tb_exchange_lite` | `exchange_lite.sv` | BUY order at ask, BUY below ask, SELL at bid, SELL above bid; backpressure `fill_ready` | FILL with correct `fill_price` and echoed `order_id`/`ts_echo`; REJECT with zero fill fields; counters (`orders_rcvd`, `fills_sent`, `rejects_sent`) accurate; `fill_valid` held until `fill_ready`; `counter_clr` clears all state; `enable=0` blocks matching | Exact boundary (limit = ask for BUY, limit = bid for SELL), out-of-range `symbol_id` → REJECT, `fill_ready` toggling (backpressure), order while stage-1 occupied (dropped until slot free) |
+| `tb_tx_arbiter` | `tx_arbiter.sv` | Simultaneous quote + fill available; `tx_ready` toggling | Fill sent first (strict priority); `quote_ready` blocked while `fill_valid` asserted; 1-cycle bubble after `tx_ready` consumes frame before next accept; no frame corruption | Only quotes, only fills, alternating, backpressure from `tx_ready`, rapid toggle, long `tx_ready` deassert |
 
 #### 7.2.4 Board B Pipeline Tests
 
@@ -2853,7 +2913,7 @@ Every synthesizable module from §4.6 gets a dedicated self-checking testbench. 
 
 | TB | Module | Stimulus | Key Checks | Edge Cases |
 |----|--------|----------|------------|------------|
-| `tb_board_a_axi_regs` | `board_a_axi_regs.sv` | Write config registers, read back; read status registers | Write/read round-trip correct; status registers reflect PL inputs; single-cycle pulse generation on CTRL write | Write to read-only register (ignored), read from write-only register (returns 0 or default), rapid successive writes |
+| `tb_board_a_axi_regs` | `board_a_axi_regs.sv` | Write all config register windows (init_mid, init_spread, sector_id, tokens for 16 symbols), read back; read STATUS/QUOTES_SENT/ORDERS_RCVD; verify CTRL pulse generation | Write/read round-trip correct for all windowed addresses; `active_sym_count` clamped to [1, NUM_SYM]; zero spread clamped to 1; STATUS packs `fifo_fill`, `regime`, `link_up`, `running`; `axi_start_pulse` / `axi_reset_pulse` are single-cycle | Out-of-range window index, `active_sym_count = 0` (clamped to 1), `active_sym_count > 16` (clamped), read from CTRL address (returns 0), rapid successive writes to same window |
 | `tb_board_b_axi_regs` | `board_b_axi_regs.sv` | Same pattern as Board A, plus histogram bin reads | All config/status registers correct; histogram bins readable; position registers sign-correct | Same edge cases + reading histogram while fills are arriving (should be coherent) |
 
 ### 7.3 Integration Testing (Simulation)
@@ -2877,7 +2937,7 @@ Each phase is **gated** — do not proceed until the current phase passes. This 
 |-------|------|--------|---------------|---------------|
 | **1: LED Blinker** | Verify Vivado flow + PYNQ boot | Build minimal overlay: clock divider → LED toggle. Load via PYNQ `Overlay()`. | LED blinks at expected rate (~3 Hz). PYNQ Jupyter accessible via browser. | 2 hours |
 | **2: AXI-Lite Smoke** | Verify PS ↔ PL register access | Add AXI-Lite slave with 1 R/W register. Write 0xDEADBEEF from Python, read back. | Read returns 0xDEADBEEF. Write different values, all round-trip correctly. | 2 hours |
-| **3: Board A Standalone** | Verify market_sim + exchange | Load full Board A overlay. Run `config_exchange.py`. Read counters via MMIO. Optional: Vivado ILA on quote frames. | `quotes_sent` incrementing; correct regime behavior (step size changes with switch/register); LFSR seed loads correctly. | 4 hours |
+| **3: Board A Standalone** | Verify market_sim + exchange | Load full Board A overlay. Run `config_symbols.py`. Read counters via MMIO. Optional: Vivado ILA on quote frames. | `quotes_sent` incrementing; correct regime behavior (step size changes with switch/register); LFSR seed loads correctly; OU pull-back keeps prices bounded. | 4 hours |
 | **4: Board B Standalone** | Verify trader pipeline without link | Load Board B overlay with internal synthetic quote generator (hardcoded stimulus in RTL, replacing `link_rx`). Run config script. | `orders_sent > 0`; `position != 0`; histogram bins populated; `risk_halt` fires when expected. | 4 hours |
 | **5: Link Smoke** | Verify PMOD physical data transfer | Board A sends incrementing counter frames (not real quotes — just 128-bit counters). Board B checks sequence continuity. | `rx_frame_count = tx_frame_count`; zero sequence errors; `link_up` asserted on Board B. | 3 hours |
 | **6: One-Way Quotes** | Verify real quote reception | Board A sends real quotes (market_sim running). Board B receives, updates quote_book. No orders sent yet (ARMED state). | `quotes_rcvd` on Board B matches `quotes_sent` on Board A (within timing tolerance). | 2 hours |
@@ -2894,8 +2954,8 @@ After hardware bring-up, dedicated stress tests validate system stability under 
 
 | Test | Regime | Duration | Metrics to Monitor | Expected Behavior |
 |------|--------|----------|--------------------|-------------------|
-| S1 | CALM | 10 min | ~100K qps, steady PnL, low risk rejects | Stable, predictable. PnL drifts slowly. |
-| S2 | VOLATILE | 10 min | Same throughput, wider PnL swings, more rejects | PnL oscillates with larger amplitude. Position limits hit more often. |
+| S1 | CALM | 10 min | ~100K qps, steady PnL, low risk rejects | Stable, predictable. OU pull-back keeps prices near init_mid. Mean-reversion strategy profits steadily. |
+| S2 | VOLATILE | 10 min | Same throughput, wider PnL swings, more rejects | Larger price oscillations around init_mid. More trading opportunities but higher variance. Position limits hit more often. |
 | S3 | BURST | 10 min | ~1M+ qps, FIFO fill levels, link utilization | Throughput gauges near max. FIFO fill must stay < 75% (48/64 entries). |
 | S4 | ADVERSARIAL | 10 min | High risk rejects, rapid PnL changes, `risk_halt` may trigger | Risk system heavily engaged. Possible HALTED state if PnL drops fast. |
 | S5 | RAPID SWITCH | 10 min | Switch regime every 30 sec via hardware switches | No glitches on regime transitions. Throughput/latency shift cleanly. |
@@ -2967,9 +3027,10 @@ When a test fails, these tools and techniques are available:
 | 4 | `tb_link_tx.sv` | Unit | Serialization, timing, backpressure |
 | 5 | `tb_link_rx.sv` | Unit | Deserialization, CDC sync, error detection |
 | 6 | `tb_link_loopback.sv` | Unit | TX→RX round-trip, 1000 random frames |
-| 7 | `tb_market_sim.sv` | Unit | Price evolution, regime switching, round-robin |
-| 8 | `tb_exchange_lite.sv` | Unit | Order matching, fill/reject generation |
-| 9 | `tb_tx_arbiter.sv` | Unit | Priority muxing, handshake correctness |
+| 7 | `tb_market_sim.sv` | Unit | 3-tier noise + OU pull-back price evolution, regime switching, round-robin, backpressure |
+| 7a | `tb_market_noise_gen.sv` | Unit | Global/sector/company LFSR noise tiers, drift saturation, sector population scaling |
+| 8 | `tb_exchange_lite.sv` | Unit | Order matching, fill/reject generation, backpressure, counter_clr |
+| 9 | `tb_tx_arbiter.sv` | Unit | Priority muxing, handshake correctness, 1-cycle bubble |
 | 10 | `tb_msg_demux.sv` | Unit | Frame routing by msg_type |
 | 11 | `tb_quote_book.sv` | Unit | Per-symbol register file updates |
 | 12 | `tb_feature_compute.sv` | Unit | Mid, spread, EMA computation accuracy |
@@ -2978,20 +3039,20 @@ When a test fails, these tools and techniques are available:
 | 15 | `tb_order_manager.sv` | Unit | ORDER frame packing, ID/timestamp assignment |
 | 16 | `tb_position_tracker.sv` | Unit | Position tracking, cash accumulation |
 | 17 | `tb_latency_histogram.sv` | Unit | Bin mapping, min/max/sum/count stats |
-| 18 | `tb_board_a_axi_regs.sv` | Unit | AXI-Lite read/write, pulse generation |
+| 18 | `tb_board_a_axi_regs.sv` | Unit | AXI-Lite windowed read/write (16 symbols), pulse generation, STATUS packing |
 | 19 | `tb_board_b_axi_regs.sv` | Unit | AXI-Lite read/write, histogram readout |
 | 20 | `tb_board_a.sv` | Integration | Full Board A with synthetic orders |
 | 21 | `tb_board_b.sv` | Integration | Full Board B with synthetic quotes |
 | 22 | `tb_system.sv` | Integration | Full system, behavioral link, all regimes |
 | 23 | `tb_system_cdc.sv` | Integration | Full system with 2-cycle CDC delay model |
 
-**Total: 23 testbench files** (19 unit + 4 integration).
+**Total: 24 testbench files** (20 unit + 4 integration).
 
 ---
 
 ## 8. Stretch Goals
 
-The core build delivers a fully functional dual-FPGA trading system with a single mean-reversion strategy, 4 symbols, 4-bit link, and 115200-baud telemetry. The stretch goals below extend the system's capability without requiring architectural changes — every extension was designed into the core from day one (reserved switch pins, parameterized arrays, modular strategy slot). This section covers **only** the algorithm and implementation details not already described elsewhere.
+The core build delivers a fully functional dual-FPGA trading system with a single mean-reversion strategy, 16 symbols (with sector-aware pricing), 4-bit link, and 115200-baud telemetry. The stretch goals below extend the system's capability without requiring architectural changes — every extension was designed into the core from day one (reserved switch pins, parameterized arrays, modular strategy slot). This section covers **only** the algorithm and implementation details not already described elsewhere.
 
 > **Cross-references**: Module definitions → §4.6.6 · Wiring changes → §4.6.8.4 · FSM independence → §4.4.5 · Pin mapping → §4.4.2 · Telemetry fields → §5.3.3 · Acceptance criteria → §7.6 (A13–A15) · Link width scaling → §4.5.4, §4.6.8.3 · Symbol scaling → §4.6.8.2
 
@@ -3168,9 +3229,9 @@ localparam int NUM_SYMBOLS = 8;   // was 4
 ```
 
 **What else changes** (all automatic if coding patterns followed):
-- Board A AXI register map grows: +2 registers per symbol (init_mid, init_spread) → +8 registers for 8 symbols
+- Board A AXI register map already uses windowed addressing for up to 16 symbols (init_mid, init_spread, sector_id, tokens) — no map changes needed for ≤ 16 symbols
 - Board B AXI register map grows: +1 position register per symbol → +4 registers for 8 symbols
-- `config_exchange.py` and `telemetry_server.py` loops extend to cover additional symbols
+- `config_symbols.py` and `telemetry_server.py` loops extend to cover additional symbols
 - Dashboard position bar chart auto-sizes (reads array length from JSON)
 - Total frame rate stays the same — just spread across more symbols (per-symbol rate = total / NUM_SYMBOLS)
 
@@ -3192,7 +3253,7 @@ localparam int LINK_DATA_W = 8;   // was 4
 
 | Step | Core Demo | With Stretch Goals |
 |------|-----------|-------------------|
-| Setup | 4 symbols, 1 strategy | 8 symbols, 3 strategies visible on dashboard |
+| Setup | 16 symbols, 1 strategy | 16 symbols, 3 strategies visible on dashboard |
 | Start CALM | Mean-reversion trades | Mean-reversion selected (auto or manual) |
 | Switch to VOLATILE | Same strategy, wider swings | Operator flips SW to momentum → trades follow trends. Or auto-mode selects momentum itself. |
 | Switch to ADVERSARIAL | Same strategy, many rejects | Auto-mode switches to NN (defensive). NN reduces rejects. |
@@ -3427,29 +3488,29 @@ All three frame types in a single reference, 128 bits each, MSB serialized first
 
 #### D.1 Board A Register Map
 
-Base address: auto-assigned by Vivado block design (read from `.hwh` via PYNQ).
+Base address: auto-assigned by Vivado block design (read from `.hwh` via PYNQ). Address space: 8-bit (256 bytes).
+
+The register map uses **windowed addressing** to support up to `NUM_SYMBOLS=16` symbols. Per-symbol arrays are laid out at fixed base offsets with `+4×i` indexing.
 
 | Offset | Name | Width | R/W | Default | Description |
 |--------|------|-------|-----|---------|-------------|
-| `0x00` | `CTRL` | 32 | W | 0 | Bit 0: start pulse, Bit 1: reset pulse. Writing generates 1-cycle pulses. |
-| `0x04` | `QUOTE_INTERVAL` | 32 | R/W | 1000 | Clock cycles between consecutive quote rounds (per-symbol). Lower = faster quotes. |
-| `0x08` | `LFSR_SEED` | 32 | R/W | `0xDEADBEEF` | Initial seed for the 32-bit Galois LFSR. Loaded into LFSR on IDLE→RUNNING transition. |
-| `0x0C` | `REGIME` | 32 | R/W | 0 | Bits 1:0: regime (00=CALM, 01=VOLATILE, 10=BURST, 11=ADVERSARIAL). Effective when `sw_override` (SW[2]) is low. |
-| `0x10` | `SYM0_INIT_MID` | 32 | R/W | `0x0096_4000` | Symbol 0 initial mid price (Q16.16). $150.25 |
-| `0x14` | `SYM0_INIT_SPREAD` | 32 | R/W | `0x0000_2000` | Symbol 0 initial spread (Q16.16). $0.125 |
-| `0x18` | `SYM1_INIT_MID` | 32 | R/W | `0x00C8_0000` | Symbol 1 initial mid price. $200.00 |
-| `0x1C` | `SYM1_INIT_SPREAD` | 32 | R/W | `0x0000_4000` | Symbol 1 initial spread. $0.25 |
-| `0x20` | `SYM2_INIT_MID` | 32 | R/W | `0x0032_0000` | Symbol 2 initial mid price. $50.00 |
-| `0x24` | `SYM2_INIT_SPREAD` | 32 | R/W | `0x0000_1000` | Symbol 2 initial spread. $0.0625 |
-| `0x28` | `SYM3_INIT_MID` | 32 | R/W | `0x004B_0000` | Symbol 3 initial mid price. $75.00 |
-| `0x2C` | `SYM3_INIT_SPREAD` | 32 | R/W | `0x0000_3000` | Symbol 3 initial spread. $0.1875 |
-| `0x40` | `STATUS` | 32 | R | — | Bit 0: `running`, Bit 1: `link_up`, Bits 3:2: `active_regime` |
-| `0x44` | `QUOTES_SENT` | 32 | R | 0 | Monotonic counter: total QUOTE frames generated |
-| `0x48` | `ORDERS_RCVD` | 32 | R | 0 | Monotonic counter: total ORDER frames received from Board B |
-| `0x4C` | `FILLS_SENT` | 32 | R | 0 | Monotonic counter: total FILL frames sent (includes rejects) |
-| `0x50` | `REJECTS_SENT` | 32 | R | 0 | Monotonic counter: orders that failed price match |
-| `0x54` | `LINK_ERRORS` | 32 | R | 0 | Link RX framing error count |
-| `0x58` | `FIFO_FILL` | 32 | R | 0 | Current quote FIFO fill level (0–64) |
+| `0x00` | `CTRL` | 32 | W | 0 | Bit 0: `start_pulse`, Bit 1: `reset_pulse`. Writing generates 1-cycle pulses. |
+| `0x04` | `QUOTE_INTERVAL` | 32 | R/W | 1000 | Clock cycles between consecutive quote rounds (per-symbol). 0 = every cycle (fastest). |
+| `0x08` | `LFSR_SEED` | 32 | R/W | `0xDEADBEEF` | Initial seed for the noise generator LFSRs. Loaded on IDLE→RUNNING transition. Zero seed is remapped to 1 internally. |
+| `0x0C` | `REGIME` | 32 | R/W | 0 | Bits [1:0]: regime (00=CALM, 01=VOLATILE, 10=BURST, 11=ADVERSARIAL). Effective only when `sw_override` (SW[2]) is low. |
+| `0x10`–`0x4F` | `INIT_MID[i]` | 32 | R/W | 0 | Per-symbol initial mid price (Q16.16). `offset = 0x10 + 4×i` for `i = 0..15`. Written by PS via `config_symbols.py`. |
+| `0x50`–`0x8F` | `INIT_SPREAD[i]` | 32 | R/W | 1 | Per-symbol initial spread (Q16.16). `offset = 0x50 + 4×i`. Zero spread is clamped to 1 internally. |
+| `0x90`–`0xCF` | `SECTOR_ID[i]` | 32 | R/W | 0 | Per-symbol sector assignment. `offset = 0x90 + 4×i`. Only bits `[SECTOR_ID_W-1:0]` are used (3 bits for 8 sectors). |
+| `0xD0`–`0xEF` | `TOKEN[j]` | 32 | R/W | identity | Packed company tokens: two 16-bit tokens per 32-bit word. `offset = 0xD0 + 4×j` stores `{token[2j+1], token[2j]}`. 8 words cover 16 symbols. Default: `token[i] = i`. |
+| `0xF0` | `ACTIVE_SYM_COUNT` | 32 | R/W | NUM_SYM | Bits [7:0]: number of active symbols (1–16). 0 is clamped to 1; values > NUM_SYM are clamped to NUM_SYM. Controls how many symbols participate in round-robin quoting and noise generation. |
+| `0xF4` | `STATUS` | 32 | R | — | Packed read-only status: bit [0]=`running`, [1]=`link_up`, [3:2]=`active_regime`, [8:4]=reserved (zero), [15:9]=`fifo_fill[6:0]` (quote FIFO level, 0–64), [31:16]=reserved. |
+| `0xF8` | `QUOTES_SENT` | 32 | R | 0 | Monotonic counter: total QUOTE frames generated by `market_sim`. |
+| `0xFC` | `ORDERS_RCVD` | 32 | R | 0 | Monotonic counter: total ORDER frames received by `exchange_lite`. |
+
+**Implementation notes**:
+- `fills_sent`, `rejects_sent`, and `link_errors` are wired as inputs to the AXI register module but **do not have dedicated read-back addresses** in the current implementation. They are available for debug via ILA probes. A future revision could map them to unused addresses.
+- `fifo_fill` is packed inside the `STATUS` register at bits [15:9] rather than having a separate address.
+- The AXI handshake uses `write_fire = awvalid && wvalid && !bvalid` (no `wstrb` byte-lane decoding — full-word writes only). Read: `read_fire = arvalid && !rvalid`.
 
 #### D.2 Board B Register Map
 
@@ -3521,46 +3582,76 @@ This produces a new 32-bit pseudo-random value every cycle. The sequence is full
 
 #### E.2 Price Evolution Algorithm
 
-Each quote cycle, the market simulator updates one symbol's prices:
+Each quote cycle, `market_sim` updates one symbol's prices using a **3-tier correlated noise model** with an **Ornstein-Uhlenbeck pull-back force**. The algorithm below describes exactly what happens in the RTL on each `do_quote` tick:
 
 ```
-1. Extract 5-bit random step from LFSR
-   raw_step = lfsr_out[4:0]                         // 0 to 31
+─── Phase 1: Noise Generation (in market_noise_gen) ───
 
-2. Convert to signed step centered at zero
-   signed_step = raw_step - 16                       // -16 to +15
+1. Global noise (1 LFSR, refreshed every tick):
+   g_raw = {0, global_rand[5:0]} - 32       // 6-bit unsigned → signed, range [-31..+31]
+   if (g_raw == -32) g_raw = 0              // clamp for zero-mean symmetry
+   global_noise = g_raw <<< 6               // scale up (Q16.16)
 
-3. Scale by regime-dependent step size
-   price_delta = signed_step × step_size[regime]     // Q16.16
+2. Sector drift (1 LFSR per sector, accumulated):
+   sec_raw = {0, sector_rand[k][17:12]} - 32
+   if (sec_raw == -32) sec_raw = 0
+   sec_base_delta = sec_raw <<< 2
+   sec_scaled = sec_base_delta × sector_pop[k]  // more symbols = faster sector drift
+   sec_drift[k] = saturate(sec_drift[k] + sec_scaled, ±DRIFT_SAT_Q16)
 
-4. Update mid price
-   mid_price[symbol] += price_delta                  // Q16.16, wrapping
+3. Company drift (1 LFSR per symbol, accumulated):
+   sym_raw = {0, sym_rand[s][11:6]} - 32
+   if (sym_raw == -32) sym_raw = 0
+   sym_delta = sym_raw <<< 3
+   sym_drift[s] = saturate(sym_drift[s] + sym_delta, ±DRIFT_SAT_Q16)
 
-5. Clamp mid price to valid range
-   if mid_price[symbol] < MIN_PRICE:
-       mid_price[symbol] = MIN_PRICE                 // e.g., $1.00
-   if mid_price[symbol] > MAX_PRICE:
-       mid_price[symbol] = MAX_PRICE                 // e.g., $10,000
+4. Combine all three tiers:
+   step_out[s] = global_noise + sec_drift[sector_id[s]] + sym_drift[s]
 
-6. Compute bid and ask from mid + regime-dependent spread
+─── Phase 2: Price Update (in market_sim) ───
+
+5. Scale noise by regime step size:
+   delta = (step_out[s] × step_size[regime]) >>> 16    // Q32.32 → Q16.16
+
+6. Compute Ornstein-Uhlenbeck pull-back force:
+   displacement = init_mid[s] - mid_price[s]           // signed distance from initial
+   pull_back = displacement >>> PULLBACK_SHIFT          // spring constant = 1/32
+
+7. Update mid price:
+   new_mid = mid_price[s] + delta + pull_back           // noise + restoring force
+   new_mid = clamp(new_mid, MIN_PRICE, MAX_PRICE)       // $1.00 to $10,000 (Q16.16)
+
+8. Compute bid and ask from mid + regime-dependent spread:
    spread = base_spread[regime]
-   bid_price[symbol] = mid_price[symbol] - (spread >> 1)
-   ask_price[symbol] = mid_price[symbol] + (spread >> 1)
+   bid = clamp(new_mid - spread/2, MIN_PRICE, MAX_PRICE)
+   ask = clamp(new_mid + spread/2, MIN_PRICE, MAX_PRICE)
+   bid_size = 1000, ask_size = 1000                      // fixed per quote
 
-7. Pack QUOTE frame and push to FIFO
-   frame = {MSG_QUOTE, symbol_id, regime, bid_price, ask_price, bid_size, ask_size, seq_num++}
+9. Pack QUOTE frame and push to FIFO:
+   frame = {MSG_QUOTE, symbol_id, regime, 2'b0, bid, ask, bid_size, ask_size, seq_num}
+   seq_num[s]++
+   sym_ptr = (sym_ptr + 1) % active_sym_count            // round-robin
 ```
+
+**Why this model**: The pull-back force in step 6 creates an Ornstein-Uhlenbeck process — prices oscillate around their initial values rather than drifting permanently. This produces genuine mean-reverting price dynamics that are exploitable by the Board B trading strategy. The drift saturation in steps 2–3 bounds the maximum accumulated noise, keeping price oscillations within a predictable band.
+
+**Key constants** (from `hft_pkg.sv`):
+- `MARKET_NOISE_DRIFT_SAT_Q16 = 0x0000_1000`: Maximum drift accumulator value (small → fast saturation → bounded amplitude)
+- `PULLBACK_SHIFT = 5`: Spring constant = displacement / 32 per tick
+- `MIN_PRICE = 0x0001_0000` ($1.00 Q16.16), `MAX_PRICE = 0x2710_0000` ($10,000 Q16.16)
 
 #### E.3 Regime Parameters
 
-| Regime | `step_size` (Q16.16) | `base_spread` (Q16.16) | `quote_interval` (cycles) | Behavior |
-|--------|---------------------|------------------------|---------------------------|----------|
-| CALM | `0x0000_0100` ($0.004) | `0x0000_2000` ($0.125) | 1000 (100K qps) | Small price steps, tight spread. Mean-reversion profitable. |
-| VOLATILE | `0x0000_1000` ($0.063) | `0x0000_8000` ($0.50) | 1000 (100K qps) | Large price steps, wide spread. Momentum may outperform. |
-| BURST | `0x0000_0100` ($0.004) | `0x0000_2000` ($0.125) | 100 (1M qps) | Same steps as CALM, but 10× faster. Stress-tests throughput. |
-| ADVERSARIAL | `0x0000_4000` ($0.25) | `0x0001_0000` ($1.00) | 500 (200K qps) | Very large steps + very wide spread. Many risk rejects. PnL may hit max loss → HALTED. |
+These values are **hardcoded** in the `always_comb` regime-select block of `market_sim.sv`. They are not writable via AXI-Lite registers (the regime only selects which hardcoded pair is active). `quote_interval` is separately configurable via AXI-Lite.
 
-All parameters are configurable via AXI-Lite registers and can be overridden at runtime. The regime is selected by `active_regime` (§4.4.4) — either from switches or PS register.
+| Regime | `step_size` (Q16.16) | `base_spread` (Q16.16) | Behavior |
+|--------|---------------------|------------------------|----------|
+| CALM | `0x0000_0400` ($0.016) | `0x0000_1000` ($0.0625) | Small noise steps, tight spread. Gentle oscillations around init_mid. Mean-reversion consistently profitable. |
+| VOLATILE | `0x0000_8000` ($0.50) | `0x0000_4000` ($0.25) | Large noise steps, medium spread. Rapid price swings with strong pull-back. Larger deviations → more trading opportunities. |
+| BURST | `0x0000_0400` ($0.016) | `0x0000_1000` ($0.0625) | Same noise as CALM — differentiated by `quote_interval` (set to a lower value by PS for higher throughput). Stress-tests the link and pipeline. |
+| ADVERSARIAL | `0x0001_0000` ($1.00) | `0x0000_8000` ($0.50) | Very large noise steps, wide spread. Prices move aggressively but pull-back keeps them bounded. High risk-reject rate; may trigger `risk_halt`. |
+
+The regime is selected by `active_regime` (§4.4.4) — either from switches or PS register. `quote_interval` is set independently via AXI-Lite register `QUOTE_INTERVAL` (offset `0x04`).
 
 ### Appendix F — Trading Strategy Reference (Board B Modes)
 

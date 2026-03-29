@@ -66,7 +66,10 @@ module market_noise_gen
     endfunction
 
     function automatic logic signed [31:0] sector_base_delta(input logic [31:0] r);
-        return (($signed({1'b0, r[17:12]}) - 32'sd32) <<< 2);
+        logic signed [31:0] raw;
+        raw = $signed({1'b0, r[17:12]}) - 32'sd32;
+        if (raw == -32'sd32) raw = 32'sd0;  // clamp to symmetric range [-31..+31], mean=0
+        return (raw <<< 2);
     endfunction
 
     function automatic logic signed [31:0] sector_scaled_delta(
@@ -83,7 +86,10 @@ module market_noise_gen
     endfunction
 
     function automatic logic signed [31:0] company_tick_delta(input logic [31:0] r);
-        return (($signed({1'b0, r[11:6]}) - 32'sd32) <<< 3);
+        logic signed [31:0] raw;
+        raw = $signed({1'b0, r[11:6]}) - 32'sd32;
+        if (raw == -32'sd32) raw = 32'sd0;  // clamp to symmetric range [-31..+31], mean=0
+        return (raw <<< 3);
     endfunction
 
     // Defensive clamp for standalone use (integration already clamps upstream).
@@ -145,7 +151,10 @@ module market_noise_gen
     );
 
     always_comb begin
-        global_noise_q16_16 = (($signed({1'b0, global_rand[5:0]}) - 32'sd32) <<< 6);
+        logic signed [31:0] g_raw;
+        g_raw = $signed({1'b0, global_rand[5:0]}) - 32'sd32;
+        if (g_raw == -32'sd32) g_raw = 32'sd0;  // clamp to symmetric range [-31..+31], mean=0
+        global_noise_q16_16 = (g_raw <<< 6);
     end
 
     integer kk;

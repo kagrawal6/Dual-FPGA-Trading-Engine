@@ -15,6 +15,14 @@
 // only emitted when the consumer is already ready — quote_valid is a 1-cycle
 // pulse (not a held-valid skid). Intentional for this FIFO-style sink.
 //
+// Mean-reversion pull-back (Ornstein-Uhlenbeck restoring force):
+//   displacement = init_mid[s] - mid_price[s]
+//   pullback     = displacement >>> PULLBACK_SHIFT
+//   new_mid      = old_mid + noise_delta + pullback
+// This creates bounded price oscillations around init_mid, ensuring the
+// market simulator produces mean-reverting price dynamics suitable for the
+// Board B mean-reversion trading strategy.
+//
 // Spread model: each update sets spread from base_spread_q16_16 (regime only).
 // init_spread[] applies on async reset or lfsr_load only (no sector/company
 // spread dynamics).
@@ -71,20 +79,20 @@ module market_sim
     always_comb begin
         unique case (active_regime)
             REGIME_CALM: begin
-                step_size_q16_16   = 32'h0000_0100;
-                base_spread_q16_16 = 32'h0000_2000;
+                step_size_q16_16   = 32'h0000_0400;
+                base_spread_q16_16 = 32'h0000_1000;
             end
             REGIME_VOLATILE: begin
-                step_size_q16_16   = 32'h0000_1000;
-                base_spread_q16_16 = 32'h0000_8000;
+                step_size_q16_16   = 32'h0000_8000;
+                base_spread_q16_16 = 32'h0000_4000;
             end
             REGIME_BURST: begin
-                step_size_q16_16   = 32'h0000_0100;
-                base_spread_q16_16 = 32'h0000_2000;
+                step_size_q16_16   = 32'h0000_0400;
+                base_spread_q16_16 = 32'h0000_1000;
             end
             default: begin // REGIME_ADVERSARIAL
-                step_size_q16_16   = 32'h0000_4000;
-                base_spread_q16_16 = 32'h0001_0000;
+                step_size_q16_16   = 32'h0001_0000;
+                base_spread_q16_16 = 32'h0000_8000;
             end
         endcase
     end
@@ -144,6 +152,8 @@ module market_sim
     logic signed [31:0] mid_s_c;
     logic signed [31:0] new_mid_s_c;
     logic [31:0]        new_mid_u_c;
+    sprice_t            displacement_c;  // init_mid - current mid (signed)
+    sprice_t            pullback_c;      // restoring force toward init_mid
     price_t             new_spread_q_c;
     sprice_t            spr_h_s_c;
     sprice_t            bid_s2_c, ask_s2_c;
@@ -157,6 +167,8 @@ module market_sim
         mid_s_c        = 32'sd0;
         new_mid_s_c    = 32'sd0;
         new_mid_u_c    = 32'd0;
+        displacement_c = 32'sd0;
+        pullback_c     = 32'sd0;
         new_spread_q_c = 32'd0;
         spr_h_s_c      = 32'sd0;
         bid_s2_c       = 32'sd0;
@@ -174,7 +186,12 @@ module market_sim
             delta_scaled_c = price_delta_s32_t'(delta_mul_c >>> 16);
 
             mid_s_c         = $signed(mid_price[sym_ptr]);
-            new_mid_s_c     = mid_s_c + delta_scaled_c;
+
+            // Ornstein-Uhlenbeck pull-back: restoring force toward initial price
+            displacement_c = $signed(init_mid[sym_ptr]) - $signed(mid_price[sym_ptr]);
+            pullback_c     = displacement_c >>> PULLBACK_SHIFT;
+
+            new_mid_s_c     = mid_s_c + delta_scaled_c + pullback_c;
 
             if (new_mid_s_c < MIN_PRICE_Q16_16) new_mid_u_c = price_t'(MIN_PRICE_Q16_16);
             else if (new_mid_s_c > MAX_PRICE_Q16_16) new_mid_u_c = price_t'(MAX_PRICE_Q16_16);

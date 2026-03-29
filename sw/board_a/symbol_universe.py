@@ -27,29 +27,91 @@ from typing import Dict, List
 # https://github.com/datasets/s-and-p-500-companies
 SP500_CSV_URL = "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/master/data/constituents.csv"
 
-# Deterministic sector baseline initial prices.
-SECTOR_DEFAULT_INIT_PRICE = {
-    "Communication Services": 140.0,
-    "Consumer Discretionary": 180.0,
-    "Consumer Staples": 90.0,
-    "Energy": 120.0,
-    "Financials": 130.0,
-    "Health Care": 150.0,
-    "Industrials": 110.0,
-    "Information Technology": 220.0,
-    "Materials": 95.0,
-    "Real Estate": 85.0,
-    "Utilities": 70.0,
+# ── RTL-compatible 3-bit sector_id mapping (0..7) ──────────────
+# The RTL uses SECTOR_ID_W = $clog2(NUM_SECTORS) = 3 bits, so we
+# can only have 8 distinct sector_ids. The 11 GICS sectors are
+# merged into 8 buckets that match the golden model and RTL:
+#   0 = Tech,  1 = Energy,  2 = Health,  3 = Cons.Disc,
+#   4 = Financ. (+Real Estate),  5 = Indust. (+Materials),
+#   6 = Staples (+Utilities),  7 = Comms
+GICS_TO_SECTOR_ID: Dict[str, int] = {
+    "Information Technology":  0,
+    "Energy":                  1,
+    "Health Care":             2,
+    "Consumer Discretionary":  3,
+    "Financials":              4,
+    "Real Estate":             4,  # merged with Financials
+    "Industrials":             5,
+    "Materials":               5,  # merged with Industrials
+    "Consumer Staples":        6,
+    "Utilities":               6,  # merged with Consumer Staples
+    "Communication Services":  7,
 }
 
-# Offline fallback so scripts still work without network.
+# Default init price range per sector (low, high) for hash-based variety.
+SECTOR_PRICE_RANGE: Dict[int, tuple] = {
+    0: (120.0, 500.0),   # Tech
+    1: ( 60.0, 200.0),   # Energy
+    2: (100.0, 400.0),   # Health
+    3: (100.0, 350.0),   # Cons.Disc
+    4: ( 80.0, 300.0),   # Financials
+    5: ( 70.0, 250.0),   # Industrials
+    6: ( 40.0, 200.0),   # Staples
+    7: (100.0, 300.0),   # Comms
+}
+
+# Per-company price and spread overrides for the 16 golden model stocks.
+# These match golden_model/common.py SYMBOL_UNIVERSE exactly.
+_GOLDEN_OVERRIDES: Dict[str, Dict[str, float]] = {
+    "AAPL":  {"init_price": 180.00, "init_spread": 0.10},
+    "MSFT":  {"init_price": 420.00, "init_spread": 0.15},
+    "NVDA":  {"init_price": 900.00, "init_spread": 0.25},
+    "XOM":   {"init_price": 115.00, "init_spread": 0.08},
+    "CVX":   {"init_price": 160.00, "init_spread": 0.10},
+    "JNJ":   {"init_price": 155.00, "init_spread": 0.08},
+    "UNH":   {"init_price": 520.00, "init_spread": 0.20},
+    "AMZN":  {"init_price": 185.00, "init_spread": 0.10},
+    "TSLA":  {"init_price": 250.00, "init_spread": 0.30},
+    "JPM":   {"init_price": 200.00, "init_spread": 0.10},
+    "GS":    {"init_price": 480.00, "init_spread": 0.20},
+    "CAT":   {"init_price": 360.00, "init_spread": 0.15},
+    "HON":   {"init_price": 200.00, "init_spread": 0.10},
+    "PG":    {"init_price": 165.00, "init_spread": 0.06},
+    "KO":    {"init_price":  60.00, "init_spread": 0.04},
+    "GOOGL": {"init_price": 175.00, "init_spread": 0.10},
+}
+
+
+def _ticker_hash_price(ticker: str, sector_id: int) -> float:
+    """Generate a deterministic but varied init price from the ticker string."""
+    lo, hi = SECTOR_PRICE_RANGE.get(sector_id, (80.0, 300.0))
+    h = hash(ticker) & 0xFFFF
+    return round(lo + (hi - lo) * (h / 0xFFFF), 2)
+
+
+def _ticker_hash_spread(price: float) -> float:
+    """Rough init_spread proportional to price (0.03%–0.07% of price)."""
+    return round(max(0.02, price * 0.0005), 2)
+
+
+# Offline fallback — all 16 golden model stocks so demos work without network.
 _FALLBACK_DB: Dict[str, Dict[str, object]] = {
-    "AAPL": {"sector": "Information Technology", "sector_id": 0, "init_price": 180.00},
-    "MSFT": {"sector": "Information Technology", "sector_id": 0, "init_price": 420.00},
-    "NVDA": {"sector": "Information Technology", "sector_id": 0, "init_price": 900.00},
-    "XOM": {"sector": "Energy", "sector_id": 1, "init_price": 115.00},
-    "CVX": {"sector": "Energy", "sector_id": 1, "init_price": 160.00},
-    "JPM": {"sector": "Financials", "sector_id": 2, "init_price": 200.00},
+    "AAPL":  {"sector": "Information Technology",  "sector_id": 0, "init_price": 180.00, "init_spread": 0.10},
+    "MSFT":  {"sector": "Information Technology",  "sector_id": 0, "init_price": 420.00, "init_spread": 0.15},
+    "NVDA":  {"sector": "Information Technology",  "sector_id": 0, "init_price": 900.00, "init_spread": 0.25},
+    "XOM":   {"sector": "Energy",                  "sector_id": 1, "init_price": 115.00, "init_spread": 0.08},
+    "CVX":   {"sector": "Energy",                  "sector_id": 1, "init_price": 160.00, "init_spread": 0.10},
+    "JNJ":   {"sector": "Health Care",             "sector_id": 2, "init_price": 155.00, "init_spread": 0.08},
+    "UNH":   {"sector": "Health Care",             "sector_id": 2, "init_price": 520.00, "init_spread": 0.20},
+    "AMZN":  {"sector": "Consumer Discretionary",  "sector_id": 3, "init_price": 185.00, "init_spread": 0.10},
+    "TSLA":  {"sector": "Consumer Discretionary",  "sector_id": 3, "init_price": 250.00, "init_spread": 0.30},
+    "JPM":   {"sector": "Financials",              "sector_id": 4, "init_price": 200.00, "init_spread": 0.10},
+    "GS":    {"sector": "Financials",              "sector_id": 4, "init_price": 480.00, "init_spread": 0.20},
+    "CAT":   {"sector": "Industrials",             "sector_id": 5, "init_price": 360.00, "init_spread": 0.15},
+    "HON":   {"sector": "Industrials",             "sector_id": 5, "init_price": 200.00, "init_spread": 0.10},
+    "PG":    {"sector": "Consumer Staples",        "sector_id": 6, "init_price": 165.00, "init_spread": 0.06},
+    "KO":    {"sector": "Consumer Staples",        "sector_id": 6, "init_price":  60.00, "init_spread": 0.04},
+    "GOOGL": {"sector": "Communication Services",  "sector_id": 7, "init_price": 175.00, "init_spread": 0.10},
 }
 
 
@@ -70,22 +132,29 @@ def _download_sp500_rows() -> List[Dict[str, str]]:
 
 
 def _build_symbol_db_from_rows(rows: List[Dict[str, str]]) -> Dict[str, Dict[str, object]]:
-    """Build SYMBOL_DB from CSV rows (Symbol + GICS Sector)."""
-    sectors = sorted({r["GICS Sector"].strip() for r in rows if r.get("GICS Sector")})
-    sector_to_id = {sector: idx for idx, sector in enumerate(sectors)}
-
+    """Build SYMBOL_DB from CSV rows, using the 8-sector RTL mapping."""
     out: Dict[str, Dict[str, object]] = {}
     for row in rows:
         symbol_raw = row.get("Symbol", "")
-        sector = row.get("GICS Sector", "").strip()
-        if not symbol_raw or not sector:
+        gics_sector = row.get("GICS Sector", "").strip()
+        if not symbol_raw or not gics_sector:
             continue
         symbol = normalize_symbol(symbol_raw.replace(".", "-"))
-        init_price = float(SECTOR_DEFAULT_INIT_PRICE.get(sector, 100.0))
+        sector_id = GICS_TO_SECTOR_ID.get(gics_sector, 5)  # default to Industrials
+
+        override = _GOLDEN_OVERRIDES.get(symbol)
+        if override:
+            init_price = override["init_price"]
+            init_spread = override["init_spread"]
+        else:
+            init_price = _ticker_hash_price(symbol, sector_id)
+            init_spread = _ticker_hash_spread(init_price)
+
         out[symbol] = {
-            "sector": sector,
-            "sector_id": sector_to_id[sector],
+            "sector": gics_sector,
+            "sector_id": sector_id,
             "init_price": init_price,
+            "init_spread": init_spread,
             "company_name": row.get("Security", "").strip(),
         }
 

@@ -44,24 +44,24 @@ cd golden_model
 python run.py
 ```
 
-Press Enter to advance the simulation. Type commands to control it:
+The dashboard auto-refreshes continuously. Use single-key controls:
 
-```
-regime 0        Switch to CALM market (small price moves)
-regime 1        Switch to VOLATILE market
-regime 3        Switch to ADVERSARIAL market (stress test)
-threshold 0.5   Set trading threshold to $0.50
-qty 200         Set order quantity to 200 shares
-stop            Pause trading
-start           Resume trading
-reset           Reset everything
-quit            Exit
-```
+| Key | Action |
+|-----|--------|
+| `c` | Switch to **CALM** market |
+| `v` | Switch to **VOLATILE** market |
+| `b` | Switch to **BURST** market |
+| `a` | Switch to **ADVERSARIAL** market (stress test) |
+| `+` | Raise trading threshold by $0.10 |
+| `-` | Lower trading threshold by $0.10 |
+| `s` | Toggle start / stop trading |
+| `r` | Reset everything |
+| `q` | Quit |
 
 ### Command-line options
 
 ```
-python run.py --regime 3 --threshold 0.03 --sym 4
+python run.py --regime 3 --threshold 0.30 --sym 4
 ```
 
 Use `--sym 4` to run with fewer symbols (first 4 from the universe).

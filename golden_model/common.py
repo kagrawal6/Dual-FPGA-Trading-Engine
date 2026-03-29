@@ -37,7 +37,8 @@ LFSR_TAPS = 0x00400007   # x^32 + x^22 + x^2 + x + 1
 GOLDEN          = 0x9E37_79B9
 GLOBAL_SEED_XOR = 0xA11F_E511
 SECTOR_SEED_XOR = 0xC13F_A9A9
-DRIFT_SATURATION = 0x0200_0000  # max drift accumulator value (Q16.16)
+DRIFT_SATURATION = 0x0000_1000  # max drift accumulator value (small for fast saturation)
+PULLBACK_SHIFT   = 5            # mean-reversion spring: pull_back = (init - current) >> 5
 
 # Latency histogram parameters
 HIST_BINS = 16
@@ -76,10 +77,10 @@ SIDE_SELL = 1
 # step_size: multiplier for noise → price delta (Q16.16)
 # base_spread: bid-ask spread width (Q16.16)
 REGIME_PARAMS = {
-    Regime.CALM:        {"step_size": 0x0000_0100, "base_spread": 0x0000_2000},
-    Regime.VOLATILE:    {"step_size": 0x0000_1000, "base_spread": 0x0000_8000},
-    Regime.BURST:       {"step_size": 0x0000_0100, "base_spread": 0x0000_2000},
-    Regime.ADVERSARIAL: {"step_size": 0x0000_4000, "base_spread": 0x0001_0000},
+    Regime.CALM:        {"step_size": 0x0000_0400, "base_spread": 0x0000_1000},
+    Regime.VOLATILE:    {"step_size": 0x0000_8000, "base_spread": 0x0000_4000},
+    Regime.BURST:       {"step_size": 0x0000_0400, "base_spread": 0x0000_1000},
+    Regime.ADVERSARIAL: {"step_size": 0x0001_0000, "base_spread": 0x0000_8000},
 }
 
 
