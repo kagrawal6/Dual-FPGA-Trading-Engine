@@ -1,6 +1,6 @@
-# Adding Complexity — PDF Extract & Project Notes
+# Adding Complexity — Project Notes
 
-**Source:** `Adding_complexity.pdf`
+**Source:** `Adding_complexity.pdf` (design notes this document was derived from; implementation status is summarized in *Implemented Changes In This Repo* below.)
 
 Best user-friendly flow
 
@@ -77,6 +77,7 @@ sw/
 board_a/
 config_exchange.py
 config_symbols.py
+symbol_config_panel.py
 symbol_universe.py
 board_b/
 telemetry_server.py
@@ -84,7 +85,7 @@ dashboard/
 dashboard.py
 
 So:
-1. 2 new software files
+1. New software files under `sw/board_a/` (universe + loader; optional Jupyter panel)
 2. Hardware only needs small modifications to accept sector metadata cleanly
 
 What symbol_universe.py should contain
@@ -211,7 +212,7 @@ That is how software tells hardware what each selected company belongs to.
 
 -- 7 of 13 --
 
-Best user-friendly model
+Best user-friendly model (original PDF)
 
 Option A: command-line
 python config_symbols.py --symbols AAPL MSFT NVDA XOM CVX
@@ -232,6 +233,12 @@ Later, if you want it slick:
 ● click “load symbols”
 ● script updates config
 That is very demo-friendly, but I would start with command-line or file input first.
+
+**Current repo (beyond A/B):**
+
+- **Terminal interactive:** `python3 config_symbols.py --interactive` — prompts on stdin (SSH/serial from a laptop). Use `--write-sector-id`, `--write-token-id`, and `--start` when your bitstream supports them (same as non-interactive CLI).
+- **Jupyter / ipywidgets:** `sw/board_a/symbol_config_panel.py` — call `show_symbol_config_panel()` from a notebook for a small UI (paste tickers or random sample, checkboxes, **Apply to FPGA**). Same MMIO path as `config_symbols.py`; typical on PYNQ with a browser.
+- **Shared implementation:** `config_symbols.py` exposes `parse_ticker_paste`, `prepare_loaded_symbols`, `print_configuration_summary`, and `write_mmio_board_config` so CLI, `--interactive`, and the Jupyter panel stay aligned.
 
 -- 8 of 13 --
 
@@ -317,7 +324,8 @@ The clean implementation is:
 What we added:
 Software:
 ● symbol_universe.py -> defines companies + sectors
-● config_symbols.py -> user selects companies
+● config_symbols.py -> user selects companies (CLI, `--interactive`, shared MMIO helpers)
+● symbol_config_panel.py -> optional Jupyter/ipywidgets panel calling the same MMIO path
 
 Hardware:
 ● per-symbol sector_id
@@ -367,7 +375,10 @@ This section captures what is actually implemented now, why it was done, and wha
 - Files:
   - `sw/board_a/symbol_universe.py`
   - `sw/board_a/config_symbols.py`
-- Supports ticker/token/file/random selection workflows.
+  - `sw/board_a/symbol_config_panel.py` (Jupyter / ipywidgets UI; optional)
+- Supports ticker/token/file/random selection workflows (CLI flags on `config_symbols.py`).
+- **Terminal interactive:** `--interactive` on `config_symbols.py` for prompt-driven selection over SSH/serial.
+- **Jupyter:** `show_symbol_config_panel()` for a browser-based panel (paste tickers or random sample); uses the same helpers as the CLI (`prepare_loaded_symbols`, `write_mmio_board_config`, etc.).
 - Supports stable per-company tokens.
 - Programs symbol metadata via AXI map:
   - init mid/spread

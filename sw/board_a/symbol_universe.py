@@ -18,6 +18,8 @@ from __future__ import annotations
 import csv
 import io
 import urllib.request
+import re
+from collections import defaultdict
 from typing import Dict, List
 
 
@@ -111,10 +113,13 @@ def _build_symbol_db() -> Dict[str, Dict[str, object]]:
 # ADDITION: full S&P500-aware database used by config scripts.
 SYMBOL_DB: Dict[str, Dict[str, object]] = _build_symbol_db()
 
-# ADDITION: stable global token table (0..N-1) built from sorted tickers.
+# One canonical ordering: alphabetical ticker = sheet row order for user picks (#N) and company_token.
+ORDERED_TICKERS: List[str] = sorted(SYMBOL_DB.keys())
+
+# ADDITION: stable global token table (0..N-1) aligned with ORDERED_TICKERS.
 # This gives users a persistent numeric input form in addition to symbols.
 COMPANY_TOKEN_BY_TICKER: Dict[str, int] = {
-    ticker: idx for idx, ticker in enumerate(sorted(SYMBOL_DB.keys()))
+    ticker: idx for idx, ticker in enumerate(ORDERED_TICKERS)
 }
 TICKER_BY_COMPANY_TOKEN: Dict[int, str] = {
     token: ticker for ticker, token in COMPANY_TOKEN_BY_TICKER.items()
@@ -138,6 +143,122 @@ def ticker_for_token(token: int) -> str:
     if token not in TICKER_BY_COMPANY_TOKEN:
         raise ValueError(f"Unknown token: {token}")
     return TICKER_BY_COMPANY_TOKEN[token]
+
+
+def catalog_row_to_ticker(one_based_row: int) -> str:
+    """Map printed catalog row (1..N) to ticker; same order as ORDERED_TICKERS / company_token."""
+    if one_based_row < 1 or one_based_row > len(ORDERED_TICKERS):
+        raise ValueError(f"Catalog row must be 1..{len(ORDERED_TICKERS)}, got {one_based_row}")
+    return ORDERED_TICKERS[one_based_row - 1]
+
+
+def resolve_user_company_pick(raw: str) -> str:
+    """
+    Resolve one user token to a normalized ticker.
+
+    Accepts:
+    - Ticker symbol, e.g. AAPL, brk-b
+    - Catalog row: 42 or #42 (1-based index in ORDERED_TICKERS — alphabetical list)
+
+    Row numbers match ``universe_catalog.txt`` and printed excerpts.
+    """
+    s = raw.strip()
+    if not s:
+        raise ValueError("empty pick")
+    sym_try = normalize_symbol(s)
+    if sym_try in SYMBOL_DB:
+        return sym_try
+    num_part = s[1:].strip() if s.startswith("#") else s
+    if num_part.isdigit():
+        n = int(num_part)
+        return catalog_row_to_ticker(n)
+    raise ValueError(f"Unknown company {raw!r}: not a ticker and not a catalog row 1..{len(ORDERED_TICKERS)}")
+
+
+def write_universe_catalog(path: str = "universe_catalog.txt") -> str:
+    """
+    Write full numbered list: row, ticker, company name (when known).
+    Same row numbers as resolve_user_company_pick (#N).
+    """
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("Row   Ticker   Company\n")
+        for i, t in enumerate(ORDERED_TICKERS, start=1):
+            name = str(SYMBOL_DB[t].get("company_name", t))
+            f.write(f"{i:5d}  {t:6s}  {name}\n")
+    return path
+
+
+def catalog_excerpt_lines(max_head: int = 20, max_tail: int = 5) -> List[str]:
+    """Short numbered lines for terminal display (head + tail if universe is large)."""
+    n = len(ORDERED_TICKERS)
+    lines: List[str] = []
+    head = min(max_head, n)
+    for i in range(head):
+        t = ORDERED_TICKERS[i]
+        name = str(SYMBOL_DB[t].get("company_name", t))
+        lines.append(f"  {i + 1:5d}  {t:6s}  {name}")
+    if n > head + max_tail:
+        lines.append(f"  ... ({n - head - max_tail} rows omitted) ...")
+        for j in range(max(0, n - max_tail), n):
+            t = ORDERED_TICKERS[j]
+            name = str(SYMBOL_DB[t].get("company_name", t))
+            lines.append(f"  {j + 1:5d}  {t:6s}  {name}")
+    elif n > head:
+        for j in range(head, n):
+            t = ORDERED_TICKERS[j]
+            name = str(SYMBOL_DB[t].get("company_name", t))
+            lines.append(f"  {j + 1:5d}  {t:6s}  {name}")
+    return lines
+
+
+_ROW_ONLY = re.compile(r"^#\s*\d+\s*$")
+
+
+def line_is_catalog_row_token(line: str) -> bool:
+    """True if whole line is only '#42' style (not a free-text comment)."""
+    return bool(_ROW_ONLY.match(line.strip()))
+
+
+def tickers_grouped_by_sector() -> Dict[str, List[str]]:
+    """All tickers in SYMBOL_DB grouped by GICS sector name (sorted tickers per sector)."""
+    g: Dict[str, List[str]] = defaultdict(list)
+    for t, info in SYMBOL_DB.items():
+        sector = str(info["sector"])
+        g[sector].append(t)
+    for sector in g:
+        g[sector].sort()
+    return dict(sorted(g.items(), key=lambda x: x[0].lower()))
+
+
+def ordered_sector_names() -> List[str]:
+    return list(tickers_grouped_by_sector().keys())
+
+
+def resolve_sector_choice(user_input: str, canonical_names: List[str]) -> str:
+    """
+    Map user text to a canonical sector name: 1-based index, exact name, unique prefix, or unique substring.
+    """
+    u = user_input.strip()
+    if not u:
+        raise ValueError("empty sector name")
+    if u.isdigit():
+        idx = int(u)
+        if 1 <= idx <= len(canonical_names):
+            return canonical_names[idx - 1]
+        raise ValueError(f"Sector # must be 1..{len(canonical_names)}")
+    ul = u.lower()
+    exact = [c for c in canonical_names if c.lower() == ul]
+    if len(exact) == 1:
+        return exact[0]
+    pref = [c for c in canonical_names if c.lower().startswith(ul)]
+    if len(pref) == 1:
+        return pref[0]
+    sub = [c for c in canonical_names if ul in c.lower()]
+    if len(sub) == 1:
+        return sub[0]
+    if len(sub) > 1:
+        raise ValueError(f"Ambiguous sector {user_input!r}: try a longer name or the list number. Matches: {sub[:6]}")
+    raise ValueError(f"Unknown sector {user_input!r}")
 
 
 def get_symbol_info(sym: str) -> Dict[str, object]:

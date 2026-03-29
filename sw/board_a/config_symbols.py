@@ -2,7 +2,7 @@
 Addition: user-friendly symbol loader (tickers -> numeric metadata) for Board A.
 
 What this code does:
-1) User selects companies by ticker (CLI or a text file).
+1) User selects companies by GICS sector mix (counts summing to hw-slots), ticker/#row paste, CLI, Jupyter, or files.
 2) Script validates tickers against `symbol_universe.SYMBOL_DB`.
 3) Assigns `symbol_id = 0..N-1` in the order the user provided.
 4) Groups them by sector (for a clean UX summary).
@@ -19,16 +19,20 @@ from __future__ import annotations
 import argparse
 import random
 from collections import Counter
-from typing import List
+from typing import Any, Dict, List, Optional
 
 from pynq import Overlay, MMIO
 
 from symbol_universe import (
     SYMBOL_DB,
     extract_sector_groups,
+    line_is_catalog_row_token,
     normalize_symbol,
+    ordered_sector_names,
+    resolve_sector_choice,
+    resolve_user_company_pick,
     ticker_for_token,
-    token_for_ticker,
+    tickers_grouped_by_sector,
 )
 
 
@@ -52,11 +56,295 @@ def q16_16(val: float) -> int:
     return int(val * 65536) & 0xFFFFFFFF
 
 
+def parse_company_picks(text: str) -> List[str]:
+    """
+    Split pasted text (lines and/or spaces) into tickers.
+
+    Each token may be a ticker (AAPL) or a catalog row number (42 or #42).
+    Row numbers match ``universe_catalog.txt`` (alphabetical order).
+    """
+    out: List[str] = []
+    for line in text.splitlines():
+        for tok in line.split():
+            out.append(resolve_user_company_pick(tok))
+    return out
+
+
+def parse_ticker_paste(text: str) -> List[str]:
+    """Ticker-only paste (no #row). Prefer parse_company_picks for interactive/Jupyter."""
+    parts: List[str] = []
+    for line in text.splitlines():
+        parts.extend(line.split())
+    return [normalize_symbol(p) for p in parts if normalize_symbol(p)]
+
+
+def validate_sector_allocation(
+    allocation: Dict[str, int],
+    hw_slots: int,
+    groups: Dict[str, List[str]],
+) -> None:
+    total = sum(allocation.values())
+    if total != hw_slots:
+        raise ValueError(f"Sector counts must sum to exactly {hw_slots}, got {total}.")
+    for name, k in allocation.items():
+        if k < 0:
+            raise ValueError(f"Negative count for {name}.")
+        if name not in groups:
+            raise ValueError(f"Unknown sector {name!r}.")
+        if k > len(groups[name]):
+            raise ValueError(
+                f"Sector {name!r}: requested {k} but only {len(groups[name])} symbol(s) in universe."
+            )
+
+
+def sample_tickers_from_sector_allocation(
+    allocation: Dict[str, int],
+    rng: random.Random,
+) -> List[str]:
+    """For each sector, draw `k` distinct random tickers; shuffle combined list (length = sum k)."""
+    groups = tickers_grouped_by_sector()
+    picked: List[str] = []
+    for name in sorted(allocation.keys()):
+        k = allocation[name]
+        if k <= 0:
+            continue
+        pool = list(groups[name])
+        picked.extend(rng.sample(pool, k))
+    rng.shuffle(picked)
+    return picked
+
+
+def parse_sector_mix_compact(spec: str, hw_slots: int) -> Dict[str, int]:
+    """Parse 'Energy:6,Information Technology:10' (comma-separated Sector:count)."""
+    names = ordered_sector_names()
+    allocation: Dict[str, int] = {}
+    for part in spec.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if ":" not in part:
+            raise ValueError(f"Expected Sector:count in {part!r}")
+        sec, _, cnt_s = part.rpartition(":")
+        cnt = int(cnt_s.strip())
+        name = resolve_sector_choice(sec.strip(), names)
+        allocation[name] = allocation.get(name, 0) + cnt
+    groups = tickers_grouped_by_sector()
+    validate_sector_allocation(allocation, hw_slots, groups)
+    return allocation
+
+
+def parse_sector_mix_lines(text: str, hw_slots: int) -> Dict[str, int]:
+    """
+    One allocation per non-comment line: 'SectorName 4' or '3 4' or 'Energy:6'.
+    Lines starting with # are comments unless #<digits> catalog row (ignored here).
+    """
+    names = ordered_sector_names()
+    allocation: Dict[str, int] = {}
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        if line.startswith("#") and not line_is_catalog_row_token(line):
+            continue
+        if ":" in line:
+            sec, _, cnt_s = line.rpartition(":")
+            spec, cnt_s = sec.strip(), cnt_s.strip()
+        else:
+            parts = line.rsplit(None, 1)
+            if len(parts) != 2:
+                raise ValueError(f"Bad line {raw!r}: use 'SectorName count' or 'Sector:count'")
+            spec, cnt_s = parts[0].strip(), parts[1].strip()
+        cnt = int(cnt_s)
+        name = resolve_sector_choice(spec, names)
+        allocation[name] = allocation.get(name, 0) + cnt
+    groups = tickers_grouped_by_sector()
+    validate_sector_allocation(allocation, hw_slots, groups)
+    return allocation
+
+
+def sector_mix_intro_text(hw_slots: int) -> str:
+    groups = tickers_grouped_by_sector()
+    names = ordered_sector_names()
+    nsec = len(names)
+    lines = [
+        f"There are {nsec} sectors in the universe. You assign counts per sector that sum to exactly {hw_slots}.",
+        "Companies are then chosen uniformly at random within each sector (no replacement).",
+        "Any feasible split is allowed (e.g. two sectors only: 10 + 6, or many sectors with smaller counts).",
+        "",
+        "Sector list (#, symbol count, name):",
+    ]
+    for i, name in enumerate(names, start=1):
+        lines.append(f"  {i:2d}. ({len(groups[name]):3d} symbols)  {name}")
+    return "\n".join(lines)
+
+
+def prompt_sector_mix_dialog(hw_slots: int, random_seed: Optional[int]) -> List[str]:
+    groups = tickers_grouped_by_sector()
+    names = ordered_sector_names()
+    print(sector_mix_intro_text(hw_slots))
+    allocation: Dict[str, int] = {}
+    print(f"\nEnter assignments until all {hw_slots} slots are filled.")
+    print("Each line:  <sector # or partial name>  <count>")
+    print("Example:  `Energy 6`  or  `3 10`  (sector #3, ten companies)\n")
+
+    while sum(allocation.values()) < hw_slots:
+        rem = hw_slots - sum(allocation.values())
+        line = input(f"Slots left {rem}/{hw_slots} — sector and count> ").strip()
+        if not line:
+            raise ValueError("Incomplete sector mix (empty line).")
+        parts = line.rsplit(None, 1)
+        if len(parts) != 2:
+            print("Need two fields: sector (number or name) and count.")
+            continue
+        spec, cnt_s = parts[0], parts[1]
+        try:
+            cnt = int(cnt_s)
+        except ValueError:
+            print("Second field must be an integer.")
+            continue
+        if cnt < 0 or cnt > rem:
+            print(f"Count must be between 0 and {rem}.")
+            continue
+        if cnt == 0:
+            continue
+        try:
+            name = resolve_sector_choice(spec, names)
+        except ValueError as e:
+            print(e)
+            continue
+        already = allocation.get(name, 0)
+        cap = len(groups[name])
+        if already + cnt > cap:
+            print(f"{name}: can take at most {cap - already} more (already {already}, universe {cap}).")
+            continue
+        allocation[name] = already + cnt
+
+    validate_sector_allocation(allocation, hw_slots, groups)
+    seed_in = input("Random seed within sectors (Enter = nondeterministic): ").strip()
+    seed: Optional[int] = int(seed_in) if seed_in else random_seed
+    rng = random.Random(seed)
+    picks = sample_tickers_from_sector_allocation(allocation, rng)
+    print("\nSelected tickers (random within each sector):")
+    for t in picks:
+        print(f"  {t}")
+    return picks
+
+
+def prepare_loaded_symbols(
+    selected: List[str],
+    hw_slots: int,
+    allow_truncate: bool,
+    init_spread_default: float,
+) -> List[dict[str, Any]]:
+    """
+    Validate tickers against SYMBOL_DB, apply hw slot limit, return per-slot dicts
+    for printing and MMIO (same shape as the rest of this module).
+    """
+    if not selected:
+        raise ValueError("No valid tickers provided.")
+
+    if len(selected) > hw_slots and not allow_truncate:
+        raise ValueError(
+            f"Too many symbols ({len(selected)}). Hardware slots={hw_slots}. "
+            "Use --allow-truncate to proceed."
+        )
+    selected = selected[:hw_slots]
+
+    loaded: List[dict[str, Any]] = []
+    for symbol_id, sym in enumerate(selected):
+        if sym not in SYMBOL_DB:
+            raise ValueError(f"Unknown symbol: {sym}")
+        info = SYMBOL_DB[sym]
+        loaded.append(
+            {
+                "symbol_id": symbol_id,
+                "ticker": sym,
+                "sector": str(info["sector"]),
+                "sector_id": int(info["sector_id"]),
+                "company_token": int(info["company_token"]),
+                "init_price": float(info["init_price"]),
+                "init_spread": float(info.get("init_spread", init_spread_default)),
+            }
+        )
+    return loaded
+
+
+def print_configuration_summary(loaded: List[dict[str, Any]], hw_slots: int) -> None:
+    print(f"Loaded {len(loaded)} symbols (hw_slots={hw_slots}):")
+    for x in loaded:
+        print(
+            f'{x["symbol_id"]}: token={x["company_token"]} {x["ticker"]} -> '
+            f'{x["sector"]}, init={x["init_price"]}'
+        )
+
+    sector_groups = extract_sector_groups([x["ticker"] for x in loaded])
+    print("Sector groups:")
+    for sector_name, tickers in sector_groups.items():
+        joined = ", ".join(tickers)
+        print(f"{sector_name}: {joined}")
+
+    by_sector_name = Counter(x["sector"] for x in loaded)
+    by_sector_id = Counter(x["sector_id"] for x in loaded)
+    print("Sector population (hardware sector_id counts — used for noise gain):")
+    for sid in sorted(by_sector_id.keys()):
+        print(f"  sector_id {sid}: {by_sector_id[sid]} symbol(s)")
+    print("Sector population (by name, demo / debug):")
+    for name, cnt in sorted(by_sector_name.items(), key=lambda z: (-z[1], z[0])):
+        print(f"  {name}: {cnt}")
+
+
+def write_mmio_board_config(
+    mmio: MMIO,
+    loaded: List[dict[str, Any]],
+    hw_slots: int,
+    *,
+    write_sector_id: bool,
+    write_token_id: bool,
+    init_spread_default: float,
+    pulse_start: bool,
+) -> None:
+    mmio.write(ACTIVE_SYM_COUNT, len(loaded))
+
+    for i in range(hw_slots):
+        if i < len(loaded):
+            init_mid = loaded[i]["init_price"]
+            init_spread = loaded[i]["init_spread"]
+            sector_id = loaded[i]["sector_id"]
+            company_token = loaded[i]["company_token"]
+        else:
+            init_mid = 0.0
+            init_spread = float(init_spread_default)
+            sector_id = 0
+            company_token = 0
+
+        mmio.write(INIT_MID_BASE + 4 * i, q16_16(init_mid))
+        mmio.write(INIT_SPREAD_BASE + 4 * i, q16_16(init_spread))
+
+        if write_sector_id:
+            mmio.write(SECTOR_ID_BASE + 4 * i, int(sector_id))
+        if write_token_id:
+            token_reg = TOKEN_BASE + 4 * (i // 2)
+            if i % 2 == 0:
+                packed = int(company_token) & 0xFFFF
+                if (i + 1) < hw_slots:
+                    nxt = loaded[i + 1]["company_token"] if (i + 1) < len(loaded) else 0
+                    packed |= (int(nxt) & 0xFFFF) << 16
+                mmio.write(token_reg, packed)
+
+    if pulse_start:
+        mmio.write(CTRL, 0x01)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Load ticker/token metadata into Board A (supports random 8-16 company selection)."
     )
-    group = parser.add_mutually_exclusive_group(required=True)
+    parser.add_argument(
+        "--interactive",
+        action="store_true",
+        help="Prompt on stdin: sector mix (fills --hw-slots) or full-universe random sample (laptop SSH).",
+    )
+    group = parser.add_mutually_exclusive_group(required=False)
     group.add_argument("--symbols", nargs="+", help="Tickers to load, e.g. AAPL MSFT NVDA XOM CVX")
     group.add_argument("--tokens", nargs="+", type=int, help="Stable global company tokens, e.g. 10 55 230")
     group.add_argument(
@@ -68,6 +356,16 @@ def parse_args() -> argparse.Namespace:
         "--random-count",
         type=int,
         help="Pick a random set of companies of size N (recommended 8..16).",
+    )
+    group.add_argument(
+        "--sector-mix",
+        type=str,
+        help='Allocate all hw-slots by GICS sector, e.g. "Energy:6,Information Technology:10" (must sum to --hw-slots).',
+    )
+    group.add_argument(
+        "--sector-mix-file",
+        type=str,
+        help="File with sector lines: 'SectorName count' or 'Sector:count'; counts must sum to --hw-slots.",
     )
 
     parser.add_argument(
@@ -100,17 +398,68 @@ def parse_args() -> argparse.Namespace:
         default=0.125,
         help="Default init_spread (Q16.16) for symbols if not otherwise specified by SYMBOL_DB.",
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    has_cli = (
+        args.symbols is not None
+        or args.tokens is not None
+        or args.symbols_file is not None
+        or args.random_count is not None
+        or args.sector_mix is not None
+        or args.sector_mix_file is not None
+    )
+    if args.interactive and has_cli:
+        parser.error(
+            "Do not combine --interactive with other selection flags "
+            "(--symbols / --tokens / --symbols-file / --random-count / --sector-mix / --sector-mix-file)."
+        )
+    if not args.interactive and not has_cli:
+        parser.error(
+            "Choose one: --interactive OR --symbols OR --tokens OR --symbols-file OR "
+            "--random-count OR --sector-mix OR --sector-mix-file."
+        )
+    return args
+
+
+def prompt_interactive(hw_slots: int, random_seed: int | None) -> List[str]:
+    """
+    Ask the user (stdin) for sector mix or full-universe random sample.
+    Sector path always fills exactly `hw_slots` companies (default 16).
+    """
+    print(
+        f"\nBoard A — interactive load: exactly {hw_slots} active symbols "
+        f"(universe has {len(SYMBOL_DB)} tickers).\n"
+    )
+    print("  1) Sector mix — you choose how many from each sector (totals to full slot count); companies random within sector")
+    print(f"  2) Fully random — uniform random {hw_slots} companies from entire universe (ignore sectors)")
+    choice = ""
+    while choice not in ("1", "2"):
+        choice = input("Enter 1 or 2: ").strip()
+
+    if choice == "2":
+        seed_in = input("Random seed (Enter for nondeterministic): ").strip()
+        seed: int | None = int(seed_in) if seed_in else random_seed
+        rng = random.Random(seed)
+        universe = sorted(SYMBOL_DB.keys())
+        if hw_slots > len(universe):
+            raise ValueError(f"hw_slots={hw_slots} exceeds universe size {len(universe)}.")
+        return rng.sample(universe, hw_slots)
+
+    return prompt_sector_mix_dialog(hw_slots, random_seed)
 
 
 def load_symbols_from_file(path: str) -> List[str]:
+    """Load picks from lines; supports tickers and #row. Lines starting with # are comments unless #<digits> only."""
     out: List[str] = []
     with open(path, "r", encoding="utf-8") as f:
         for line in f:
             s = line.strip()
-            if not s or s.startswith("#"):
+            if not s:
                 continue
-            out.append(s)
+            if s.startswith("#") and not line_is_catalog_row_token(s):
+                continue
+            for tok in s.split():
+                out.append(resolve_user_company_pick(tok))
     return out
 
 
@@ -120,10 +469,24 @@ def main() -> None:
     if args.hw_slots < 1:
         raise ValueError("--hw-slots must be >= 1.")
 
-    # ADDITION: multi-mode selection input (symbols, tokens, file, or random sample).
-    if args.symbols_file:
-        raw_symbols = load_symbols_from_file(args.symbols_file)
-        selected = [normalize_symbol(s) for s in raw_symbols if normalize_symbol(s)]
+    # ADDITION: multi-mode selection input (interactive, symbols, tokens, file, or random sample).
+    if args.interactive:
+        if not args.write_sector_id or not args.write_token_id:
+            print(
+                "Tip: use --write-sector-id --write-token-id (and usually --start) so RTL gets sector noise and tokens.\n"
+            )
+        selected = prompt_interactive(args.hw_slots, args.random_seed)
+    elif args.symbols_file:
+        selected = load_symbols_from_file(args.symbols_file)
+    elif args.sector_mix is not None:
+        alloc = parse_sector_mix_compact(args.sector_mix, args.hw_slots)
+        rng = random.Random(args.random_seed)
+        selected = sample_tickers_from_sector_allocation(alloc, rng)
+    elif args.sector_mix_file is not None:
+        with open(args.sector_mix_file, encoding="utf-8") as f:
+            alloc = parse_sector_mix_lines(f.read(), args.hw_slots)
+        rng = random.Random(args.random_seed)
+        selected = sample_tickers_from_sector_allocation(alloc, rng)
     elif args.tokens:
         selected = [ticker_for_token(t) for t in args.tokens]
     elif args.random_count is not None:
@@ -135,98 +498,28 @@ def main() -> None:
             raise ValueError(f"--random-count={args.random_count} exceeds universe size {len(universe)}.")
         selected = rng.sample(universe, args.random_count)
     else:
-        raw_symbols = args.symbols
-        selected = [normalize_symbol(s) for s in raw_symbols if normalize_symbol(s)]
+        selected = [resolve_user_company_pick(s) for s in args.symbols]
 
-    if not selected:
-        raise ValueError("No valid tickers provided.")
+    loaded = prepare_loaded_symbols(
+        selected,
+        args.hw_slots,
+        args.allow_truncate,
+        args.init_spread_default,
+    )
+    print_configuration_summary(loaded, args.hw_slots)
 
-    if len(selected) > args.hw_slots and not args.allow_truncate:
-        raise ValueError(
-            f"Too many symbols ({len(selected)}). Hardware slots={args.hw_slots}. "
-            "Use --allow-truncate to proceed."
-        )
-    selected = selected[: args.hw_slots]
-
-    # ADDITION: resolve normalized per-slot metadata (includes fixed global token).
-    loaded = []
-    for symbol_id, sym in enumerate(selected):
-        if sym not in SYMBOL_DB:
-            raise ValueError(f"Unknown symbol: {sym}")
-        info = SYMBOL_DB[sym]
-        loaded.append(
-            {
-                "symbol_id": symbol_id,
-                "ticker": sym,
-                "sector": str(info["sector"]),
-                "sector_id": int(info["sector_id"]),
-                "company_token": int(info["company_token"]),
-                "init_price": float(info["init_price"]),
-                # The PDF only specifies init_price; we use a default spread for current RTL.
-                "init_spread": float(info.get("init_spread", args.init_spread_default)),
-            }
-        )
-
-    # UX summary (matches the PDF style).
-    print(f"Loaded {len(loaded)} symbols (hw_slots={args.hw_slots}):")
-    for x in loaded:
-        print(
-            f'{x["symbol_id"]}: token={x["company_token"]} {x["ticker"]} -> '
-            f'{x["sector"]}, init={x["init_price"]}'
-        )
-
-    sector_groups = extract_sector_groups([x["ticker"] for x in loaded])
-    print("Sector groups:")
-    for sector_name, tickers in sector_groups.items():
-        joined = ", ".join(tickers)
-        print(f"{sector_name}: {joined}")
-
-    # RTL scales per-sector noise by active population in each sector_id.
-    by_sector_name = Counter(x["sector"] for x in loaded)
-    by_sector_id = Counter(x["sector_id"] for x in loaded)
-    print("Sector population (hardware sector_id counts — used for noise gain):")
-    for sid in sorted(by_sector_id.keys()):
-        print(f"  sector_id {sid}: {by_sector_id[sid]} symbol(s)")
-    print("Sector population (by name, demo / debug):")
-    for name, cnt in sorted(by_sector_name.items(), key=lambda z: (-z[1], z[0])):
-        print(f"  {name}: {cnt}")
-
-    # ADDITION: write extended metadata config into AXI-Lite map.
     ol = Overlay("overlays/board_a.bit")
     mmio = MMIO(ol.ip_dict["board_a_top_0"]["phys_addr"], 256)
-    mmio.write(ACTIVE_SYM_COUNT, len(loaded))
-
-    # Write init prices/spreads for all active hardware slots.
-    # If user provides fewer than slots, unused slots get init_mid=0.
-    for i in range(args.hw_slots):
-        if i < len(loaded):
-            init_mid = loaded[i]["init_price"]
-            init_spread = loaded[i]["init_spread"]
-            sector_id = loaded[i]["sector_id"]
-            company_token = loaded[i]["company_token"]
-        else:
-            init_mid = 0.0
-            init_spread = float(args.init_spread_default)
-            sector_id = 0
-            company_token = 0
-
-        mmio.write(INIT_MID_BASE + 4 * i, q16_16(init_mid))
-        mmio.write(INIT_SPREAD_BASE + 4 * i, q16_16(init_spread))
-
-        if args.write_sector_id:
-            mmio.write(SECTOR_ID_BASE + 4 * i, int(sector_id))
-        if args.write_token_id:
-            token_reg = TOKEN_BASE + 4 * (i // 2)
-            if i % 2 == 0:
-                packed = int(company_token) & 0xFFFF
-                if (i + 1) < args.hw_slots:
-                    nxt = loaded[i + 1]["company_token"] if (i + 1) < len(loaded) else 0
-                    packed |= (int(nxt) & 0xFFFF) << 16
-                mmio.write(token_reg, packed)
-
+    write_mmio_board_config(
+        mmio,
+        loaded,
+        args.hw_slots,
+        write_sector_id=args.write_sector_id,
+        write_token_id=args.write_token_id,
+        init_spread_default=args.init_spread_default,
+        pulse_start=args.start,
+    )
     if args.start:
-        # Start pulse matches sw/board_a/config_exchange.py.
-        mmio.write(CTRL, 0x01)
         print("Board A started.")
 
 
