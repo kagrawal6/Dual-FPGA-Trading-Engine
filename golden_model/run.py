@@ -25,6 +25,8 @@ from common import (
     Regime, MsgType, FillStatus,
     LinkLayer, QuoteFrame, OrderFrame, FillFrame,
     frame_type, q16, from_q16, sext32, sext48,
+    SYMBOL_UNIVERSE, SECTOR_NAMES,
+    default_tickers, default_init_mids, default_init_spreads, default_sector_ids,
 )
 from board_a import BoardA
 from board_b import BoardB
@@ -38,7 +40,7 @@ def clear_screen():
 
 
 class Simulation:
-    def __init__(self, num_sym=4, num_sectors=4):
+    def __init__(self, num_sym=NUM_SYMBOLS, num_sectors=NUM_SECTORS):
         self.num_sym = num_sym
         self.board_a = BoardA(num_sym, num_sectors)
         self.board_b = BoardB(num_sym)
@@ -50,11 +52,12 @@ class Simulation:
         self.cycle = 0
         self.regime = Regime.CALM
 
-        # Default configuration
+        # Pull defaults from the symbol universe (realistic S&P 500 prices)
+        self.tickers = default_tickers()[:num_sym]
         self.seed = 0xDEAD_BEEF
-        self.init_mid = [q16(150.0)] * num_sym
-        self.init_spread = [q16(0.125)] * num_sym
-        self.sector_ids = list(range(min(num_sectors, num_sym))) + [0] * max(0, num_sym - num_sectors)
+        self.init_mid = default_init_mids()[:num_sym]
+        self.init_spread = default_init_spreads()[:num_sym]
+        self.sector_ids = default_sector_ids()[:num_sym]
         self.batch_size = BATCH_SIZE
 
     def setup(self, regime=Regime.CALM, threshold_dollars=1.0):
@@ -117,34 +120,41 @@ class Simulation:
         if bb.risk.risk_halt:
             status = "RISK HALT"
 
-        print("=" * 58)
-        print("       DUAL-FPGA TRADING ENGINE  —  GOLDEN MODEL")
-        print("=" * 58)
+        W = 80
+        print("=" * W)
+        print("          DUAL-FPGA TRADING ENGINE  —  GOLDEN MODEL")
+        print("=" * W)
         print(f" Cycle: {self.cycle:,}  |  Regime: {regime_name}  |  Status: {status}")
-        print(f" Threshold: ${from_q16(bb.threshold):.4f}  |  Qty: {bb.base_qty}")
-        print("-" * 58)
+        print(f" Threshold: ${from_q16(bb.threshold):.4f}  |  Qty: {bb.base_qty}"
+              f"  |  Symbols: {self.num_sym}")
+        print("-" * W)
 
-        # Market table
+        # Market table with ticker names and sector
         print(" MARKET")
-        print(f" {'Sym':>3}  {'Bid':>10}  {'Ask':>10}  {'Spread':>8}  {'Position':>9}  {'EMA':>10}")
+        print(f" {'#':>2} {'Tick':>5} {'Sect':>7}  {'Bid':>10}  {'Ask':>10}"
+              f"  {'Spread':>7}  {'Pos':>7}  {'EMA':>10}")
         for i in range(self.num_sym):
             bid = ms.best_bid[i]
             ask = ms.best_ask[i]
             spread = ask - bid
             pos = sext32(pt.position[i])
             ema = bb.features.ema[i]
-            ema_str = f"${from_q16(ema):.2f}" if bb.features.initialized[i] else "    —"
-            print(f"  {i:>2}   ${from_q16(bid):>8.4f}  ${from_q16(ask):>8.4f}"
-                  f"  ${from_q16(spread):>6.4f}  {pos:>9}  {ema_str:>10}")
+            ema_str = f"${from_q16(ema):>7.2f}" if bb.features.initialized[i] else "      —"
+            ticker = self.tickers[i] if i < len(self.tickers) else f"S{i}"
+            sec_id = self.sector_ids[i] if i < len(self.sector_ids) else 0
+            sec_name = SECTOR_NAMES.get(sec_id, f"S{sec_id}")
+            print(f" {i:>2} {ticker:>5} {sec_name:>7}  ${from_q16(bid):>8.2f}"
+                  f"  ${from_q16(ask):>8.2f}  ${from_q16(spread):>5.3f}"
+                  f"  {pos:>7}  {ema_str}")
         print()
 
         # Trading stats
         print(" TRADING ACTIVITY")
-        print(f"   Quotes received:  {bb.quotes_rcvd:>8,}")
-        print(f"   Orders sent:      {bb.orders_sent:>8,}")
+        print(f"   Quotes received:  {bb.quotes_rcvd:>8,}    "
+              f"Exchange rejects: {ex.rejects_sent:>8,}")
+        print(f"   Orders sent:      {bb.orders_sent:>8,}    "
+              f"Risk rejects:     {bb.risk.risk_rejects:>8,}")
         print(f"   Fills received:   {pt.fills_rcvd:>8,}")
-        print(f"   Exchange rejects: {ex.rejects_sent:>8,}")
-        print(f"   Risk rejects:     {bb.risk.risk_rejects:>8,}")
         print()
 
         # P&L
@@ -171,12 +181,12 @@ class Simulation:
         else:
             print(" LATENCY: no fills yet")
 
-        print("=" * 58)
+        print("=" * W)
 
 
 def main():
     # Parse optional command-line args
-    num_sym = 4
+    num_sym = NUM_SYMBOLS
     regime = Regime.CALM
     threshold = 1.0
 
@@ -188,13 +198,20 @@ def main():
         elif arg == "--threshold" and i < len(sys.argv) - 1:
             threshold = float(sys.argv[i + 1])
 
-    sim = Simulation(num_sym=num_sym, num_sectors=min(num_sym, NUM_SECTORS))
+    sim = Simulation(num_sym=num_sym, num_sectors=NUM_SECTORS)
     sim.setup(regime=regime, threshold_dollars=threshold)
 
     clear_screen()
     print("Dual-FPGA Trading Engine — Golden Model Simulator")
     print(f"  Symbols: {num_sym}  |  Starting regime: {REGIME_NAMES[int(regime)]}")
     print(f"  Threshold: ${threshold:.4f}  |  Batch size: {sim.batch_size} cycles")
+    print()
+    print("  Symbol universe:")
+    for i, t in enumerate(sim.tickers):
+        sec_id = sim.sector_ids[i]
+        sec_name = SECTOR_NAMES.get(sec_id, f"S{sec_id}")
+        price = from_q16(sim.init_mid[i])
+        print(f"    [{i:>2}] {t:>5}  {sec_name:>7}  ${price:>8.2f}")
     print()
     print("Press Enter to start simulation...")
     input()

@@ -358,29 +358,44 @@ class BoardA:
 # ─────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    from common import q16
+    from common import (
+        q16, default_init_mids, default_init_spreads, default_sector_ids,
+        SYMBOL_UNIVERSE,
+    )
 
-    board = BoardA(num_sym=4, num_sectors=4)
+    mids = default_init_mids()
+    spreads = default_init_spreads()
+    sids = default_sector_ids()
+
+    board = BoardA(num_sym=NUM_SYMBOLS, num_sectors=NUM_SECTORS)
     board.configure(
         regime=Regime.CALM, quote_interval=0, seed=0xDEAD_BEEF,
-        init_mid=[q16(150.0)] * 4, init_spread=[q16(0.125)] * 4,
-        sector_ids=[0, 1, 2, 0], active_count=4,
+        init_mid=mids, init_spread=spreads,
+        sector_ids=sids, active_count=NUM_SYMBOLS,
     )
     board.start()
 
-    # Run 20 cycles — should generate quotes
+    # Run 20 cycles — should generate quotes with diverse prices
     quotes_seen = 0
     for c in range(20):
         bits = board.step(c)
         if bits is not None:
             q_frame = QuoteFrame.from_bits(bits)
             quotes_seen += 1
-            print(f"Cycle {c}: {q_frame}")
+            ticker = SYMBOL_UNIVERSE[q_frame.symbol]["ticker"]
+            print(f"Cycle {c}: {ticker:>5} {q_frame}")
     assert quotes_seen > 0
     print(f"\nGenerated {quotes_seen} quotes in 20 cycles")
 
-    # Send an order and get a fill back
-    order = OrderFrame(symbol=0, side=SIDE_BUY, price=q16(152.0), qty=100,
+    # Verify prices are actually different across symbols
+    prices = set()
+    for i in range(NUM_SYMBOLS):
+        prices.add(board.market.mid_price[i])
+    assert len(prices) > 1, "All symbols have the same price — universe not working!"
+    print(f"Unique mid prices across {NUM_SYMBOLS} symbols: {len(prices)}")
+
+    # Send an order and get a fill back (AAPL, symbol 0)
+    order = OrderFrame(symbol=0, side=SIDE_BUY, price=q16(200.0), qty=100,
                        order_id=1, timestamp=42)
     bits = board.step(20, order_in=order)
     assert bits is not None

@@ -84,6 +84,61 @@ REGIME_PARAMS = {
 
 
 # ─────────────────────────────────────────────────────────────
+# Default Symbol Universe
+#
+# 16 symbols across 8 GICS sectors, mirroring real S&P 500 companies.
+# On real hardware, the PYNQ script (config_symbols.py) writes these
+# per-symbol values into AXI registers. Here we hardcode a realistic
+# default so the golden model produces diverse, sector-correlated
+# price movements out of the box.
+#
+# Sector ID mapping (matches config_symbols.py → board_a_axi_regs):
+#   0 = Information Technology    4 = Financials
+#   1 = Energy                    5 = Industrials
+#   2 = Health Care               6 = Consumer Staples
+#   3 = Consumer Discretionary    7 = Communication Services
+# ─────────────────────────────────────────────────────────────
+
+SYMBOL_UNIVERSE = [
+    # slot  ticker   sector_id  init_price($)  init_spread($)
+    {"ticker": "AAPL",  "sector_id": 0, "init_price": 180.00, "init_spread": 0.10},
+    {"ticker": "MSFT",  "sector_id": 0, "init_price": 420.00, "init_spread": 0.15},
+    {"ticker": "NVDA",  "sector_id": 0, "init_price": 900.00, "init_spread": 0.25},
+    {"ticker": "XOM",   "sector_id": 1, "init_price": 115.00, "init_spread": 0.08},
+    {"ticker": "CVX",   "sector_id": 1, "init_price": 160.00, "init_spread": 0.10},
+    {"ticker": "JNJ",   "sector_id": 2, "init_price": 155.00, "init_spread": 0.08},
+    {"ticker": "UNH",   "sector_id": 2, "init_price": 520.00, "init_spread": 0.20},
+    {"ticker": "AMZN",  "sector_id": 3, "init_price": 185.00, "init_spread": 0.10},
+    {"ticker": "TSLA",  "sector_id": 3, "init_price": 250.00, "init_spread": 0.30},
+    {"ticker": "JPM",   "sector_id": 4, "init_price": 200.00, "init_spread": 0.10},
+    {"ticker": "GS",    "sector_id": 4, "init_price": 480.00, "init_spread": 0.20},
+    {"ticker": "CAT",   "sector_id": 5, "init_price": 360.00, "init_spread": 0.15},
+    {"ticker": "HON",   "sector_id": 5, "init_price": 200.00, "init_spread": 0.10},
+    {"ticker": "PG",    "sector_id": 6, "init_price": 165.00, "init_spread": 0.06},
+    {"ticker": "KO",    "sector_id": 6, "init_price":  60.00, "init_spread": 0.04},
+    {"ticker": "GOOGL", "sector_id": 7, "init_price": 175.00, "init_spread": 0.10},
+]
+
+SECTOR_NAMES = {
+    0: "Tech", 1: "Energy", 2: "Health", 3: "Cons.Disc",
+    4: "Financ.", 5: "Indust.", 6: "Staples", 7: "Comms",
+}
+
+
+def default_tickers() -> list[str]:
+    return [s["ticker"] for s in SYMBOL_UNIVERSE]
+
+def default_init_mids() -> list[int]:
+    return [int(s["init_price"] * 65536) & MASK_32 for s in SYMBOL_UNIVERSE]
+
+def default_init_spreads() -> list[int]:
+    return [int(s["init_spread"] * 65536) & MASK_32 for s in SYMBOL_UNIVERSE]
+
+def default_sector_ids() -> list[int]:
+    return [s["sector_id"] for s in SYMBOL_UNIVERSE]
+
+
+# ─────────────────────────────────────────────────────────────
 # Fixed-Point Helpers
 # ─────────────────────────────────────────────────────────────
 
