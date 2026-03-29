@@ -59,8 +59,8 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_board_a_ctrl___024root final {
     std::string __Vtask_tb_board_a_ctrl__DOT__check__8__msg;
     std::string __Vtask_tb_board_a_ctrl__DOT__check__9__msg;
     VlDelayScheduler __VdlySched;
-    VlTriggerScheduler __VtrigSched_h16a0c060__0;
-    VlTriggerScheduler __VtrigSched_h6c0bcb33__0;
+    VlTriggerScheduler __VtrigSched_h5841218e__0;
+    VlTriggerScheduler __VtrigSched_h5c2f6120__0;
 
     // INTERNAL VARIABLES
     Vtb_board_a_ctrl__Syms* vlSymsp;

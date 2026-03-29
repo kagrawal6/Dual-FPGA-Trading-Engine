@@ -31,8 +31,8 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_market_noise_gen___024root final {
     CData/*0:0*/ __VactPhaseResult;
     CData/*0:0*/ __VinactPhaseResult;
     CData/*0:0*/ __VnbaPhaseResult;
-    IData/*31:0*/ tb_market_noise_gen__DOT____Vlvbound_hbca5105d__0;
-    IData/*31:0*/ tb_market_noise_gen__DOT____Vlvbound_hfe435c26__0;
+    IData/*31:0*/ tb_market_noise_gen__DOT____Vlvbound_hfe5e2d2f__0;
+    IData/*31:0*/ tb_market_noise_gen__DOT____Vlvbound_h546553af__0;
     IData/*31:0*/ tb_market_noise_gen__DOT__base_seed;
     IData/*31:0*/ tb_market_noise_gen__DOT__err_count;
     IData/*31:0*/ tb_market_noise_gen__DOT__dut__DOT__u_global_lfsr__DOT__lfsr_reg;
@@ -106,8 +106,8 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_market_noise_gen___024root final {
     std::string __Vtask_tb_market_noise_gen__DOT__check__68__msg;
     std::string __Vtask_tb_market_noise_gen__DOT__check__69__msg;
     VlDelayScheduler __VdlySched;
-    VlTriggerScheduler __VtrigSched_h4f7774ab__0;
-    VlTriggerScheduler __VtrigSched_h945862dd__0;
+    VlTriggerScheduler __VtrigSched_h04d2243f__0;
+    VlTriggerScheduler __VtrigSched_h55fe2048__0;
 
     // INTERNAL VARIABLES
     Vtb_market_noise_gen__Syms* vlSymsp;

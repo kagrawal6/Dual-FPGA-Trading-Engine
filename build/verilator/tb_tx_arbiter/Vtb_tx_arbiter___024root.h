@@ -59,8 +59,8 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_tx_arbiter___024root final {
     std::string __Vtask_tb_tx_arbiter__DOT__check__12__msg;
     std::string __Vtask_tb_tx_arbiter__DOT__check__13__msg;
     VlDelayScheduler __VdlySched;
-    VlTriggerScheduler __VtrigSched_hc99d27f4__0;
-    VlTriggerScheduler __VtrigSched_h9771911a__0;
+    VlTriggerScheduler __VtrigSched_h4d3b64c4__0;
+    VlTriggerScheduler __VtrigSched_h320c008b__0;
 
     // INTERNAL VARIABLES
     Vtb_tx_arbiter__Syms* vlSymsp;

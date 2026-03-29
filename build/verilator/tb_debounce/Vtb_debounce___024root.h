@@ -42,7 +42,7 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_debounce___024root final {
     std::string __Vtask_tb_debounce__DOT__check__6__msg;
     std::string __Vtask_tb_debounce__DOT__check__7__msg;
     VlDelayScheduler __VdlySched;
-    VlTriggerScheduler __VtrigSched_hfff4b4c4__0;
+    VlTriggerScheduler __VtrigSched_h5a5a23e9__0;
 
     // INTERNAL VARIABLES
     Vtb_debounce__Syms* vlSymsp;

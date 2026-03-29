@@ -182,8 +182,8 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_market_sim___024root final {
     std::string __Vtask_tb_market_sim__DOT__check__117__msg;
     std::string __Vtask_tb_market_sim__DOT__check__119__msg;
     VlDelayScheduler __VdlySched;
-    VlTriggerScheduler __VtrigSched_hb7b23b8b__0;
-    VlTriggerScheduler __VtrigSched_h4e0461f5__0;
+    VlTriggerScheduler __VtrigSched_h8d2e6b5d__0;
+    VlTriggerScheduler __VtrigSched_h066a8c7b__0;
 
     // INTERNAL VARIABLES
     Vtb_market_sim__Syms* vlSymsp;

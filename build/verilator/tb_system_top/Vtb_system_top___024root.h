@@ -43,7 +43,6 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_system_top___024root final {
         CData/*0:0*/ tb_system_top__DOT__u_board_a__DOT__tx_ready;
         CData/*0:0*/ tb_system_top__DOT__u_board_a__DOT__link_up;
         CData/*0:0*/ tb_system_top__DOT__u_board_a__DOT__frame_out_valid;
-        CData/*0:0*/ tb_system_top__DOT__u_board_a__DOT__exchange_enable;
         CData/*0:0*/ tb_system_top__DOT__u_board_a__DOT__quote_fifo_wr_en;
         CData/*0:0*/ tb_system_top__DOT__u_board_a__DOT__quote_fifo_rd_en;
         CData/*0:0*/ tb_system_top__DOT__u_board_a__DOT__quote_fifo_full;
@@ -81,9 +80,9 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_system_top___024root final {
         CData/*0:0*/ tb_system_top__DOT__u_board_a__DOT__u_link_rx__DOT__valid_sync;
         CData/*3:0*/ tb_system_top__DOT__u_board_a__DOT__u_link_rx__DOT__data_s1;
         CData/*3:0*/ tb_system_top__DOT__u_board_a__DOT__u_link_rx__DOT__data_sync;
+        CData/*0:0*/ tb_system_top__DOT__u_board_a__DOT__u_link_rx__DOT__valid_prev;
     };
     struct {
-        CData/*0:0*/ tb_system_top__DOT__u_board_a__DOT__u_link_rx__DOT__valid_prev;
         CData/*0:0*/ tb_system_top__DOT__u_board_a__DOT__u_link_rx__DOT__state;
         CData/*4:0*/ tb_system_top__DOT__u_board_a__DOT__u_link_rx__DOT__beat_count;
         CData/*0:0*/ tb_system_top__DOT__u_board_a__DOT__u_link_rx__DOT__phase;
@@ -147,9 +146,9 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_system_top___024root final {
         IData/*31:0*/ tb_system_top__DOT__u_board_a__DOT__u_market_sim__DOT__u_market_noise_gen__DOT__g_sec_rng__BRA__7__KET____DOT__u_sec_lfsr__DOT__lfsr_reg;
         IData/*31:0*/ tb_system_top__DOT__u_board_a__DOT__u_exchange_lite__DOT__p1_limit_price;
         IData/*31:0*/ tb_system_top__DOT__u_board_a__DOT__u_exchange_lite__DOT__p1_cur_bid;
+        IData/*31:0*/ tb_system_top__DOT__u_board_a__DOT__u_exchange_lite__DOT__p1_cur_ask;
     };
     struct {
-        IData/*31:0*/ tb_system_top__DOT__u_board_a__DOT__u_exchange_lite__DOT__p1_cur_ask;
         IData/*31:0*/ tb_system_top__DOT__u_board_a__DOT__u_exchange_lite__DOT__fill_price_val;
         VlWide<4>/*127:0*/ tb_system_top__DOT__u_board_a__DOT__u_tx_arb__DOT__tx_frame_buf;
         VlWide<4>/*127:0*/ tb_system_top__DOT__u_board_a__DOT__u_link_tx__DOT__shifter;

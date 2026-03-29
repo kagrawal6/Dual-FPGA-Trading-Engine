@@ -114,7 +114,7 @@ VL_ATTR_COLD void Vtb_market_noise_gen___024root___eval_settle(Vtb_market_noise_
 #ifdef VL_DEBUG
             Vtb_market_noise_gen___024root___dump_triggers__stl(vlSelfRef.__VstlTriggered, "stl"s);
 #endif
-            VL_FATAL_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_noise_gen.sv", 13, "", "DIDNOTCONVERGE: Settle region did not converge after '--converge-limit' of 100 tries");
+            VL_FATAL_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_noise_gen.sv", 13, "", "DIDNOTCONVERGE: Settle region did not converge after '--converge-limit' of 100 tries");
         }
         __VstlIterCount = ((IData)(1U) + __VstlIterCount);
         vlSelfRef.__VstlPhaseResult = Vtb_market_noise_gen___024root___eval_phase__stl(vlSelf);
@@ -354,8 +354,8 @@ VL_ATTR_COLD void Vtb_market_noise_gen___024root___ctor_var_reset(Vtb_market_noi
     Vtb_market_noise_gen__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSelf->tb_market_noise_gen__DOT____Vlvbound_hbca5105d__0 = 0;
-    vlSelf->tb_market_noise_gen__DOT____Vlvbound_hfe435c26__0 = 0;
+    vlSelf->tb_market_noise_gen__DOT____Vlvbound_hfe5e2d2f__0 = 0;
+    vlSelf->tb_market_noise_gen__DOT____Vlvbound_h546553af__0 = 0;
     const uint64_t __VscopeHash = VL_MURMUR64_HASH(vlSelf->vlNamep);
     vlSelf->tb_market_noise_gen__DOT__clk = VL_SCOPED_RAND_RESET_I(1, __VscopeHash, 5911782632311984704ull);
     vlSelf->tb_market_noise_gen__DOT__rst_n = VL_SCOPED_RAND_RESET_I(1, __VscopeHash, 5903399981987933972ull);

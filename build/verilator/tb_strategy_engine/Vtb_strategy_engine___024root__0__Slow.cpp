@@ -22,7 +22,7 @@ VL_ATTR_COLD void Vtb_strategy_engine___024root___eval_initial__TOP(Vtb_strategy
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.tb_strategy_engine__DOT__clk = 0U;
-    VL_FINISH_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_b/tb_strategy_engine.sv", 59, "");
+    VL_FINISH_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_b\\tb_strategy_engine.sv", 59, "");
 }
 
 VL_ATTR_COLD void Vtb_strategy_engine___024root___eval_final(Vtb_strategy_engine___024root* vlSelf) {

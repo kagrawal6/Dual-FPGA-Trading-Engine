@@ -1,6 +1,6 @@
--Info: /Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_exchange_lite.sv:120: $dumpvar ignored, as Verilated without --trace
+-Info: C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\tb_exchange_lite.sv:120: $dumpvar ignored, as Verilated without --trace
 tb_exchange_lite: PASS (all checks passed, VCD: tb_exchange_lite.vcd)
-- /Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_exchange_lite.sv:286: Verilog $finish
+- C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\tb_exchange_lite.sv:286: Verilog $finish
 - S i m u l a t i o n   R e p o r t: Verilator 5.046 2026-02-28
-- Verilator: $finish at 515ns; walltime 0.000 s; speed 14.306 ms/s
-- Verilator: cpu 0.000 s on 1 threads; allocated 1 MB
+- Verilator: $finish at 515ns; walltime 0.000 s; speed 0.000 s/s
+- Verilator: cpu 0.000 s on 1 threads; allocated 4 MB

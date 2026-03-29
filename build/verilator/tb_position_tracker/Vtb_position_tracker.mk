@@ -12,7 +12,7 @@ PERL = perl
 # Python3 executable (from $PYTHON3, defaults to 'python3' if not set)
 PYTHON3 = python3
 # Path to Verilator kit (from $VERILATOR_ROOT)
-VERILATOR_ROOT = /opt/homebrew/Cellar/verilator/5.046/share/verilator
+VERILATOR_ROOT = C:/msys64/ucrt64/share/verilator
 # SystemC include directory with systemc.h (from $SYSTEMC_INCLUDE)
 SYSTEMC_INCLUDE ?=
 # SystemC library directory with libsystemc.a (from $SYSTEMC_LIBDIR)
@@ -28,7 +28,7 @@ VM_SP_OR_SC = $(VM_SC)
 # Deprecated
 VM_PCLI = 1
 # Deprecated: SystemC architecture to find link library path (from $SYSTEMC_ARCH)
-VM_SC_TARGET_ARCH = linux
+VM_SC_TARGET_ARCH = mingw32
 
 ### Vars...
 # Design prefix (from --prefix)

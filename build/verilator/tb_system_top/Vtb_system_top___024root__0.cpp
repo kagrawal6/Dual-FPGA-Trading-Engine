@@ -26,7 +26,7 @@ VlCoroutine Vtb_system_top___024root___eval_initial__TOP__Vtiming__0(Vtb_system_
     // Body
     vlSelfRef.tb_system_top__DOT__rst_n = 0U;
     co_await vlSelfRef.__VdlySched.delay(0x00000000000186a0ULL, 
-                                         nullptr, "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/tb_system_top.sv", 
+                                         nullptr, "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb\\tb_system_top.sv", 
                                          97);
     vlSelfRef.tb_system_top__DOT__rst_n = 1U;
     co_return;
@@ -48,10 +48,10 @@ VlCoroutine Vtb_system_top___024root___eval_initial__TOP__Vtiming__1(Vtb_system_
     vlSelfRef.tb_system_top__DOT__s_axi_wdata_a = 0U;
     vlSelfRef.tb_system_top__DOT__s_axi_araddr_a = 0U;
     co_await vlSelfRef.__VdlySched.delay(0x0000000002faf080ULL, 
-                                         nullptr, "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/tb_system_top.sv", 
+                                         nullptr, "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb\\tb_system_top.sv", 
                                          200);
     VL_WRITEF_NX("tb_system_top: PASS (smoke: Board A + stub B, 50 us idle)\n",0);
-    VL_FINISH_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/tb_system_top.sv", 202, "");
+    VL_FINISH_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb\\tb_system_top.sv", 202, "");
     co_return;
 }
 
@@ -63,7 +63,7 @@ VlCoroutine Vtb_system_top___024root___eval_initial__TOP__Vtiming__2(Vtb_system_
     while (VL_LIKELY(!vlSymsp->_vm_contextp__->gotFinish())) {
         co_await vlSelfRef.__VdlySched.delay(0x0000000000001388ULL, 
                                              nullptr, 
-                                             "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/tb_system_top.sv", 
+                                             "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb\\tb_system_top.sv", 
                                              92);
         vlSelfRef.tb_system_top__DOT__clk = (1U & (~ (IData)(vlSelfRef.tb_system_top__DOT__clk)));
     }
@@ -150,7 +150,7 @@ void Vtb_system_top___024root___act_sequent__TOP__0(Vtb_system_top___024root* vl
                 VL_WRITEF_NX("[%0t] %%Error: market_sim.sv:72: Assertion failed in %Ntb_system_top.u_board_a.u_market_sim: unique case, but multiple matches found for '2'h%x'\n",0,
                              64,VL_TIME_UNITED_Q(1000),
                              -9,vlSymsp->name(),2,(IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__active_regime));
-                VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv", 72, "");
+                VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/rtl/board_a\\market_sim.sv", 72, "");
             }
         }
     }
@@ -1524,7 +1524,7 @@ void Vtb_system_top___024root___nba_sequent__TOP__0(Vtb_system_top___024root* vl
                                           & (~ (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__quote_fifo_full))) 
                                          << 1U) | ((IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__quote_fifo_rd_en) 
                                                    & (~ (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__quote_fifo_empty)))));
-                        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/rtl/shared/sync_fifo.sv", 61, "");
+                        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/rtl/shared\\sync_fifo.sv", 61, "");
                     }
                 }
             }
@@ -1614,7 +1614,7 @@ void Vtb_system_top___024root___nba_sequent__TOP__0(Vtb_system_top___024root* vl
                                  64,VL_TIME_UNITED_Q(1000),
                                  -9,vlSymsp->name(),
                                  1,(IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_link_tx__DOT__st));
-                    VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/rtl/link/link_tx.sv", 49, "");
+                    VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/rtl/link\\link_tx.sv", 49, "");
                 }
             }
         }
@@ -4116,8 +4116,8 @@ void Vtb_system_top___024root___nba_sequent__TOP__0(Vtb_system_top___024root* vl
         vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_ctrl__DOT__p2 
             = ((IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_ctrl__DOT__db2) 
                & (~ (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_ctrl__DOT__u_db2__DOT__btn_out_prev)));
-        vlSelfRef.tb_system_top__DOT__u_board_a__DOT__axi_reset_pulse = 0U;
         vlSelfRef.tb_system_top__DOT__u_board_a__DOT__axi_start_pulse = 0U;
+        vlSelfRef.tb_system_top__DOT__u_board_a__DOT__axi_reset_pulse = 0U;
         if ((0U != (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__fsm_state))) {
             if (vlSelfRef.tb_system_top__DOT__u_board_a__DOT__lfsr_load) {
                 vlSelfRef.tb_system_top__DOT__u_board_a__DOT__quote_valid_ms = 0U;
@@ -4144,11 +4144,11 @@ void Vtb_system_top___024root___nba_sequent__TOP__0(Vtb_system_top___024root* vl
         }
         if (vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_axi_regs__DOT__write_fire) {
             if ((0U == (IData)(vlSelfRef.tb_system_top__DOT__s_axi_awaddr_a))) {
+                vlSelfRef.tb_system_top__DOT__u_board_a__DOT__axi_start_pulse 
+                    = (1U & vlSelfRef.tb_system_top__DOT__s_axi_wdata_a);
                 vlSelfRef.tb_system_top__DOT__u_board_a__DOT__axi_reset_pulse 
                     = (1U & (vlSelfRef.tb_system_top__DOT__s_axi_wdata_a 
                              >> 1U));
-                vlSelfRef.tb_system_top__DOT__u_board_a__DOT__axi_start_pulse 
-                    = (1U & vlSelfRef.tb_system_top__DOT__s_axi_wdata_a);
             }
             if ((0U != (IData)(vlSelfRef.tb_system_top__DOT__s_axi_awaddr_a))) {
                 if ((4U != (IData)(vlSelfRef.tb_system_top__DOT__s_axi_awaddr_a))) {
@@ -4420,7 +4420,7 @@ void Vtb_system_top___024root___nba_sequent__TOP__0(Vtb_system_top___024root* vl
                  & (~ (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_tx_arb__DOT__tx_buf_valid)))) {
                 __Vdly__tb_system_top__DOT__u_board_a__DOT__fill_valid = 0U;
             }
-            if ((((IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__exchange_enable) 
+            if ((((2U == (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__fsm_state)) 
                   & (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_exchange_lite__DOT__p1_valid)) 
                  & (~ (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__fill_valid)))) {
                 if (vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_exchange_lite__DOT__is_filled) {
@@ -4465,11 +4465,12 @@ void Vtb_system_top___024root___nba_sequent__TOP__0(Vtb_system_top___024root* vl
                 __Vdly__tb_system_top__DOT__u_board_a__DOT__fill_valid = 1U;
                 __Vdly__tb_system_top__DOT__u_board_a__DOT__u_exchange_lite__DOT__p1_valid = 0U;
             }
-            if ((((((IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__exchange_enable) 
-                    & (~ (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_exchange_lite__DOT__p1_valid))) 
-                   & (~ (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__fill_valid))) 
-                  & (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__frame_out_valid)) 
-                 & (0x20000000U == (0xf0000000U & vlSelfRef.tb_system_top__DOT__u_board_a__DOT__frame_out[3U])))) {
+            if ((IData)((((((2U == (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__fsm_state)) 
+                            & (~ (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_exchange_lite__DOT__p1_valid))) 
+                           & (~ (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__fill_valid))) 
+                          & (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__frame_out_valid)) 
+                         & (0x20000000U == (0xf0000000U 
+                                            & vlSelfRef.tb_system_top__DOT__u_board_a__DOT__frame_out[3U]))))) {
                 __Vdly__tb_system_top__DOT__u_board_a__DOT__orders_rcvd 
                     = ((IData)(1U) + vlSelfRef.tb_system_top__DOT__u_board_a__DOT__orders_rcvd);
                 __Vdly__tb_system_top__DOT__u_board_a__DOT__u_exchange_lite__DOT__p1_symbol 
@@ -4521,8 +4522,8 @@ void Vtb_system_top___024root___nba_sequent__TOP__0(Vtb_system_top___024root* vl
         __Vdly__tb_system_top__DOT__u_board_a__DOT__u_ctrl__DOT__db2 = 0U;
         __Vdly__tb_system_top__DOT__u_board_a__DOT__u_ctrl__DOT__u_db2__DOT__btn_out_prev = 0U;
         vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_ctrl__DOT__p2 = 0U;
-        vlSelfRef.tb_system_top__DOT__u_board_a__DOT__axi_reset_pulse = 0U;
         vlSelfRef.tb_system_top__DOT__u_board_a__DOT__axi_start_pulse = 0U;
+        vlSelfRef.tb_system_top__DOT__u_board_a__DOT__axi_reset_pulse = 0U;
         vlSelfRef.tb_system_top__DOT__u_board_a__DOT__quote_valid_ms = 0U;
         tb_system_top__DOT__s_axi_rdata_a = 0U;
         __VdlySet__tb_system_top__DOT__u_board_a__DOT__sym_init_mid__v1 = 1U;
@@ -5242,7 +5243,7 @@ void Vtb_system_top___024root___nba_sequent__TOP__0(Vtb_system_top___024root* vl
                                                  4,
                                                  (vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_link_rx__DOT__unnamedblk1__DOT__assembled_next[3U] 
                                                   >> 0x0000001cU));
-                                    VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/rtl/link/link_rx.sv", 128, "");
+                                    VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/rtl/link\\link_rx.sv", 128, "");
                                 }
                             }
                         }
@@ -5577,9 +5578,6 @@ void Vtb_system_top___024root___nba_sequent__TOP__0(Vtb_system_top___024root* vl
     vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_link_rx__DOT__valid_sync 
         = ((IData)(vlSelfRef.tb_system_top__DOT__rst_n) 
            && (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_link_rx__DOT__valid_s1));
-    vlSelfRef.tb_system_top__DOT__u_board_a__DOT__exchange_enable 
-        = ((2U == (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__fsm_state)) 
-           | (3U == (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__fsm_state)));
     __Vtableidx1 = (((IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_ctrl__DOT__p1) 
                      << 4U) | ((((IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__axi_start_pulse) 
                                  | (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_ctrl__DOT__p0)) 
@@ -5679,7 +5677,7 @@ bool Vtb_system_top___024root___eval_phase__inact(Vtb_system_top___024root* vlSe
     // Body
     __VinactExecute = vlSelfRef.__VdlySched.awaitingZeroDelay();
     if (__VinactExecute) {
-        VL_FATAL_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/tb_system_top.sv", 13, "", "ZERODLY: Design Verilated with '--no-sched-zero-delay', but #0 delay executed at runtime");
+        VL_FATAL_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb\\tb_system_top.sv", 13, "", "ZERODLY: Design Verilated with '--no-sched-zero-delay', but #0 delay executed at runtime");
     }
     return (__VinactExecute);
 }
@@ -5724,13 +5722,13 @@ void Vtb_system_top___024root___eval(Vtb_system_top___024root* vlSelf) {
 #ifdef VL_DEBUG
             Vtb_system_top___024root___dump_triggers__act(vlSelfRef.__VnbaTriggered, "nba"s);
 #endif
-            VL_FATAL_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/tb_system_top.sv", 13, "", "DIDNOTCONVERGE: NBA region did not converge after '--converge-limit' of 100 tries");
+            VL_FATAL_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb\\tb_system_top.sv", 13, "", "DIDNOTCONVERGE: NBA region did not converge after '--converge-limit' of 100 tries");
         }
         __VnbaIterCount = ((IData)(1U) + __VnbaIterCount);
         vlSelfRef.__VinactIterCount = 0U;
         do {
             if (VL_UNLIKELY(((0x00000064U < vlSelfRef.__VinactIterCount)))) {
-                VL_FATAL_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/tb_system_top.sv", 13, "", "DIDNOTCONVERGE: Inactive region did not converge after '--converge-limit' of 100 tries");
+                VL_FATAL_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb\\tb_system_top.sv", 13, "", "DIDNOTCONVERGE: Inactive region did not converge after '--converge-limit' of 100 tries");
             }
             vlSelfRef.__VinactIterCount = ((IData)(1U) 
                                            + vlSelfRef.__VinactIterCount);
@@ -5740,7 +5738,7 @@ void Vtb_system_top___024root___eval(Vtb_system_top___024root* vlSelf) {
 #ifdef VL_DEBUG
                     Vtb_system_top___024root___dump_triggers__act(vlSelfRef.__VactTriggered, "act"s);
 #endif
-                    VL_FATAL_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/tb_system_top.sv", 13, "", "DIDNOTCONVERGE: Active region did not converge after '--converge-limit' of 100 tries");
+                    VL_FATAL_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb\\tb_system_top.sv", 13, "", "DIDNOTCONVERGE: Active region did not converge after '--converge-limit' of 100 tries");
                 }
                 vlSelfRef.__VactIterCount = ((IData)(1U) 
                                              + vlSelfRef.__VactIterCount);

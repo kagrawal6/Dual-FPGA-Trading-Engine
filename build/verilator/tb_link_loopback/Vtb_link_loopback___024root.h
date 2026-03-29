@@ -60,9 +60,9 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_link_loopback___024root final {
     std::string __Vtask_tb_link_loopback__DOT__check__1__msg;
     std::string __Vtask_tb_link_loopback__DOT__check__2__msg;
     VlDelayScheduler __VdlySched;
-    VlTriggerScheduler __VtrigSched_h34831005__0;
-    VlTriggerScheduler __VtrigSched_hcd3beec7__0;
-    VlTriggerScheduler __VtrigSched_h30781aef__0;
+    VlTriggerScheduler __VtrigSched_hd6195f49__0;
+    VlTriggerScheduler __VtrigSched_hfce81947__0;
+    VlTriggerScheduler __VtrigSched_h91136b0c__0;
 
     // INTERNAL VARIABLES
     Vtb_link_loopback__Syms* vlSymsp;

@@ -64,7 +64,7 @@ VL_ATTR_COLD void Vtb_system_top___024root___eval_settle(Vtb_system_top___024roo
 #ifdef VL_DEBUG
             Vtb_system_top___024root___dump_triggers__stl(vlSelfRef.__VstlTriggered, "stl"s);
 #endif
-            VL_FATAL_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/tb_system_top.sv", 13, "", "DIDNOTCONVERGE: Settle region did not converge after '--converge-limit' of 100 tries");
+            VL_FATAL_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb\\tb_system_top.sv", 13, "", "DIDNOTCONVERGE: Settle region did not converge after '--converge-limit' of 100 tries");
         }
         __VstlIterCount = ((IData)(1U) + __VstlIterCount);
         vlSelfRef.__VstlPhaseResult = Vtb_system_top___024root___eval_phase__stl(vlSelf);
@@ -146,9 +146,6 @@ VL_ATTR_COLD void Vtb_system_top___024root___stl_sequent__TOP__0(Vtb_system_top_
         = (0x40U == (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_quote_fifo__DOT__count_r));
     vlSelfRef.tb_system_top__DOT__u_board_a__DOT__quote_fifo_empty 
         = (0U == (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_quote_fifo__DOT__count_r));
-    vlSelfRef.tb_system_top__DOT__u_board_a__DOT__exchange_enable 
-        = ((2U == (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__fsm_state)) 
-           | (3U == (IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__fsm_state)));
     vlSelfRef.tb_system_top__DOT__u_board_a__DOT__u_axi_regs__DOT__read_fire 
         = ((~ (IData)(vlSelfRef.tb_system_top__DOT__s_axi_rvalid_a)) 
            & (IData)(vlSelfRef.tb_system_top__DOT__s_axi_arvalid_a));
@@ -272,7 +269,7 @@ VL_ATTR_COLD void Vtb_system_top___024root___stl_sequent__TOP__0(Vtb_system_top_
                 VL_WRITEF_NX("[%0t] %%Error: market_sim.sv:72: Assertion failed in %Ntb_system_top.u_board_a.u_market_sim: unique case, but multiple matches found for '2'h%x'\n",0,
                              64,VL_TIME_UNITED_Q(1000),
                              -9,vlSymsp->name(),2,(IData)(vlSelfRef.tb_system_top__DOT__u_board_a__DOT__active_regime));
-                VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv", 72, "");
+                VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/rtl/board_a\\market_sim.sv", 72, "");
             }
         }
     }
@@ -738,7 +735,6 @@ VL_ATTR_COLD void Vtb_system_top___024root___ctor_var_reset(Vtb_system_top___024
     }
     VL_SCOPED_RAND_RESET_W(128, vlSelf->tb_system_top__DOT__u_board_a__DOT__frame_out, __VscopeHash, 4460919278891673549ull);
     vlSelf->tb_system_top__DOT__u_board_a__DOT__frame_out_valid = VL_SCOPED_RAND_RESET_I(1, __VscopeHash, 144868399964768933ull);
-    vlSelf->tb_system_top__DOT__u_board_a__DOT__exchange_enable = VL_SCOPED_RAND_RESET_I(1, __VscopeHash, 3041727024523647255ull);
     vlSelf->tb_system_top__DOT__u_board_a__DOT__quote_fifo_wr_en = VL_SCOPED_RAND_RESET_I(1, __VscopeHash, 3397807244722287821ull);
     vlSelf->tb_system_top__DOT__u_board_a__DOT__quote_fifo_rd_en = VL_SCOPED_RAND_RESET_I(1, __VscopeHash, 9463499868395050506ull);
     vlSelf->tb_system_top__DOT__u_board_a__DOT__quote_fifo_full = VL_SCOPED_RAND_RESET_I(1, __VscopeHash, 14990274732349811061ull);

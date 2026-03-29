@@ -1,5 +1,5 @@
 tb_link_tx: PASS (all checks passed)
-- /Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/link/tb_link_tx.sv:103: Verilog $finish
+- C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/link\tb_link_tx.sv:103: Verilog $finish
 - S i m u l a t i o n   R e p o r t: Verilator 5.046 2026-02-28
-- Verilator: $finish at 1us; walltime 0.000 s; speed 27.453 ms/s
-- Verilator: cpu 0.000 s on 1 threads; allocated 1 MB
+- Verilator: $finish at 1us; walltime 0.000 s; speed 0.000 s/s
+- Verilator: cpu 0.000 s on 1 threads; allocated 4 MB

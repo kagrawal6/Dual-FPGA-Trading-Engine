@@ -40,7 +40,7 @@ VL_ATTR_COLD void Vtb_exchange_lite___024root___eval_initial__TOP(Vtb_exchange_l
     // Body
     vlSelfRef.tb_exchange_lite__DOT__clk = 0U;
     vlSymsp->_vm_contextp__->dumpfile("tb_exchange_lite.vcd"s);
-    VL_PRINTF_MT("-Info: /Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_exchange_lite.sv:120: $dumpvar ignored, as Verilated without --trace\n");
+    VL_PRINTF_MT("-Info: C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_exchange_lite.sv:120: $dumpvar ignored, as Verilated without --trace\n");
 }
 
 VL_ATTR_COLD void Vtb_exchange_lite___024root___eval_final(Vtb_exchange_lite___024root* vlSelf) {
@@ -68,7 +68,7 @@ VL_ATTR_COLD void Vtb_exchange_lite___024root___eval_settle(Vtb_exchange_lite___
 #ifdef VL_DEBUG
             Vtb_exchange_lite___024root___dump_triggers__stl(vlSelfRef.__VstlTriggered, "stl"s);
 #endif
-            VL_FATAL_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_exchange_lite.sv", 12, "", "DIDNOTCONVERGE: Settle region did not converge after '--converge-limit' of 100 tries");
+            VL_FATAL_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_exchange_lite.sv", 12, "", "DIDNOTCONVERGE: Settle region did not converge after '--converge-limit' of 100 tries");
         }
         __VstlIterCount = ((IData)(1U) + __VstlIterCount);
         vlSelfRef.__VstlPhaseResult = Vtb_exchange_lite___024root___eval_phase__stl(vlSelf);

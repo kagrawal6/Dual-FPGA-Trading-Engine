@@ -1,5 +1,5 @@
 tb_system_top: PASS (smoke: Board A + stub B, 50 us idle)
-- /Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/tb_system_top.sv:202: Verilog $finish
+- C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb\tb_system_top.sv:202: Verilog $finish
 - S i m u l a t i o n   R e p o r t: Verilator 5.046 2026-02-28
-- Verilator: $finish at 50us; walltime 0.001 s; speed 41.391 ms/s
-- Verilator: cpu 0.001 s on 1 threads; allocated 1 MB
+- Verilator: $finish at 50us; walltime 0.004 s; speed 0.000 s/s
+- Verilator: cpu 0.000 s on 1 threads; allocated 4 MB

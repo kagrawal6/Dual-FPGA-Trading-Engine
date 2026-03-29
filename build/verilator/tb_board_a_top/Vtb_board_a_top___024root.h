@@ -46,7 +46,6 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_board_a_top___024root final {
         CData/*0:0*/ tb_board_a_top__DOT__dut__DOT__tx_ready;
         CData/*0:0*/ tb_board_a_top__DOT__dut__DOT__link_up;
         CData/*0:0*/ tb_board_a_top__DOT__dut__DOT__frame_out_valid;
-        CData/*0:0*/ tb_board_a_top__DOT__dut__DOT__exchange_enable;
         CData/*0:0*/ tb_board_a_top__DOT__dut__DOT__quote_fifo_wr_en;
         CData/*0:0*/ tb_board_a_top__DOT__dut__DOT__quote_fifo_rd_en;
         CData/*0:0*/ tb_board_a_top__DOT__dut__DOT__quote_fifo_full;
@@ -81,9 +80,9 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_board_a_top___024root final {
         CData/*4:0*/ tb_board_a_top__DOT__dut__DOT__u_link_tx__DOT__beat;
         CData/*0:0*/ tb_board_a_top__DOT__dut__DOT__u_link_tx__DOT__half_nibble;
         CData/*0:0*/ tb_board_a_top__DOT__dut__DOT__u_link_rx__DOT__valid_s1;
+        CData/*0:0*/ tb_board_a_top__DOT__dut__DOT__u_link_rx__DOT__valid_sync;
     };
     struct {
-        CData/*0:0*/ tb_board_a_top__DOT__dut__DOT__u_link_rx__DOT__valid_sync;
         CData/*3:0*/ tb_board_a_top__DOT__dut__DOT__u_link_rx__DOT__data_s1;
         CData/*3:0*/ tb_board_a_top__DOT__dut__DOT__u_link_rx__DOT__data_sync;
         CData/*0:0*/ tb_board_a_top__DOT__dut__DOT__u_link_rx__DOT__valid_prev;
@@ -94,9 +93,9 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_board_a_top___024root final {
         CData/*0:0*/ __VstlPhaseResult;
         CData/*0:0*/ __Vtrigprevexpr___TOP__tb_board_a_top__DOT__clk__0;
         CData/*0:0*/ __Vtrigprevexpr___TOP__tb_board_a_top__DOT__rst_n__0;
-        CData/*0:0*/ __Vtrigprevexpr_h972aab23__1;
+        CData/*0:0*/ __Vtrigprevexpr_h02f108bd__1;
         CData/*0:0*/ __Vtrigprevexpr___TOP__tb_board_a_top__DOT__s_axi_bvalid__0;
-        CData/*0:0*/ __Vtrigprevexpr_h113370fe__1;
+        CData/*0:0*/ __Vtrigprevexpr_h28d73e28__1;
         CData/*0:0*/ __Vtrigprevexpr___TOP__tb_board_a_top__DOT__s_axi_rvalid__0;
         CData/*0:0*/ __VactPhaseResult;
         CData/*0:0*/ __VinactPhaseResult;
@@ -147,9 +146,9 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_board_a_top___024root final {
         IData/*31:0*/ tb_board_a_top__DOT__dut__DOT__u_market_sim__DOT__u_market_noise_gen__DOT__g_sym_rng__BRA__12__KET____DOT__u_sym_lfsr__DOT__lfsr_reg;
         IData/*31:0*/ tb_board_a_top__DOT__dut__DOT__u_market_sim__DOT__u_market_noise_gen__DOT__g_sym_rng__BRA__13__KET____DOT__u_sym_lfsr__DOT__lfsr_reg;
         IData/*31:0*/ tb_board_a_top__DOT__dut__DOT__u_market_sim__DOT__u_market_noise_gen__DOT__g_sym_rng__BRA__14__KET____DOT__u_sym_lfsr__DOT__lfsr_reg;
+        IData/*31:0*/ tb_board_a_top__DOT__dut__DOT__u_market_sim__DOT__u_market_noise_gen__DOT__g_sym_rng__BRA__15__KET____DOT__u_sym_lfsr__DOT__lfsr_reg;
     };
     struct {
-        IData/*31:0*/ tb_board_a_top__DOT__dut__DOT__u_market_sim__DOT__u_market_noise_gen__DOT__g_sym_rng__BRA__15__KET____DOT__u_sym_lfsr__DOT__lfsr_reg;
         IData/*31:0*/ tb_board_a_top__DOT__dut__DOT__u_market_sim__DOT__u_market_noise_gen__DOT__g_sec_rng__BRA__0__KET____DOT__u_sec_lfsr__DOT__lfsr_reg;
         IData/*31:0*/ tb_board_a_top__DOT__dut__DOT__u_market_sim__DOT__u_market_noise_gen__DOT__g_sec_rng__BRA__1__KET____DOT__u_sec_lfsr__DOT__lfsr_reg;
         IData/*31:0*/ tb_board_a_top__DOT__dut__DOT__u_market_sim__DOT__u_market_noise_gen__DOT__g_sec_rng__BRA__2__KET____DOT__u_sec_lfsr__DOT__lfsr_reg;
@@ -192,12 +191,12 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_board_a_top___024root final {
     std::string __Vtask_tb_board_a_top__DOT__check__3__msg;
     std::string __Vtask_tb_board_a_top__DOT__check__4__msg;
     VlDelayScheduler __VdlySched;
-    VlTriggerScheduler __VtrigSched_h6fd192e6__0;
-    VlTriggerScheduler __VtrigSched_h68e7d246__0;
-    VlTriggerScheduler __VtrigSched_h0f1c9fb4__0;
-    VlTriggerScheduler __VtrigSched_h43444ce6__0;
-    VlTriggerScheduler __VtrigSched_h950459ef__0;
-    VlTriggerScheduler __VtrigSched_hc95c02d3__0;
+    VlTriggerScheduler __VtrigSched_hd05ab690__0;
+    VlTriggerScheduler __VtrigSched_h96a0a0ea__0;
+    VlTriggerScheduler __VtrigSched_h62c6f1aa__0;
+    VlTriggerScheduler __VtrigSched_hbf9eea7c__0;
+    VlTriggerScheduler __VtrigSched_h7ce02aad__0;
+    VlTriggerScheduler __VtrigSched_h517031f1__0;
 
     // INTERNAL VARIABLES
     Vtb_board_a_top__Syms* vlSymsp;

@@ -56,8 +56,8 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_sync_fifo___024root final {
     std::string __Vtask_tb_sync_fifo__DOT__check__11__msg;
     std::string __Vtask_tb_sync_fifo__DOT__check__12__msg;
     VlDelayScheduler __VdlySched;
-    VlTriggerScheduler __VtrigSched_h05fb3bc4__0;
-    VlTriggerScheduler __VtrigSched_hc024f4ad__0;
+    VlTriggerScheduler __VtrigSched_h16468184__0;
+    VlTriggerScheduler __VtrigSched_hb2fb5223__0;
 
     // INTERNAL VARIABLES
     Vtb_sync_fifo__Syms* vlSymsp;

@@ -1,5 +1,5 @@
 tb_board_a_top: PASS (quotes_sent=2527)
-- /Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_board_a_top.sv:173: Verilog $finish
+- C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\tb_board_a_top.sv:173: Verilog $finish
 - S i m u l a t i o n   R e p o r t: Verilator 5.046 2026-02-28
-- Verilator: $finish at 800us; walltime 0.026 s; speed 31.361 ms/s
-- Verilator: cpu 0.026 s on 1 threads; allocated 1 MB
+- Verilator: $finish at 800us; walltime 0.056 s; speed 0.000 s/s
+- Verilator: cpu 0.000 s on 1 threads; allocated 4 MB

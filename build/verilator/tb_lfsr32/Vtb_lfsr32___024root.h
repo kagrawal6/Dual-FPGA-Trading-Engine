@@ -41,7 +41,7 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_lfsr32___024root final {
     std::string __Vtask_tb_lfsr32__DOT__check__11__msg;
     std::string __Vtask_tb_lfsr32__DOT__check__13__msg;
     VlDelayScheduler __VdlySched;
-    VlTriggerScheduler __VtrigSched_hf1633238__0;
+    VlTriggerScheduler __VtrigSched_hb706121e__0;
 
     // INTERNAL VARIABLES
     Vtb_lfsr32__Syms* vlSymsp;

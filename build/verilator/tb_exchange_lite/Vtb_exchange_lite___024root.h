@@ -124,8 +124,8 @@ class alignas(VL_CACHE_LINE_BYTES) Vtb_exchange_lite___024root final {
     std::string __Vtask_tb_exchange_lite__DOT__check__85__msg;
     std::string __Vtask_tb_exchange_lite__DOT__check__86__msg;
     VlDelayScheduler __VdlySched;
-    VlTriggerScheduler __VtrigSched_h068d8763__0;
-    VlTriggerScheduler __VtrigSched_h1d76856a__0;
+    VlTriggerScheduler __VtrigSched_h89ac9348__0;
+    VlTriggerScheduler __VtrigSched_h059def81__0;
 
     // INTERNAL VARIABLES
     Vtb_exchange_lite__Syms* vlSymsp;

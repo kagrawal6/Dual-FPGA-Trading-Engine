@@ -66,7 +66,7 @@ VL_ATTR_COLD void Vtb_board_a_ctrl___024root___eval_settle(Vtb_board_a_ctrl___02
 #ifdef VL_DEBUG
             Vtb_board_a_ctrl___024root___dump_triggers__stl(vlSelfRef.__VstlTriggered, "stl"s);
 #endif
-            VL_FATAL_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_board_a_ctrl.sv", 10, "", "DIDNOTCONVERGE: Settle region did not converge after '--converge-limit' of 100 tries");
+            VL_FATAL_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_board_a_ctrl.sv", 10, "", "DIDNOTCONVERGE: Settle region did not converge after '--converge-limit' of 100 tries");
         }
         __VstlIterCount = ((IData)(1U) + __VstlIterCount);
         vlSelfRef.__VstlPhaseResult = Vtb_board_a_ctrl___024root___eval_phase__stl(vlSelf);

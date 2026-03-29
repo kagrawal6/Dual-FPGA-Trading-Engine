@@ -15,7 +15,7 @@ void Vtb_market_sim___024root___eval_initial(Vtb_market_sim___024root* vlSelf) {
     // Body
     vlSelfRef.tb_market_sim__DOT__clk = 0U;
     vlSymsp->_vm_contextp__->dumpfile("tb_market_sim.vcd"s);
-    VL_PRINTF_MT("-Info: /Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv:78: $dumpvar ignored, as Verilated without --trace\n");
+    VL_PRINTF_MT("-Info: C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv:78: $dumpvar ignored, as Verilated without --trace\n");
     Vtb_market_sim___024root___eval_initial__TOP__Vtiming__0(vlSelf);
     Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(vlSelf);
     Vtb_market_sim___024root___eval_initial__TOP__Vtiming__2(vlSelf);
@@ -28,14 +28,14 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__0(Vtb_market_
     // Body
     vlSelfRef.tb_market_sim__DOT__rst_n = 0U;
     co_await vlSelfRef.__VdlySched.delay(0x00000000000186a0ULL, 
-                                         nullptr, "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                         nullptr, "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                          42);
     vlSelfRef.tb_market_sim__DOT__rst_n = 1U;
     co_return;
 }
 
-void Vtb_market_sim___024root____VbeforeTrig_hb7b23b8b__0(Vtb_market_sim___024root* vlSelf, const char* __VeventDescription);
-void Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(Vtb_market_sim___024root* vlSelf, const char* __VeventDescription);
+void Vtb_market_sim___024root____VbeforeTrig_h8d2e6b5d__0(Vtb_market_sim___024root* vlSelf, const char* __VeventDescription);
+void Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(Vtb_market_sim___024root* vlSelf, const char* __VeventDescription);
 
 VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_sim___024root* vlSelf) {
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1\n"); );
@@ -300,20 +300,20 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
     __Vtask_tb_market_sim__DOT__check__119__cond = 0;
     // Body
     while ((1U & (~ (IData)(vlSelfRef.tb_market_sim__DOT__rst_n)))) {
-        Vtb_market_sim___024root____VbeforeTrig_hb7b23b8b__0(vlSelf, 
+        Vtb_market_sim___024root____VbeforeTrig_h8d2e6b5d__0(vlSelf, 
                                                              "@( tb_market_sim.rst_n)");
-        co_await vlSelfRef.__VtrigSched_hb7b23b8b__0.trigger(1U, 
+        co_await vlSelfRef.__VtrigSched_h8d2e6b5d__0.trigger(1U, 
                                                              nullptr, 
                                                              "@( tb_market_sim.rst_n)", 
-                                                             "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                             "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                              179);
     }
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          180);
     vlSelfRef.tb_market_sim__DOT__enable = 0U;
     vlSelfRef.tb_market_sim__DOT__lfsr_load = 0U;
@@ -339,20 +339,20 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
     vlSelfRef.tb_market_sim__DOT__sector_id[3U] = 3U;
     vlSelfRef.tb_market_sim__DOT__seq_expect[3U] = 0U;
     vlSelfRef.tb_market_sim__DOT__lfsr_load = 1U;
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          116);
     vlSelfRef.tb_market_sim__DOT__lfsr_load = 0U;
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          118);
     vlSelfRef.tb_market_sim__DOT__enable = 1U;
     vlSelfRef.tb_market_sim__DOT__unnamedblk2__DOT__sym_wrap = 3U;
@@ -367,12 +367,12 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         vlSelfRef.__Vtask_tb_market_sim__DOT__check_one_quote__3__tag 
             = VL_SFORMATF_N_NX("P1 q%0d",0,32,vlSelfRef.tb_market_sim__DOT__unnamedblk2__DOT__q) ;
         do {
-            Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+            Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                                  "@(posedge tb_market_sim.clk)");
-            co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+            co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                                  nullptr, 
                                                                  "@(posedge tb_market_sim.clk)", 
-                                                                 "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                                 "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                                  109);
         } while ((1U & (~ (IData)(vlSelfRef.tb_market_sim__DOT__quote_valid))));
         __Vtask_tb_market_sim__DOT__check__5__cond 
@@ -385,7 +385,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__5__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -403,7 +403,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__6__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -417,7 +417,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__7__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -438,7 +438,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__8__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -459,7 +459,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__9__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -473,7 +473,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__10__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -487,7 +487,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__11__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -518,7 +518,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
                                  64,VL_TIME_UNITED_Q(1000),
                                  -9,vlSymsp->name(),
                                  2,(IData)(__Vfunc_tb_market_sim__DOT__base_spread_for__12__r));
-                    VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 85, "");
+                    VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 85, "");
                 }
             }
         }
@@ -536,7 +536,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__13__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -571,7 +571,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__15__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -581,17 +581,17 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__16__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
     vlSelfRef.tb_market_sim__DOT__enable = 0U;
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          202);
     vlSelfRef.tb_market_sim__DOT__enable = 0U;
     vlSelfRef.tb_market_sim__DOT__lfsr_load = 0U;
@@ -619,20 +619,20 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
     vlSelfRef.tb_market_sim__DOT__active_sym_count = 4U;
     vlSelfRef.tb_market_sim__DOT__quote_interval = 5U;
     vlSelfRef.tb_market_sim__DOT__lfsr_load = 1U;
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          116);
     vlSelfRef.tb_market_sim__DOT__lfsr_load = 0U;
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          118);
     vlSelfRef.tb_market_sim__DOT__enable = 1U;
     vlSelfRef.tb_market_sim__DOT__quote_ready = 1U;
@@ -648,12 +648,12 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         = vlSelfRef.tb_market_sim__DOT__unnamedblk2__DOT__exp_sym;
     vlSelfRef.__Vtask_tb_market_sim__DOT__check_one_quote__20__tag = "P2 pre-block"s;
     do {
-        Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+        Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                              "@(posedge tb_market_sim.clk)");
-        co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+        co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                              nullptr, 
                                                              "@(posedge tb_market_sim.clk)", 
-                                                             "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                             "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                              109);
     } while ((1U & (~ (IData)(vlSelfRef.tb_market_sim__DOT__quote_valid))));
     __Vtask_tb_market_sim__DOT__check__22__cond = (1U 
@@ -667,7 +667,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__22__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -686,7 +686,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__23__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -701,7 +701,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__24__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -723,7 +723,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__25__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -742,7 +742,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__26__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -757,7 +757,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__27__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -772,7 +772,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__28__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -800,7 +800,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
                 VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:85: Assertion failed in %Ntb_market_sim.base_spread_for: unique case, but multiple matches found for '2'h%x'\n",0,
                              64,VL_TIME_UNITED_Q(1000),
                              -9,vlSymsp->name(),2,(IData)(__Vfunc_tb_market_sim__DOT__base_spread_for__29__r));
-                VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 85, "");
+                VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 85, "");
             }
         }
     }
@@ -820,7 +820,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__30__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -833,16 +833,16 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__31__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          217);
     __Vtask_tb_market_sim__DOT__check__32__cond = (1U 
                                                    & (~ (IData)(vlSelfRef.tb_market_sim__DOT__quote_valid)));
@@ -851,7 +851,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__32__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -870,12 +870,12 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
     vlSelfRef.tb_market_sim__DOT__quote_ready = 0U;
     tb_market_sim__DOT__unnamedblk2__DOT__unnamedblk1_1__DOT____Vrepeat0 = 0x00000028U;
     while (VL_LTS_III(32, 0U, tb_market_sim__DOT__unnamedblk2__DOT__unnamedblk1_1__DOT____Vrepeat0)) {
-        Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+        Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                              "@(posedge tb_market_sim.clk)");
-        co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+        co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                              nullptr, 
                                                              "@(posedge tb_market_sim.clk)", 
-                                                             "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                             "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                              225);
         __Vtask_tb_market_sim__DOT__check__34__cond 
             = (1U & (~ (IData)(vlSelfRef.tb_market_sim__DOT__quote_valid)));
@@ -884,7 +884,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__34__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -896,7 +896,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__35__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -911,12 +911,12 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         = vlSelfRef.tb_market_sim__DOT__unnamedblk2__DOT__exp_sym;
     vlSelfRef.__Vtask_tb_market_sim__DOT__check_one_quote__36__tag = "P2 post-block"s;
     do {
-        Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+        Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                              "@(posedge tb_market_sim.clk)");
-        co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+        co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                              nullptr, 
                                                              "@(posedge tb_market_sim.clk)", 
-                                                             "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                             "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                              109);
     } while ((1U & (~ (IData)(vlSelfRef.tb_market_sim__DOT__quote_valid))));
     __Vtask_tb_market_sim__DOT__check__38__cond = (1U 
@@ -930,7 +930,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__38__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -949,7 +949,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__39__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -964,7 +964,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__40__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -986,7 +986,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__41__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1005,7 +1005,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__42__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1020,7 +1020,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__43__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1035,7 +1035,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__44__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1063,7 +1063,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
                 VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:85: Assertion failed in %Ntb_market_sim.base_spread_for: unique case, but multiple matches found for '2'h%x'\n",0,
                              64,VL_TIME_UNITED_Q(1000),
                              -9,vlSymsp->name(),2,(IData)(__Vfunc_tb_market_sim__DOT__base_spread_for__45__r));
-                VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 85, "");
+                VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 85, "");
             }
         }
     }
@@ -1083,7 +1083,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__46__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1106,12 +1106,12 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         = vlSelfRef.tb_market_sim__DOT__unnamedblk2__DOT__exp_sym;
     vlSelfRef.__Vtask_tb_market_sim__DOT__check_one_quote__48__tag = "P2 post-block b"s;
     do {
-        Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+        Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                              "@(posedge tb_market_sim.clk)");
-        co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+        co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                              nullptr, 
                                                              "@(posedge tb_market_sim.clk)", 
-                                                             "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                             "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                              109);
     } while ((1U & (~ (IData)(vlSelfRef.tb_market_sim__DOT__quote_valid))));
     __Vtask_tb_market_sim__DOT__check__50__cond = (1U 
@@ -1125,7 +1125,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__50__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1144,7 +1144,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__51__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1159,7 +1159,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__52__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1181,7 +1181,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__53__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1200,7 +1200,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__54__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1215,7 +1215,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__55__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1230,7 +1230,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__56__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1258,7 +1258,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
                 VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:85: Assertion failed in %Ntb_market_sim.base_spread_for: unique case, but multiple matches found for '2'h%x'\n",0,
                              64,VL_TIME_UNITED_Q(1000),
                              -9,vlSymsp->name(),2,(IData)(__Vfunc_tb_market_sim__DOT__base_spread_for__57__r));
-                VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 85, "");
+                VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 85, "");
             }
         }
     }
@@ -1278,7 +1278,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__58__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1286,12 +1286,12 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         = (0x0000ffffU & ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__seq_expect
                           [(3U & __Vtask_tb_market_sim__DOT__check_one_quote__48__exp_sym)]));
     vlSelfRef.tb_market_sim__DOT__enable = 0U;
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          238);
     vlSelfRef.tb_market_sim__DOT__enable = 0U;
     vlSelfRef.tb_market_sim__DOT__lfsr_load = 0U;
@@ -1319,20 +1319,20 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
     vlSelfRef.tb_market_sim__DOT__active_sym_count = 2U;
     vlSelfRef.tb_market_sim__DOT__quote_interval = 1U;
     vlSelfRef.tb_market_sim__DOT__lfsr_load = 1U;
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          116);
     vlSelfRef.tb_market_sim__DOT__lfsr_load = 0U;
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          118);
     vlSelfRef.tb_market_sim__DOT__enable = 1U;
     vlSelfRef.tb_market_sim__DOT__unnamedblk2__DOT__sym_wrap = 1U;
@@ -1349,12 +1349,12 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             = vlSelfRef.tb_market_sim__DOT__unnamedblk2__DOT__exp_sym;
         vlSelfRef.__Vtask_tb_market_sim__DOT__check_one_quote__62__tag = "P3 active2"s;
         do {
-            Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+            Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                                  "@(posedge tb_market_sim.clk)");
-            co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+            co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                                  nullptr, 
                                                                  "@(posedge tb_market_sim.clk)", 
-                                                                 "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                                 "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                                  109);
         } while ((1U & (~ (IData)(vlSelfRef.tb_market_sim__DOT__quote_valid))));
         __Vtask_tb_market_sim__DOT__check__64__cond 
@@ -1367,7 +1367,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__64__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -1385,7 +1385,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__65__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -1399,7 +1399,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__66__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -1420,7 +1420,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__67__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -1441,7 +1441,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__68__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -1455,7 +1455,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__69__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -1469,7 +1469,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__70__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -1500,7 +1500,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
                                  64,VL_TIME_UNITED_Q(1000),
                                  -9,vlSymsp->name(),
                                  2,(IData)(__Vfunc_tb_market_sim__DOT__base_spread_for__71__r));
-                    VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 85, "");
+                    VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 85, "");
                 }
             }
         }
@@ -1518,7 +1518,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__72__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -1542,12 +1542,12 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
                - (IData)(1U));
     }
     vlSelfRef.tb_market_sim__DOT__enable = 0U;
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          255);
     vlSelfRef.tb_market_sim__DOT__enable = 0U;
     vlSelfRef.tb_market_sim__DOT__lfsr_load = 0U;
@@ -1575,20 +1575,20 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
     vlSelfRef.tb_market_sim__DOT__active_sym_count = 4U;
     vlSelfRef.tb_market_sim__DOT__quote_interval = 1U;
     vlSelfRef.tb_market_sim__DOT__lfsr_load = 1U;
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          116);
     vlSelfRef.tb_market_sim__DOT__lfsr_load = 0U;
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          118);
     vlSelfRef.tb_market_sim__DOT__enable = 1U;
     vlSelfRef.tb_market_sim__DOT__unnamedblk2__DOT__sym_wrap = 3U;
@@ -1605,12 +1605,12 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             = vlSelfRef.tb_market_sim__DOT__unnamedblk2__DOT__exp_sym;
         vlSelfRef.__Vtask_tb_market_sim__DOT__check_one_quote__77__tag = "P4 pre-reload"s;
         do {
-            Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+            Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                                  "@(posedge tb_market_sim.clk)");
-            co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+            co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                                  nullptr, 
                                                                  "@(posedge tb_market_sim.clk)", 
-                                                                 "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                                 "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                                  109);
         } while ((1U & (~ (IData)(vlSelfRef.tb_market_sim__DOT__quote_valid))));
         __Vtask_tb_market_sim__DOT__check__79__cond 
@@ -1623,7 +1623,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__79__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -1641,7 +1641,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__80__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -1655,7 +1655,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__81__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -1676,7 +1676,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__82__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -1697,7 +1697,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__83__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -1711,7 +1711,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__84__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -1725,7 +1725,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__85__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -1756,7 +1756,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
                                  64,VL_TIME_UNITED_Q(1000),
                                  -9,vlSymsp->name(),
                                  2,(IData)(__Vfunc_tb_market_sim__DOT__base_spread_for__86__r));
-                    VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 85, "");
+                    VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 85, "");
                 }
             }
         }
@@ -1774,7 +1774,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__87__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -1804,33 +1804,33 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__89__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
     vlSelfRef.tb_market_sim__DOT__enable = 0U;
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          274);
     vlSelfRef.tb_market_sim__DOT__lfsr_load = 1U;
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          116);
     vlSelfRef.tb_market_sim__DOT__lfsr_load = 0U;
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          118);
     __Vtask_tb_market_sim__DOT__check__91__cond = (0U 
                                                    == vlSelfRef.tb_market_sim__DOT__quotes_generated);
@@ -1839,7 +1839,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__91__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1854,12 +1854,12 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
     __Vtask_tb_market_sim__DOT__check_one_quote__92__exp_sym = 0U;
     vlSelfRef.__Vtask_tb_market_sim__DOT__check_one_quote__92__tag = "P4 after reload"s;
     do {
-        Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+        Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                              "@(posedge tb_market_sim.clk)");
-        co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+        co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                              nullptr, 
                                                              "@(posedge tb_market_sim.clk)", 
-                                                             "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                             "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                              109);
     } while ((1U & (~ (IData)(vlSelfRef.tb_market_sim__DOT__quote_valid))));
     __Vtask_tb_market_sim__DOT__check__94__cond = (1U 
@@ -1873,7 +1873,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__94__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1892,7 +1892,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__95__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1907,7 +1907,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__96__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1929,7 +1929,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__97__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1948,7 +1948,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__98__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1963,7 +1963,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__99__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -1976,7 +1976,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__100__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -2004,7 +2004,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
                 VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:85: Assertion failed in %Ntb_market_sim.base_spread_for: unique case, but multiple matches found for '2'h%x'\n",0,
                              64,VL_TIME_UNITED_Q(1000),
                              -9,vlSymsp->name(),2,(IData)(__Vfunc_tb_market_sim__DOT__base_spread_for__101__r));
-                VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 85, "");
+                VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 85, "");
             }
         }
     }
@@ -2022,7 +2022,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__102__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -2036,17 +2036,17 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__103__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
     vlSelfRef.tb_market_sim__DOT__enable = 0U;
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          289);
     vlSelfRef.tb_market_sim__DOT__enable = 0U;
     vlSelfRef.tb_market_sim__DOT__lfsr_load = 0U;
@@ -2074,20 +2074,20 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
     vlSelfRef.tb_market_sim__DOT__quote_interval = 0U;
     vlSelfRef.tb_market_sim__DOT__active_sym_count = 4U;
     vlSelfRef.tb_market_sim__DOT__lfsr_load = 1U;
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          116);
     vlSelfRef.tb_market_sim__DOT__lfsr_load = 0U;
-    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                          "@(posedge tb_market_sim.clk)");
-    co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+    co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge tb_market_sim.clk)", 
-                                                         "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                         "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                          118);
     vlSelfRef.tb_market_sim__DOT__enable = 1U;
     vlSelfRef.tb_market_sim__DOT__unnamedblk2__DOT__sym_wrap = 3U;
@@ -2104,12 +2104,12 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             = vlSelfRef.tb_market_sim__DOT__unnamedblk2__DOT__exp_sym;
         vlSelfRef.__Vtask_tb_market_sim__DOT__check_one_quote__107__tag = "P5 interval0"s;
         do {
-            Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(vlSelf, 
+            Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(vlSelf, 
                                                                  "@(posedge tb_market_sim.clk)");
-            co_await vlSelfRef.__VtrigSched_h4e0461f5__0.trigger(0U, 
+            co_await vlSelfRef.__VtrigSched_h066a8c7b__0.trigger(0U, 
                                                                  nullptr, 
                                                                  "@(posedge tb_market_sim.clk)", 
-                                                                 "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                                                 "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                                                  109);
         } while ((1U & (~ (IData)(vlSelfRef.tb_market_sim__DOT__quote_valid))));
         __Vtask_tb_market_sim__DOT__check__109__cond 
@@ -2122,7 +2122,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__109__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -2140,7 +2140,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__110__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -2154,7 +2154,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__111__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -2175,7 +2175,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__112__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -2196,7 +2196,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__113__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -2210,7 +2210,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__114__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -2224,7 +2224,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__115__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -2255,7 +2255,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
                                  64,VL_TIME_UNITED_Q(1000),
                                  -9,vlSymsp->name(),
                                  2,(IData)(__Vfunc_tb_market_sim__DOT__base_spread_for__116__r));
-                    VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 85, "");
+                    VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 85, "");
                 }
             }
         }
@@ -2273,7 +2273,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
             VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                          64,VL_TIME_UNITED_Q(1000),
                          -9,vlSymsp->name(),-1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__117__msg));
-            VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+            VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
             vlSelfRef.tb_market_sim__DOT__err_count 
                 = ((IData)(1U) + vlSelfRef.tb_market_sim__DOT__err_count);
         }
@@ -2303,7 +2303,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("[%0t] %%Error: tb_market_sim.sv:71: Assertion failed in %Ntb_market_sim.check: FAIL: %@\n",0,
                      64,VL_TIME_UNITED_Q(1000),-9,vlSymsp->name(),
                      -1,&(vlSelfRef.__Vtask_tb_market_sim__DOT__check__119__msg));
-        VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 71, "");
+        VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 71, "");
         vlSelfRef.tb_market_sim__DOT__err_count = ((IData)(1U) 
                                                    + vlSelfRef.tb_market_sim__DOT__err_count);
     }
@@ -2313,7 +2313,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__1(Vtb_market_
         VL_WRITEF_NX("tb_market_sim: FAIL (%0d errors)\n",0,
                      32,vlSelfRef.tb_market_sim__DOT__err_count);
     }
-    VL_FINISH_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 310, "");
+    VL_FINISH_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 310, "");
     co_return;
 }
 
@@ -2325,7 +2325,7 @@ VlCoroutine Vtb_market_sim___024root___eval_initial__TOP__Vtiming__2(Vtb_market_
     while (VL_LIKELY(!vlSymsp->_vm_contextp__->gotFinish())) {
         co_await vlSelfRef.__VdlySched.delay(0x0000000000001388ULL, 
                                              nullptr, 
-                                             "/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 
+                                             "C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 
                                              38);
         vlSelfRef.tb_market_sim__DOT__clk = (1U & (~ (IData)(vlSelfRef.tb_market_sim__DOT__clk)));
     }
@@ -2400,7 +2400,7 @@ void Vtb_market_sim___024root___act_comb__TOP__0(Vtb_market_sim___024root* vlSel
                 VL_WRITEF_NX("[%0t] %%Error: market_sim.sv:72: Assertion failed in %Ntb_market_sim.dut: unique case, but multiple matches found for '2'h%x'\n",0,
                              64,VL_TIME_UNITED_Q(1000),
                              -9,vlSymsp->name(),2,(IData)(vlSelfRef.tb_market_sim__DOT__active_regime));
-                VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv", 72, "");
+                VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/rtl/board_a\\market_sim.sv", 72, "");
             }
         }
     }
@@ -4274,7 +4274,7 @@ void Vtb_market_sim___024root___nba_comb__TOP__0(Vtb_market_sim___024root* vlSel
                 VL_WRITEF_NX("[%0t] %%Error: market_sim.sv:72: Assertion failed in %Ntb_market_sim.dut: unique case, but multiple matches found for '2'h%x'\n",0,
                              64,VL_TIME_UNITED_Q(1000),
                              -9,vlSymsp->name(),2,(IData)(vlSelfRef.tb_market_sim__DOT__active_regime));
-                VL_STOP_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv", 72, "");
+                VL_STOP_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/rtl/board_a\\market_sim.sv", 72, "");
             }
         }
     }
@@ -4522,10 +4522,10 @@ void Vtb_market_sim___024root___timing_ready(Vtb_market_sim___024root* vlSelf) {
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     if ((8ULL & vlSelfRef.__VactTriggered[0U])) {
-        vlSelfRef.__VtrigSched_hb7b23b8b__0.ready("@( tb_market_sim.rst_n)");
+        vlSelfRef.__VtrigSched_h8d2e6b5d__0.ready("@( tb_market_sim.rst_n)");
     }
     if ((1ULL & vlSelfRef.__VactTriggered[0U])) {
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready("@(posedge tb_market_sim.clk)");
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready("@(posedge tb_market_sim.clk)");
     }
 }
 
@@ -4534,12 +4534,12 @@ void Vtb_market_sim___024root___timing_resume(Vtb_market_sim___024root* vlSelf) 
     Vtb_market_sim__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSelfRef.__VtrigSched_hb7b23b8b__0.moveToResumeQueue(
+    vlSelfRef.__VtrigSched_h8d2e6b5d__0.moveToResumeQueue(
                                                           "@( tb_market_sim.rst_n)");
-    vlSelfRef.__VtrigSched_h4e0461f5__0.moveToResumeQueue(
+    vlSelfRef.__VtrigSched_h066a8c7b__0.moveToResumeQueue(
                                                           "@(posedge tb_market_sim.clk)");
-    vlSelfRef.__VtrigSched_hb7b23b8b__0.resume("@( tb_market_sim.rst_n)");
-    vlSelfRef.__VtrigSched_h4e0461f5__0.resume("@(posedge tb_market_sim.clk)");
+    vlSelfRef.__VtrigSched_h8d2e6b5d__0.resume("@( tb_market_sim.rst_n)");
+    vlSelfRef.__VtrigSched_h066a8c7b__0.resume("@(posedge tb_market_sim.clk)");
     if ((4ULL & vlSelfRef.__VactTriggered[0U])) {
         vlSelfRef.__VdlySched.resume();
     }
@@ -4595,7 +4595,7 @@ bool Vtb_market_sim___024root___eval_phase__inact(Vtb_market_sim___024root* vlSe
     // Body
     __VinactExecute = vlSelfRef.__VdlySched.awaitingZeroDelay();
     if (__VinactExecute) {
-        VL_FATAL_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 16, "", "ZERODLY: Design Verilated with '--no-sched-zero-delay', but #0 delay executed at runtime");
+        VL_FATAL_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 16, "", "ZERODLY: Design Verilated with '--no-sched-zero-delay', but #0 delay executed at runtime");
     }
     return (__VinactExecute);
 }
@@ -4640,13 +4640,13 @@ void Vtb_market_sim___024root___eval(Vtb_market_sim___024root* vlSelf) {
 #ifdef VL_DEBUG
             Vtb_market_sim___024root___dump_triggers__act(vlSelfRef.__VnbaTriggered, "nba"s);
 #endif
-            VL_FATAL_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 16, "", "DIDNOTCONVERGE: NBA region did not converge after '--converge-limit' of 100 tries");
+            VL_FATAL_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 16, "", "DIDNOTCONVERGE: NBA region did not converge after '--converge-limit' of 100 tries");
         }
         __VnbaIterCount = ((IData)(1U) + __VnbaIterCount);
         vlSelfRef.__VinactIterCount = 0U;
         do {
             if (VL_UNLIKELY(((0x00000064U < vlSelfRef.__VinactIterCount)))) {
-                VL_FATAL_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 16, "", "DIDNOTCONVERGE: Inactive region did not converge after '--converge-limit' of 100 tries");
+                VL_FATAL_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 16, "", "DIDNOTCONVERGE: Inactive region did not converge after '--converge-limit' of 100 tries");
             }
             vlSelfRef.__VinactIterCount = ((IData)(1U) 
                                            + vlSelfRef.__VinactIterCount);
@@ -4656,7 +4656,7 @@ void Vtb_market_sim___024root___eval(Vtb_market_sim___024root* vlSelf) {
 #ifdef VL_DEBUG
                     Vtb_market_sim___024root___dump_triggers__act(vlSelfRef.__VactTriggered, "act"s);
 #endif
-                    VL_FATAL_MT("/Users/eeshanahari/Dual-FPGA-Trading-Engine/tb/board_a/tb_market_sim.sv", 16, "", "DIDNOTCONVERGE: Active region did not converge after '--converge-limit' of 100 tries");
+                    VL_FATAL_MT("C:/Users/blazi/Downloads/Dual-FPGA-Trading-Engine/tb/board_a\\tb_market_sim.sv", 16, "", "DIDNOTCONVERGE: Active region did not converge after '--converge-limit' of 100 tries");
                 }
                 vlSelfRef.__VactIterCount = ((IData)(1U) 
                                              + vlSelfRef.__VactIterCount);
@@ -4668,8 +4668,8 @@ void Vtb_market_sim___024root___eval(Vtb_market_sim___024root* vlSelf) {
     } while (vlSelfRef.__VnbaPhaseResult);
 }
 
-void Vtb_market_sim___024root____VbeforeTrig_hb7b23b8b__0(Vtb_market_sim___024root* vlSelf, const char* __VeventDescription) {
-    VL_DEBUG_IF(VL_DBG_MSGF("+    Vtb_market_sim___024root____VbeforeTrig_hb7b23b8b__0\n"); );
+void Vtb_market_sim___024root____VbeforeTrig_h8d2e6b5d__0(Vtb_market_sim___024root* vlSelf, const char* __VeventDescription) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vtb_market_sim___024root____VbeforeTrig_h8d2e6b5d__0\n"); );
     Vtb_market_sim__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Locals
@@ -4681,14 +4681,14 @@ void Vtb_market_sim___024root____VbeforeTrig_hb7b23b8b__0(Vtb_market_sim___024ro
     vlSelfRef.__Vtrigprevexpr___TOP__tb_market_sim__DOT__rst_n__0 
         = vlSelfRef.tb_market_sim__DOT__rst_n;
     if ((8ULL & __VTmp[0U])) {
-        vlSelfRef.__VtrigSched_hb7b23b8b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h8d2e6b5d__0.ready(__VeventDescription);
     }
     vlSelfRef.__VactTriggeredAcc[0U] = (vlSelfRef.__VactTriggeredAcc[0U] 
                                         | __VTmp[0U]);
 }
 
-void Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(Vtb_market_sim___024root* vlSelf, const char* __VeventDescription) {
-    VL_DEBUG_IF(VL_DBG_MSGF("+    Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0\n"); );
+void Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0(Vtb_market_sim___024root* vlSelf, const char* __VeventDescription) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vtb_market_sim___024root____VbeforeTrig_h066a8c7b__0\n"); );
     Vtb_market_sim__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Locals
@@ -4699,34 +4699,34 @@ void Vtb_market_sim___024root____VbeforeTrig_h4e0461f5__0(Vtb_market_sim___024ro
     vlSelfRef.__Vtrigprevexpr___TOP__tb_market_sim__DOT__clk__0 
         = vlSelfRef.tb_market_sim__DOT__clk;
     if ((1ULL & __VTmp[0U])) {
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
-        vlSelfRef.__VtrigSched_h4e0461f5__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
+        vlSelfRef.__VtrigSched_h066a8c7b__0.ready(__VeventDescription);
     }
     vlSelfRef.__VactTriggeredAcc[0U] = (vlSelfRef.__VactTriggeredAcc[0U] 
                                         | __VTmp[0U]);
