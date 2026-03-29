@@ -703,6 +703,11 @@ Clock Domains (per board):
    This is the computational heart of the pipeline, using DSP48E2 slices for fixed-point arithmetic:
    - **Cycle 1**: Computes `mid = (bid + ask) >> 1` (arithmetic mean of bid and ask) and `spread = ask - bid` (market width).
    - **Cycles 2-3**: Updates the per-symbol exponential moving average (EMA) using a multiply-accumulate: `ema_new = (alpha × mid + (1-alpha) × ema_old) >> 16`. This uses two DSP48E2 slices for the Q0.16 × Q16.16 multiplications. The EMA is a smoothed price history — it tracks the "fair value" of the symbol.
+   - **EMA first-sample initialization**: A per-symbol 1-bit register `ema_initialized[NUM_SYMBOLS]` (cleared on reset) tracks whether each symbol has received its first quote. On the first quote for a given symbol (`!ema_initialized[sym]`), the EMA is seeded directly with `mid` — bypassing the MAC — and the initialized bit is set. This prevents a large spurious deviation on the first quote (without this, `ema_old = 0` would produce `deviation ≈ mid ≈ $150`, immediately triggering a false trade signal). Subsequent quotes use the normal EMA MAC path. In RTL this is a simple mux in stage 3:
+     ```
+     if (first_sample_s3)   ema_state[sym] <= mid_s3;
+     else                   ema_state[sym] <= ema_mac_result;
+     ```
    - **Output**: `deviation = mid - ema` (signed Q16.16). A positive deviation means the current price is above the smoothed average; negative means below.
 
 6. **Stage 5 — Strategy Engine (1 cycle)**
@@ -715,11 +720,23 @@ Clock Domains (per board):
 
 7. **Stage 6 — Risk Manager (1 cycle)**
    Three independent checks execute in parallel on the same clock edge:
-   - **Position check**: Would the new order push `abs(position[symbol])` beyond `max_position`?
+   - **Position check**: Would the new order push `abs(position[symbol])` beyond `max_position`? To prevent **in-flight position overshoot** (see below), this check uses *effective position* rather than actual position.
    - **Rate check**: Have we sent too many orders in the current time window (sliding window counter)?
    - **Loss check**: Is `total_pnl` below `-max_loss` (halt threshold)?
 
    All three must pass AND `trading_enable` must be high AND `risk_halt` must be low. Any failure suppresses the order and increments `risk_rejects`. If the loss check fails, `risk_halt` latches — all trading stops until reset.
+
+   **In-flight position tracking**: Orders take ~258 cycles round-trip through the link layer (Board B → Board A → fill → Board B). During this window, the risk manager can approve multiple orders for the same symbol, each seeing the stale `position[sym]` from the position tracker (which only updates when fills return). Without mitigation, this race condition allows positions to overshoot `max_position` (e.g., 6 orders of qty=100 approved while position=0, all fill, resulting in position=600 > max_position=500).
+
+   The fix uses **separate** per-symbol `pending_buy[NUM_SYMBOLS]` and `pending_sell[NUM_SYMBOLS]` unsigned registers (cleared on reset), tracking gross outstanding buy and sell quantities independently. A net (signed) tracker is insufficient because alternating BUY/SELL signals cancel out, allowing positions to overshoot.
+
+   - **On BUY approved**: `pending_buy[sym] += qty`
+   - **On SELL approved**: `pending_sell[sym] += qty`
+   - **On BUY fill or reject received**: `pending_buy[sym] -= qty`
+   - **On SELL fill or reject received**: `pending_sell[sym] -= qty`
+   - **Position check (worst-case)**: For a BUY, the worst case assumes all pending buys fill but no pending sells do: `abs(position[sym] + pending_buy[sym] + qty) <= max_position`. For a SELL: `abs(position[sym] - pending_sell[sym] - qty) <= max_position`.
+
+   Both fills and exchange-rejected fills must decrement pending counters, since rejected orders are no longer in-flight. This requires the FILL frame path (from `msg_demux`) to feed back to `risk_manager` for all fill statuses, not just `FILL_OK`.
 
 8. **Stage 7 — Order Manager (1 cycle)**
    Only fires when risk_manager outputs `approved_valid`. Builds a 128-bit ORDER frame:

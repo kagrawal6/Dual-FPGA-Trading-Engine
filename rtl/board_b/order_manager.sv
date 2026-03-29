@@ -35,7 +35,7 @@ module order_manager
 );
 
     // TODO: Implementation
-    // Pack ORDER frame per §4.5.3:
+    // Pack ORDER frame per Appendix C:
     //   [127:124] = MSG_ORDER (4'h2)
     //   [123:116] = approved_symbol
     //   [115]     = approved_side
@@ -43,8 +43,7 @@ module order_manager
     //   [111:80]  = approved_price (limit_price)
     //   [79:64]   = approved_qty
     //   [63:48]   = order_id (auto-increment)
-    //   [47:32]   = 16'b0 (reserved)
-    //   [31:16]   = cycle_counter (timestamp)
-    //   [15:0]    = seq_num (auto-increment)
+    //   [47:32]   = cycle_counter (timestamp) — exchange_lite echoes this as ts_echo
+    //   [31:0]    = 32'b0 (reserved)
 
 endmodule

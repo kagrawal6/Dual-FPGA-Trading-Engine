@@ -36,10 +36,10 @@ module position_tracker
 );
 
     // TODO: Implementation
-    // Decode FILL frame per §4.5.3:
+    // Decode FILL frame per Appendix C:
     //   [127:124]=msg_type, [123:116]=symbol_id, [115]=side, [114:112]=status,
     //   [111:80]=fill_price, [79:64]=fill_qty, [63:48]=order_id,
-    //   [31:16]=ts_echo, [15:0]=seq_num
+    //   [47:32]=ts_echo, [31:0]=reserved
     // Only process if status == FILL_OK (3'b000).
     // Position update: BUY → position[sym] += qty; SELL → position[sym] -= qty.
     // Cash update: BUY → cash -= price * qty; SELL → cash += price * qty.
