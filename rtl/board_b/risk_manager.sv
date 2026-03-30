@@ -1,11 +1,15 @@
 // ============================================================================
 // Module: risk_manager
 // Three parallel limit checks in 1 cycle (pipeline stage 6):
-//   1) Position limit: |position[symbol]| < max_position
-//   2) Order rate:     orders_this_window < max_order_rate
-//   3) Max loss:       total_pnl > -max_loss
-// Final gate: approved = pass_1 & pass_2 & pass_3 & order_enable.
-// Latches risk_halt when check 3 fails (cleared only by counter_clr).
+//   1) Position limit: worst-case position (including in-flight pending)
+//      must not exceed max_position
+//   2) Order rate: order_count < max_order_rate
+//   3) Max loss: total_pnl > -max_loss
+// Final gate: approved = pass_1 & pass_2 & pass_3 & order_enable & !risk_halt.
+// Latches risk_halt when check 3 fails (cleared only by clear).
+//
+// In-flight tracking: pending_buy[sym] and pending_sell[sym] track orders
+// that have been sent but not yet filled/rejected. on_fill clears them.
 // ============================================================================
 
 `timescale 1ns / 1ps
@@ -17,26 +21,25 @@ module risk_manager
 )(
     input  logic        clk,
     input  logic        rst_n,
-    input  logic        clear,              // reset halt latch + rate counter
+    input  logic        clear,
 
-    // FSM control
-    input  logic        order_enable,       // high only in TRADING state
+    input  logic        order_enable,
 
-    // Trade signal from strategy_engine (stage 5 output)
+    // Trade signal from strategy_engine
     input  logic        signal_valid,
     input  logic        signal_side,        // 0=BUY, 1=SELL
     input  price_t      signal_price,
     input  qty_t        signal_qty,
     input  symbol_t     signal_symbol,
 
-    // Position feedback (from position_tracker, combinational read)
+    // Position feedback from position_tracker
     input  position_t   position [NUM_SYM],
-    input  sprice_t     total_pnl,          // cash[47:16] — integer dollar PnL
+    input  sprice_t     total_pnl,
 
-    // Configuration (from AXI registers)
+    // Configuration
     input  logic [POSITION_W-1:0]  max_position,
     input  logic [COUNTER_W-1:0]   max_order_rate,
-    input  price_t                 max_loss,        // Q16.16 positive threshold
+    input  price_t                 max_loss,
 
     // Approved output → order_manager
     output logic        approved_valid,
@@ -45,21 +48,133 @@ module risk_manager
     output qty_t        approved_qty,
     output symbol_t     approved_symbol,
 
+    // Fill feedback (from position_tracker) — clears pending
+    input  logic        fill_valid,
+    input  symbol_t     fill_symbol,
+    input  logic        fill_side,
+    input  qty_t        fill_qty,
+
     // Status
     output logic                  risk_halt,
     output logic [COUNTER_W-1:0] risk_rejects
 );
 
-    // TODO: Implementation
-    // Parallel checks (combinational):
-    //   pass_pos  = (position[signal_symbol] >= 0)
-    //              ? (position[signal_symbol] + signal_qty <= max_position)
-    //              : (-position[signal_symbol] + signal_qty <= max_position);
-    //   pass_rate = (order_count < max_order_rate);
-    //   pass_loss = (total_pnl > -$signed(max_loss));
-    //   approved  = signal_valid & pass_pos & pass_rate & pass_loss & order_enable & !risk_halt;
-    // Registered output (1 cycle).
-    // risk_halt latches on !pass_loss, cleared by clear.
-    // Sliding window counter for order rate.
+    // ── In-flight pending tracking ──────────────────────────────
+    logic [QTY_W-1:0] pending_buy  [NUM_SYM];
+    logic [QTY_W-1:0] pending_sell [NUM_SYM];
+
+    // ── Order rate counter ──────────────────────────────────────
+    logic [COUNTER_W-1:0] order_count;
+
+    // ── Combinational check signals ─────────────────────────────
+    logic pass_pos, pass_rate, pass_loss;
+    logic approved_comb;
+
+    always_comb begin
+        // Default
+        pass_pos  = 1'b1;
+        pass_rate = 1'b1;
+        pass_loss = 1'b1;
+
+        // Check 1: worst-case position after all pending orders fill
+        if (signal_valid && signal_symbol < NUM_SYM[7:0]) begin
+            automatic logic signed [POSITION_W:0] cur_pos;
+            automatic logic signed [POSITION_W:0] worst;
+            cur_pos = $signed(position[signal_symbol]);
+
+            if (signal_side == 1'b0) begin
+                // BUY: worst case = current + pending_buy + qty
+                worst = cur_pos + $signed({1'b0, pending_buy[signal_symbol]})
+                                + $signed({1'b0, signal_qty});
+            end else begin
+                // SELL: worst case = current - pending_sell - qty
+                worst = cur_pos - $signed({1'b0, pending_sell[signal_symbol]})
+                                - $signed({1'b0, signal_qty});
+            end
+
+            // abs(worst) <= max_position
+            if (worst < 0)
+                pass_pos = (-worst) <= $signed({1'b0, max_position});
+            else
+                pass_pos = worst <= $signed({1'b0, max_position});
+        end
+
+        // Check 2: order rate
+        pass_rate = (order_count < max_order_rate);
+
+        // Check 3: max loss (total_pnl > -max_loss)
+        pass_loss = (total_pnl > -$signed({1'b0, max_loss[PRICE_W-2:0]}));
+
+        approved_comb = signal_valid & order_enable & !risk_halt
+                        & pass_pos & pass_rate & pass_loss;
+    end
+
+    // ── Registered output + state update ────────────────────────
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            approved_valid  <= 1'b0;
+            approved_side   <= 1'b0;
+            approved_price  <= '0;
+            approved_qty    <= '0;
+            approved_symbol <= '0;
+            risk_halt       <= 1'b0;
+            risk_rejects    <= '0;
+            order_count     <= '0;
+            for (int i = 0; i < NUM_SYM; i++) begin
+                pending_buy[i]  <= '0;
+                pending_sell[i] <= '0;
+            end
+        end else if (clear) begin
+            approved_valid  <= 1'b0;
+            risk_halt       <= 1'b0;
+            risk_rejects    <= '0;
+            order_count     <= '0;
+            for (int i = 0; i < NUM_SYM; i++) begin
+                pending_buy[i]  <= '0;
+                pending_sell[i] <= '0;
+            end
+        end else begin
+            approved_valid <= 1'b0;
+
+            if (signal_valid) begin
+                if (!order_enable || risk_halt) begin
+                    risk_rejects <= risk_rejects + 1'b1;
+                end else if (approved_comb) begin
+                    approved_valid  <= 1'b1;
+                    approved_side   <= signal_side;
+                    approved_price  <= signal_price;
+                    approved_qty    <= signal_qty;
+                    approved_symbol <= signal_symbol;
+                    order_count     <= order_count + 1'b1;
+
+                    if (signal_symbol < NUM_SYM[7:0]) begin
+                        if (signal_side == 1'b0)
+                            pending_buy[signal_symbol] <= pending_buy[signal_symbol] + signal_qty;
+                        else
+                            pending_sell[signal_symbol] <= pending_sell[signal_symbol] + signal_qty;
+                    end
+                end else begin
+                    risk_rejects <= risk_rejects + 1'b1;
+                    if (!pass_loss)
+                        risk_halt <= 1'b1;
+                end
+            end
+
+            // Fill feedback — clear pending
+            if (fill_valid && fill_symbol < NUM_SYM[7:0]) begin
+                if (fill_side == 1'b0) begin
+                    if (pending_buy[fill_symbol] >= fill_qty)
+                        pending_buy[fill_symbol] <= pending_buy[fill_symbol] - fill_qty;
+                    else
+                        pending_buy[fill_symbol] <= '0;
+                end else begin
+                    if (pending_sell[fill_symbol] >= fill_qty)
+                        pending_sell[fill_symbol] <= pending_sell[fill_symbol] - fill_qty;
+                    else
+                        pending_sell[fill_symbol] <= '0;
+                end
+            end
+        end
+    end
 
 endmodule

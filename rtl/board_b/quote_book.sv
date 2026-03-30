@@ -4,6 +4,8 @@
 // Updated by incoming QUOTE frames (1 cycle latency). Outputs the current
 // symbol's data for downstream pipeline processing (feature_compute).
 // Pipeline stage 2 in the Board B data plane.
+//
+// Out-of-range symbols (>= NUM_SYM) are silently ignored.
 // ============================================================================
 
 `timescale 1ns / 1ps
@@ -30,11 +32,61 @@ module quote_book
     output logic                book_valid
 );
 
-    // TODO: Implementation
-    // Decode QUOTE frame fields per §4.5.3:
-    //   [127:124]=msg_type, [123:116]=symbol_id, [115:114]=regime,
-    //   [111:80]=bid_price, [79:48]=ask_price, [47:32]=bid_size, [31:16]=ask_size
-    // Store in register array: best_bid[NUM_SYM], best_ask[NUM_SYM], etc.
-    // On quote_valid: update registers, output that symbol's data with book_valid=1.
+    // ── Register file ───────────────────────────────────────────
+    price_t  best_bid [NUM_SYM];
+    price_t  best_ask [NUM_SYM];
+    qty_t    best_bid_sz [NUM_SYM];
+    qty_t    best_ask_sz [NUM_SYM];
+
+    // ── Combinational frame decode ──────────────────────────────
+    logic [7:0]  frame_symbol;
+    logic [1:0]  frame_regime;
+    price_t      frame_bid;
+    price_t      frame_ask;
+    qty_t        frame_bid_sz;
+    qty_t        frame_ask_sz;
+
+    assign frame_symbol = quote_frame[123:116];
+    assign frame_regime = quote_frame[115:114];
+    assign frame_bid    = quote_frame[111:80];
+    assign frame_ask    = quote_frame[79:48];
+    assign frame_bid_sz = quote_frame[47:32];
+    assign frame_ask_sz = quote_frame[31:16];
+
+    // ── Registered update + output ──────────────────────────────
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            book_valid <= 1'b0;
+            bid_price  <= '0;
+            ask_price  <= '0;
+            bid_size   <= '0;
+            ask_size   <= '0;
+            symbol_id  <= '0;
+            regime     <= REGIME_CALM;
+            for (int i = 0; i < NUM_SYM; i++) begin
+                best_bid[i]    <= '0;
+                best_ask[i]    <= '0;
+                best_bid_sz[i] <= '0;
+                best_ask_sz[i] <= '0;
+            end
+        end else begin
+            book_valid <= 1'b0;
+
+            if (quote_valid && frame_symbol < NUM_SYM[7:0]) begin
+                best_bid[frame_symbol]    <= frame_bid;
+                best_ask[frame_symbol]    <= frame_ask;
+                best_bid_sz[frame_symbol] <= frame_bid_sz;
+                best_ask_sz[frame_symbol] <= frame_ask_sz;
+
+                bid_price  <= frame_bid;
+                ask_price  <= frame_ask;
+                bid_size   <= frame_bid_sz;
+                ask_size   <= frame_ask_sz;
+                symbol_id  <= frame_symbol;
+                regime     <= regime_e'(frame_regime);
+                book_valid <= 1'b1;
+            end
+        end
+    end
 
 endmodule
