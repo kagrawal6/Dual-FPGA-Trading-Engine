@@ -112,6 +112,19 @@ def show_symbol_config_panel(
         description="HW slots",
     )
 
+    w_quote_interval = w.BoundedIntText(
+        value=1000, min=0, max=1_000_000,
+        description="Quote interval", style={"description_width": "initial"},
+    )
+    w_lfsr_seed = w.Text(
+        value="0xDEADBEEF", description="LFSR seed",
+        style={"description_width": "initial"}, layout=w.Layout(width="200px"),
+    )
+    w_regime = w.Dropdown(
+        options=[("CALM", 0), ("VOLATILE", 1), ("BURST", 2), ("ADVERSARIAL", 3)],
+        value=0, description="Regime", style={"description_width": "initial"},
+    )
+
     chk_sector = w.Checkbox(value=True, description="Write sector IDs")
     chk_token = w.Checkbox(value=True, description="Write token IDs")
     chk_start = w.Checkbox(value=True, description="Pulse start (CTRL)")
@@ -156,6 +169,7 @@ def show_symbol_config_panel(
 
                 ol = Overlay(overlay_path)
                 mmio = MMIO(ol.ip_dict[ip_block]["phys_addr"], mmio_length)
+                lfsr_val = int(w_lfsr_seed.value.strip(), 0)
                 write_mmio_board_config(
                     mmio,
                     loaded,
@@ -164,6 +178,9 @@ def show_symbol_config_panel(
                     write_token_id=bool(chk_token.value),
                     init_spread_default=0.125,
                     pulse_start=bool(chk_start.value),
+                    quote_interval=int(w_quote_interval.value),
+                    lfsr_seed=lfsr_val,
+                    regime=int(w_regime.value),
                 )
                 if chk_start.value:
                     print("Board A started (CTRL pulsed).")
@@ -183,6 +200,7 @@ def show_symbol_config_panel(
             manual,
             random_inner,
             hw_slots,
+            w.HBox([w_quote_interval, w_lfsr_seed, w_regime]),
             w.HBox([chk_sector, chk_token, chk_start]),
             chk_truncate,
             apply_btn,

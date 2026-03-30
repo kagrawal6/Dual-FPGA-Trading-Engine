@@ -24,7 +24,7 @@ def main():
     mmio.write(BASE_QTY,       100)              # 100 shares per order
     mmio.write(MAX_POSITION,   500)
     mmio.write(MAX_ORDER_RATE, 1000)
-    mmio.write(MAX_LOSS,       q16_16(100.00))
+    mmio.write(MAX_LOSS,       100)              # $100 integer dollars (matches total_pnl = cash[47:16])
 
     # Start
     mmio.write(CTRL, 0x01)
@@ -37,11 +37,11 @@ def main():
         data["ops"]      = mmio.read(ORDERS_SENT)
         data["fps"]      = mmio.read(FILLS_RCVD)
         data["rej"]      = mmio.read(RISK_REJECTS)
-        data["pos"]      = [signed32(mmio.read(POS_SYM0 + i * 4))
+        data["pos"]      = [signed32(mmio.read(POS_BASE + i * 4))
                             for i in range(NUM_SYMBOLS)]
         data["cash_lo"]  = mmio.read(CASH_LO)
         data["cash_hi"]  = mmio.read(CASH_HI)
-        data["hist"]     = [mmio.read(HIST_BIN0 + i * 4)
+        data["hist"]     = [mmio.read(HIST_BASE + i * 4)
                             for i in range(NUM_HIST_BINS)]
         data["lat_min"]  = mmio.read(LAT_MIN)
         data["lat_max"]  = mmio.read(LAT_MAX)

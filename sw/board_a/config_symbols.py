@@ -48,12 +48,42 @@ SECTOR_ID_BASE = 0x90     # +4*i
 ACTIVE_SYM_COUNT = 0xF0
 TOKEN_BASE = 0xD0         # +4*(i//2), two 16-bit tokens packed per word
 
+STATUS      = 0xF4
+QUOTES_SENT = 0xF8
+ORDERS_RCVD = 0xFC
+
 DEFAULT_HW_SLOTS = 16
+
+REGIME_NAMES = {0: "CALM", 1: "VOLATILE", 2: "BURST", 3: "ADVERSARIAL"}
 
 
 def q16_16(val: float) -> int:
     """Convert float to unsigned Q16.16 integer."""
     return int(val * 65536) & 0xFFFFFFFF
+
+
+def read_board_a_status(mmio: MMIO) -> Dict[str, Any]:
+    """Read and decode Board A status registers (STATUS, QUOTES_SENT, ORDERS_RCVD)."""
+    raw = mmio.read(STATUS)
+    return {
+        "running":     bool(raw & 0x01),
+        "link_up":     bool(raw & 0x02),
+        "regime":      (raw >> 2) & 0x03,
+        "regime_name": REGIME_NAMES.get((raw >> 2) & 0x03, "?"),
+        "fifo_fill":   (raw >> 9) & 0x7F,
+        "quotes_sent": mmio.read(QUOTES_SENT),
+        "orders_rcvd": mmio.read(ORDERS_RCVD),
+    }
+
+
+def print_board_a_status(mmio: MMIO) -> None:
+    s = read_board_a_status(mmio)
+    print(f"  running     : {s['running']}")
+    print(f"  link_up     : {s['link_up']}")
+    print(f"  regime      : {s['regime']} ({s['regime_name']})")
+    print(f"  fifo_fill   : {s['fifo_fill']}")
+    print(f"  quotes_sent : {s['quotes_sent']}")
+    print(f"  orders_rcvd : {s['orders_rcvd']}")
 
 
 def parse_company_picks(text: str) -> List[str]:
@@ -302,7 +332,13 @@ def write_mmio_board_config(
     write_token_id: bool,
     init_spread_default: float,
     pulse_start: bool,
+    quote_interval: int = 1000,
+    lfsr_seed: int = 0xDEADBEEF,
+    regime: int = 0,
 ) -> None:
+    mmio.write(QUOTE_INTERVAL, quote_interval)
+    mmio.write(LFSR_SEED, lfsr_seed)
+    mmio.write(REGIME, regime & 0x3)
     mmio.write(ACTIVE_SYM_COUNT, len(loaded))
 
     for i in range(hw_slots):
@@ -379,24 +415,63 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="If more are selected than hardware slots, truncate to --hw-slots.",
     )
-    parser.add_argument("--start", action="store_true", help="Pulse CTRL after writing config.")
+    parser.add_argument("--start", action="store_true", help="Pulse CTRL[0] after writing config.")
+    parser.add_argument("--reset", action="store_true", help="Pulse CTRL[1] (reset FSM) before writing config. Use to reconfigure a running board.")
+    parser.add_argument(
+        "--status",
+        action="store_true",
+        help="Read and print Board A status registers, then exit (no configuration).",
+    )
     parser.add_argument("--random-seed", type=int, default=None, help="Seed for deterministic random selection.")
 
     parser.add_argument(
         "--write-sector-id",
         action="store_true",
-        help="Write SYM*_SECTOR_ID registers. Only enable if your RTL/bitstream supports them.",
+        default=True,
+        help="Write SYM*_SECTOR_ID registers (default: on).",
+    )
+    parser.add_argument(
+        "--no-write-sector-id",
+        dest="write_sector_id",
+        action="store_false",
+        help="Skip writing SYM*_SECTOR_ID registers.",
     )
     parser.add_argument(
         "--write-token-id",
         action="store_true",
-        help="Write SYM*_TOKEN registers for fixed global token model.",
+        default=True,
+        help="Write SYM*_TOKEN registers (default: on).",
+    )
+    parser.add_argument(
+        "--no-write-token-id",
+        dest="write_token_id",
+        action="store_false",
+        help="Skip writing SYM*_TOKEN registers.",
     )
     parser.add_argument(
         "--init-spread-default",
         type=float,
         default=0.125,
         help="Default init_spread (Q16.16) for symbols if not otherwise specified by SYMBOL_DB.",
+    )
+    parser.add_argument(
+        "--quote-interval",
+        type=int,
+        default=1000,
+        help="Clock cycles between consecutive quote rounds (0 = every cycle, fastest). RTL default: 1000.",
+    )
+    parser.add_argument(
+        "--lfsr-seed",
+        type=lambda x: int(x, 0),
+        default=0xDEADBEEF,
+        help="32-bit PRNG seed for market noise (hex or decimal). RTL default: 0xDEADBEEF.",
+    )
+    parser.add_argument(
+        "--regime",
+        type=int,
+        default=0,
+        choices=[0, 1, 2, 3],
+        help="Market regime: 0=CALM, 1=VOLATILE, 2=BURST, 3=ADVERSARIAL. Overridden by SW[2] on board.",
     )
     args = parser.parse_args()
 
@@ -408,6 +483,10 @@ def parse_args() -> argparse.Namespace:
         or args.sector_mix is not None
         or args.sector_mix_file is not None
     )
+    if args.status:
+        if args.interactive or has_cli:
+            parser.error("--status is standalone: do not combine with symbol selection flags.")
+        return args
     if args.interactive and has_cli:
         parser.error(
             "Do not combine --interactive with other selection flags "
@@ -415,7 +494,7 @@ def parse_args() -> argparse.Namespace:
         )
     if not args.interactive and not has_cli:
         parser.error(
-            "Choose one: --interactive OR --symbols OR --tokens OR --symbols-file OR "
+            "Choose one: --status OR --interactive OR --symbols OR --tokens OR --symbols-file OR "
             "--random-count OR --sector-mix OR --sector-mix-file."
         )
     return args
@@ -469,12 +548,19 @@ def main() -> None:
     if args.hw_slots < 1:
         raise ValueError("--hw-slots must be >= 1.")
 
-    # ADDITION: multi-mode selection input (interactive, symbols, tokens, file, or random sample).
+    ol = Overlay("overlays/board_a.bit")
+    mmio = MMIO(ol.ip_dict["board_a_top_0"]["phys_addr"], 256)
+
+    if args.status:
+        print("Board A status:")
+        print_board_a_status(mmio)
+        return
+
+    if args.reset:
+        print("Resetting Board A FSM (CTRL[1] pulse)...")
+        mmio.write(CTRL, 0x02)
+
     if args.interactive:
-        if not args.write_sector_id or not args.write_token_id:
-            print(
-                "Tip: use --write-sector-id --write-token-id (and usually --start) so RTL gets sector noise and tokens.\n"
-            )
         selected = prompt_interactive(args.hw_slots, args.random_seed)
     elif args.symbols_file:
         selected = load_symbols_from_file(args.symbols_file)
@@ -508,8 +594,9 @@ def main() -> None:
     )
     print_configuration_summary(loaded, args.hw_slots)
 
-    ol = Overlay("overlays/board_a.bit")
-    mmio = MMIO(ol.ip_dict["board_a_top_0"]["phys_addr"], 256)
+    print(f"\nGlobal config: quote_interval={args.quote_interval}, "
+          f"lfsr_seed=0x{args.lfsr_seed:08X}, regime={REGIME_NAMES[args.regime]}")
+
     write_mmio_board_config(
         mmio,
         loaded,
@@ -518,9 +605,14 @@ def main() -> None:
         write_token_id=args.write_token_id,
         init_spread_default=args.init_spread_default,
         pulse_start=args.start,
+        quote_interval=args.quote_interval,
+        lfsr_seed=args.lfsr_seed,
+        regime=args.regime,
     )
     if args.start:
         print("Board A started.")
+    print("\nPost-config status:")
+    print_board_a_status(mmio)
 
 
 if __name__ == "__main__":

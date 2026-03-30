@@ -149,7 +149,7 @@ module board_b_axi_regs
             base_qty        <= 16'd100;
             max_position    <= 32'd500;
             max_order_rate  <= 32'd10000;
-            max_loss        <= 32'h0064_0000;    // $100
+            max_loss        <= 32'd100;           // $100 integer dollars (total_pnl = cash[47:16])
             s_axi_bvalid    <= 1'b0;
             s_axi_rvalid    <= 1'b0;
             s_axi_rdata     <= '0;

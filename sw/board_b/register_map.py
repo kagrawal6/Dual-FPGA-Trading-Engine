@@ -1,7 +1,7 @@
 """
 Board B Register Map — register_map.py
 Shared constants for telemetry_server.py and debug scripts.
-Offsets match Appendix D.2 of the design spec.
+Offsets match board_b_axi_regs.sv (Appendix D.2 of the design spec).
 """
 
 # Config registers (R/W)
@@ -21,24 +21,19 @@ ORDERS_SENT    = 0x48
 FILLS_RCVD     = 0x4C
 RISK_REJECTS   = 0x50
 LINK_ERRORS    = 0x54
-POS_SYM0       = 0x58
-POS_SYM1       = 0x5C
-POS_SYM2       = 0x60
-POS_SYM3       = 0x64
-CASH_LO        = 0x68
-CASH_HI        = 0x6C
 
-# Histogram (R)
-HIST_BIN0      = 0x80
-# HIST_BIN1..15 at 0x84..0xBC (stride 4)
+POS_BASE       = 0x58   # +4*i, 16 symbols → 0x58..0x94
+CASH_LO        = 0x98
+CASH_HI        = 0x9C
 
-# Latency stats (R)
-LAT_MIN        = 0xC0
-LAT_MAX        = 0xC4
-LAT_SUM        = 0xC8
-LAT_COUNT      = 0xCC
+HIST_BASE      = 0xA0   # +4*i, 16 bins → 0xA0..0xDC
 
-NUM_SYMBOLS    = 4
+LAT_MIN        = 0xE0
+LAT_MAX        = 0xE4
+LAT_SUM        = 0xE8
+LAT_COUNT      = 0xEC
+
+NUM_SYMBOLS    = 16
 NUM_HIST_BINS  = 16
 
 
