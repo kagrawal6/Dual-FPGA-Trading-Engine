@@ -386,8 +386,8 @@ class BoardB:
         self.threshold = 0x0001_0000  # $1.00 deviation to trigger trade
         self.base_qty = 100         # shares per order
         self.max_position = 500     # max shares per symbol
-        self.max_order_rate = 10000
-        self.max_loss = 0x0064_0000 # $100 max loss (Q16.16)
+        self.max_order_rate = 1000
+        self.max_loss = 100  # $100 integer dollars (matches total_pnl = cash >> 16)
 
         # Auto-incrementing order ID
         self._next_order_id = 0

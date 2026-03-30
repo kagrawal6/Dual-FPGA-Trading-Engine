@@ -1,12 +1,8 @@
 // ============================================================================
 // Testbench: tb_lfsr32
-// Tests the 32-bit Galois LFSR (lfsr32) module: seed loading, enable/advance,
-// zero-seed remap, and golden-vector sequence (matches Python / spec).
-//
-// ModelSim waveform tips:
-//   - Add to wave: clk, rst_n, enable, load, seed_in, dut.lfsr_reg, rand_out
-//   - Optional: vsim -voptargs=+acc work.tb_lfsr32:dut for full internal visibility
-//   - VCD is written to tb_lfsr32.vcd in the simulation working directory
+// Multi-seed golden vectors, adversarial load/enable, zero-seed remap,
+// all-ones seed, rapid load toggling, determinism replay.
+// Golden vectors from golden_model/gen_board_a_vectors.py.
 // ============================================================================
 
 `timescale 1ns / 1ps
@@ -22,9 +18,9 @@ module tb_lfsr32;
     logic [31:0] seed_in;
     logic [31:0] rand_out;
 
-    int err_count = 0;
+    int pass_count = 0;
+    int fail_count = 0;
 
-    // Clock generation (100 MHz)
     initial clk = 0;
     always #5 clk = ~clk;
 
@@ -37,29 +33,22 @@ module tb_lfsr32;
         .rand_out (rand_out)
     );
 
-    // Golden vectors: Galois step (lfsr[0] ? (lfsr>>1)^LFSR_TAPS : lfsr>>1),
-    // starting from seed 32'h1, first eight *states seen after each advancing
-    // clock edge* when load then repeated enable — see task run_golden_check.
-    localparam int GOLDEN_LEN = 8;
-    localparam logic [31:0] GOLDEN_AFTER_SEED1 [GOLDEN_LEN] = '{
-        32'h0000_0001,  // after load cycle (hold)
-        32'h0040_0007,  // after 1st enable
-        32'h0060_0004,  // after 2nd enable
-        32'h0030_0002,  // after 3rd enable
-        32'h0018_0001,  // after 4th enable
-        32'h004c_0007,  // after 5th enable
-        32'h0066_0004,  // after 6th enable
-        32'h0033_0002   // after 7th enable
-    };
-
-    task automatic check(string msg, logic pass);
-        if (!pass) begin
+    task automatic check(string msg, logic cond);
+        if (cond) pass_count++;
+        else begin
             $error("FAIL: %s", msg);
-            err_count++;
+            fail_count++;
         end
     endtask
 
-    // Waveform dump (ModelSim, Icarus, Verilator-compatible subset)
+    task automatic check32(string msg, logic [31:0] actual, logic [31:0] expected);
+        if (actual === expected) pass_count++;
+        else begin
+            $error("FAIL: %s — got %08h, exp %08h", msg, actual, expected);
+            fail_count++;
+        end
+    endtask
+
     initial begin
         $dumpfile("tb_lfsr32.vcd");
         $dumpvars(0, tb_lfsr32);
@@ -75,108 +64,225 @@ module tb_lfsr32;
         @(posedge clk);
     endtask
 
-    // After reset, DUT holds lfsr_reg == 1 until load or enable changes it.
-    task automatic run_reset_check();
-        check("After async reset, state must be 1", rand_out == 32'h1);
+    // ── Golden vectors: seed 0xDEADBEEF, 16 steps ──
+    localparam int GVLEN = 16;
+    localparam logic [31:0] GV_DEADBEEF [GVLEN] = '{
+        32'h6F16DF70, 32'h378B6FB8, 32'h1BC5B7DC, 32'h0DE2DBEE,
+        32'h06F16DF7, 32'h0338B6FC, 32'h019C5B7E, 32'h00CE2DBF,
+        32'h002716D8, 32'h00138B6C, 32'h0009C5B6, 32'h0004E2DB,
+        32'h0042716A, 32'h002138B5, 32'h00509C5D, 32'h00684E29
+    };
+
+    // ── Golden vectors: seed 0x00000001, 16 steps ──
+    localparam logic [31:0] GV_SEED1 [GVLEN] = '{
+        32'h00400007, 32'h00600004, 32'h00300002, 32'h00180001,
+        32'h004C0007, 32'h00660004, 32'h00330002, 32'h00198001,
+        32'h004CC007, 32'h00666004, 32'h00333002, 32'h00199801,
+        32'h004CCC07, 32'h00666604, 32'h00333302, 32'h00199981
+    };
+
+    // ── Test: reset state ──
+    task automatic test_reset();
+        $display("--- test_reset ---");
+        check32("After reset, rand_out == 1", rand_out, 32'h0000_0001);
     endtask
 
-    task automatic run_load_hold_check();
+    // ── Test: load + hold ──
+    task automatic test_load_hold();
+        $display("--- test_load_hold ---");
         seed_in = 32'hCAFE_BABE;
-        load    = 1'b1;
+        load = 1'b1;
         @(posedge clk);
         load = 1'b0;
         @(posedge clk);
-        check("After load, rand_out must match seed", rand_out == 32'hCAFE_BABE);
-        // Hold with enable low
-        repeat (3) @(posedge clk);
-        check("With enable low, state must hold", rand_out == 32'hCAFE_BABE);
+        check32("After load, seed latched", rand_out, 32'hCAFE_BABE);
+        repeat (5) @(posedge clk);
+        check32("enable=0: state holds", rand_out, 32'hCAFE_BABE);
     endtask
 
-    task automatic run_golden_check();
-        int k;
-        enable  = 1'b0;
-        seed_in = 32'h1;
-        load    = 1'b1;
-        @(posedge clk);
-        load = 1'b0;
-        @(posedge clk);
-        for (k = 0; k < GOLDEN_LEN; k++) begin
-            check(
-                $sformatf("Golden vector %0d: exp %08h got %08h", k, GOLDEN_AFTER_SEED1[k], rand_out),
-                rand_out == GOLDEN_AFTER_SEED1[k]
-            );
-            if (k != GOLDEN_LEN - 1) begin
-                enable = 1'b1;
-                @(posedge clk);
-            end
-        end
-        enable = 1'b0;
-    endtask
-
-    task automatic run_never_zero_stress();
-        int i;
+    // ── Test: golden vectors for seed 0xDEADBEEF ──
+    task automatic test_golden_deadbeef();
+        $display("--- test_golden_deadbeef ---");
         seed_in = 32'hDEAD_BEEF;
-        load    = 1'b1;
-        @(posedge clk);
-        load   = 1'b0;
-        enable = 1'b1;
-        for (i = 0; i < 500; i++) begin
-            @(posedge clk);
-            check($sformatf("Stress cycle %0d: output non-zero", i), rand_out != 32'h0);
-        end
-        enable = 1'b0;
-    endtask
-
-    task automatic run_zero_seed_remap();
-        seed_in = 32'h0;
-        load    = 1'b1;
+        load = 1'b1;
         @(posedge clk);
         load = 1'b0;
         @(posedge clk);
-        check("Zero seed remapped to 1", rand_out == 32'h1);
-    endtask
-
-    task automatic run_determinism_check();
-        logic [31:0] seq [10];
-        int i;
-        seed_in = 32'hA5A5_5A5A;
-        load    = 1'b1;
-        @(posedge clk);
-        load   = 1'b0;
+        check32("seed DEADBEEF loaded", rand_out, 32'hDEAD_BEEF);
         enable = 1'b1;
-        for (i = 0; i < 10; i++) begin
+        for (int i = 0; i < GVLEN; i++) begin
             @(posedge clk);
-            seq[i] = rand_out;
+            check32($sformatf("DEADBEEF step[%0d]", i), rand_out, GV_DEADBEEF[i]);
         end
         enable = 1'b0;
-        // Reload same seed and replay
-        seed_in = 32'hA5A5_5A5A;
-        load    = 1'b1;
+    endtask
+
+    // ── Test: golden vectors for seed 1 ──
+    task automatic test_golden_seed1();
+        $display("--- test_golden_seed1 ---");
+        seed_in = 32'h0000_0001;
+        load = 1'b1;
         @(posedge clk);
-        load   = 1'b0;
+        load = 1'b0;
+        @(posedge clk);
         enable = 1'b1;
-        for (i = 0; i < 10; i++) begin
+        for (int i = 0; i < GVLEN; i++) begin
             @(posedge clk);
-            check($sformatf("Determinism idx %0d", i), rand_out == seq[i]);
+            check32($sformatf("SEED1 step[%0d]", i), rand_out, GV_SEED1[i]);
+        end
+        enable = 1'b0;
+    endtask
+
+    // ── Test: zero-seed remap ──
+    task automatic test_zero_seed_remap();
+        $display("--- test_zero_seed_remap ---");
+        seed_in = 32'h0;
+        load = 1'b1;
+        @(posedge clk);
+        load = 1'b0;
+        @(posedge clk);
+        check32("Zero seed remapped to 1", rand_out, 32'h0000_0001);
+        // Should produce same sequence as seed 1
+        enable = 1'b1;
+        for (int i = 0; i < 8; i++) begin
+            @(posedge clk);
+            check32($sformatf("Zero remap step[%0d]", i), rand_out, GV_SEED1[i]);
+        end
+        enable = 1'b0;
+    endtask
+
+    // ── Test: all-ones seed ──
+    task automatic test_all_ones_seed();
+        $display("--- test_all_ones_seed ---");
+        seed_in = 32'hFFFF_FFFF;
+        load = 1'b1;
+        @(posedge clk);
+        load = 1'b0;
+        @(posedge clk);
+        check32("All-ones seed loaded", rand_out, 32'hFFFF_FFFF);
+        enable = 1'b1;
+        for (int i = 0; i < 100; i++) begin
+            @(posedge clk);
+            check($sformatf("All-ones step[%0d] non-zero", i), rand_out != 32'h0);
+        end
+        enable = 1'b0;
+    endtask
+
+    // ── Test: load during enable (load takes priority) ──
+    task automatic test_load_during_enable();
+        $display("--- test_load_during_enable ---");
+        seed_in = 32'hDEAD_BEEF;
+        load = 1'b1;
+        @(posedge clk);
+        load = 1'b0;
+        enable = 1'b1;
+        repeat (5) @(posedge clk);
+        // Now load a new seed while enable is high
+        seed_in = 32'h0000_0001;
+        load = 1'b1;
+        @(posedge clk);
+        load = 1'b0;
+        @(posedge clk);
+        // Should have clean cut to new sequence
+        check32("Load during enable: seed 1 loaded", rand_out, 32'h0000_0001);
+        @(posedge clk);
+        check32("Load during enable: first step matches seed1", rand_out, GV_SEED1[0]);
+        enable = 1'b0;
+    endtask
+
+    // ── Test: simultaneous load + enable (load should win) ──
+    task automatic test_simultaneous_load_enable();
+        $display("--- test_simultaneous_load_enable ---");
+        seed_in = 32'hA5A5_5A5A;
+        load = 1'b1;
+        enable = 1'b1;
+        @(posedge clk);
+        load = 1'b0;
+        @(posedge clk);
+        check32("Simultaneous load+enable: load wins", rand_out, 32'hA5A5_5A5A);
+        enable = 1'b0;
+    endtask
+
+    // ── Test: rapid load/unload toggling ──
+    task automatic test_rapid_toggle();
+        $display("--- test_rapid_toggle ---");
+        enable = 1'b0;
+        for (int i = 0; i < 10; i++) begin
+            seed_in = 32'h1000_0000 + i;
+            load = 1'b1;
+            @(posedge clk);
+            load = 1'b0;
+            @(posedge clk);
+            check($sformatf("Rapid toggle[%0d]: non-zero", i), rand_out != 32'h0);
+        end
+        // Verify last seed stuck
+        check32("Rapid toggle: last seed", rand_out, 32'h1000_0009);
+    endtask
+
+    // ── Test: determinism replay ──
+    task automatic test_determinism();
+        logic [31:0] seq_a [20];
+        $display("--- test_determinism ---");
+        seed_in = 32'hBAAD_F00D;
+        load = 1'b1;
+        @(posedge clk);
+        load = 1'b0;
+        enable = 1'b1;
+        for (int i = 0; i < 20; i++) begin
+            @(posedge clk);
+            seq_a[i] = rand_out;
+        end
+        enable = 1'b0;
+        // Replay
+        seed_in = 32'hBAAD_F00D;
+        load = 1'b1;
+        @(posedge clk);
+        load = 1'b0;
+        enable = 1'b1;
+        for (int i = 0; i < 20; i++) begin
+            @(posedge clk);
+            check32($sformatf("Determinism[%0d]", i), rand_out, seq_a[i]);
+        end
+        enable = 1'b0;
+    endtask
+
+    // ── Test: never-zero stress ──
+    task automatic test_never_zero();
+        $display("--- test_never_zero ---");
+        seed_in = 32'hDEAD_BEEF;
+        load = 1'b1;
+        @(posedge clk);
+        load = 1'b0;
+        enable = 1'b1;
+        for (int i = 0; i < 1000; i++) begin
+            @(posedge clk);
+            check($sformatf("Stress[%0d] non-zero", i), rand_out != 32'h0);
         end
         enable = 1'b0;
     endtask
 
     initial begin
         wait_reset();
-        run_reset_check();
+        test_reset();
+        test_load_hold();
+        test_golden_deadbeef();
+        test_golden_seed1();
+        test_zero_seed_remap();
+        test_all_ones_seed();
+        test_load_during_enable();
+        test_simultaneous_load_enable();
+        test_rapid_toggle();
+        test_determinism();
+        test_never_zero();
 
-        run_load_hold_check();
-        run_golden_check();
-        run_never_zero_stress();
-        run_zero_seed_remap();
-        run_determinism_check();
-
-        if (err_count == 0)
-            $display("tb_lfsr32: PASS (all checks passed, VCD: tb_lfsr32.vcd)");
-        else
-            $display("tb_lfsr32: FAIL (%0d errors)", err_count);
-
+        $display("\n===================================");
+        if (fail_count == 0)
+            $display("tb_lfsr32: PASS (%0d checks passed)", pass_count);
+        else begin
+            $display("tb_lfsr32: FAIL (%0d passed, %0d failed)", pass_count, fail_count);
+            $fatal;
+        end
+        $display("===================================");
         $finish;
     end
 

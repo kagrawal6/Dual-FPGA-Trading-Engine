@@ -1,58 +1,9 @@
 // ============================================================================
 // Testbench: tb_tx_arbiter
-// Verifies minimal Board A arbiter contract:
-// - strict priority: fill > quote
-// - deterministic one-frame output behavior
-// - no dual-ready assertion
-// - downstream backpressure does not corrupt or drop selected frame
+// Simultaneous fill+quote (fill wins), fill while quote buffered, quote
+// starvation, rapid consume+refill, reset, back-to-back quotes, tx_ready
+// toggling.
 // ============================================================================
-
-// -----------------------------------------------------------------------------
-// Future complexity / upgrade ideas for tx_arbiter
-//
-// Current version is intentionally minimal:
-//   - strict priority: fill > quote
-//   - one-entry output buffer
-//   - no dropped frame under backpressure
-//   - no fairness logic
-//   - one-cycle bubble between consume and next accept is acceptable
-//
-// Ways this file could become more complex in the future:
-//
-// 1) Quote starvation prevention
-//    - Right now, continuous fill traffic can starve quotes forever.
-//    - Future version could add fairness or weighted scheduling so quotes
-//      still get occasional service under heavy fill load.
-//
-// 2) Same-cycle consume + refill
-//    - Current arbiter inserts a bubble after tx_ready consumes a frame.
-//    - Future version could support refill in the same cycle for higher
-//      throughput, but logic becomes trickier.
-//
-// 3) More message classes
-//    - Right now there are only two inputs: fill and quote.
-//    - Future versions could arbitrate among fills, rejects, quotes,
-//      control/status frames, telemetry, etc.
-//
-// 4) Weighted / policy-based scheduling
-//    - Instead of fixed priority, future logic could support round-robin,
-//      weighted priority, or configurable QoS rules.
-//
-// 5) Input-side buffering
-//    - Current design assumes producers hold valid correctly until accepted.
-//    - Future version could add FIFOs on fill/quote inputs for burst absorption.
-//
-// 6) Burst-aware arbitration
-//    - Could choose to drain several fills before returning to quotes, or vice
-//      versa, depending on system goals.
-//
-// 7) Runtime-configurable arbitration policy
-//    - Priority mode could later become software-configurable via AXI-Lite
-//      registers instead of hardcoded fill > quote.
-//
-// Keep current version simple for the original demo. Only add these if needed
-// after the baseline system is fully stable.
-// -----------------------------------------------------------------------------
 
 `timescale 1ns / 1ps
 
@@ -71,14 +22,8 @@ module tb_tx_arbiter;
     logic               tx_valid;
     logic               tx_ready;
 
-    int err_count = 0;
-
-    task automatic check(input string msg, input logic cond);
-        if (!cond) begin
-            $error("FAIL: %s", msg);
-            err_count++;
-        end
-    endtask
+    int pass_count = 0;
+    int fail_count = 0;
 
     initial clk = 1'b0;
     always #5 clk = ~clk;
@@ -103,13 +48,34 @@ module tb_tx_arbiter;
         .tx_ready   (tx_ready)
     );
 
-    initial begin
-        $dumpfile("tb_tx_arbiter.vcd");
-        $dumpvars(0, tb_tx_arbiter);
-    end
+    task automatic check(string msg, logic cond);
+        if (cond) pass_count++;
+        else begin
+            $error("FAIL: %s", msg);
+            fail_count++;
+        end
+    endtask
+
+    task automatic check128(string msg, logic [127:0] actual, logic [127:0] expected);
+        if (actual === expected) pass_count++;
+        else begin
+            $error("FAIL: %s — got %032h, exp %032h", msg, actual, expected);
+            fail_count++;
+        end
+    endtask
+
+    // Consume the current buffered frame
+    task automatic consume();
+        tx_ready = 1'b1;
+        @(posedge clk);
+        tx_ready = 1'b0;
+    endtask
 
     initial begin
-        logic [FRAME_W-1:0] F1, F2, Q1, Q2;
+        logic [FRAME_W-1:0] F1, F2, F3, Q1, Q2, Q3, Q4, Q5;
+
+        $dumpfile("tb_tx_arbiter.vcd");
+        $dumpvars(0, tb_tx_arbiter);
 
         fill_frame  = '0;
         fill_valid  = 1'b0;
@@ -119,75 +85,201 @@ module tb_tx_arbiter;
 
         F1 = {MSG_FILL, 124'h0000_0000_0000_0000_0000_0000_0001};
         F2 = {MSG_FILL, 124'h0000_0000_0000_0000_0000_0000_0002};
-        Q1 = {MSG_QUOTE,124'h0000_0000_0000_0000_0000_0000_0011};
-        Q2 = {MSG_QUOTE,124'h0000_0000_0000_0000_0000_0000_0022};
+        F3 = {MSG_FILL, 124'h0000_0000_0000_0000_0000_0000_0003};
+        Q1 = {MSG_QUOTE, 124'h0000_0000_0000_0000_0000_0000_0011};
+        Q2 = {MSG_QUOTE, 124'h0000_0000_0000_0000_0000_0000_0022};
+        Q3 = {MSG_QUOTE, 124'h0000_0000_0000_0000_0000_0000_0033};
+        Q4 = {MSG_QUOTE, 124'h0000_0000_0000_0000_0000_0000_0044};
+        Q5 = {MSG_QUOTE, 124'h0000_0000_0000_0000_0000_0000_0055};
 
         wait (rst_n === 1'b1);
         @(posedge clk);
 
-        // 1) Strict priority and no-dual-ready when both request.
+        // ─────────────────────────────────────────────────────
+        // 1) Reset: tx_valid=0
+        // ─────────────────────────────────────────────────────
+        $display("--- test_reset ---");
+        check("reset: tx_valid=0", tx_valid == 1'b0);
+
+        // ─────────────────────────────────────────────────────
+        // 2) Simultaneous fill+quote: fill wins
+        // ─────────────────────────────────────────────────────
+        $display("--- test_fill_priority ---");
         fill_frame  = F1;
         quote_frame = Q1;
         fill_valid  = 1'b1;
         quote_valid = 1'b1;
         tx_ready    = 1'b0;
         #1;
-        check("both valid -> quote_ready low (strict priority)", quote_ready === 1'b0);
-        check("both valid -> not both ready high", !(fill_ready && quote_ready));
+        check("both valid: quote_ready=0", quote_ready == 1'b0);
+        check("both valid: not both ready", !(fill_ready && quote_ready));
         @(posedge clk);
-        check("selected frame is fill", tx_valid && tx_frame == F1);
+        check("fill wins: tx_valid", tx_valid == 1'b1);
+        check128("fill wins: frame=F1", tx_frame, F1);
 
-        // Once buffered, no new accepts while stalled.
+        // While stalled, no new accepts
         fill_frame = F2;
         @(posedge clk);
-        check("while stalled, fill_ready low", fill_ready === 1'b0);
-        check("while stalled, quote_ready low", quote_ready === 1'b0);
-        check("stalled output remains stable", tx_valid && tx_frame == F1);
+        check("stalled: fill_ready=0", fill_ready == 1'b0);
+        check("stalled: quote_ready=0", quote_ready == 1'b0);
+        check128("stalled: frame stable", tx_frame, F1);
 
-        // 2) Consume first frame; one-cycle bubble is acceptable in this minimal arbiter.
-        tx_ready = 1'b1;
+        // Consume F1
+        consume();
+        check("consumed F1: tx_valid=0", tx_valid == 1'b0);
+
+        // Now fill F2 should be accepted (still both valid)
         @(posedge clk);
-        check("consumed frame deasserts tx_valid", tx_valid === 1'b0);
+        check("F2 accepted", tx_valid == 1'b1);
+        check128("F2 frame", tx_frame, F2);
+        fill_valid = 1'b0;
+        consume();
 
-        // 3) Quote only path.
+        // Now Q1 should be accepted
+        @(posedge clk);
+        check("Q1 accepted after fills", tx_valid == 1'b1);
+        check128("Q1 frame", tx_frame, Q1);
+        quote_valid = 1'b0;
+        consume();
+
+        // ─────────────────────────────────────────────────────
+        // 3) Quote only path
+        // ─────────────────────────────────────────────────────
+        $display("--- test_quote_only ---");
         fill_valid  = 1'b0;
         quote_valid = 1'b1;
         quote_frame = Q2;
         tx_ready    = 1'b1;
         @(posedge clk);
-        check("quote accepted when no fill", tx_valid && tx_frame == Q2);
+        check("quote only: accepted", tx_valid == 1'b1);
+        check128("quote only: Q2", tx_frame, Q2);
         @(posedge clk);
-        check("quote consumed", tx_valid === 1'b0);
+        check("quote consumed", tx_valid == 1'b0);
+        quote_valid = 1'b0;
+        tx_ready = 1'b0;
 
-        // 4) No corruption under backpressure:
-        // buffer quote while tx_ready=0, then keep stable even when fill appears.
+        // ─────────────────────────────────────────────────────
+        // 4) Fill while quote buffered: no preemption
+        // ─────────────────────────────────────────────────────
+        $display("--- test_no_preempt ---");
         tx_ready    = 1'b0;
         quote_valid = 1'b1;
-        quote_frame = Q1;
+        quote_frame = Q3;
         fill_valid  = 1'b0;
         @(posedge clk);
-        check("quote buffered with tx stall", tx_valid && tx_frame == Q1);
+        check("Q3 buffered", tx_valid && tx_frame == Q3);
 
+        // Now present fill while Q3 is buffered
         fill_valid = 1'b1;
-        fill_frame = F2;
+        fill_frame = F3;
         repeat (3) begin
             @(posedge clk);
-            check("held frame remains quote (no preempt mid-hold)", tx_valid && tx_frame == Q1);
-            check("no dual ready while full", !(fill_ready && quote_ready));
+            check128("no preempt: still Q3", tx_frame, Q3);
+            check("no preempt: no dual ready", !(fill_ready && quote_ready));
         end
+        // Consume Q3
         tx_ready = 1'b1;
         @(posedge clk);
-        check("held quote consumed first", tx_valid === 1'b0);
-
-        // Fill can be accepted afterward.
+        check("Q3 consumed", tx_valid == 1'b0);
+        // F3 should be next
+        quote_valid = 1'b0;
         @(posedge clk);
-        check("fill accepted after buffer frees", tx_valid && tx_frame == F2);
+        check("F3 accepted", tx_valid == 1'b1);
+        check128("F3 frame", tx_frame, F3);
+        fill_valid = 1'b0;
+        @(posedge clk);
+        tx_ready = 1'b0;
 
-        if (err_count == 0)
-            $display("tb_tx_arbiter: PASS (all checks passed)");
-        else
-            $display("tb_tx_arbiter: FAIL (%0d errors)", err_count);
+        // ─────────────────────────────────────────────────────
+        // 5) Quote starvation: 10 continuous fills
+        // ─────────────────────────────────────────────────────
+        $display("--- test_starvation ---");
+        tx_ready = 1'b1;
+        quote_valid = 1'b1;
+        quote_frame = Q4;
+        begin
+            int quote_accepted = 0;
+            for (int i = 0; i < 10; i++) begin
+                fill_frame = {MSG_FILL, 124'(i + 100)};
+                fill_valid = 1'b1;
+                @(posedge clk);
+                if (tx_valid && tx_frame[127:124] == MSG_QUOTE) quote_accepted++;
+                @(posedge clk); // consume cycle
+            end
+            fill_valid = 1'b0;
+            check("starvation: quotes starved during fills", quote_accepted == 0);
+        end
+        // After fills stop, quote should get through
+        @(posedge clk);
+        @(posedge clk);
+        if (tx_valid) begin
+            check("starvation: quote gets through after fills", tx_frame[127:124] == MSG_QUOTE);
+        end
+        quote_valid = 1'b0;
+        tx_ready = 1'b0;
+        repeat (3) @(posedge clk);
 
+        // ─────────────────────────────────────────────────────
+        // 6) Back-to-back quotes
+        // ─────────────────────────────────────────────────────
+        $display("--- test_back_to_back_quotes ---");
+        tx_ready = 1'b1;
+        fill_valid = 1'b0;
+        for (int i = 0; i < 5; i++) begin
+            quote_frame = {MSG_QUOTE, 124'(i + 500)};
+            quote_valid = 1'b1;
+            @(posedge clk);
+            if (tx_valid) begin
+                check($sformatf("b2b quote[%0d]: msg_type", i), tx_frame[127:124] == MSG_QUOTE);
+            end
+            @(posedge clk); // allow bubble
+        end
+        quote_valid = 1'b0;
+        tx_ready = 1'b0;
+        repeat (3) @(posedge clk);
+
+        // ─────────────────────────────────────────────────────
+        // 7) tx_ready toggling: no data corruption
+        // ─────────────────────────────────────────────────────
+        $display("--- test_ready_toggling ---");
+        quote_frame = Q5;
+        quote_valid = 1'b1;
+        fill_valid  = 1'b0;
+        for (int i = 0; i < 10; i++) begin
+            tx_ready = (i % 2 == 0) ? 1'b1 : 1'b0;
+            @(posedge clk);
+            if (tx_valid)
+                check($sformatf("toggle[%0d]: frame ok", i), tx_frame[127:124] == MSG_QUOTE);
+        end
+        quote_valid = 1'b0;
+        tx_ready = 1'b0;
+
+        // ─────────────────────────────────────────────────────
+        // 8) Reset: tx_valid deasserts
+        // ─────────────────────────────────────────────────────
+        $display("--- test_mid_reset ---");
+        quote_frame = Q1;
+        quote_valid = 1'b1;
+        @(posedge clk);
+        rst_n = 1'b0;
+        repeat (4) @(posedge clk);
+        check("mid-reset: tx_valid=0", tx_valid == 1'b0);
+        rst_n = 1'b1;
+        quote_valid = 1'b0;
+        repeat (4) @(posedge clk);
+
+        // ─────────────────────────────────────────────────────
+        // Summary
+        // ─────────────────────────────────────────────────────
+        $display("\n===================================");
+        if (fail_count == 0)
+            $display("tb_tx_arbiter: PASS (%0d checks passed)", pass_count);
+        else begin
+            $display("tb_tx_arbiter: FAIL (%0d passed, %0d failed)", pass_count, fail_count);
+            $fatal;
+        end
+        $display("===================================");
         $finish;
     end
+
 endmodule

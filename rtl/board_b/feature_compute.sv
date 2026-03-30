@@ -117,7 +117,7 @@ module feature_compute
                 end else begin
                     s2_first  <= 1'b0;
                     s2_prod_a <= {16'b0, ema_alpha} * {16'b0, s1_mid};
-                    s2_prod_b <= beta[15:0] * {16'b0, ema_state[s1_sym]};
+                    s2_prod_b <= {15'b0, beta} * {16'b0, ema_state[s1_sym]};
                 end
             end
         end

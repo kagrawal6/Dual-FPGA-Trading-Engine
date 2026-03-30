@@ -2,11 +2,11 @@
 // Testbench: tb_risk_manager
 // Tests the risk_manager module: position limit, order rate, max loss,
 // order_enable gating, risk_halt latch, in-flight pending tracking,
-// fill feedback, and clear behavior.
+// fill feedback, simultaneous signal+fill (same and different symbols),
+// position boundary conditions, and clear behavior.
 //
-// Golden model reference: board_b.py RiskManager class. Test values are
-// constructed to match golden model logic (worst-case position including
-// pending, strict rate limit, signed PnL comparison).
+// Critical regression: simultaneous signal_valid + fill_valid on same
+// symbol/side — verifies the merged NBA delta fix (no last-wins race).
 // ============================================================================
 
 `timescale 1ns / 1ps
@@ -118,78 +118,90 @@ module tb_risk_manager;
         fill_valid = 1'b0;
     endtask
 
+    task automatic do_clear();
+        clear = 1'b1;
+        @(posedge clk);
+        clear = 1'b0;
+        @(posedge clk);
+    endtask
+
     initial begin
-        signal_valid  = 1'b0;
-        signal_side   = 1'b0;
-        signal_price  = '0;
-        signal_qty    = '0;
-        signal_symbol = '0;
-        fill_valid    = 1'b0;
-        fill_symbol   = '0;
-        fill_side     = 1'b0;
-        fill_qty      = '0;
-        clear         = 1'b0;
-        order_enable  = 1'b1;
-        total_pnl     = '0;
-        max_position  = 32'd500;
+        signal_valid   = 1'b0;
+        signal_side    = 1'b0;
+        signal_price   = '0;
+        signal_qty     = '0;
+        signal_symbol  = '0;
+        fill_valid     = 1'b0;
+        fill_symbol    = '0;
+        fill_side      = 1'b0;
+        fill_qty       = '0;
+        clear          = 1'b0;
+        order_enable   = 1'b1;
+        total_pnl      = '0;
+        max_position   = 32'd500;
         max_order_rate = 32'd10000;
-        max_loss      = 32'd100;  // $100 integer (matching total_pnl units)
+        max_loss       = 32'd100;
 
         for (int i = 0; i < TB_NUM_SYM; i++) position[i] = '0;
 
         @(posedge rst_n);
         repeat (2) @(posedge clk);
 
-        // ── T1: Basic approval (all checks pass) ────────────────
+        // ── T1: Basic approval (all checks pass) ─────────────
         $display("\n=== T1: Basic approval ===");
         send_signal(1'b0, 32'h00B4_0000, 16'd100, 8'd0);
-        check("T1: approved",       approved_valid == 1'b1);
-        check("T1: side==BUY",      approved_side == 1'b0);
-        check("T1: price",          approved_price == 32'h00B4_0000);
-        check("T1: qty==100",       approved_qty == 16'd100);
-        check("T1: symbol==0",      approved_symbol == 8'd0);
-        check("T1: no halt",        risk_halt == 1'b0);
+        check("T1: approved",        approved_valid == 1'b1);
+        check("T1: side==BUY",       approved_side == 1'b0);
+        check("T1: price",           approved_price == 32'h00B4_0000);
+        check("T1: qty==100",        approved_qty == 16'd100);
+        check("T1: symbol==0",       approved_symbol == 8'd0);
+        check("T1: no halt",         risk_halt == 1'b0);
 
-        // ── T2: order_enable = 0 → rejected ────────────────────
+        // ── T2: order_enable = 0 → rejected ──────────────────
         $display("\n=== T2: order_enable off ===");
         order_enable = 1'b0;
         send_signal(1'b0, 32'h00B4_0000, 16'd100, 8'd0);
-        check("T2: rejected",       approved_valid == 1'b0);
-        check("T2: risk_rejects++", risk_rejects == 32'd1);
+        check("T2: rejected",        approved_valid == 1'b0);
+        check("T2: risk_rejects++",  risk_rejects == 32'd1);
         order_enable = 1'b1;
 
-        // ── T3: Position limit exceeded ─────────────────────────
+        // ── T3: Position limit exceeded ───────────────────────
         $display("\n=== T3: Position limit ===");
-        // Position[0] = 450, max_position = 500
-        // BUY qty=100 → worst = 450 + 100 (pending_buy from T1) + 100 = 650 > 500
         position[0] = 32'd450;
+        // worst = 450 + pending_buy[0](100 from T1) + 100 = 650 > 500
         send_signal(1'b0, 32'h00B4_0000, 16'd100, 8'd0);
-        check("T3: rejected (pos)",  approved_valid == 1'b0);
-        check("T3: risk_rejects",    risk_rejects == 32'd2);
+        check("T3: rejected (pos)", approved_valid == 1'b0);
 
-        // Clear pending by sending a fill for the T1 pending buy
+        // Clear pending
         send_fill(8'd0, 1'b0, 16'd100);
-
-        // Now with pending cleared: worst = 450 + 0 + 100 = 550 > 500
+        // Now pending_buy[0]=0, worst = 450 + 0 + 100 = 550 > 500
         send_signal(1'b0, 32'h00B4_0000, 16'd100, 8'd0);
         check("T3b: still rejected", approved_valid == 1'b0);
 
-        // Reduce position
-        position[0] = 32'd300;
+        // Reduce position to boundary
+        position[0] = 32'd400;
         send_signal(1'b0, 32'h00B4_0000, 16'd100, 8'd0);
-        check("T3c: approved (300+100<=500)", approved_valid == 1'b1);
+        check("T3c: approved (400+100<=500)", approved_valid == 1'b1);
+
+        // ── T3d: Position boundary: exactly at limit ──────────
+        $display("\n=== T3d: Position boundary exactly ===");
+        do_clear();
+        position[0] = 32'd499;
+        max_position = 32'd500;
+        send_signal(1'b0, 32'h00B4_0000, 16'd1, 8'd0);
+        check("T3d: qty=1 at 499 → 500 ok", approved_valid == 1'b1);
+
+        send_signal(1'b0, 32'h00B4_0000, 16'd2, 8'd0);
+        // worst = 499 + pending(1 from T3d) + 2 = 502 > 500
+        check("T3e: qty=2 → 502 rejected", approved_valid == 1'b0);
 
         position[0] = '0;
 
-        // ── T4: Order rate limit ────────────────────────────────
+        // ── T4: Order rate limit ──────────────────────────────
         $display("\n=== T4: Rate limit ===");
+        do_clear();
         max_order_rate = 32'd3;
-        clear = 1'b1;
-        @(posedge clk);
-        clear = 1'b0;
-        @(posedge clk);
 
-        // Send 3 orders → should all pass
         send_signal(1'b0, 32'h00B4_0000, 16'd10, 8'd0);
         check("T4a: order 1 ok",   approved_valid == 1'b1);
         send_signal(1'b0, 32'h00B4_0000, 16'd10, 8'd1);
@@ -197,68 +209,146 @@ module tb_risk_manager;
         send_signal(1'b0, 32'h00B4_0000, 16'd10, 8'd2);
         check("T4c: order 3 ok",   approved_valid == 1'b1);
 
-        // 4th order should fail rate check
         send_signal(1'b0, 32'h00B4_0000, 16'd10, 8'd3);
         check("T4d: rate limited", approved_valid == 1'b0);
 
         max_order_rate = 32'd10000;
 
-        // ── T5: Max loss → risk_halt ────────────────────────────
+        // ── T5: Max loss → risk_halt ──────────────────────────
         $display("\n=== T5: Max loss halt ===");
-        clear = 1'b1;
-        @(posedge clk);
-        clear = 1'b0;
-        @(posedge clk);
-
-        // total_pnl = -$101 → below -max_loss(-$100) → halt
-        // In Q16.16 signed: -101 = 0xFFFFFF9B as integer dollars in sprice_t
+        do_clear();
         total_pnl = -32'sd101;
         send_signal(1'b0, 32'h00B4_0000, 16'd100, 8'd0);
-        check("T5: rejected",      approved_valid == 1'b0);
-        check("T5: risk_halt set", risk_halt == 1'b1);
+        check("T5: rejected",       approved_valid == 1'b0);
+        check("T5: risk_halt set",  risk_halt == 1'b1);
 
-        // Subsequent orders fail even with good PnL (halt is latched)
+        // Latched — even good PnL gets rejected
         total_pnl = 32'sd100;
         send_signal(1'b0, 32'h00B4_0000, 16'd100, 8'd0);
-        check("T5b: still halted", approved_valid == 1'b0);
+        check("T5b: still halted",  approved_valid == 1'b0);
 
         // Clear unlatches
-        clear = 1'b1;
-        @(posedge clk);
-        clear = 1'b0;
-        @(posedge clk);
-        check("T5c: halt cleared", risk_halt == 1'b0);
+        do_clear();
+        check("T5c: halt cleared",  risk_halt == 1'b0);
 
         send_signal(1'b0, 32'h00B4_0000, 16'd100, 8'd0);
         check("T5d: approved again", approved_valid == 1'b1);
         total_pnl = '0;
 
-        // ── T6: SELL order position check ───────────────────────
+        // ── T6: SELL order position check ─────────────────────
         $display("\n=== T6: SELL position check ===");
-        clear = 1'b1;
-        @(posedge clk);
-        clear = 1'b0;
-        @(posedge clk);
-
+        do_clear();
         position[1] = -32'sd400;
         send_signal(1'b1, 32'h01A4_0000, 16'd100, 8'd1);
-        // worst = -400 - 0 - 100 = -500, abs = 500 <= 500 → pass
+        // worst = -400 - 0 - 100 = -500, abs=500 <= 500 → pass
         check("T6a: SELL at boundary", approved_valid == 1'b1);
 
-        // Now pending_sell[1] = 100, worst = -400 - 100 - 100 = -600 > 500
+        // pending_sell[1] = 100, worst = -400 - 100 - 100 = -600 > 500
         send_signal(1'b1, 32'h01A4_0000, 16'd100, 8'd1);
         check("T6b: SELL rejected", approved_valid == 1'b0);
-
         position[1] = '0;
 
-        // ── T7: No valid → no output ────────────────────────────
-        $display("\n=== T7: Idle ===");
+        // ──────────────────────────────────────────────────────
+        // T7: CRITICAL REGRESSION — Simultaneous signal+fill
+        // same symbol, same side. Must verify merged NBA delta.
+        // ──────────────────────────────────────────────────────
+        $display("\n=== T7: Simultaneous signal+fill (same sym/side) ===");
+        do_clear();
+        // First, build up a pending_buy[0] = 100
+        send_signal(1'b0, 32'h00B4_0000, 16'd100, 8'd0);
+        check("T7-setup: approved", approved_valid == 1'b1);
+        // Now pending_buy[0] = 100
+
+        // On the same cycle: approve BUY sym=0 qty=50 AND fill BUY sym=0 qty=100
+        signal_valid  = 1'b1;
+        signal_side   = 1'b0;  // BUY
+        signal_price  = 32'h00B4_0000;
+        signal_qty    = 16'd50;
+        signal_symbol = 8'd0;
+        fill_valid    = 1'b1;
+        fill_symbol   = 8'd0;
+        fill_side     = 1'b0;  // BUY
+        fill_qty      = 16'd100;
+        @(posedge clk);
+        signal_valid = 1'b0;
+        fill_valid   = 1'b0;
+        @(posedge clk);
+
+        check("T7: simultaneous approved", approved_valid == 1'b1);
+        // pending_buy[0] should be: 100 (old) + 50 (new signal) - 100 (fill) = 50
+        // With the bug (no merge), it would be either 50 or 0 (last NBA wins)
+        // With the fix, the merge handles both in one update
+        check("T7: pending merged",
+              dut.pending_buy[0] == 16'd50);
+
+        // ──────────────────────────────────────────────────────
+        // T8: Simultaneous signal+fill DIFFERENT symbols
+        // ──────────────────────────────────────────────────────
+        $display("\n=== T8: Simultaneous signal+fill (different syms) ===");
+        do_clear();
+        // Build pending_sell[1] = 200
+        send_signal(1'b1, 32'h01A4_0000, 16'd200, 8'd1);
+        check("T8-setup: approved", approved_valid == 1'b1);
+
+        // Simultaneously: approve BUY sym=0 qty=100 AND fill SELL sym=1 qty=200
+        signal_valid  = 1'b1;
+        signal_side   = 1'b0;  // BUY sym=0
+        signal_price  = 32'h00B4_0000;
+        signal_qty    = 16'd100;
+        signal_symbol = 8'd0;
+        fill_valid    = 1'b1;
+        fill_symbol   = 8'd1;
+        fill_side     = 1'b1;  // SELL sym=1
+        fill_qty      = 16'd200;
+        @(posedge clk);
+        signal_valid = 1'b0;
+        fill_valid   = 1'b0;
+        @(posedge clk);
+
+        check("T8: approved",              approved_valid == 1'b1);
+        check("T8: pending_buy[0]=100",    dut.pending_buy[0] == 16'd100);
+        check("T8: pending_sell[1]=0",     dut.pending_sell[1] == 16'd0);
+
+        // ──────────────────────────────────────────────────────
+        // T9: Fill clears pending (no underflow)
+        // ──────────────────────────────────────────────────────
+        $display("\n=== T9: Fill overshoot (no underflow) ===");
+        do_clear();
+        send_signal(1'b0, 32'h00B4_0000, 16'd50, 8'd2);
+        check("T9-setup: approved", approved_valid == 1'b1);
+        // pending_buy[2] = 50
+
+        // Fill with qty=100 (more than pending) — should clamp to 0
+        send_fill(8'd2, 1'b0, 16'd100);
+        @(posedge clk);
+        check("T9: pending clamped to 0", dut.pending_buy[2] == 16'd0);
+
+        // ──────────────────────────────────────────────────────
+        // T10: Clear resets everything
+        // ──────────────────────────────────────────────────────
+        $display("\n=== T10: Clear resets all ===");
+        total_pnl = -32'sd200;
+        send_signal(1'b0, 32'h00B4_0000, 16'd100, 8'd0);
+        check("T10a: halt triggered", risk_halt == 1'b1);
+
+        do_clear();
+        check("T10b: halt cleared",       risk_halt == 1'b0);
+        check("T10b: rejects cleared",    risk_rejects == 32'd0);
+        check("T10b: pending_buy[0]==0",  dut.pending_buy[0] == 16'd0);
+        check("T10b: pending_sell[0]==0", dut.pending_sell[0] == 16'd0);
+
+        total_pnl = '0;
+        send_signal(1'b0, 32'h00B4_0000, 16'd100, 8'd0);
+        check("T10c: can approve after clear", approved_valid == 1'b1);
+
+        // ── T11: No valid → no output ─────────────────────────
+        $display("\n=== T11: Idle ===");
         signal_valid = 1'b0;
         @(posedge clk);
         @(posedge clk);
-        check("T7: no output", approved_valid == 1'b0);
+        check("T11: no output", approved_valid == 1'b0);
 
-        // ── Summary ─────────────────────────────────────────────
+        // ── Summary ───────────────────────────────────────────
         repeat (3) @(posedge clk);
         $display("\n══════════════════════════════════════════");
         $display("  risk_manager testbench complete");

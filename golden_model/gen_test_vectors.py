@@ -213,8 +213,8 @@ def main():
     board_b.threshold = q16(0.50)  # $0.50 threshold
     board_b.base_qty = 100
     board_b.max_position = 500
-    board_b.max_order_rate = 10000
-    board_b.max_loss = q16(100.0)
+    board_b.max_order_rate = 1000
+    board_b.max_loss = 100  # integer dollars (matches total_pnl = cash >> 16)
     board_b.start()
 
     board_a4 = BoardA(num_sym=4, num_sectors=4)
@@ -390,6 +390,105 @@ def main():
     with open(os.path.join(out_dir, "latency_histogram_vectors.json"), "w") as f:
         json.dump(lat_vectors, f, indent=2)
     print(f"  {len(lat_vectors)} latency vectors written")
+
+    # ──────────────────────────────────────────────────────────
+    # 8. Board A LFSR vectors: multiple seeds, 16 steps each
+    # ──────────────────────────────────────────────────────────
+    print("\n=== Generating Board A LFSR vectors ===")
+    from common import LFSR32 as LFSR32_cls
+    lfsr_vectors = {}
+    for seed_name, seed_val in [("0xDEADBEEF", 0xDEADBEEF), ("0x00000001", 1), ("0x00000000", 0)]:
+        lfsr = LFSR32_cls(seed_val)
+        eff = lfsr.value
+        steps = [lfsr.step() for _ in range(16)]
+        lfsr_vectors[seed_name] = {"effective_seed": hex32(eff), "steps": [hex32(v) for v in steps]}
+    with open(os.path.join(out_dir, "lfsr_vectors.json"), "w") as f:
+        json.dump(lfsr_vectors, f, indent=2)
+    print(f"  LFSR vectors for 3 seeds written")
+
+    # ──────────────────────────────────────────────────────────
+    # 9. Board A noise vectors: 4 symbols, 8 ticks
+    # ──────────────────────────────────────────────────────────
+    print("\n=== Generating Board A noise vectors ===")
+    from board_a import NoiseGen
+    noise = NoiseGen(num_sym=4, num_sectors=4)
+    noise.seed(0xDEADBEEF)
+    sector_ids_nv = [0, 0, 1, 1]
+    noise_vectors = []
+    for tick in range(8):
+        step_out = noise.generate(active_count=4, sector_ids=sector_ids_nv)
+        noise_vectors.append({
+            "tick": tick,
+            "step_out": [hex32(step_out[s] & MASK_32) for s in range(4)],
+        })
+    with open(os.path.join(out_dir, "noise_vectors.json"), "w") as f:
+        json.dump(noise_vectors, f, indent=2)
+    print(f"  {len(noise_vectors)} noise vectors written")
+
+    # ──────────────────────────────────────────────────────────
+    # 10. Board A quote frame vectors: 16 quotes
+    # ──────────────────────────────────────────────────────────
+    print("\n=== Generating Board A quote vectors ===")
+    board_a_qv = BoardA(num_sym=4, num_sectors=4)
+    board_a_qv.configure(
+        regime=Regime.CALM, quote_interval=0, seed=0xDEAD_BEEF,
+        init_mid=[q16(180.0), q16(420.0), q16(900.0), q16(115.0)],
+        init_spread=[q16(0.10), q16(0.15), q16(0.25), q16(0.08)],
+        sector_ids=[0, 0, 1, 1],
+        active_count=4,
+    )
+    board_a_qv.start()
+    quote_vectors = []
+    for cyc in range(16):
+        bits = board_a_qv.step(cyc)
+        if bits is not None and frame_type(bits) == MsgType.QUOTE:
+            qf = QuoteFrame.from_bits(bits)
+            quote_vectors.append({
+                "cycle": cyc,
+                "frame_hex": hex128(bits),
+                "symbol": qf.symbol,
+                "regime": qf.regime,
+                "bid_hex": hex32(qf.bid),
+                "ask_hex": hex32(qf.ask),
+                "seq_num": qf.seq_num,
+            })
+    with open(os.path.join(out_dir, "quote_vectors.json"), "w") as f:
+        json.dump(quote_vectors, f, indent=2)
+    with open(os.path.join(out_dir, "quote_frames.hex"), "w") as f:
+        for v in quote_vectors:
+            f.write(f"{v['frame_hex']}\n")
+    print(f"  {len(quote_vectors)} quote vectors written")
+
+    # ──────────────────────────────────────────────────────────
+    # 11. Board A exchange vectors: 6 test orders
+    # ──────────────────────────────────────────────────────────
+    print("\n=== Generating Board A exchange vectors ===")
+    from board_a import Exchange as Exchange_cls
+    bid = [board_a_qv.market.best_bid[s] for s in range(4)]
+    ask = [board_a_qv.market.best_ask[s] for s in range(4)]
+    exchange = Exchange_cls(num_sym=4)
+    test_orders_ev = [
+        ("BUY at ask (fill)", OrderFrame(symbol=0, side=SIDE_BUY, price=ask[0], qty=100, order_id=0, timestamp=100)),
+        ("BUY below ask (rej)", OrderFrame(symbol=0, side=SIDE_BUY, price=ask[0]-1, qty=50, order_id=1, timestamp=101)),
+        ("SELL at bid (fill)", OrderFrame(symbol=1, side=SIDE_SELL, price=bid[1], qty=75, order_id=2, timestamp=102)),
+        ("SELL above bid (rej)", OrderFrame(symbol=1, side=SIDE_SELL, price=bid[1]+1, qty=25, order_id=3, timestamp=103)),
+        ("OORange sym=4 (rej)", OrderFrame(symbol=4, side=SIDE_BUY, price=q16(200.0), qty=10, order_id=4, timestamp=104)),
+        ("BUY sym=3 (fill)", OrderFrame(symbol=3, side=SIDE_BUY, price=ask[3]+q16(1.0), qty=200, order_id=5, timestamp=105)),
+    ]
+    exchange_vectors = []
+    for desc, order in test_orders_ev:
+        fill = exchange.match(order, bid, ask)
+        exchange_vectors.append({
+            "description": desc,
+            "order_hex": hex128(order.to_bits()),
+            "fill_hex": hex128(fill.to_bits()),
+            "is_filled": fill.is_filled,
+            "fill_price_hex": hex32(fill.fill_price),
+            "fill_qty": fill.fill_qty,
+        })
+    with open(os.path.join(out_dir, "exchange_vectors.json"), "w") as f:
+        json.dump(exchange_vectors, f, indent=2)
+    print(f"  {len(exchange_vectors)} exchange vectors written")
 
     # ──────────────────────────────────────────────────────────
     # Summary

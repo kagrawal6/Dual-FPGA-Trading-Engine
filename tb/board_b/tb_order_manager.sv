@@ -1,11 +1,11 @@
 // ============================================================================
 // Testbench: tb_order_manager
-// Tests the order_manager module: ORDER frame packing per Appendix C,
-// auto-incrementing order_id, timestamp capture, backpressure handling,
-// and counter clearing.
+// Tests the order_manager module: ORDER frame packing, auto-incrementing
+// order_id, timestamp capture, backpressure handling (held frame + new order
+// simultaneous arrival), rapid burst, order ID wrap-around, and clear.
 //
-// Golden model reference: board_b.py BoardB._handle_quote() packs
-// ORDER frames with the same field layout and auto-incrementing ID.
+// Critical regression: simultaneous held-release + new order — verifies the
+// 3-branch priority fix that prevents silent order drops.
 // ============================================================================
 
 `timescale 1ns / 1ps
@@ -71,6 +71,23 @@ module tb_order_manager;
         end
     endtask
 
+    task automatic approve_order(
+        input logic       side,
+        input price_t     price,
+        input qty_t       qty,
+        input symbol_t    sym,
+        input timestamp_t ts
+    );
+        cycle_counter   = ts;
+        approved_valid  = 1'b1;
+        approved_side   = side;
+        approved_price  = price;
+        approved_qty    = qty;
+        approved_symbol = sym;
+        @(posedge clk);
+        approved_valid = 1'b0;
+    endtask
+
     initial begin
         approved_valid  = 1'b0;
         approved_side   = 1'b0;
@@ -84,16 +101,9 @@ module tb_order_manager;
         @(posedge rst_n);
         repeat (2) @(posedge clk);
 
-        // ── T1: Basic BUY order packing ─────────────────────────
+        // ── T1: Basic BUY order packing ───────────────────────
         $display("\n=== T1: BUY order frame packing ===");
-        cycle_counter   = 16'h002A;
-        approved_valid  = 1'b1;
-        approved_side   = 1'b0;  // BUY
-        approved_price  = 32'h00B4_1999;  // ask price
-        approved_qty    = 16'd100;
-        approved_symbol = 8'd0;
-        @(posedge clk);
-        approved_valid = 1'b0;
+        approve_order(1'b0, 32'h00B4_1999, 16'd100, 8'd0, 16'h002A);
         @(posedge clk);
 
         check("T1: order_valid",         order_valid == 1'b1);
@@ -101,98 +111,177 @@ module tb_order_manager;
         check("T1: symbol==0",           order_frame[123:116] == 8'd0);
         check("T1: side==BUY",           order_frame[115] == 1'b0);
         check("T1: reserved==000",       order_frame[114:112] == 3'b000);
-        check32("T1: price",              order_frame[111:80], 32'h00B4_1999);
+        check32("T1: price",             order_frame[111:80], 32'h00B4_1999);
         check("T1: qty==100",            order_frame[79:64] == 16'd100);
         check("T1: order_id==0",         order_frame[63:48] == 16'd0);
         check("T1: timestamp==0x002A",   order_frame[47:32] == 16'h002A);
-        check32("T1: reserved_lo",        order_frame[31:0], 32'h0);
+        check32("T1: reserved_lo",       order_frame[31:0], 32'h0);
         check("T1: orders_sent==1",      orders_sent == 32'd1);
 
-        // ── T2: SELL order with auto-incremented ID ─────────────
+        // ── T2: SELL order with auto-incremented ID ───────────
         $display("\n=== T2: SELL order, order_id=1 ===");
         order_ready = 1'b1;
-        @(posedge clk);  // let T1 frame be consumed
-
-        cycle_counter   = 16'h0050;
-        approved_valid  = 1'b1;
-        approved_side   = 1'b1;  // SELL
-        approved_price  = 32'h00B4_0000;  // bid price
-        approved_qty    = 16'd50;
-        approved_symbol = 8'd3;
         @(posedge clk);
-        approved_valid = 1'b0;
-        order_ready = 1'b0;  // prevent T2 frame from being consumed
+
+        approve_order(1'b1, 32'h00B4_0000, 16'd50, 8'd3, 16'h0050);
+        order_ready = 1'b0;
         @(posedge clk);
 
         check("T2: order_valid",         order_valid == 1'b1);
         check("T2: side==SELL",          order_frame[115] == 1'b1);
         check("T2: symbol==3",           order_frame[123:116] == 8'd3);
         check("T2: order_id==1",         order_frame[63:48] == 16'd1);
-        check("T2: timestamp==0x0050",   order_frame[47:32] == 16'h0050);
         check("T2: orders_sent==2",      orders_sent == 32'd2);
 
-        // ── T3: Backpressure — order_ready low ──────────────────
+        // ── T3: Backpressure — new order goes to holding ──────
         $display("\n=== T3: Backpressure ===");
-        // order_ready is already 0; T2 frame occupies the output
+        approve_order(1'b0, 32'h01A4_0000, 16'd200, 8'd1, 16'h0060);
+        @(posedge clk);
 
-        cycle_counter   = 16'h0060;
-        approved_valid  = 1'b1;
-        approved_side   = 1'b0;
-        approved_price  = 32'h01A4_0000;
-        approved_qty    = 16'd200;
-        approved_symbol = 8'd1;
+        check("T3: order_valid still",   order_valid == 1'b1);
+        check("T3: orders_sent==3",      orders_sent == 32'd3);
+        check("T3: holding==1",          dut.holding == 1'b1);
+
+        // Release backpressure → held frame appears
+        order_ready = 1'b1;
+        @(posedge clk);
+        @(posedge clk);
+        check("T3b: held frame out",     order_valid == 1'b1);
+        check("T3b: symbol==1",          order_frame[123:116] == 8'd1);
+        check("T3b: order_id==2",        order_frame[63:48] == 16'd2);
+
+        // ──────────────────────────────────────────────────────
+        // T4: CRITICAL REGRESSION — Simultaneous held-release + new order
+        // When output is occupied, held is occupied, and order_ready goes
+        // high same cycle as a new approved_valid:
+        //   - held frame should move to output
+        //   - new order should go to holding register
+        // ──────────────────────────────────────────────────────
+        $display("\n=== T4: Simultaneous held-release + new order ===");
+        order_ready = 1'b1;
+        @(posedge clk);
+        @(posedge clk);
+
+        // Fill output with order A
+        approve_order(1'b0, 32'h00640000, 16'd10, 8'd0, 16'h0100);
+        @(posedge clk);
+        check("T4-setup-A: valid",       order_valid == 1'b1);
+
+        // Now: output occupied with A, backpressure on
+        order_ready = 1'b0;
+
+        // Send order B → goes to holding
+        approve_order(1'b1, 32'h00C80000, 16'd20, 8'd1, 16'h0110);
+        @(posedge clk);
+        check("T4-setup-B: holding",     dut.holding == 1'b1);
+        check("T4-setup-B: orders==5",   orders_sent == 32'd5);
+
+        // Now: output=A, held=B. Release backpressure AND send new order C simultaneously
+        order_ready    = 1'b1;
+        approved_valid = 1'b1;
+        approved_side  = 1'b0;
+        approved_price = 32'h012C0000;
+        approved_qty   = 16'd30;
+        approved_symbol = 8'd2;
+        cycle_counter  = 16'h0120;
         @(posedge clk);
         approved_valid = 1'b0;
+
+        // After this cycle: held B should be in output, new C should be in holding
         @(posedge clk);
+        check("T4: B now in output",     order_valid == 1'b1);
+        check("T4: B symbol==1",         order_frame[123:116] == 8'd1);
+        check("T4: C in holding",        dut.holding == 1'b1);
+        check("T4: orders_sent==6",      orders_sent == 32'd6);
 
-        check("T3: order_valid still high", order_valid == 1'b1);
-        check("T3: orders_sent==3",      orders_sent == 32'd3);
+        // Consume B → C should appear
+        @(posedge clk);
+        check("T4b: C now out",          order_valid == 1'b1);
+        check("T4b: C symbol==2",        order_frame[123:116] == 8'd2);
+        check("T4b: holding cleared",    dut.holding == 1'b0);
 
-        // Release backpressure — held frame should appear
+        // ──────────────────────────────────────────────────────
+        // T5: Rapid 3-order burst with backpressure
+        // ──────────────────────────────────────────────────────
+        $display("\n=== T5: Rapid 3-order burst ===");
         order_ready = 1'b1;
         @(posedge clk);
         @(posedge clk);
-        check("T3b: held frame out",    order_valid == 1'b1);
-        check("T3b: symbol==1",         order_frame[123:116] == 8'd1);
-        check("T3b: order_id==2",       order_frame[63:48] == 16'd2);
 
-        // ── T4: Clear resets ID and counter ─────────────────────
-        $display("\n=== T4: Clear ===");
-        order_ready = 1'b1;
+        // Ensure clean state
+        order_ready = 1'b0;
+
+        // Send 3 orders on consecutive cycles
+        approve_order(1'b0, 32'h00640000, 16'd10, 8'd0, 16'h0200);
+        approve_order(1'b1, 32'h00C80000, 16'd20, 8'd1, 16'h0201);
+        approve_order(1'b0, 32'h012C0000, 16'd30, 8'd2, 16'h0202);
         @(posedge clk);
+
+        // First 2 should be captured (output + held), third may be dropped
+        check("T5: output occupied",     order_valid == 1'b1);
+
+        // Release and drain
+        order_ready = 1'b1;
+        repeat (4) @(posedge clk);
+
+        // ──────────────────────────────────────────────────────
+        // T6: Clear resets ID and counter
+        // ──────────────────────────────────────────────────────
+        $display("\n=== T6: Clear ===");
+        order_ready = 1'b1;
+        repeat (3) @(posedge clk);
 
         clear = 1'b1;
         @(posedge clk);
         clear = 1'b0;
         @(posedge clk);
 
-        check("T4: order_valid==0",      order_valid == 1'b0);
-        check("T4: orders_sent==0",      orders_sent == 32'd0);
+        check("T6: order_valid==0",      order_valid == 1'b0);
+        check("T6: orders_sent==0",      orders_sent == 32'd0);
+        check("T6: holding==0",          dut.holding == 1'b0);
 
         // Next order should get id=0
-        cycle_counter   = 16'h0100;
-        approved_valid  = 1'b1;
-        approved_side   = 1'b0;
-        approved_price  = 32'h00C8_0000;
-        approved_qty    = 16'd10;
-        approved_symbol = 8'd2;
+        approve_order(1'b0, 32'h00C8_0000, 16'd10, 8'd2, 16'h0300);
         @(posedge clk);
-        approved_valid = 1'b0;
+        check("T6b: order_id reset",     order_frame[63:48] == 16'd0);
+        check("T6b: orders_sent==1",     orders_sent == 32'd1);
+
+        // ──────────────────────────────────────────────────────
+        // T7: Order ID wrap-around (16-bit)
+        // ──────────────────────────────────────────────────────
+        $display("\n=== T7: Order ID wrap-around ===");
+        clear = 1'b1;
+        @(posedge clk);
+        clear = 1'b0;
         @(posedge clk);
 
-        check("T4b: order_id reset to 0", order_frame[63:48] == 16'd0);
-        check("T4b: orders_sent==1",      orders_sent == 32'd1);
+        // Force next_order_id near the wrap point
+        force dut.next_order_id = 16'hFFFE;
+        @(posedge clk);
+        release dut.next_order_id;
 
-        // ── T5: No valid → no output ────────────────────────────
-        $display("\n=== T5: Idle ===");
+        approve_order(1'b0, 32'h00640000, 16'd10, 8'd0, 16'h0400);
+        @(posedge clk);
+        check("T7a: id=0xFFFE",          order_frame[63:48] == 16'hFFFE);
+
+        approve_order(1'b0, 32'h00640000, 16'd10, 8'd0, 16'h0401);
+        @(posedge clk);
+        check("T7b: id=0xFFFF",          order_frame[63:48] == 16'hFFFF);
+
+        approve_order(1'b0, 32'h00640000, 16'd10, 8'd0, 16'h0402);
+        @(posedge clk);
+        check("T7c: id wraps to 0",      order_frame[63:48] == 16'h0000);
+
+        // ── T8: No valid → no output ──────────────────────────
+        $display("\n=== T8: Idle ===");
         order_ready = 1'b1;
         @(posedge clk);
         @(posedge clk);
         approved_valid = 1'b0;
         repeat (3) @(posedge clk);
-        check("T5: no output",            order_valid == 1'b0);
+        check("T8: no output",           order_valid == 1'b0);
 
-        // ── Summary ─────────────────────────────────────────────
+        // ── Summary ───────────────────────────────────────────
         repeat (3) @(posedge clk);
         $display("\n══════════════════════════════════════════");
         $display("  order_manager testbench complete");

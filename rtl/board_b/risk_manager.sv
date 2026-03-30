@@ -148,9 +148,19 @@ module risk_manager
                     order_count     <= order_count + 1'b1;
 
                     if (signal_symbol < NUM_SYM[7:0]) begin
-                        if (signal_side == 1'b0)
+                        // Skip standalone pending increment when the fill
+                        // block below handles the merged update.
+                        logic fill_merges_buy, fill_merges_sell;
+                        fill_merges_buy  = fill_valid && (fill_symbol == signal_symbol)
+                                           && (fill_symbol < NUM_SYM[7:0])
+                                           && (signal_side == 1'b0) && (fill_side == 1'b0);
+                        fill_merges_sell = fill_valid && (fill_symbol == signal_symbol)
+                                           && (fill_symbol < NUM_SYM[7:0])
+                                           && (signal_side == 1'b1) && (fill_side == 1'b1);
+
+                        if (signal_side == 1'b0 && !fill_merges_buy)
                             pending_buy[signal_symbol] <= pending_buy[signal_symbol] + signal_qty;
-                        else
+                        else if (signal_side == 1'b1 && !fill_merges_sell)
                             pending_sell[signal_symbol] <= pending_sell[signal_symbol] + signal_qty;
                     end
                 end else begin
@@ -160,15 +170,34 @@ module risk_manager
                 end
             end
 
-            // Fill feedback — clear pending
+            // Fill feedback — clear pending.
+            // Guard: if signal and fill target the same pending entry on the
+            // same cycle, merge both deltas to avoid last-NBA-wins data loss.
             if (fill_valid && fill_symbol < NUM_SYM[7:0]) begin
+                logic sig_same_buy, sig_same_sell;
+                sig_same_buy  = approved_comb && (signal_symbol == fill_symbol)
+                                && (signal_side == 1'b0) && (fill_side == 1'b0);
+                sig_same_sell = approved_comb && (signal_symbol == fill_symbol)
+                                && (signal_side == 1'b1) && (fill_side == 1'b1);
+
                 if (fill_side == 1'b0) begin
-                    if (pending_buy[fill_symbol] >= fill_qty)
+                    if (sig_same_buy) begin
+                        // Merge: +signal_qty from approval, -fill_qty from fill
+                        if (pending_buy[fill_symbol] + signal_qty >= fill_qty)
+                            pending_buy[fill_symbol] <= pending_buy[fill_symbol] + signal_qty - fill_qty;
+                        else
+                            pending_buy[fill_symbol] <= '0;
+                    end else if (pending_buy[fill_symbol] >= fill_qty)
                         pending_buy[fill_symbol] <= pending_buy[fill_symbol] - fill_qty;
                     else
                         pending_buy[fill_symbol] <= '0;
                 end else begin
-                    if (pending_sell[fill_symbol] >= fill_qty)
+                    if (sig_same_sell) begin
+                        if (pending_sell[fill_symbol] + signal_qty >= fill_qty)
+                            pending_sell[fill_symbol] <= pending_sell[fill_symbol] + signal_qty - fill_qty;
+                        else
+                            pending_sell[fill_symbol] <= '0;
+                    end else if (pending_sell[fill_symbol] >= fill_qty)
                         pending_sell[fill_symbol] <= pending_sell[fill_symbol] - fill_qty;
                     else
                         pending_sell[fill_symbol] <= '0;

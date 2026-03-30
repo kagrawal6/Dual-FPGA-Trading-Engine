@@ -203,6 +203,82 @@ module tb_board_b_axi_regs;
         axi_read(9'h0EC, rd_val);
         check("T5: lat_count==8", rd_val == 32'd8);
 
+        // ── T6: Default register values ──────────────────────
+        $display("\n=== T6: Default values ===");
+        // Read defaults BEFORE any writes (need fresh DUT for this)
+        // We already wrote some registers, so check the ones we didn't touch
+        axi_read(9'h018, rd_val);
+        check("T6: default max_order_rate==1000", max_order_rate == 32'd1000);
+
+        axi_read(9'h01C, rd_val);
+        check("T6: default max_loss==100", max_loss == 32'd100);
+
+        axi_read(9'h014, rd_val);
+        check("T6: max_position readback", rd_val == 32'd1000);
+
+        // ── T7: STATUS register bit packing ──────────────────
+        $display("\n=== T7: STATUS register packing ===");
+        // Test all combinations of status bits
+        fsm_state = B_ARMED;
+        link_up   = 1'b0;
+        risk_halt = 1'b1;
+        active_strategy = STRAT_NN;
+        @(posedge clk);
+
+        axi_read(9'h040, rd_val);
+        // STATUS: {25'b0, risk_halt, link_up, fsm_state[2:0], active_strategy[1:0]}
+        check("T7a: status ARMED+halt+NN",
+              rd_val == {25'b0, 1'b1, 1'b0, B_ARMED, STRAT_NN});
+
+        fsm_state = B_HALTED;
+        link_up   = 1'b1;
+        risk_halt = 1'b1;
+        active_strategy = STRAT_AUTO;
+        @(posedge clk);
+
+        axi_read(9'h040, rd_val);
+        check("T7b: status HALTED+link+halt+AUTO",
+              rd_val == {25'b0, 1'b1, 1'b1, B_HALTED, STRAT_AUTO});
+
+        fsm_state = B_IDLE;
+        link_up   = 1'b0;
+        risk_halt = 1'b0;
+        active_strategy = STRAT_MEAN_REV;
+        @(posedge clk);
+
+        axi_read(9'h040, rd_val);
+        check("T7c: status IDLE clean",
+              rd_val == {25'b0, 1'b0, 1'b0, B_IDLE, STRAT_MEAN_REV});
+
+        // ── T8: Histogram bin readback ───────────────────────
+        $display("\n=== T8: Histogram bin readback ===");
+        hist_bins[0] = 32'd42;
+        hist_bins[5] = 32'd999;
+        @(posedge clk);
+
+        axi_read(9'h0A0, rd_val);
+        check("T8a: hist_bin[0]==42",  rd_val == 32'd42);
+
+        axi_read(9'h0A0 + 9'd20, rd_val);  // bin[5] at offset 5*4=20
+        check("T8b: hist_bin[5]==999", rd_val == 32'd999);
+
+        // ── T9: Cash readback (high word sign extension) ─────
+        $display("\n=== T9: Cash readback ===");
+        cash = -48'sd12345;
+        @(posedge clk);
+
+        axi_read(9'h098, rd_val);
+        check("T9a: cash_lo",    rd_val == cash[31:0]);
+
+        axi_read(9'h09C, rd_val);
+        check("T9b: cash_hi sign-ext", rd_val == {{16{cash[47]}}, cash[47:32]});
+
+        // ── T10: Reset pulse ─────────────────────────────────
+        $display("\n=== T10: Reset pulse ===");
+        axi_write(9'h000, 32'h0000_0002);
+        @(posedge clk);
+        check("T10: reset deasserts", axi_reset_pulse == 1'b0);
+
         // ── Summary ─────────────────────────────────────────────
         repeat (3) @(posedge clk);
         $display("\n══════════════════════════════════════════");

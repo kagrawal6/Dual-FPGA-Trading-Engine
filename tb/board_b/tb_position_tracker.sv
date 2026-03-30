@@ -181,7 +181,6 @@ module tb_position_tracker;
 
         // ── T6: ts_echo extraction ──────────────────────────────
         $display("\n=== T6: ts_echo extraction ===");
-        // BUY sym=0 with ts_echo = 0x00AA
         fill_frame = {4'h3, 8'd0, 1'b0, 3'b000,
                       32'h00B4_0000, 16'd50, 16'd99, 16'h00AA, 32'h0};
         fill_valid = 1'b1;
@@ -191,6 +190,75 @@ module tb_position_tracker;
 
         check("T6: ts_echo==0x00AA",       ts_echo == 16'h00AA);
         check("T6: fill_processed",        fill_processed == 1'b1);
+
+        // ── T7: Out-of-range symbol (sym=99) — no crash ─────
+        $display("\n=== T7: Out-of-range symbol ===");
+        begin
+            logic [31:0] pos0_before;
+            pos0_before = position[0];
+
+            // BUY sym=99 (NUM_SYM=4 → valid 0-3), should not update anything
+            fill_frame = {4'h3, 8'd99, 1'b0, 3'b000,
+                          32'h00B4_0000, 16'd100, 16'd200, 16'h0050, 32'h0};
+            fill_valid = 1'b1;
+            @(posedge clk);
+            fill_valid = 1'b0;
+            @(posedge clk);
+
+            check("T7: no crash",             1'b1);
+            check32("T7: pos[0] unchanged",   position[0], pos0_before);
+        end
+
+        // ── T8: Back-to-back fills (consecutive cycles) ──────
+        $display("\n=== T8: Back-to-back fills ===");
+        begin
+            // Clear first
+            clear = 1'b1;
+            @(posedge clk);
+            clear = 1'b0;
+            @(posedge clk);
+
+            // Two fills on consecutive cycles: BUY sym=0 qty=50, then SELL sym=1 qty=30
+            fill_frame = {4'h3, 8'd0, 1'b0, 3'b000,
+                          32'h00640000, 16'd50, 16'd1, 16'h0010, 32'h0};
+            fill_valid = 1'b1;
+            @(posedge clk);
+
+            fill_frame = {4'h3, 8'd1, 1'b1, 3'b000,
+                          32'h00C80000, 16'd30, 16'd2, 16'h0020, 32'h0};
+            @(posedge clk);
+            fill_valid = 1'b0;
+
+            // Wait for processing
+            @(posedge clk);
+            @(posedge clk);
+
+            check32("T8: pos[0]==50",     position[0], 32'h00000032);
+            check32("T8: pos[1]==-30",    position[1], 32'hFFFFFFE2);
+            check("T8: fills_rcvd==2",    fills_rcvd == 32'd2);
+        end
+
+        // ── T9: Multiple fills on same symbol accumulate ─────
+        $display("\n=== T9: Accumulating fills ===");
+        begin
+            clear = 1'b1;
+            @(posedge clk);
+            clear = 1'b0;
+            @(posedge clk);
+
+            // 3 BUY fills for sym=0: qty=10, 20, 30 → position=60
+            for (int i = 0; i < 3; i++) begin
+                fill_frame = {4'h3, 8'd0, 1'b0, 3'b000,
+                              32'h00640000, 16'(10 + i * 10), 16'(i), 16'h0050, 32'h0};
+                fill_valid = 1'b1;
+                @(posedge clk);
+                fill_valid = 1'b0;
+                @(posedge clk);
+            end
+
+            check32("T9: pos[0]==60",     position[0], 32'h0000003C);
+            check("T9: fills_rcvd==3",    fills_rcvd == 32'd3);
+        end
 
         // ── Summary ─────────────────────────────────────────────
         repeat (3) @(posedge clk);

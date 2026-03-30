@@ -114,9 +114,11 @@ module link_rx #(
                     // We sample every other core clock to match the PMOD beat
                     // rate (nibbles held for 2 core_clk cycles).
                     if (!phase) begin
-                        // If valid drops before completing the expected beats, count an error.
+                        // If valid drops before completing the expected beats, count an error
+                        // and deassert link_up (framing failure = link unreliable).
                         if (!valid_sync) begin
                             error_count <= error_count + 1'b1;
+                            link_up     <= 1'b0;
                             state       <= S_IDLE;
                         end
                         else begin
@@ -133,6 +135,7 @@ module link_rx #(
                                     end
                                     default: begin
                                         error_count <= error_count + 1'b1;
+                                        link_up     <= 1'b0;
                                     end
                                 endcase
 
@@ -155,8 +158,10 @@ module link_rx #(
                 default: state <= S_IDLE;
             endcase
 
-            if (counter_clr)
+            if (counter_clr) begin
                 error_count <= '0;
+                link_up     <= 1'b0;
+            end
         end
     end
 

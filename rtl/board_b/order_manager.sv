@@ -79,16 +79,27 @@ module order_manager
                              cycle_counter,         // [47:32]
                              32'h0};                // [31:0]
 
-                if (!order_valid || order_ready) begin
+                if (!holding && (!order_valid || order_ready)) begin
                     order_frame <= new_frame;
                     order_valid <= 1'b1;
-                end else begin
+                    next_order_id <= next_order_id + 1'b1;
+                    orders_sent   <= orders_sent + 1'b1;
+                end else if (!holding) begin
                     held_frame <= new_frame;
                     holding    <= 1'b1;
+                    next_order_id <= next_order_id + 1'b1;
+                    orders_sent   <= orders_sent + 1'b1;
+                end else if (!order_valid || order_ready) begin
+                    // holding=1 but output is freeing up this cycle (block 2
+                    // releases held→output), so the holding slot is available
+                    // for the new order.
+                    held_frame <= new_frame;
+                    holding    <= 1'b1;
+                    next_order_id <= next_order_id + 1'b1;
+                    orders_sent   <= orders_sent + 1'b1;
                 end
-
-                next_order_id <= next_order_id + 1'b1;
-                orders_sent   <= orders_sent + 1'b1;
+                // else: output and holding truly occupied — order dropped
+                // (cannot occur at normal quote rates)
             end
         end
     end

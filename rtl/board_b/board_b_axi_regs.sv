@@ -148,7 +148,7 @@ module board_b_axi_regs
             ema_alpha       <= 16'd6554;         // ~10%
             base_qty        <= 16'd100;
             max_position    <= 32'd500;
-            max_order_rate  <= 32'd10000;
+            max_order_rate  <= 32'd1000;
             max_loss        <= 32'd100;           // $100 integer dollars (total_pnl = cash[47:16])
             s_axi_bvalid    <= 1'b0;
             s_axi_rvalid    <= 1'b0;
@@ -192,7 +192,7 @@ module board_b_axi_regs
                 else if (rd_addr == ADDR_MAX_LOSS)     s_axi_rdata <= max_loss;
 
                 else if (rd_addr == ADDR_STATUS)
-                    s_axi_rdata <= {24'b0, risk_halt, link_up, fsm_state, active_strategy};
+                    s_axi_rdata <= {25'b0, risk_halt, link_up, fsm_state, active_strategy};
 
                 else if (rd_addr == ADDR_QUOTES_RCVD)  s_axi_rdata <= quotes_rcvd;
                 else if (rd_addr == ADDR_ORDERS_SENT)  s_axi_rdata <= orders_sent;

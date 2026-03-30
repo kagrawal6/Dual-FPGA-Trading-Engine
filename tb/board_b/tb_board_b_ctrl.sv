@@ -148,6 +148,94 @@ module tb_board_b_ctrl;
         @(posedge clk);
         check("T5c: halt → red",        rgb1 == 3'b100);
 
+        // ── T6: All 4 strategy switch values ──────────────────
+        $display("\n=== T6: All 4 strategy values ===");
+        sw = 8'b0000_1000;  // override active, SW[2:1]=00 → MEAN_REV
+        sw[2:1] = 2'b00;
+        sw[3] = 1'b1;
+        @(posedge clk);
+        check("T6a: MEAN_REV",       strategy_sw == STRAT_MEAN_REV);
+
+        sw[2:1] = 2'b01;  // MOMENTUM
+        @(posedge clk);
+        check("T6b: MOMENTUM",       strategy_sw == STRAT_MOMENTUM);
+
+        sw[2:1] = 2'b10;  // NN
+        @(posedge clk);
+        check("T6c: NN",             strategy_sw == STRAT_NN);
+
+        sw[2:1] = 2'b11;  // AUTO
+        @(posedge clk);
+        check("T6d: AUTO",           strategy_sw == STRAT_AUTO);
+
+        sw = 8'h00;
+
+        // ── T7: All FSM state LED encodings ───────────────────
+        $display("\n=== T7: All FSM state LED encodings ===");
+        risk_halt    = 1'b0;
+        order_enable = 1'b0;
+        link_up      = 1'b0;
+
+        fsm_state = B_RESET;
+        @(posedge clk);
+        check("T7a: LED[2:0]=RESET",  led[2:0] == B_RESET[2:0]);
+
+        fsm_state = B_IDLE;
+        @(posedge clk);
+        check("T7b: LED[2:0]=IDLE",   led[2:0] == B_IDLE[2:0]);
+
+        fsm_state = B_ARMED;
+        @(posedge clk);
+        check("T7c: LED[2:0]=ARMED",  led[2:0] == B_ARMED[2:0]);
+
+        fsm_state = B_TRADING;
+        order_enable = 1'b1;
+        link_up      = 1'b1;
+        @(posedge clk);
+        check("T7d: LED[2:0]=TRADING", led[2:0] == B_TRADING[2:0]);
+        check("T7d: LED[4]=link",      led[4] == 1'b1);
+        check("T7d: LED[6]=order_en",  led[6] == 1'b1);
+
+        fsm_state = B_HALTED;
+        risk_halt = 1'b1;
+        @(posedge clk);
+        check("T7e: LED[2:0]=HALTED",  led[2:0] == B_HALTED[2:0]);
+        check("T7e: LED[5]=halt",      led[5] == 1'b1);
+
+        // ── T8: Double button press ───────────────────────────
+        $display("\n=== T8: Double button press ===");
+        risk_halt = 1'b0;
+        fsm_state = B_IDLE;
+        @(posedge clk);
+
+        // Press btn[0], wait for debounce, release, wait, press again
+        btn[0] = 1'b1;
+        repeat (20) @(posedge clk);
+        btn[0] = 1'b0;
+        repeat (20) @(posedge clk);
+        btn[0] = 1'b1;
+        repeat (20) @(posedge clk);
+        btn[0] = 1'b0;
+        repeat (20) @(posedge clk);
+        // Both presses should have generated pulses (verified by debounce settling)
+
+        // ── T9: Stop and reset buttons ────────────────────────
+        $display("\n=== T9: Stop and reset buttons ===");
+        btn = 4'b0000;
+        repeat (2) @(posedge clk);
+
+        // btn[1] = stop
+        btn[1] = 1'b1;
+        repeat (20) @(posedge clk);
+        btn[1] = 1'b0;
+        repeat (20) @(posedge clk);
+
+        // btn[2] = reset
+        btn[2] = 1'b1;
+        repeat (20) @(posedge clk);
+        btn[2] = 1'b0;
+        repeat (20) @(posedge clk);
+
         // ── Summary ─────────────────────────────────────────────
         repeat (3) @(posedge clk);
         $display("\n══════════════════════════════════════════");

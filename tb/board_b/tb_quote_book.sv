@@ -280,13 +280,9 @@ module tb_quote_book;
 
         // ────────────────────────────────────────────────────────
         // TEST 7: Golden model — 3rd round (cycles 8-11)
-        // Verify exact values match quote_book_vectors.json
-        // After cycle 11: stored_bid=[0x00B3F81A, 0x01A3F818, 0x0383F81B, 0x0072F80D]
         // ────────────────────────────────────────────────────────
         $display("\n=== TEST 7: Golden model 3rd round ===");
 
-        // Reset sym0 and sym1 to their round-2 values first (already done by T3)
-        // Now send cycle 10: sym=2 bid=0x0383F81B ask=0x0384081B
         quote_frame = 128'h10200383F81B0384081B03E803E80002;
         quote_valid = 1'b1;
         @(posedge clk);
@@ -295,7 +291,6 @@ module tb_quote_book;
         check("T7.2: sym2 bid=0x0383F81B", bid_price == 32'h0383F81B);
         check("T7.2: sym2 ask=0x0384081B", ask_price == 32'h0384081B);
 
-        // Cycle 11: sym=3 bid=0x0072F80D ask=0x0073080D
         quote_frame = 128'h10300072F80D0073080D03E803E80002;
         quote_valid = 1'b1;
         @(posedge clk);
@@ -303,6 +298,67 @@ module tb_quote_book;
         @(posedge clk);
         check("T7.3: sym3 bid=0x0072F80D", bid_price == 32'h0072F80D);
         check("T7.3: sym3 ask=0x0073080D", ask_price == 32'h0073080D);
+
+        // ────────────────────────────────────────────────────────
+        // TEST 8: Golden model — 4th round (cycles 12-15)
+        // ────────────────────────────────────────────────────────
+        $display("\n=== TEST 8: Golden model 4th round (cycles 12-15) ===");
+
+        // Cycle 12: sym=0 bid=0x00B3F80B ask=0x00B4080B
+        quote_frame = 128'h100000B3F80B00B4080B03E803E80003;
+        quote_valid = 1'b1;
+        @(posedge clk);
+        quote_valid = 1'b0;
+        @(posedge clk);
+        check("T8.0: bid=0x00B3F80B",     bid_price == 32'h00B3F80B);
+        check("T8.0: ask=0x00B4080B",     ask_price == 32'h00B4080B);
+
+        // Cycle 13: sym=1 bid=0x01A3F7F4 ask=0x01A407F4
+        quote_frame = 128'h101001A3F7F401A407F403E803E80003;
+        quote_valid = 1'b1;
+        @(posedge clk);
+        quote_valid = 1'b0;
+        @(posedge clk);
+        check("T8.1: bid=0x01A3F7F4",     bid_price == 32'h01A3F7F4);
+        check("T8.1: ask=0x01A407F4",     ask_price == 32'h01A407F4);
+
+        // Cycle 14: sym=2 bid=0x0383F7FE ask=0x038407FE
+        quote_frame = 128'h10200383F7FE038407FE03E803E80003;
+        quote_valid = 1'b1;
+        @(posedge clk);
+        quote_valid = 1'b0;
+        @(posedge clk);
+        check("T8.2: bid=0x0383F7FE",     bid_price == 32'h0383F7FE);
+
+        // Cycle 15: sym=3 bid=0x0072F80F ask=0x0073080F
+        quote_frame = 128'h10300072F80F0073080F03E803E80003;
+        quote_valid = 1'b1;
+        @(posedge clk);
+        quote_valid = 1'b0;
+        @(posedge clk);
+        check("T8.3: bid=0x0072F80F",     bid_price == 32'h0072F80F);
+        check("T8.3: ask=0x0073080F",     ask_price == 32'h0073080F);
+
+        // ────────────────────────────────────────────────────────
+        // TEST 9: Triple overwrite on same symbol
+        // ────────────────────────────────────────────────────────
+        $display("\n=== TEST 9: Triple overwrite same symbol ===");
+        begin
+            // 3 consecutive writes to sym=0 with different prices
+            quote_frame = 128'h100000010000000200000000000000000;
+            quote_valid = 1'b1;
+            @(posedge clk);
+            quote_frame = 128'h100000030000000400000000000000000;
+            @(posedge clk);
+            quote_frame = 128'h100000050000000600000000000000000;
+            @(posedge clk);
+            quote_valid = 1'b0;
+
+            // Last one wins
+            repeat (2) @(posedge clk);
+            check("T9: last bid wins",    bid_price == 32'h00050000);
+            check("T9: last ask wins",    ask_price == 32'h00060000);
+        end
 
         // ────────────────────────────────────────────────────────
         // SUMMARY

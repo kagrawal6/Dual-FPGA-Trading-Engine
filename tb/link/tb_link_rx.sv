@@ -1,7 +1,7 @@
 // ============================================================================
 // Testbench: tb_link_rx
-// Tests the PMOD link receiver: data/valid synchronization, frame assembly,
-// frame_out_valid pulse, link_up status, and error_count tracking.
+// link_up deassertion on error/counter_clr, recovery, invalid msg_type,
+// back-to-back frames, local_ready behavior.
 // ============================================================================
 
 `timescale 1ns / 1ps
@@ -12,6 +12,7 @@ module tb_link_rx;
 
     logic                  clk;
     logic                  rst_n;
+    logic                  counter_clr;
     logic [3:0]            pmod_data;
     logic                  pmod_valid;
     logic                  local_ready;
@@ -20,203 +21,225 @@ module tb_link_rx;
     logic                  link_up;
     logic [31:0]           error_count;
 
-    // Clock generation (100 MHz)
+    int pass_count = 0;
+    int fail_count = 0;
+
     initial clk = 0;
     always #5 clk = ~clk;
 
-    // Reset generation (active-low, deassert after 100ns)
     initial begin
         rst_n = 0;
         #100;
         rst_n = 1;
     end
 
-    link_rx #(
-        .FRAME_W (128),
-        .DATA_W  (4)
-    ) dut (
+    link_rx #(.FRAME_W(128), .DATA_W(4)) dut (
         .clk             (clk),
-        .rst_n            (rst_n),
-        .counter_clr      (1'b0),
-        .pmod_data        (pmod_data),
-        .pmod_valid       (pmod_valid),
-        .local_ready      (local_ready),
-        .frame_out        (frame_out),
-        .frame_out_valid  (frame_out_valid),
-        .link_up          (link_up),
-        .error_count      (error_count)
+        .rst_n           (rst_n),
+        .counter_clr     (counter_clr),
+        .pmod_data       (pmod_data),
+        .pmod_valid      (pmod_valid),
+        .local_ready     (local_ready),
+        .frame_out       (frame_out),
+        .frame_out_valid (frame_out_valid),
+        .link_up         (link_up),
+        .error_count     (error_count)
     );
-
-    // ---------------------------------------------------------------------
-    // Test utilities
-    // ---------------------------------------------------------------------
-    int err_count_scratch = 0;
-    int frames_seen       = 0;
-    logic [127:0] last_frame = '0;
-
-    always_ff @(posedge clk) begin
-        if (frame_out_valid) begin
-            frames_seen <= frames_seen + 1;
-            last_frame   <= frame_out;
-        end
-    end
-
-    task automatic check(input string msg, input logic cond);
-        if (!cond) begin
-            $error("FAIL: %s", msg);
-            err_count_scratch++;
-        end
-    endtask
 
     localparam int FRAME_W = 128;
     localparam int DATA_W  = 4;
-    localparam int BEATS   = FRAME_W / DATA_W; // 32
+    localparam int BEATS   = FRAME_W / DATA_W;
+
+    task automatic check(string msg, logic cond);
+        if (cond) pass_count++;
+        else begin
+            $error("FAIL: %s", msg);
+            fail_count++;
+        end
+    endtask
+
+    task automatic check128(string msg, logic [127:0] actual, logic [127:0] expected);
+        if (actual === expected) pass_count++;
+        else begin
+            $error("FAIL: %s — got %032h, exp %032h", msg, actual, expected);
+            fail_count++;
+        end
+    endtask
 
     function automatic logic [DATA_W-1:0] nibble_at(input logic [FRAME_W-1:0] frame, input int i);
-        // MSB-first: beat 0 = frame[127:124], beat 1 = frame[123:120], ...
         nibble_at = frame[FRAME_W-1 - (i*DATA_W) -: DATA_W];
     endfunction
 
-    // Drive a frame with 2 core_clk cycles per beat.
+    // Drive a complete frame (2 clk per nibble), with optional truncation
     task automatic send_frame(
         input logic [FRAME_W-1:0] frame,
         input int beats_to_send,
-        input int pad_cycles_after_last_beat
+        input int pad_after
     );
-        int i;
-        begin
-            // Start from an idle valid low so the receiver sees a clean rising edge.
-            pmod_valid = 1'b0;
-            pmod_data  = '0;
+        pmod_valid = 1'b0;
+        pmod_data  = '0;
+        @(posedge clk);
+
+        for (int i = 0; i < beats_to_send; i++) begin
+            pmod_data  = nibble_at(frame, i);
+            pmod_valid = 1'b1;
             @(posedge clk);
-
-            for (i = 0; i < beats_to_send; i++) begin
-                pmod_data  = nibble_at(frame, i);
-                pmod_valid = 1'b1;
-                @(posedge clk);
-                @(posedge clk); // hold for 2 cycles
-            end
-
-            // Keep valid high a little longer so the receiver (with 2-FF sync and
-            // phase-aligned sampling) still sees valid asserted during its final
-            // sampling beat.
-            if (pad_cycles_after_last_beat > 0) begin
-                repeat (pad_cycles_after_last_beat) @(posedge clk);
-            end
-
-            // Deassert valid after the last beat + padding.
-            pmod_valid = 1'b0;
-            pmod_data  = '0;
             @(posedge clk);
+        end
+
+        if (pad_after > 0)
+            repeat (pad_after) @(posedge clk);
+
+        pmod_valid = 1'b0;
+        pmod_data  = '0;
+        @(posedge clk);
+    endtask
+
+    // Wait for frame_out_valid or timeout
+    task automatic wait_frame(output logic got_frame, output logic [127:0] captured, input int timeout = 120);
+        int cnt = 0;
+        got_frame = 1'b0;
+        captured = '0;
+        while (!frame_out_valid && cnt < timeout) begin
+            @(posedge clk);
+            cnt++;
+        end
+        if (frame_out_valid) begin
+            got_frame = 1'b1;
+            captured = frame_out;
         end
     endtask
 
-    // A helper to wait and ensure frame_out_valid doesn't pulse unexpectedly.
-    task automatic wait_cycles_no_frame(input int cycles);
-        begin
-            for (int k = 0; k < cycles; k++) begin
-                @(posedge clk);
-                check($sformatf("Unexpected frame_out_valid pulse at cycle %0d", k),
-                      frame_out_valid == 1'b0);
-            end
+    // Verify no frame arrives for N cycles
+    task automatic no_frame_for(input int cycles, input string tag);
+        for (int i = 0; i < cycles; i++) begin
+            @(posedge clk);
+            check($sformatf("%s: no frame at cycle %0d", tag, i), frame_out_valid == 1'b0);
         end
     endtask
 
-    // ---------------------------------------------------------------------
-    // Waveform dump
-    // ---------------------------------------------------------------------
     initial begin
+        logic [127:0] good_frame, bad_frame, rx_frame;
+        logic got;
+
         $dumpfile("tb_link_rx.vcd");
         $dumpvars(0, tb_link_rx);
-    end
 
-    // ---------------------------------------------------------------------
-    // Test sequence
-    // ---------------------------------------------------------------------
-    initial begin
-        int err0;
-        int err1;
-        int wait_p;
-        logic [127:0] good_frame;
-        logic [127:0] bad_msg_frame;
+        pmod_data   = '0;
+        pmod_valid  = 1'b0;
+        counter_clr = 1'b0;
 
-        // Defaults
-        pmod_data       = '0;
-        pmod_valid      = 1'b0;
-        frames_seen     = 0;
-        last_frame      = '0;
-        err_count_scratch = 0;
-
-        // Wait for reset release
         @(posedge clk);
         wait (rst_n === 1'b1);
-        @(posedge clk);
+        repeat (4) @(posedge clk);
 
-        // -------------------------------------------------------------
-        // 1) valid staying low indefinitely → no frames, link_up stays 0
-        // -------------------------------------------------------------
-        wait_cycles_no_frame(30);
-        check("No frames should be seen in idle period", frames_seen == 0);
-        check("link_up should remain 0 before first valid frame", link_up == 1'b0);
+        // ─────────────────────────────────────────────────────
+        // 1) Idle state: no frames, link_up=0
+        // ─────────────────────────────────────────────────────
+        $display("--- test_idle ---");
+        no_frame_for(30, "idle");
+        check("idle: link_up=0", link_up == 1'b0);
 
-        err0 = error_count;
-
-        // -------------------------------------------------------------
-        // 2) Glitch/truncated valid: should not assert frame_out_valid,
-        //    but should increment error_count.
-        // -------------------------------------------------------------
-        send_frame(128'hDEAD_BEEF_F00D_1234_5678_9ABC_DEF0_0001, 5, 0);
-        // Allow time for receiver to complete/abort and update error_count
-        wait_cycles_no_frame(80);
-        check("Truncated frame must not produce frame_out_valid", frames_seen == 0);
-        check("error_count should increment after truncation", error_count > err0);
-        err1 = error_count;
-
-        // -------------------------------------------------------------
-        // 3) Full valid frame (msg_type=QUOTE=4'h1) → frame assembles,
-        //    frame_out_valid pulses once, link_up asserts.
-        // -------------------------------------------------------------
-        good_frame = {4'h1, 124'h1234_5678_9ABC_DEF0_0FED_CBA9_8765_432};
-
-        // Reset counters for this scenario
-        frames_seen = 0;
-        last_frame  = '0;
-
-        send_frame(good_frame, BEATS, 10);
-
-        // Wait for one successful pulse.
-        wait_p = 0;
-        while (frames_seen == 0 && wait_p < 120) begin
-            @(posedge clk);
-            wait_p++;
+        // ─────────────────────────────────────────────────────
+        // 2) Truncated frame → error, no frame_out_valid
+        // ─────────────────────────────────────────────────────
+        $display("--- test_truncated ---");
+        begin
+            int err_before = error_count;
+            send_frame(128'hDEAD_BEEF_F00D_1234_5678_9ABC_DEF0_0001, 5, 0);
+            no_frame_for(80, "truncated");
+            check("truncated: error_count incremented", error_count > err_before);
         end
-        check("Full valid frame must produce at least one frame_out_valid pulse", frames_seen == 1);
-        check("Assembled frame_out must match the transmitted frame", last_frame === good_frame);
-        check("link_up must assert after first successful frame", link_up == 1'b1);
-        check("No new errors expected for a valid complete frame", error_count == err1);
 
-        // -------------------------------------------------------------
-        // 4) Full frame with invalid msg_type → frame_out_valid must stay low,
-        //    error_count increments; link_up should remain 1.
-        // -------------------------------------------------------------
-        bad_msg_frame = {4'hF, 124'h0};
-        frames_seen = 0;
-        last_frame  = '0;
+        // ─────────────────────────────────────────────────────
+        // 3) Valid QUOTE frame → assembles, link_up=1
+        // ─────────────────────────────────────────────────────
+        $display("--- test_valid_quote ---");
+        good_frame = {4'h1, 124'h1234_5678_9ABC_DEF0_0FED_CBA9_8765_432};
+        begin
+            int err_before = error_count;
+            send_frame(good_frame, BEATS, 10);
+            wait_frame(got, rx_frame);
+            check("valid: frame received", got);
+            check128("valid: frame matches", rx_frame, good_frame);
+            check("valid: link_up=1", link_up == 1'b1);
+            check("valid: no new errors", error_count == err_before);
+        end
 
-        send_frame(bad_msg_frame, BEATS, 10);
-        wait_cycles_no_frame(90);
-        check("Invalid msg_type must not output frame_out_valid", frames_seen == 0);
-        check("error_count should increment on invalid msg_type", error_count > err1);
-        check("link_up should remain asserted once link is up", link_up == 1'b1);
+        // ─────────────────────────────────────────────────────
+        // 4) Invalid msg_type → error++, link_up drops
+        // ─────────────────────────────────────────────────────
+        $display("--- test_invalid_msg_type ---");
+        bad_frame = {4'hF, 124'h0};
+        begin
+            int err_before = error_count;
+            send_frame(bad_frame, BEATS, 10);
+            no_frame_for(90, "invalid msg");
+            check("invalid: error_count++", error_count > err_before);
+            check("invalid: link_up dropped", link_up == 1'b0);
+        end
 
-        // -------------------------------------------------------------
+        // ─────────────────────────────────────────────────────
+        // 5) link_up recovery after error
+        // ─────────────────────────────────────────────────────
+        $display("--- test_link_up_recovery ---");
+        good_frame = {4'h2, 8'h01, 1'b0, 3'b000, 32'h0064_0000, 16'd50, 16'd1, 16'h1234, 32'h0};
+        send_frame(good_frame, BEATS, 10);
+        wait_frame(got, rx_frame);
+        check("recovery: frame received", got);
+        check128("recovery: frame matches", rx_frame, good_frame);
+        check("recovery: link_up=1 again", link_up == 1'b1);
+
+        // ─────────────────────────────────────────────────────
+        // 6) counter_clr → link_up drops, error_count=0
+        // ─────────────────────────────────────────────────────
+        $display("--- test_counter_clr ---");
+        check("pre-clr: link_up=1", link_up == 1'b1);
+        counter_clr = 1'b1;
+        @(posedge clk);
+        counter_clr = 1'b0;
+        @(posedge clk);
+        check("counter_clr: link_up=0", link_up == 1'b0);
+        check("counter_clr: error_count=0", error_count == 32'h0);
+
+        // ─────────────────────────────────────────────────────
+        // 7) Back-to-back frames (3 frames, minimal gap)
+        // ─────────────────────────────────────────────────────
+        $display("--- test_back_to_back ---");
+        for (int i = 0; i < 3; i++) begin
+            logic [127:0] bf;
+            bf = {4'h1, 8'(i), 116'(i + 1)};
+            send_frame(bf, BEATS, 4);
+            wait_frame(got, rx_frame);
+            check($sformatf("b2b[%0d]: received", i), got);
+            check128($sformatf("b2b[%0d]: match", i), rx_frame, bf);
+        end
+        check("b2b: link_up=1", link_up == 1'b1);
+
+        // ─────────────────────────────────────────────────────
+        // 8) Invalid msg_type 0x0 → error
+        // ─────────────────────────────────────────────────────
+        $display("--- test_msg_type_0 ---");
+        begin
+            int err_before = error_count;
+            bad_frame = {4'h0, 124'hAAAA_BBBB_CCCC_DDDD_EEEE_FFFF_0000_000};
+            send_frame(bad_frame, BEATS, 10);
+            no_frame_for(90, "msg_type_0");
+            check("msg_type_0: error_count++", error_count > err_before);
+            check("msg_type_0: link_up dropped", link_up == 1'b0);
+        end
+
+        // ─────────────────────────────────────────────────────
         // Summary
-        // -------------------------------------------------------------
-        if (err_count_scratch == 0)
-            $display("tb_link_rx: PASS (all tests passed)");
-        else
-            $display("tb_link_rx: FAIL (%0d errors)", err_count_scratch);
-
+        // ─────────────────────────────────────────────────────
+        $display("\n===================================");
+        if (fail_count == 0)
+            $display("tb_link_rx: PASS (%0d checks passed)", pass_count);
+        else begin
+            $display("tb_link_rx: FAIL (%0d passed, %0d failed)", pass_count, fail_count);
+            $fatal;
+        end
+        $display("===================================");
         $finish;
     end
 

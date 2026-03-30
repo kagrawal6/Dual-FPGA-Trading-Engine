@@ -168,6 +168,51 @@ module tb_latency_histogram;
         repeat (3) @(posedge clk);
         check("T9: lat_count still 0", lat_count == 32'd0);
 
+        // ── T10: Large latency → clamped to bin 15 ───────────
+        $display("\n=== T10: Large latency (bin overflow) ===");
+        // latency = 600 → bin = 600 >> 5 = 18, clamped to 15
+        record_latency(16'd100, 16'd700);
+        check("T10: bin[15]>=1",     hist_bins[15] >= 32'd1);
+        check("T10: lat_max==600",   lat_max == 32'd600);
+
+        // latency = 1000 → bin = 31, clamped to 15
+        record_latency(16'd0, 16'd1000);
+        check("T10b: bin[15]>=2",    hist_bins[15] >= 32'd2);
+        check("T10b: lat_max==1000", lat_max == 32'd1000);
+
+        // ── T11: 16-bit wrap-around (cycle < ts_echo) ────────
+        $display("\n=== T11: 16-bit timestamp wrap ===");
+        clear = 1'b1;
+        @(posedge clk);
+        clear = 1'b0;
+        @(posedge clk);
+
+        // ts_echo=65530, cycle=10 → latency = 10 - 65530 (mod 65536) = 16
+        record_latency(16'd65530, 16'd10);
+        // 16-bit subtraction: 10 - 65530 = 10 + 6 = 16 (wrapping unsigned)
+        check("T11: lat wraps to 16",  lat_min == 32'd16);
+        check("T11: lat_count==1",     lat_count == 32'd1);
+        // bin = 16 >> 5 = 0
+        check("T11: bin[0]==1",         hist_bins[0] == 32'd1);
+
+        // ts_echo=65500, cycle=100 → latency = 100 - 65500 = 136 (wrapping)
+        record_latency(16'd65500, 16'd100);
+        check("T11b: lat=136",         lat_max == 32'd136);
+        // bin = 136 >> 5 = 4
+        check("T11b: bin[4]==1",        hist_bins[4] == 32'd1);
+
+        // ── T12: Exact zero latency ──────────────────────────
+        $display("\n=== T12: Zero latency ===");
+        clear = 1'b1;
+        @(posedge clk);
+        clear = 1'b0;
+        @(posedge clk);
+
+        record_latency(16'd500, 16'd500);
+        check("T12: lat==0",           lat_min == 32'd0);
+        check("T12: bin[0]==1",         hist_bins[0] == 32'd1);
+        check("T12: lat_sum==0",        lat_sum == 32'd0);
+
         // ── Summary ─────────────────────────────────────────────
         repeat (3) @(posedge clk);
         $display("\n══════════════════════════════════════════");

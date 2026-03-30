@@ -1,8 +1,8 @@
 // ============================================================================
 // Testbench: tb_exchange_lite
-// Tests the exchange_lite module: simplified exchange matching engine that
-// receives ORDER frames, compares limit_price against live bid/ask from
-// market_sim, and generates FILL frames (FILLED or REJECTED).
+// Golden fill frames, boundary prices, counter_clr, enable=0, back-to-back
+// orders, all symbols, out-of-range, backpressure, wrong msg_type.
+// Golden vectors from gen_board_a_vectors.py.
 // ============================================================================
 
 `timescale 1ns / 1ps
@@ -15,6 +15,7 @@ module tb_exchange_lite;
     logic                     clk;
     logic                     rst_n;
     logic                     enable;
+    logic                     counter_clr_sig;
     price_t                   best_bid    [TB_NUM_SYM];
     price_t                   best_ask    [TB_NUM_SYM];
     logic [FRAME_W-1:0]       order_frame;
@@ -26,24 +27,23 @@ module tb_exchange_lite;
     logic [COUNTER_W-1:0]     fills_sent;
     logic [COUNTER_W-1:0]     rejects_sent;
 
-    // Clock generation (100 MHz)
+    int pass_count = 0;
+    int fail_count = 0;
+
     initial clk = 0;
     always #5 clk = ~clk;
 
-    // Reset generation (active-low, deassert after 100ns)
     initial begin
         rst_n = 0;
         #100;
         rst_n = 1;
     end
 
-    exchange_lite #(
-        .NUM_SYM(TB_NUM_SYM)
-    ) dut (
+    exchange_lite #(.NUM_SYM(TB_NUM_SYM)) dut (
         .clk         (clk),
         .rst_n       (rst_n),
         .enable      (enable),
-        .counter_clr (1'b0),
+        .counter_clr (counter_clr_sig),
         .best_bid    (best_bid),
         .best_ask    (best_ask),
         .order_frame (order_frame),
@@ -56,19 +56,32 @@ module tb_exchange_lite;
         .rejects_sent(rejects_sent)
     );
 
-    int err_count = 0;
-
-    task automatic check(input string msg, input logic cond);
-        if (!cond) begin
+    task automatic check(string msg, logic cond);
+        if (cond) pass_count++;
+        else begin
             $error("FAIL: %s", msg);
-            err_count++;
+            fail_count++;
         end
     endtask
 
-    // ORDER frame builder per spec:
-    // [127:124]=MSG_ORDER, [123:116]=symbol, [115]=side, [114:112]=reserved
-    // [111:80]=limit_price, [79:64]=qty, [63:48]=order_id, [47:32]=timestamp
-    // [31:0]=reserved
+    task automatic check32(string msg, logic [31:0] actual, logic [31:0] expected);
+        if (actual === expected) pass_count++;
+        else begin
+            $error("FAIL: %s — got %08h, exp %08h", msg, actual, expected);
+            fail_count++;
+        end
+    endtask
+
+    task automatic check128(string msg, logic [127:0] actual, logic [127:0] expected);
+        if (actual === expected) pass_count++;
+        else begin
+            $error("FAIL: %s", msg);
+            $error("  got: %032h", actual);
+            $error("  exp: %032h", expected);
+            fail_count++;
+        end
+    endtask
+
     function automatic logic [127:0] build_order(
         input logic [7:0]  sym,
         input logic        side,
@@ -77,212 +90,228 @@ module tb_exchange_lite;
         input logic [15:0] oid,
         input logic [15:0] ts
     );
-        build_order = {
-            MSG_ORDER, sym, side, 3'b000,
-            limit_price, qty, oid, ts, 32'h0000_0000
-        };
+        build_order = {MSG_ORDER, sym, side, 3'b000, limit_price, qty, oid, ts, 32'h0};
     endfunction
 
     task automatic send_order(input logic [127:0] frame);
-        begin
-            order_frame = frame;
-            order_valid = 1'b1;
+        order_frame = frame;
+        order_valid = 1'b1;
+        @(posedge clk);
+        order_valid = 1'b0;
+    endtask
+
+    task automatic wait_fill(input int timeout = 10, input string tag = "");
+        int cnt = 0;
+        while (!fill_valid && cnt < timeout) begin
             @(posedge clk);
-            order_valid = 1'b0;
+            cnt++;
+        end
+        check($sformatf("%s: fill arrived", tag), fill_valid);
+    endtask
+
+    task automatic no_fill_for(input int cycles, input string tag);
+        for (int i = 0; i < cycles; i++) begin
+            @(posedge clk);
+            check($sformatf("%s[%0d]: no fill", tag, i), !fill_valid);
         end
     endtask
 
-    task automatic wait_for_fill(input int timeout_cycles, input string why);
-        int i;
-        begin
-            i = 0;
-            while (!fill_valid && i < timeout_cycles) begin
-                @(posedge clk);
-                i++;
-            end
-            check($sformatf("%s: fill_valid should assert within %0d cycles", why, timeout_cycles),
-                  fill_valid);
-        end
-    endtask
+    // Golden bid/ask after 16 quotes in CALM regime from golden model
+    localparam logic [31:0] G_BID [4] = '{32'h00B3F80B, 32'h01A3F7F4, 32'h0383F7FE, 32'h0072F80F};
+    localparam logic [31:0] G_ASK [4] = '{32'h00B4080B, 32'h01A407F4, 32'h038407FE, 32'h0073080F};
 
-    task automatic expect_no_fill_for_cycles(input int cycles, input string why);
-        begin
-            for (int i = 0; i < cycles; i++) begin
-                @(posedge clk);
-                check($sformatf("%s (cycle %0d): no fill_valid expected", why, i), !fill_valid);
-            end
-        end
-    endtask
+    // Golden fill frames from gen_board_a_vectors.py
+    localparam logic [127:0] GF_BUY_AT_ASK = 128'h300000B4080B00640000006400000000;
+    localparam logic [127:0] GF_BUY_BELOW  = 128'h30010000000000000001006500000000;
+    localparam logic [127:0] GF_SELL_AT_BID = 128'h301801A3F7F4004B0002006600000000;
+    localparam logic [127:0] GF_SELL_ABOVE  = 128'h30190000000000000003006700000000;
+    localparam logic [127:0] GF_OOR_SYM4   = 128'h30410000000000000004006800000000;
+    localparam logic [127:0] GF_BUY_SYM3   = 128'h30300073080F00C80005006900000000;
 
-    // Waveform dump
     initial begin
         $dumpfile("tb_exchange_lite.vcd");
         $dumpvars(0, tb_exchange_lite);
-    end
 
-    initial begin
-        // Defaults
-        enable      = 1'b0;
-        order_frame = '0;
-        order_valid = 1'b0;
-        fill_ready  = 1'b1;
+        enable          = 1'b0;
+        counter_clr_sig = 1'b0;
+        order_frame     = '0;
+        order_valid     = 1'b0;
+        fill_ready      = 1'b1;
 
-        // Seed best bid/ask
         for (int s = 0; s < TB_NUM_SYM; s++) begin
-            best_bid[s] = 32'h0064_0000; // 100.0
-            best_ask[s] = 32'h0065_0000; // 101.0
+            best_bid[s] = G_BID[s];
+            best_ask[s] = G_ASK[s];
         end
-        // Symbol 1 has different prices to verify symbol routing
-        best_bid[1] = 32'h0032_0000; // 50.0
-        best_ask[1] = 32'h0033_0000; // 51.0
 
-        // Wait reset release
         @(posedge clk);
         wait (rst_n === 1'b1);
         @(posedge clk);
         enable = 1'b1;
 
-        // -------------------------------------------------------------
-        // 1) BUY at ask -> FILLED at ask
-        // -------------------------------------------------------------
-        send_order(build_order(8'd0, 1'b0, 32'h0065_0000, 16'd50, 16'd1, 16'hAAAA));
-        wait_for_fill(4, "BUY at ask");
-        check("BUY at ask: fill_valid", fill_valid);
-        check("BUY at ask: msg_type=FILL", fill_frame[127:124] == MSG_FILL);
-        check("BUY at ask: symbol echoed", fill_frame[123:116] == 8'd0);
-        check("BUY at ask: side echoed", fill_frame[115] == 1'b0);
-        check("BUY at ask: status=FILLED", fill_frame[114:112] == 3'b000);
-        check("BUY at ask: fill_price=ask", fill_frame[111:80] == 32'h0065_0000);
-        check("BUY at ask: fill_qty=order qty", fill_frame[79:64] == 16'd50);
-        check("BUY at ask: order_id echoed", fill_frame[63:48] == 16'd1);
-        check("BUY at ask: ts_echo echoed", fill_frame[47:32] == 16'hAAAA);
-        check("BUY at ask: reserved low bits zero", fill_frame[31:0] == 32'h0);
+        // ─────────────────────────────────────────────────────
+        // 1) Golden: BUY at ask → FILLED
+        // ─────────────────────────────────────────────────────
+        $display("--- test_golden_fills ---");
+        send_order(128'h200000B4080B00640000006400000000);
+        wait_fill(10, "BUY@ask");
+        check128("BUY@ask golden fill", fill_frame, GF_BUY_AT_ASK);
         @(posedge clk);
 
-        // -------------------------------------------------------------
-        // 2) BUY below ask -> REJECT
-        // -------------------------------------------------------------
-        send_order(build_order(8'd0, 1'b0, 32'h0063_0000, 16'd25, 16'd2, 16'hBBBB));
-        wait_for_fill(4, "BUY below ask");
-        check("BUY below ask: fill_valid", fill_valid);
-        check("BUY below ask: status=REJECTED", fill_frame[114:112] == 3'b001);
-        check("BUY below ask: fill_price=0", fill_frame[111:80] == 32'h0);
-        check("BUY below ask: fill_qty=0", fill_frame[79:64] == 16'h0);
-        check("BUY below ask: order_id echoed", fill_frame[63:48] == 16'd2);
-        check("BUY below ask: ts_echo echoed", fill_frame[47:32] == 16'hBBBB);
+        // 2) BUY below ask → REJECTED
+        send_order(128'h200000B4080A00320001006500000000);
+        wait_fill(10, "BUY<ask");
+        check128("BUY<ask golden fill", fill_frame, GF_BUY_BELOW);
         @(posedge clk);
 
-        // -------------------------------------------------------------
-        // 3) SELL at bid -> FILLED at bid
-        // -------------------------------------------------------------
-        send_order(build_order(8'd0, 1'b1, 32'h0064_0000, 16'd30, 16'd3, 16'hCCCC));
-        wait_for_fill(4, "SELL at bid");
-        check("SELL at bid: fill_valid", fill_valid);
-        check("SELL at bid: status=FILLED", fill_frame[114:112] == 3'b000);
-        check("SELL at bid: fill_price=bid", fill_frame[111:80] == 32'h0064_0000);
-        check("SELL at bid: fill_qty=order qty", fill_frame[79:64] == 16'd30);
+        // 3) SELL at bid → FILLED
+        send_order(128'h201801A3F7F4004B0002006600000000);
+        wait_fill(10, "SELL@bid");
+        check128("SELL@bid golden fill", fill_frame, GF_SELL_AT_BID);
         @(posedge clk);
 
-        // -------------------------------------------------------------
-        // 4) SELL above bid -> REJECT
-        // -------------------------------------------------------------
-        send_order(build_order(8'd0, 1'b1, 32'h0066_0000, 16'd30, 16'd4, 16'hDDDD));
-        wait_for_fill(4, "SELL above bid");
-        check("SELL above bid: fill_valid", fill_valid);
-        check("SELL above bid: status=REJECTED", fill_frame[114:112] == 3'b001);
-        check("SELL above bid: fill_price=0", fill_frame[111:80] == 32'h0);
-        check("SELL above bid: fill_qty=0", fill_frame[79:64] == 16'h0);
+        // 4) SELL above bid → REJECTED
+        send_order(128'h201801A3F7F500190003006700000000);
+        wait_fill(10, "SELL>bid");
+        check128("SELL>bid golden fill", fill_frame, GF_SELL_ABOVE);
         @(posedge clk);
 
-        // -------------------------------------------------------------
-        // 5) Symbol routing: use symbol 1 bid/ask
-        // -------------------------------------------------------------
-        send_order(build_order(8'd1, 1'b0, 32'h0033_0000, 16'd10, 16'd5, 16'hEEEE));
-        wait_for_fill(4, "Symbol1 BUY at ask");
-        check("Symbol1 BUY at ask: fill_valid", fill_valid);
-        check("Symbol1 BUY at ask: symbol echoed", fill_frame[123:116] == 8'd1);
-        check("Symbol1 BUY at ask: fill_price uses symbol1 ask", fill_frame[111:80] == 32'h0033_0000);
+        // 5) Out-of-range symbol → REJECTED
+        send_order(128'h204000C80000000A0004006800000000);
+        wait_fill(10, "OOR sym");
+        check128("OOR golden fill", fill_frame, GF_OOR_SYM4);
         @(posedge clk);
 
-        // -------------------------------------------------------------
-        // 6) Backpressure: fill_ready=0 should hold response valid (not drop)
-        // -------------------------------------------------------------
+        // 6) BUY sym=3 above ask → FILLED at ask
+        send_order(128'h20300074080F00C80005006900000000);
+        wait_fill(10, "BUY sym3");
+        check128("BUY sym3 golden fill", fill_frame, GF_BUY_SYM3);
+        @(posedge clk);
+
+        // Verify counters
+        check32("orders_rcvd=6", orders_rcvd, 6);
+        check32("fills_sent=3", fills_sent, 3);
+        check32("rejects_sent=3", rejects_sent, 3);
+
+        // ─────────────────────────────────────────────────────
+        // 7) Boundary: BUY exactly at ask (1 tick)
+        // ─────────────────────────────────────────────────────
+        $display("--- test_boundary ---");
+        // Exactly at ask = FILL
+        send_order(build_order(8'd0, 1'b0, G_ASK[0], 16'd10, 16'd10, 16'h1111));
+        wait_fill(10, "exact ask");
+        check("exact ask: FILLED", fill_frame[114:112] == 3'b000);
+        check32("exact ask: price=ask", fill_frame[111:80], G_ASK[0]);
+        @(posedge clk);
+
+        // One tick below ask = REJECT
+        send_order(build_order(8'd0, 1'b0, G_ASK[0]-1, 16'd10, 16'd11, 16'h2222));
+        wait_fill(10, "below ask");
+        check("below ask: REJECTED", fill_frame[114:112] == 3'b001);
+        @(posedge clk);
+
+        // SELL exactly at bid = FILL
+        send_order(build_order(8'd0, 1'b1, G_BID[0], 16'd10, 16'd12, 16'h3333));
+        wait_fill(10, "exact bid");
+        check("exact bid: FILLED", fill_frame[114:112] == 3'b000);
+        check32("exact bid: price=bid", fill_frame[111:80], G_BID[0]);
+        @(posedge clk);
+
+        // One tick above bid = REJECT
+        send_order(build_order(8'd0, 1'b1, G_BID[0]+1, 16'd10, 16'd13, 16'h4444));
+        wait_fill(10, "above bid");
+        check("above bid: REJECTED", fill_frame[114:112] == 3'b001);
+        @(posedge clk);
+
+        // ─────────────────────────────────────────────────────
+        // 8) counter_clr: all counters reset
+        // ─────────────────────────────────────────────────────
+        $display("--- test_counter_clr ---");
+        counter_clr_sig = 1'b1;
+        @(posedge clk);
+        counter_clr_sig = 1'b0;
+        @(posedge clk);
+        check32("clr: orders_rcvd=0", orders_rcvd, 0);
+        check32("clr: fills_sent=0", fills_sent, 0);
+        check32("clr: rejects_sent=0", rejects_sent, 0);
+        check("clr: fill_valid=0", fill_valid == 1'b0);
+
+        // ─────────────────────────────────────────────────────
+        // 9) enable=0: orders not processed
+        // ─────────────────────────────────────────────────────
+        $display("--- test_enable_low ---");
+        enable = 1'b0;
+        send_order(build_order(8'd0, 1'b0, G_ASK[0], 16'd10, 16'd20, 16'h5555));
+        no_fill_for(5, "enable=0");
+        check32("enable=0: orders_rcvd still 0", orders_rcvd, 0);
+        enable = 1'b1;
+        @(posedge clk);
+
+        // ─────────────────────────────────────────────────────
+        // 10) Fill backpressure: fill_ready=0
+        // ─────────────────────────────────────────────────────
+        $display("--- test_backpressure ---");
         fill_ready = 1'b0;
-        send_order(build_order(8'd0, 1'b0, 32'h0065_0000, 16'd11, 16'd6, 16'h1234));
-        wait_for_fill(4, "fill_ready low");
-        check("fill_ready low: held order_id", fill_frame[63:48] == 16'd6);
-        check("fill_ready low: held ts_echo", fill_frame[47:32] == 16'h1234);
+        send_order(build_order(8'd0, 1'b0, G_ASK[0], 16'd5, 16'd30, 16'hAAAA));
+        wait_fill(10, "bp fill");
+        // fill_valid should stay high while ready=0
         repeat (4) begin
             @(posedge clk);
-            check("fill_ready low: fill_valid stays asserted", fill_valid);
-            check("fill_ready low: frame stable", fill_frame[63:48] == 16'd6);
+            check("bp: fill_valid held", fill_valid == 1'b1);
+            check("bp: frame stable", fill_frame[63:48] == 16'd30);
         end
         fill_ready = 1'b1;
         @(posedge clk);
-        check("held fill consumed when ready returns", !fill_valid);
+        check("bp: consumed", fill_valid == 1'b0);
+
+        // ─────────────────────────────────────────────────────
+        // 11) Wrong msg_type: QUOTE frame → ignored
+        // ─────────────────────────────────────────────────────
+        $display("--- test_wrong_msg_type ---");
+        begin
+            logic [COUNTER_W-1:0] ord_before;
+            ord_before = orders_rcvd;
+            order_frame = {4'h1, 124'hAAAA_BBBB_CCCC_DDDD_EEEE_FFFF_0000_000};
+            order_valid = 1'b1;
+            @(posedge clk);
+            order_valid = 1'b0;
+            no_fill_for(5, "wrong msg");
+            check("wrong msg: orders_rcvd unchanged", orders_rcvd == ord_before);
+        end
+
+        // ─────────────────────────────────────────────────────
+        // 12) Rapid back-to-back orders
+        // ─────────────────────────────────────────────────────
+        $display("--- test_back_to_back ---");
+        send_order(build_order(8'd0, 1'b0, G_ASK[0], 16'd1, 16'd40, 16'hB001));
+        wait_fill(10, "b2b first");
+        check("b2b first: oid=40", fill_frame[63:48] == 16'd40);
+        @(posedge clk);
+        send_order(build_order(8'd1, 1'b1, G_BID[1], 16'd2, 16'd41, 16'hB002));
+        wait_fill(10, "b2b second");
+        check("b2b second: oid=41", fill_frame[63:48] == 16'd41);
         @(posedge clk);
 
-        // -------------------------------------------------------------
-        // 7) enable=0 should suppress processing
-        // -------------------------------------------------------------
-        enable = 1'b0;
-        send_order(build_order(8'd0, 1'b0, 32'h0065_0000, 16'd12, 16'd7, 16'h5678));
-        expect_no_fill_for_cycles(4, "enable low");
-        enable = 1'b1;
-
-        // -------------------------------------------------------------
-        // 8) Invalid msg_type should be ignored (no order count increment)
-        // -------------------------------------------------------------
-        order_frame = {4'hF, 124'h0};
-        order_valid = 1'b1;
-        @(posedge clk);
-        order_valid = 1'b0;
-        expect_no_fill_for_cycles(3, "invalid msg_type");
-
-        // -------------------------------------------------------------
-        // 9) Out-of-range symbol should return REJECT (not silent drop)
-        // -------------------------------------------------------------
-        send_order(build_order(8'd99, 1'b0, 32'h0065_0000, 16'd7, 16'd8, 16'h9ABC));
-        wait_for_fill(4, "out-of-range symbol");
-        check("out-of-range: symbol echoed", fill_frame[123:116] == 8'd99);
-        check("out-of-range: status=REJECTED", fill_frame[114:112] == 3'b001);
-        check("out-of-range: fill_price=0", fill_frame[111:80] == 32'h0);
-        check("out-of-range: fill_qty=0", fill_frame[79:64] == 16'h0);
-        check("out-of-range: order_id echoed", fill_frame[63:48] == 16'd8);
-        check("out-of-range: ts_echo echoed", fill_frame[47:32] == 16'h9ABC);
+        // ─────────────────────────────────────────────────────
+        // 13) Symbol routing: sym=3
+        // ─────────────────────────────────────────────────────
+        $display("--- test_sym3 ---");
+        send_order(build_order(8'd3, 1'b0, G_ASK[3], 16'd7, 16'd50, 16'hCC00));
+        wait_fill(10, "sym3");
+        check("sym3: fill_price=ask[3]", fill_frame[111:80] == G_ASK[3]);
+        check("sym3: FILLED", fill_frame[114:112] == 3'b000);
         @(posedge clk);
 
-        // -------------------------------------------------------------
-        // 10) Handshake-cycle bubble: consuming response does not emit next
-        //     response in the same cycle (minimal one-order-at-a-time model).
-        // -------------------------------------------------------------
-        send_order(build_order(8'd0, 1'b0, 32'h0065_0000, 16'd21, 16'd9, 16'h1111));
-        wait_for_fill(4, "bubble prefill");
-        check("bubble prefill: order_id=9", fill_frame[63:48] == 16'd9);
-        // First response consumes on this edge; no replacement in same cycle.
-        @(posedge clk);
-        check("bubble: no same-cycle replacement after consume", !fill_valid);
-        // Submit next order after consume; response should appear later and be correct.
-        send_order(build_order(8'd0, 1'b0, 32'h0065_0000, 16'd22, 16'd10, 16'h2222));
-        wait_for_fill(4, "bubble second response");
-        check("bubble second response: order_id=10", fill_frame[63:48] == 16'd10);
-        check("bubble second response: ts_echo", fill_frame[47:32] == 16'h2222);
-        @(posedge clk);
-
-        // Counter checks
-        // Processed valid ORDER frames while enable=1 and msg_type==ORDER:
-        // tests 1,2,3,4,5,6,9,10 => 9 orders_rcvd (test 7 is enable=0; test 8 invalid type)
-        check("orders_rcvd count", orders_rcvd == 32'd9);
-        // Filled tests: 1,3,5,6,10(oid9,oid10) -> 6
-        check("fills_sent count", fills_sent == 32'd6);
-        // Rejected tests: 2,4,9 -> 3
-        check("rejects_sent count", rejects_sent == 32'd3);
-
-        if (err_count == 0)
-            $display("tb_exchange_lite: PASS (all checks passed, VCD: tb_exchange_lite.vcd)");
-        else
-            $display("tb_exchange_lite: FAIL (%0d errors)", err_count);
-
+        // ─────────────────────────────────────────────────────
+        // Summary
+        // ─────────────────────────────────────────────────────
+        $display("\n===================================");
+        if (fail_count == 0)
+            $display("tb_exchange_lite: PASS (%0d checks passed)", pass_count);
+        else begin
+            $display("tb_exchange_lite: FAIL (%0d passed, %0d failed)", pass_count, fail_count);
+            $fatal;
+        end
+        $display("===================================");
         $finish;
     end
 
