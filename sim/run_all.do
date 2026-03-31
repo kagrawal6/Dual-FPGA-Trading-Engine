@@ -16,7 +16,6 @@ do compile_all.do
 
 set all_pass {}
 set all_fail {}
-set ::sim_ok 1
 
 proc run_group {group_name tb_list} {
     upvar all_pass all_pass
@@ -35,10 +34,11 @@ proc run_group {group_name tb_list} {
         puts " \[$idx/$total\] $group_name — $tb"
         puts "==========================================="
 
-        set ::sim_ok 1
-        onbreak {
-            set ::sim_ok 0
-            resume
+        onbreak {resume}
+
+        set fsize 0
+        if {[file exists transcript]} {
+            set fsize [file size transcript]
         }
 
         if {[catch {
@@ -46,16 +46,29 @@ proc run_group {group_name tb_list} {
             run -all
             quit -sim
         } err]} {
-            puts "*** FAIL: $tb (Tcl error: $err)"
-            set ::sim_ok 0
+            puts ">>> FAIL: $tb (Tcl error: $err)"
+            lappend all_fail $tb
+            continue
         }
 
-        if {$::sim_ok} {
-            puts ">>> PASS: $tb"
-            lappend all_pass $tb
-        } else {
+        set had_fatal 0
+        if {[file exists transcript]} {
+            set fp [open transcript r]
+            seek $fp $fsize
+            set new_content [read $fp]
+            close $fp
+            if {[string first "** Fatal:" $new_content] >= 0 ||
+                [string first "** Error:" $new_content] >= 0} {
+                set had_fatal 1
+            }
+        }
+
+        if {$had_fatal} {
             puts ">>> FAIL: $tb"
             lappend all_fail $tb
+        } else {
+            puts ">>> PASS: $tb"
+            lappend all_pass $tb
         }
     }
 }

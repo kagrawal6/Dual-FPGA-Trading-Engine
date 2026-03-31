@@ -176,7 +176,7 @@ module tb_market_sim;
             check($sformatf("gq[%0d] bid_size", q), quote_frame[47:32] == 16'd1000);
             check($sformatf("gq[%0d] ask_size", q), quote_frame[31:16] == 16'd1000);
             check($sformatf("gq[%0d] seq_num=%0d", q, q/4), quote_frame[15:0] == 16'(q/4));
-            @(posedge clk);
+            if (q < 15) @(posedge clk);
         end
         enable = 1'b0;
         @(posedge clk); #1;
@@ -224,9 +224,9 @@ module tb_market_sim;
         counter_clr_sig = 1'b1;
         @(posedge clk);
         counter_clr_sig = 1'b0;
+        enable = 1'b0;
         @(posedge clk); #1;
         check32("counter_clr: count=0", quotes_generated, 0);
-        enable = 1'b0;
         @(posedge clk);
 
         // ─────────────────────────────────────────────────────

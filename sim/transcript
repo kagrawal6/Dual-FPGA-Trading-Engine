@@ -1,67 +1,67 @@
 do run_all.do
 # Model Technology ModelSim - Intel FPGA Edition vmap 2020.1 Lib Mapping Utility 2020.02 Feb 28 2020
 # vmap work work 
-# Modifying C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/sim/full_project_regression_test.mpf
+# Modifying C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/sim/regression_testing_both_boards.mpf
 # =========================================
 #  Compiling full design...
 # =========================================
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:12 on Mar 31,2026
+# Start time: 09:59:02 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/shared/hft_pkg.sv 
 # -- Compiling package hft_pkg
 # 
 # Top level modules:
 # 	--none--
-# End time: 08:56:13 on Mar 31,2026, Elapsed time: 0:00:01
+# End time: 09:59:02 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:13 on Mar 31,2026
+# Start time: 09:59:02 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/shared/debounce.sv 
 # -- Compiling module debounce
 # 
 # Top level modules:
 # 	debounce
-# End time: 08:56:14 on Mar 31,2026, Elapsed time: 0:00:01
+# End time: 09:59:05 on Mar 31,2026, Elapsed time: 0:00:03
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:14 on Mar 31,2026
+# Start time: 09:59:05 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/shared/sync_fifo.sv 
 # -- Compiling module sync_fifo
 # 
 # Top level modules:
 # 	sync_fifo
-# End time: 08:56:14 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:05 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:14 on Mar 31,2026
+# Start time: 09:59:05 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/shared/lfsr32.sv 
 # -- Compiling module lfsr32
 # -- Importing package hft_pkg
 # 
 # Top level modules:
 # 	lfsr32
-# End time: 08:56:14 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:05 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:14 on Mar 31,2026
+# Start time: 09:59:05 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/link/link_tx.sv 
 # -- Compiling module link_tx
 # 
 # Top level modules:
 # 	link_tx
-# End time: 08:56:14 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:05 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:14 on Mar 31,2026
+# Start time: 09:59:05 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/link/link_rx.sv 
 # -- Compiling module link_rx
 # 
 # Top level modules:
 # 	link_rx
-# End time: 08:56:14 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:05 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:14 on Mar 31,2026
+# Start time: 09:59:05 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_a/market_sim.sv 
 # -- Compiling module market_sim
 # -- Importing package hft_pkg
@@ -71,10 +71,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	market_sim
-# End time: 08:56:14 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:05 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 3
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:14 on Mar 31,2026
+# Start time: 09:59:05 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_a/market_noise_gen.sv 
 # -- Compiling module market_noise_gen
 # -- Importing package hft_pkg
@@ -82,10 +82,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	market_noise_gen
-# End time: 08:56:15 on Mar 31,2026, Elapsed time: 0:00:01
+# End time: 09:59:07 on Mar 31,2026, Elapsed time: 0:00:02
 # Errors: 0, Warnings: 1
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:15 on Mar 31,2026
+# Start time: 09:59:07 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_a/exchange_lite.sv 
 # -- Compiling module exchange_lite
 # -- Importing package hft_pkg
@@ -94,10 +94,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	exchange_lite
-# End time: 08:56:15 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:07 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 2
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:15 on Mar 31,2026
+# Start time: 09:59:07 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_a/exchange_plus.sv 
 # -- Compiling module exchange_plus
 # -- Importing package hft_pkg
@@ -108,90 +108,90 @@ do run_all.do
 # 
 # Top level modules:
 # 	exchange_plus
-# End time: 08:56:15 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:08 on Mar 31,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 4
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:15 on Mar 31,2026
+# Start time: 09:59:08 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_a/tx_arbiter.sv 
 # -- Compiling module tx_arbiter
 # -- Importing package hft_pkg
 # 
 # Top level modules:
 # 	tx_arbiter
-# End time: 08:56:15 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:08 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:15 on Mar 31,2026
+# Start time: 09:59:08 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_a/board_a_ctrl.sv 
 # -- Compiling module board_a_ctrl
 # -- Importing package hft_pkg
 # 
 # Top level modules:
 # 	board_a_ctrl
-# End time: 08:56:15 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:08 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:15 on Mar 31,2026
+# Start time: 09:59:08 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_a/board_a_axi_regs.sv 
 # -- Compiling module board_a_axi_regs
 # -- Importing package hft_pkg
 # 
 # Top level modules:
 # 	board_a_axi_regs
-# End time: 08:56:16 on Mar 31,2026, Elapsed time: 0:00:01
+# End time: 09:59:08 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:16 on Mar 31,2026
+# Start time: 09:59:08 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_a/board_a_top.sv 
 # -- Compiling module board_a_top
 # -- Importing package hft_pkg
 # 
 # Top level modules:
 # 	board_a_top
-# End time: 08:56:16 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:08 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:16 on Mar 31,2026
+# Start time: 09:59:08 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_b/msg_demux.sv 
 # -- Compiling module msg_demux
 # -- Importing package hft_pkg
 # 
 # Top level modules:
 # 	msg_demux
-# End time: 08:56:16 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:08 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:16 on Mar 31,2026
+# Start time: 09:59:08 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_b/quote_book.sv 
 # -- Compiling module quote_book
 # -- Importing package hft_pkg
 # 
 # Top level modules:
 # 	quote_book
-# End time: 08:56:16 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:08 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:16 on Mar 31,2026
+# Start time: 09:59:08 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_b/feature_compute.sv 
 # -- Compiling module feature_compute
 # -- Importing package hft_pkg
 # 
 # Top level modules:
 # 	feature_compute
-# End time: 08:56:16 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:09 on Mar 31,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:16 on Mar 31,2026
+# Start time: 09:59:09 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_b/strategy_engine.sv 
 # -- Compiling module strategy_engine
 # -- Importing package hft_pkg
 # 
 # Top level modules:
 # 	strategy_engine
-# End time: 08:56:16 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:09 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:16 on Mar 31,2026
+# Start time: 09:59:09 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_b/risk_manager.sv 
 # -- Compiling module risk_manager
 # -- Importing package hft_pkg
@@ -199,50 +199,50 @@ do run_all.do
 # 
 # Top level modules:
 # 	risk_manager
-# End time: 08:56:16 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:09 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 1
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:16 on Mar 31,2026
+# Start time: 09:59:09 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_b/order_manager.sv 
 # -- Compiling module order_manager
 # -- Importing package hft_pkg
 # 
 # Top level modules:
 # 	order_manager
-# End time: 08:56:16 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:09 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:16 on Mar 31,2026
+# Start time: 09:59:09 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_b/position_tracker.sv 
 # -- Compiling module position_tracker
 # -- Importing package hft_pkg
 # 
 # Top level modules:
 # 	position_tracker
-# End time: 08:56:17 on Mar 31,2026, Elapsed time: 0:00:01
+# End time: 09:59:10 on Mar 31,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:17 on Mar 31,2026
+# Start time: 09:59:10 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_b/latency_histogram.sv 
 # -- Compiling module latency_histogram
 # -- Importing package hft_pkg
 # 
 # Top level modules:
 # 	latency_histogram
-# End time: 08:56:17 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:10 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:17 on Mar 31,2026
+# Start time: 09:59:10 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_b/board_b_ctrl.sv 
 # -- Compiling module board_b_ctrl
 # -- Importing package hft_pkg
 # 
 # Top level modules:
 # 	board_b_ctrl
-# End time: 08:56:17 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:10 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:17 on Mar 31,2026
+# Start time: 09:59:10 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_b/board_b_axi_regs.sv 
 # -- Compiling module board_b_axi_regs
 # -- Importing package hft_pkg
@@ -251,29 +251,29 @@ do run_all.do
 # 
 # Top level modules:
 # 	board_b_axi_regs
-# End time: 08:56:17 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:11 on Mar 31,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 2
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:17 on Mar 31,2026
+# Start time: 09:59:11 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../rtl/board_b/board_b_top.sv 
 # -- Compiling module board_b_top
 # -- Importing package hft_pkg
 # 
 # Top level modules:
 # 	board_b_top
-# End time: 08:56:17 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:11 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:17 on Mar 31,2026
+# Start time: 09:59:11 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/shared/tb_debounce.sv 
 # -- Compiling module tb_debounce
 # 
 # Top level modules:
 # 	tb_debounce
-# End time: 08:56:17 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:11 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:17 on Mar 31,2026
+# Start time: 09:59:11 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/shared/tb_sync_fifo.sv 
 # -- Compiling package tb_sync_fifo_sv_unit
 # -- Importing package hft_pkg
@@ -281,10 +281,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_sync_fifo
-# End time: 08:56:17 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:11 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:17 on Mar 31,2026
+# Start time: 09:59:11 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/shared/tb_lfsr32.sv 
 # -- Compiling package tb_lfsr32_sv_unit
 # -- Importing package hft_pkg
@@ -292,10 +292,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_lfsr32
-# End time: 08:56:17 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:12 on Mar 31,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:17 on Mar 31,2026
+# Start time: 09:59:12 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/link/tb_link_tx.sv 
 # ** Warning: ../tb/link/tb_link_tx.sv(173): (vlog-2244) Variable 'timeout' is implicitly static. You must either explicitly declare it as static or automatic
 # or remove the initialization in the declaration of variable.
@@ -307,18 +307,18 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_link_tx
-# End time: 08:56:17 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:12 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 2
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:17 on Mar 31,2026
+# Start time: 09:59:12 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/link/tb_link_rx.sv 
 # ** Warning: ../tb/link/tb_link_rx.sv(148): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
 # or remove the initialization in the declaration of variable.
 # ** Warning: ../tb/link/tb_link_rx.sv(160): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
 # or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/link/tb_link_rx.sv(175): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
+# ** Warning: ../tb/link/tb_link_rx.sv(178): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
 # or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/link/tb_link_rx.sv(224): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
+# ** Warning: ../tb/link/tb_link_rx.sv(234): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
 # or remove the initialization in the declaration of variable.
 # -- Compiling package tb_link_rx_sv_unit
 # -- Importing package hft_pkg
@@ -327,17 +327,17 @@ do run_all.do
 # or remove the initialization in the declaration of variable.
 # ** Warning: ../tb/link/tb_link_rx.sv(160): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
 # or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/link/tb_link_rx.sv(175): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
+# ** Warning: ../tb/link/tb_link_rx.sv(178): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
 # or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/link/tb_link_rx.sv(224): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
+# ** Warning: ../tb/link/tb_link_rx.sv(234): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
 # or remove the initialization in the declaration of variable.
 # 
 # Top level modules:
 # 	tb_link_rx
-# End time: 08:56:18 on Mar 31,2026, Elapsed time: 0:00:01
+# End time: 09:59:12 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 8
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:18 on Mar 31,2026
+# Start time: 09:59:12 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/link/tb_link_loopback.sv 
 # -- Compiling package tb_link_loopback_sv_unit
 # -- Importing package hft_pkg
@@ -345,10 +345,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_link_loopback
-# End time: 08:56:18 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:12 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:18 on Mar 31,2026
+# Start time: 09:59:12 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_market_sim.sv 
 # ** Warning: ../tb/board_a/tb_market_sim.sv(191): (vlog-2244) Variable 'regimes' is implicitly static. You must either explicitly declare it as static or automatic
 # or remove the initialization in the declaration of variable.
@@ -368,10 +368,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_market_sim
-# End time: 08:56:18 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:13 on Mar 31,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 6
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:18 on Mar 31,2026
+# Start time: 09:59:13 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_market_noise_gen.sv 
 # ** Warning: ../tb/board_a/tb_market_noise_gen.sv(232): (vlog-2244) Variable 'cum0' is implicitly static. You must either explicitly declare it as static or automatic
 # or remove the initialization in the declaration of variable.
@@ -391,10 +391,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_market_noise_gen
-# End time: 08:56:18 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:13 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 6
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:18 on Mar 31,2026
+# Start time: 09:59:13 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_exchange_lite.sv 
 # -- Compiling package tb_exchange_lite_sv_unit
 # -- Importing package hft_pkg
@@ -402,10 +402,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_exchange_lite
-# End time: 08:56:18 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:13 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:18 on Mar 31,2026
+# Start time: 09:59:13 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_tx_arbiter.sv 
 # ** Warning: ../tb/board_a/tb_tx_arbiter.sv(201): (vlog-2244) Variable 'quote_accepted' is implicitly static. You must either explicitly declare it as static or automatic
 # or remove the initialization in the declaration of variable.
@@ -417,10 +417,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_tx_arbiter
-# End time: 08:56:18 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:13 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 2
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:18 on Mar 31,2026
+# Start time: 09:59:14 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_board_a_ctrl.sv 
 # ** Warning: ../tb/board_a/tb_board_a_ctrl.sv(248): (vlog-2244) Variable 'spurious' is implicitly static. You must either explicitly declare it as static or automatic
 # or remove the initialization in the declaration of variable.
@@ -432,10 +432,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_board_a_ctrl
-# End time: 08:56:18 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:14 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 2
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:18 on Mar 31,2026
+# Start time: 09:59:14 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_board_a_top.sv 
 # -- Compiling package tb_board_a_top_sv_unit
 # -- Importing package hft_pkg
@@ -443,10 +443,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_board_a_top
-# End time: 08:56:18 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:14 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:18 on Mar 31,2026
+# Start time: 09:59:14 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_msg_demux.sv 
 # -- Compiling package tb_msg_demux_sv_unit
 # -- Importing package hft_pkg
@@ -454,513 +454,21 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_msg_demux
-# End time: 08:56:19 on Mar 31,2026, Elapsed time: 0:00:01
+# End time: 09:59:14 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:19 on Mar 31,2026
+# Start time: 09:59:14 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_quote_book.sv 
-# ** Warning: ../tb/board_b/tb_quote_book.sv(348): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
-# ** Warning: ../tb/board_b/tb_quote_book.sv(351): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
-# ** Warning: ../tb/board_b/tb_quote_book.sv(353): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
 # -- Compiling package tb_quote_book_sv_unit
 # -- Importing package hft_pkg
 # -- Compiling module tb_quote_book
-# ** Warning: ../tb/board_b/tb_quote_book.sv(348): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
-# ** Warning: ../tb/board_b/tb_quote_book.sv(351): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
-# ** Warning: ../tb/board_b/tb_quote_book.sv(353): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
 # 
 # Top level modules:
 # 	tb_quote_book
-# End time: 08:56:19 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 6
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:56:19 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_feature_compute.sv 
-# ** Error: ../tb/board_b/tb_feature_compute.sv(341): Illegal declaration after the statement near line '339'.  Declarations must precede statements.  Look for stray semicolons.
-# End time: 08:56:19 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 1, Warnings: 0
-# ** Error: C:/intelFPGA/20.1/modelsim_ase/win32aloem/vlog failed.
-# Error in macro ./compile_all.do line 72
-# C:/intelFPGA/20.1/modelsim_ase/win32aloem/vlog failed.
-#     while executing
-# "vlog -sv -work work ../tb/board_b/tb_feature_compute.sv"
-do run_all.do
-# Model Technology ModelSim - Intel FPGA Edition vmap 2020.1 Lib Mapping Utility 2020.02 Feb 28 2020
-# vmap work work 
-# Modifying C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/sim/full_project_regression_test.mpf
-# =========================================
-#  Compiling full design...
-# =========================================
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:54 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/shared/hft_pkg.sv 
-# -- Compiling package hft_pkg
-# 
-# Top level modules:
-# 	--none--
-# End time: 08:58:54 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:14 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:54 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/shared/debounce.sv 
-# -- Compiling module debounce
-# 
-# Top level modules:
-# 	debounce
-# End time: 08:58:55 on Mar 31,2026, Elapsed time: 0:00:01
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:55 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/shared/sync_fifo.sv 
-# -- Compiling module sync_fifo
-# 
-# Top level modules:
-# 	sync_fifo
-# End time: 08:58:55 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:55 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/shared/lfsr32.sv 
-# -- Compiling module lfsr32
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	lfsr32
-# End time: 08:58:55 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:55 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/link/link_tx.sv 
-# -- Compiling module link_tx
-# 
-# Top level modules:
-# 	link_tx
-# End time: 08:58:55 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:55 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/link/link_rx.sv 
-# -- Compiling module link_rx
-# 
-# Top level modules:
-# 	link_rx
-# End time: 08:58:56 on Mar 31,2026, Elapsed time: 0:00:01
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:56 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_a/market_sim.sv 
-# -- Compiling module market_sim
-# -- Importing package hft_pkg
-# ** Warning: ../rtl/board_a/market_sim.sv(52): (vlog-13314) Defaulting port 'sector_id' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# ** Warning: ../rtl/board_a/market_sim.sv(53): (vlog-13314) Defaulting port 'init_mid' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# ** Warning: ../rtl/board_a/market_sim.sv(54): (vlog-13314) Defaulting port 'init_spread' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# 
-# Top level modules:
-# 	market_sim
-# End time: 08:58:56 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 3
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:56 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_a/market_noise_gen.sv 
-# -- Compiling module market_noise_gen
-# -- Importing package hft_pkg
-# ** Warning: ../rtl/board_a/market_noise_gen.sv(30): (vlog-13314) Defaulting port 'sector_id' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# 
-# Top level modules:
-# 	market_noise_gen
-# End time: 08:58:56 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 1
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:56 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_a/exchange_lite.sv 
-# -- Compiling module exchange_lite
-# -- Importing package hft_pkg
-# ** Warning: ../rtl/board_a/exchange_lite.sv(25): (vlog-13314) Defaulting port 'best_bid' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# ** Warning: ../rtl/board_a/exchange_lite.sv(26): (vlog-13314) Defaulting port 'best_ask' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# 
-# Top level modules:
-# 	exchange_lite
-# End time: 08:58:56 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 2
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:56 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_a/exchange_plus.sv 
-# -- Compiling module exchange_plus
-# -- Importing package hft_pkg
-# ** Warning: ../rtl/board_a/exchange_plus.sv(37): (vlog-13314) Defaulting port 'best_bid' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# ** Warning: ../rtl/board_a/exchange_plus.sv(38): (vlog-13314) Defaulting port 'best_ask' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# ** Warning: ../rtl/board_a/exchange_plus.sv(41): (vlog-13314) Defaulting port 'best_bid_qty' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# ** Warning: ../rtl/board_a/exchange_plus.sv(42): (vlog-13314) Defaulting port 'best_ask_qty' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# 
-# Top level modules:
-# 	exchange_plus
-# End time: 08:58:57 on Mar 31,2026, Elapsed time: 0:00:01
-# Errors: 0, Warnings: 4
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:57 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_a/tx_arbiter.sv 
-# -- Compiling module tx_arbiter
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	tx_arbiter
-# End time: 08:58:57 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:57 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_a/board_a_ctrl.sv 
-# -- Compiling module board_a_ctrl
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	board_a_ctrl
-# End time: 08:58:57 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:57 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_a/board_a_axi_regs.sv 
-# -- Compiling module board_a_axi_regs
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	board_a_axi_regs
-# End time: 08:58:57 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:57 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_a/board_a_top.sv 
-# -- Compiling module board_a_top
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	board_a_top
-# End time: 08:58:57 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:57 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/msg_demux.sv 
-# -- Compiling module msg_demux
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	msg_demux
-# End time: 08:58:58 on Mar 31,2026, Elapsed time: 0:00:01
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:58 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/quote_book.sv 
-# -- Compiling module quote_book
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	quote_book
-# End time: 08:58:58 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:58 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/feature_compute.sv 
-# -- Compiling module feature_compute
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	feature_compute
-# End time: 08:58:58 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:58 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/strategy_engine.sv 
-# -- Compiling module strategy_engine
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	strategy_engine
-# End time: 08:58:58 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:58 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/risk_manager.sv 
-# -- Compiling module risk_manager
-# -- Importing package hft_pkg
-# ** Warning: ../rtl/board_b/risk_manager.sv(36): (vlog-13314) Defaulting port 'position' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# 
-# Top level modules:
-# 	risk_manager
-# End time: 08:58:58 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 1
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:58 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/order_manager.sv 
-# -- Compiling module order_manager
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	order_manager
-# End time: 08:58:58 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:58 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/position_tracker.sv 
-# -- Compiling module position_tracker
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	position_tracker
-# End time: 08:58:58 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:58 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/latency_histogram.sv 
-# -- Compiling module latency_histogram
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	latency_histogram
-# End time: 08:58:59 on Mar 31,2026, Elapsed time: 0:00:01
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:59 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/board_b_ctrl.sv 
-# -- Compiling module board_b_ctrl
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	board_b_ctrl
-# End time: 08:58:59 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:59 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/board_b_axi_regs.sv 
-# -- Compiling module board_b_axi_regs
-# -- Importing package hft_pkg
-# ** Warning: ../rtl/board_b/board_b_axi_regs.sv(90): (vlog-13314) Defaulting port 'position' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# ** Warning: ../rtl/board_b/board_b_axi_regs.sv(92): (vlog-13314) Defaulting port 'hist_bins' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# 
-# Top level modules:
-# 	board_b_axi_regs
-# End time: 08:58:59 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 2
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:59 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/board_b_top.sv 
-# -- Compiling module board_b_top
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	board_b_top
-# End time: 08:58:59 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:59 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/shared/tb_debounce.sv 
-# -- Compiling module tb_debounce
-# 
-# Top level modules:
-# 	tb_debounce
-# End time: 08:58:59 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:59 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/shared/tb_sync_fifo.sv 
-# -- Compiling package tb_sync_fifo_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_sync_fifo
-# 
-# Top level modules:
-# 	tb_sync_fifo
-# End time: 08:58:59 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:59 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/shared/tb_lfsr32.sv 
-# -- Compiling package tb_lfsr32_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_lfsr32
-# 
-# Top level modules:
-# 	tb_lfsr32
-# End time: 08:58:59 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:59 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/link/tb_link_tx.sv 
-# ** Warning: ../tb/link/tb_link_tx.sv(173): (vlog-2244) Variable 'timeout' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# -- Compiling package tb_link_tx_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_link_tx
-# ** Warning: ../tb/link/tb_link_tx.sv(173): (vlog-2244) Variable 'timeout' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# 
-# Top level modules:
-# 	tb_link_tx
-# End time: 08:58:59 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 2
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:58:59 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/link/tb_link_rx.sv 
-# ** Warning: ../tb/link/tb_link_rx.sv(148): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/link/tb_link_rx.sv(160): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/link/tb_link_rx.sv(175): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/link/tb_link_rx.sv(224): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# -- Compiling package tb_link_rx_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_link_rx
-# ** Warning: ../tb/link/tb_link_rx.sv(148): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/link/tb_link_rx.sv(160): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/link/tb_link_rx.sv(175): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/link/tb_link_rx.sv(224): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# 
-# Top level modules:
-# 	tb_link_rx
-# End time: 08:59:00 on Mar 31,2026, Elapsed time: 0:00:01
-# Errors: 0, Warnings: 8
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:00 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/link/tb_link_loopback.sv 
-# -- Compiling package tb_link_loopback_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_link_loopback
-# 
-# Top level modules:
-# 	tb_link_loopback
-# End time: 08:59:00 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:00 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_market_sim.sv 
-# ** Warning: ../tb/board_a/tb_market_sim.sv(191): (vlog-2244) Variable 'regimes' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/board_a/tb_market_sim.sv(192): (vlog-2244) Variable 'expected_spreads' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/board_a/tb_market_sim.sv(327): (vlog-2244) Variable 'total_disp' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# -- Compiling package tb_market_sim_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_market_sim
-# ** Warning: ../tb/board_a/tb_market_sim.sv(191): (vlog-2244) Variable 'regimes' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/board_a/tb_market_sim.sv(192): (vlog-2244) Variable 'expected_spreads' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/board_a/tb_market_sim.sv(327): (vlog-2244) Variable 'total_disp' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# 
-# Top level modules:
-# 	tb_market_sim
-# End time: 08:59:00 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 6
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:00 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_market_noise_gen.sv 
-# ** Warning: ../tb/board_a/tb_market_noise_gen.sv(232): (vlog-2244) Variable 'cum0' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/board_a/tb_market_noise_gen.sv(232): (vlog-2244) Variable 'cum1' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/board_a/tb_market_noise_gen.sv(269): (vlog-2244) Variable 'some_nonzero' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# -- Compiling package tb_market_noise_gen_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_market_noise_gen
-# ** Warning: ../tb/board_a/tb_market_noise_gen.sv(232): (vlog-2244) Variable 'cum0' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/board_a/tb_market_noise_gen.sv(232): (vlog-2244) Variable 'cum1' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/board_a/tb_market_noise_gen.sv(269): (vlog-2244) Variable 'some_nonzero' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# 
-# Top level modules:
-# 	tb_market_noise_gen
-# End time: 08:59:00 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 6
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:00 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_exchange_lite.sv 
-# -- Compiling package tb_exchange_lite_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_exchange_lite
-# 
-# Top level modules:
-# 	tb_exchange_lite
-# End time: 08:59:00 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:00 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_tx_arbiter.sv 
-# ** Warning: ../tb/board_a/tb_tx_arbiter.sv(201): (vlog-2244) Variable 'quote_accepted' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# -- Compiling package tb_tx_arbiter_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_tx_arbiter
-# ** Warning: ../tb/board_a/tb_tx_arbiter.sv(201): (vlog-2244) Variable 'quote_accepted' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# 
-# Top level modules:
-# 	tb_tx_arbiter
-# End time: 08:59:01 on Mar 31,2026, Elapsed time: 0:00:01
-# Errors: 0, Warnings: 2
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:01 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_board_a_ctrl.sv 
-# ** Warning: ../tb/board_a/tb_board_a_ctrl.sv(248): (vlog-2244) Variable 'spurious' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# -- Compiling package tb_board_a_ctrl_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_board_a_ctrl
-# ** Warning: ../tb/board_a/tb_board_a_ctrl.sv(248): (vlog-2244) Variable 'spurious' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# 
-# Top level modules:
-# 	tb_board_a_ctrl
-# End time: 08:59:01 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 2
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:01 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_board_a_top.sv 
-# -- Compiling package tb_board_a_top_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_board_a_top
-# 
-# Top level modules:
-# 	tb_board_a_top
-# End time: 08:59:01 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:01 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_msg_demux.sv 
-# -- Compiling package tb_msg_demux_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_msg_demux
-# 
-# Top level modules:
-# 	tb_msg_demux
-# End time: 08:59:01 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:01 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_quote_book.sv 
-# ** Warning: ../tb/board_b/tb_quote_book.sv(348): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
-# ** Warning: ../tb/board_b/tb_quote_book.sv(351): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
-# ** Warning: ../tb/board_b/tb_quote_book.sv(353): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
-# -- Compiling package tb_quote_book_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_quote_book
-# ** Warning: ../tb/board_b/tb_quote_book.sv(348): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
-# ** Warning: ../tb/board_b/tb_quote_book.sv(351): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
-# ** Warning: ../tb/board_b/tb_quote_book.sv(353): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
-# 
-# Top level modules:
-# 	tb_quote_book
-# End time: 08:59:01 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 6
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:01 on Mar 31,2026
+# Start time: 09:59:15 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_feature_compute.sv 
 # -- Compiling package tb_feature_compute_sv_unit
 # -- Importing package hft_pkg
@@ -968,10 +476,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_feature_compute
-# End time: 08:59:01 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:15 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:01 on Mar 31,2026
+# Start time: 09:59:15 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_strategy_engine.sv 
 # -- Compiling package tb_strategy_engine_sv_unit
 # -- Importing package hft_pkg
@@ -979,10 +487,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_strategy_engine
-# End time: 08:59:01 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:15 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:01 on Mar 31,2026
+# Start time: 09:59:15 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_risk_manager.sv 
 # -- Compiling package tb_risk_manager_sv_unit
 # -- Importing package hft_pkg
@@ -990,10 +498,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_risk_manager
-# End time: 08:59:02 on Mar 31,2026, Elapsed time: 0:00:01
+# End time: 09:59:15 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:02 on Mar 31,2026
+# Start time: 09:59:15 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_order_manager.sv 
 # -- Compiling package tb_order_manager_sv_unit
 # -- Importing package hft_pkg
@@ -1001,10 +509,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_order_manager
-# End time: 08:59:02 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:15 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:02 on Mar 31,2026
+# Start time: 09:59:15 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_position_tracker.sv 
 # -- Compiling package tb_position_tracker_sv_unit
 # -- Importing package hft_pkg
@@ -1012,10 +520,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_position_tracker
-# End time: 08:59:02 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:16 on Mar 31,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:02 on Mar 31,2026
+# Start time: 09:59:16 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_latency_histogram.sv 
 # -- Compiling package tb_latency_histogram_sv_unit
 # -- Importing package hft_pkg
@@ -1023,10 +531,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_latency_histogram
-# End time: 08:59:02 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:16 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:02 on Mar 31,2026
+# Start time: 09:59:16 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_board_b_ctrl.sv 
 # -- Compiling package tb_board_b_ctrl_sv_unit
 # -- Importing package hft_pkg
@@ -1034,10 +542,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_board_b_ctrl
-# End time: 08:59:02 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:16 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:02 on Mar 31,2026
+# Start time: 09:59:16 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_board_b_axi_regs.sv 
 # -- Compiling package tb_board_b_axi_regs_sv_unit
 # -- Importing package hft_pkg
@@ -1045,10 +553,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_board_b_axi_regs
-# End time: 08:59:02 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:16 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:02 on Mar 31,2026
+# Start time: 09:59:16 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_board_b_top.sv 
 # -- Compiling package tb_board_b_top_sv_unit
 # -- Importing package hft_pkg
@@ -1056,10 +564,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_board_b_top
-# End time: 08:59:02 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:17 on Mar 31,2026, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:02 on Mar 31,2026
+# Start time: 09:59:17 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_board_b_pipeline.sv 
 # -- Compiling package tb_board_b_pipeline_sv_unit
 # -- Importing package hft_pkg
@@ -1067,607 +575,10 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_board_b_pipeline
-# End time: 08:59:03 on Mar 31,2026, Elapsed time: 0:00:01
+# End time: 09:59:17 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 08:59:03 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/stubs/board_b_top_stub.sv 
-# ** Error: (vlog-7) Failed to open design unit file "../tb/stubs/board_b_top_stub.sv" in read mode.
-# No such file or directory. (errno = ENOENT)
-# End time: 08:59:03 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 1, Warnings: 0
-# ** Error: C:/intelFPGA/20.1/modelsim_ase/win32aloem/vlog failed.
-# Error in macro ./compile_all.do line 84
-# C:/intelFPGA/20.1/modelsim_ase/win32aloem/vlog failed.
-#     while executing
-# "vlog -sv -work work ../tb/stubs/board_b_top_stub.sv"
-do run_all.do
-# Model Technology ModelSim - Intel FPGA Edition vmap 2020.1 Lib Mapping Utility 2020.02 Feb 28 2020
-# vmap work work 
-# Modifying C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/sim/full_project_regression_test.mpf
-# =========================================
-#  Compiling full design...
-# =========================================
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:47 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/shared/hft_pkg.sv 
-# -- Compiling package hft_pkg
-# 
-# Top level modules:
-# 	--none--
-# End time: 09:00:47 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:47 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/shared/debounce.sv 
-# -- Compiling module debounce
-# 
-# Top level modules:
-# 	debounce
-# End time: 09:00:48 on Mar 31,2026, Elapsed time: 0:00:01
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:48 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/shared/sync_fifo.sv 
-# -- Compiling module sync_fifo
-# 
-# Top level modules:
-# 	sync_fifo
-# End time: 09:00:48 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:48 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/shared/lfsr32.sv 
-# -- Compiling module lfsr32
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	lfsr32
-# End time: 09:00:48 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:48 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/link/link_tx.sv 
-# -- Compiling module link_tx
-# 
-# Top level modules:
-# 	link_tx
-# End time: 09:00:48 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:48 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/link/link_rx.sv 
-# -- Compiling module link_rx
-# 
-# Top level modules:
-# 	link_rx
-# End time: 09:00:49 on Mar 31,2026, Elapsed time: 0:00:01
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:49 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_a/market_sim.sv 
-# -- Compiling module market_sim
-# -- Importing package hft_pkg
-# ** Warning: ../rtl/board_a/market_sim.sv(52): (vlog-13314) Defaulting port 'sector_id' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# ** Warning: ../rtl/board_a/market_sim.sv(53): (vlog-13314) Defaulting port 'init_mid' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# ** Warning: ../rtl/board_a/market_sim.sv(54): (vlog-13314) Defaulting port 'init_spread' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# 
-# Top level modules:
-# 	market_sim
-# End time: 09:00:49 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 3
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:49 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_a/market_noise_gen.sv 
-# -- Compiling module market_noise_gen
-# -- Importing package hft_pkg
-# ** Warning: ../rtl/board_a/market_noise_gen.sv(30): (vlog-13314) Defaulting port 'sector_id' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# 
-# Top level modules:
-# 	market_noise_gen
-# End time: 09:00:49 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 1
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:49 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_a/exchange_lite.sv 
-# -- Compiling module exchange_lite
-# -- Importing package hft_pkg
-# ** Warning: ../rtl/board_a/exchange_lite.sv(25): (vlog-13314) Defaulting port 'best_bid' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# ** Warning: ../rtl/board_a/exchange_lite.sv(26): (vlog-13314) Defaulting port 'best_ask' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# 
-# Top level modules:
-# 	exchange_lite
-# End time: 09:00:49 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 2
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:50 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_a/exchange_plus.sv 
-# -- Compiling module exchange_plus
-# -- Importing package hft_pkg
-# ** Warning: ../rtl/board_a/exchange_plus.sv(37): (vlog-13314) Defaulting port 'best_bid' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# ** Warning: ../rtl/board_a/exchange_plus.sv(38): (vlog-13314) Defaulting port 'best_ask' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# ** Warning: ../rtl/board_a/exchange_plus.sv(41): (vlog-13314) Defaulting port 'best_bid_qty' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# ** Warning: ../rtl/board_a/exchange_plus.sv(42): (vlog-13314) Defaulting port 'best_ask_qty' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# 
-# Top level modules:
-# 	exchange_plus
-# End time: 09:00:50 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 4
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:50 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_a/tx_arbiter.sv 
-# -- Compiling module tx_arbiter
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	tx_arbiter
-# End time: 09:00:50 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:50 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_a/board_a_ctrl.sv 
-# -- Compiling module board_a_ctrl
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	board_a_ctrl
-# End time: 09:00:50 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:50 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_a/board_a_axi_regs.sv 
-# -- Compiling module board_a_axi_regs
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	board_a_axi_regs
-# End time: 09:00:50 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:50 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_a/board_a_top.sv 
-# -- Compiling module board_a_top
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	board_a_top
-# End time: 09:00:50 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:50 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/msg_demux.sv 
-# -- Compiling module msg_demux
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	msg_demux
-# End time: 09:00:50 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:51 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/quote_book.sv 
-# -- Compiling module quote_book
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	quote_book
-# End time: 09:00:51 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:51 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/feature_compute.sv 
-# -- Compiling module feature_compute
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	feature_compute
-# End time: 09:00:51 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:51 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/strategy_engine.sv 
-# -- Compiling module strategy_engine
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	strategy_engine
-# End time: 09:00:51 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:51 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/risk_manager.sv 
-# -- Compiling module risk_manager
-# -- Importing package hft_pkg
-# ** Warning: ../rtl/board_b/risk_manager.sv(36): (vlog-13314) Defaulting port 'position' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# 
-# Top level modules:
-# 	risk_manager
-# End time: 09:00:51 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 1
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:51 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/order_manager.sv 
-# -- Compiling module order_manager
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	order_manager
-# End time: 09:00:51 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:51 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/position_tracker.sv 
-# -- Compiling module position_tracker
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	position_tracker
-# End time: 09:00:51 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:51 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/latency_histogram.sv 
-# -- Compiling module latency_histogram
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	latency_histogram
-# End time: 09:00:51 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:51 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/board_b_ctrl.sv 
-# -- Compiling module board_b_ctrl
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	board_b_ctrl
-# End time: 09:00:51 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:51 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/board_b_axi_regs.sv 
-# -- Compiling module board_b_axi_regs
-# -- Importing package hft_pkg
-# ** Warning: ../rtl/board_b/board_b_axi_regs.sv(90): (vlog-13314) Defaulting port 'position' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# ** Warning: ../rtl/board_b/board_b_axi_regs.sv(92): (vlog-13314) Defaulting port 'hist_bins' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
-# 
-# Top level modules:
-# 	board_b_axi_regs
-# End time: 09:00:52 on Mar 31,2026, Elapsed time: 0:00:01
-# Errors: 0, Warnings: 2
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:52 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../rtl/board_b/board_b_top.sv 
-# -- Compiling module board_b_top
-# -- Importing package hft_pkg
-# 
-# Top level modules:
-# 	board_b_top
-# End time: 09:00:52 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:52 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/shared/tb_debounce.sv 
-# -- Compiling module tb_debounce
-# 
-# Top level modules:
-# 	tb_debounce
-# End time: 09:00:52 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:52 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/shared/tb_sync_fifo.sv 
-# -- Compiling package tb_sync_fifo_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_sync_fifo
-# 
-# Top level modules:
-# 	tb_sync_fifo
-# End time: 09:00:52 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:52 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/shared/tb_lfsr32.sv 
-# -- Compiling package tb_lfsr32_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_lfsr32
-# 
-# Top level modules:
-# 	tb_lfsr32
-# End time: 09:00:52 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:52 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/link/tb_link_tx.sv 
-# ** Warning: ../tb/link/tb_link_tx.sv(173): (vlog-2244) Variable 'timeout' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# -- Compiling package tb_link_tx_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_link_tx
-# ** Warning: ../tb/link/tb_link_tx.sv(173): (vlog-2244) Variable 'timeout' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# 
-# Top level modules:
-# 	tb_link_tx
-# End time: 09:00:52 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 2
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:52 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/link/tb_link_rx.sv 
-# ** Warning: ../tb/link/tb_link_rx.sv(148): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/link/tb_link_rx.sv(160): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/link/tb_link_rx.sv(175): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/link/tb_link_rx.sv(224): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# -- Compiling package tb_link_rx_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_link_rx
-# ** Warning: ../tb/link/tb_link_rx.sv(148): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/link/tb_link_rx.sv(160): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/link/tb_link_rx.sv(175): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/link/tb_link_rx.sv(224): (vlog-2244) Variable 'err_before' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# 
-# Top level modules:
-# 	tb_link_rx
-# End time: 09:00:52 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 8
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:53 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/link/tb_link_loopback.sv 
-# -- Compiling package tb_link_loopback_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_link_loopback
-# 
-# Top level modules:
-# 	tb_link_loopback
-# End time: 09:00:53 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:53 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_market_sim.sv 
-# ** Warning: ../tb/board_a/tb_market_sim.sv(191): (vlog-2244) Variable 'regimes' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/board_a/tb_market_sim.sv(192): (vlog-2244) Variable 'expected_spreads' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/board_a/tb_market_sim.sv(327): (vlog-2244) Variable 'total_disp' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# -- Compiling package tb_market_sim_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_market_sim
-# ** Warning: ../tb/board_a/tb_market_sim.sv(191): (vlog-2244) Variable 'regimes' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/board_a/tb_market_sim.sv(192): (vlog-2244) Variable 'expected_spreads' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/board_a/tb_market_sim.sv(327): (vlog-2244) Variable 'total_disp' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# 
-# Top level modules:
-# 	tb_market_sim
-# End time: 09:00:53 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 6
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:53 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_market_noise_gen.sv 
-# ** Warning: ../tb/board_a/tb_market_noise_gen.sv(232): (vlog-2244) Variable 'cum0' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/board_a/tb_market_noise_gen.sv(232): (vlog-2244) Variable 'cum1' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/board_a/tb_market_noise_gen.sv(269): (vlog-2244) Variable 'some_nonzero' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# -- Compiling package tb_market_noise_gen_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_market_noise_gen
-# ** Warning: ../tb/board_a/tb_market_noise_gen.sv(232): (vlog-2244) Variable 'cum0' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/board_a/tb_market_noise_gen.sv(232): (vlog-2244) Variable 'cum1' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# ** Warning: ../tb/board_a/tb_market_noise_gen.sv(269): (vlog-2244) Variable 'some_nonzero' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# 
-# Top level modules:
-# 	tb_market_noise_gen
-# End time: 09:00:53 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 6
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:53 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_exchange_lite.sv 
-# -- Compiling package tb_exchange_lite_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_exchange_lite
-# 
-# Top level modules:
-# 	tb_exchange_lite
-# End time: 09:00:53 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:53 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_tx_arbiter.sv 
-# ** Warning: ../tb/board_a/tb_tx_arbiter.sv(201): (vlog-2244) Variable 'quote_accepted' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# -- Compiling package tb_tx_arbiter_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_tx_arbiter
-# ** Warning: ../tb/board_a/tb_tx_arbiter.sv(201): (vlog-2244) Variable 'quote_accepted' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# 
-# Top level modules:
-# 	tb_tx_arbiter
-# End time: 09:00:53 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 2
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:53 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_board_a_ctrl.sv 
-# ** Warning: ../tb/board_a/tb_board_a_ctrl.sv(248): (vlog-2244) Variable 'spurious' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# -- Compiling package tb_board_a_ctrl_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_board_a_ctrl
-# ** Warning: ../tb/board_a/tb_board_a_ctrl.sv(248): (vlog-2244) Variable 'spurious' is implicitly static. You must either explicitly declare it as static or automatic
-# or remove the initialization in the declaration of variable.
-# 
-# Top level modules:
-# 	tb_board_a_ctrl
-# End time: 09:00:53 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 2
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:54 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_a/tb_board_a_top.sv 
-# -- Compiling package tb_board_a_top_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_board_a_top
-# 
-# Top level modules:
-# 	tb_board_a_top
-# End time: 09:00:54 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:54 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_msg_demux.sv 
-# -- Compiling package tb_msg_demux_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_msg_demux
-# 
-# Top level modules:
-# 	tb_msg_demux
-# End time: 09:00:54 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:54 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_quote_book.sv 
-# ** Warning: ../tb/board_b/tb_quote_book.sv(348): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
-# ** Warning: ../tb/board_b/tb_quote_book.sv(351): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
-# ** Warning: ../tb/board_b/tb_quote_book.sv(353): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
-# -- Compiling package tb_quote_book_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_quote_book
-# ** Warning: ../tb/board_b/tb_quote_book.sv(348): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
-# ** Warning: ../tb/board_b/tb_quote_book.sv(351): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
-# ** Warning: ../tb/board_b/tb_quote_book.sv(353): (vlog-2600) [RDGN] - Redundant digits in numeric literal.
-# 
-# Top level modules:
-# 	tb_quote_book
-# End time: 09:00:54 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 6
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:54 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_feature_compute.sv 
-# -- Compiling package tb_feature_compute_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_feature_compute
-# 
-# Top level modules:
-# 	tb_feature_compute
-# End time: 09:00:54 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:54 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_strategy_engine.sv 
-# -- Compiling package tb_strategy_engine_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_strategy_engine
-# 
-# Top level modules:
-# 	tb_strategy_engine
-# End time: 09:00:54 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:54 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_risk_manager.sv 
-# -- Compiling package tb_risk_manager_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_risk_manager
-# 
-# Top level modules:
-# 	tb_risk_manager
-# End time: 09:00:54 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:54 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_order_manager.sv 
-# -- Compiling package tb_order_manager_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_order_manager
-# 
-# Top level modules:
-# 	tb_order_manager
-# End time: 09:00:54 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:54 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_position_tracker.sv 
-# -- Compiling package tb_position_tracker_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_position_tracker
-# 
-# Top level modules:
-# 	tb_position_tracker
-# End time: 09:00:55 on Mar 31,2026, Elapsed time: 0:00:01
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:55 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_latency_histogram.sv 
-# -- Compiling package tb_latency_histogram_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_latency_histogram
-# 
-# Top level modules:
-# 	tb_latency_histogram
-# End time: 09:00:55 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:55 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_board_b_ctrl.sv 
-# -- Compiling package tb_board_b_ctrl_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_board_b_ctrl
-# 
-# Top level modules:
-# 	tb_board_b_ctrl
-# End time: 09:00:55 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:55 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_board_b_axi_regs.sv 
-# -- Compiling package tb_board_b_axi_regs_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_board_b_axi_regs
-# 
-# Top level modules:
-# 	tb_board_b_axi_regs
-# End time: 09:00:55 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:55 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_board_b_top.sv 
-# -- Compiling package tb_board_b_top_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_board_b_top
-# 
-# Top level modules:
-# 	tb_board_b_top
-# End time: 09:00:55 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:55 on Mar 31,2026
-# vlog -reportprogress 300 -sv -work work ../tb/board_b/tb_board_b_pipeline.sv 
-# -- Compiling package tb_board_b_pipeline_sv_unit
-# -- Importing package hft_pkg
-# -- Compiling module tb_board_b_pipeline
-# 
-# Top level modules:
-# 	tb_board_b_pipeline
-# End time: 09:00:55 on Mar 31,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
-# Start time: 09:00:55 on Mar 31,2026
+# Start time: 09:59:17 on Mar 31,2026
 # vlog -reportprogress 300 -sv -work work ../tb/tb_system_top.sv 
 # ** Warning: ../tb/tb_system_top.sv(317): (vlog-2244) Variable 'wait_cnt' is implicitly static. You must either explicitly declare it as static or automatic
 # or remove the initialization in the declaration of variable.
@@ -1679,11 +590,12 @@ do run_all.do
 # 
 # Top level modules:
 # 	tb_system_top
-# End time: 09:00:55 on Mar 31,2026, Elapsed time: 0:00:00
+# End time: 09:59:17 on Mar 31,2026, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 2
 # =========================================
 #  Full compilation complete!
 # =========================================
+# 1
 # 
 # 
 ###############################################
@@ -1694,7 +606,7 @@ do run_all.do
 #  [1/6] Shared + Link ? tb_debounce
 # ===========================================
 # vsim -voptargs="+acc" work.tb_debounce -quiet 
-# Start time: 09:00:56 on Mar 31,2026
+# Start time: 09:59:17 on Mar 31,2026
 # --- test_reset ---
 # --- test_glitch ---
 # --- test_rising_edge ---
@@ -1711,150 +623,45 @@ do run_all.do
 #    Time: 4055 ns  Iteration: 1  Instance: /tb_debounce
 # 1
 # Break in Module tb_debounce at ../tb/shared/tb_debounce.sv line 216
-# End time: 09:01:18 on Mar 31,2026, Elapsed time: 0:00:22
+# End time: 09:59:34 on Mar 31,2026, Elapsed time: 0:00:17
 # Errors: 0, Warnings: 3
+# >>> FAIL: tb_debounce
 # 
 # ===========================================
 #  [2/6] Shared + Link ? tb_sync_fifo
 # ===========================================
 # vsim -voptargs="+acc" work.tb_sync_fifo -quiet 
-# Start time: 09:01:18 on Mar 31,2026
+# Start time: 09:59:34 on Mar 31,2026
 # --- test_reset ---
 # --- test_fill_drain ---
-# ** Error: FAIL: count after 10 writes — got 9, exp 10
-#    Time: 215 ns  Scope: tb_sync_fifo.check32 File: ../tb/shared/tb_sync_fifo.sv Line: 84
-# ** Error: FAIL: rd_data[2]
-#    Time: 225 ns  Scope: tb_sync_fifo.check File: ../tb/shared/tb_sync_fifo.sv Line: 76
-# ** Error: FAIL: rd_data[3]
-#    Time: 235 ns  Scope: tb_sync_fifo.check File: ../tb/shared/tb_sync_fifo.sv Line: 76
-# ** Error: FAIL: rd_data[4]
-#    Time: 245 ns  Scope: tb_sync_fifo.check File: ../tb/shared/tb_sync_fifo.sv Line: 76
-# ** Error: FAIL: rd_data[5]
-#    Time: 255 ns  Scope: tb_sync_fifo.check File: ../tb/shared/tb_sync_fifo.sv Line: 76
-# ** Error: FAIL: rd_data[6]
-#    Time: 265 ns  Scope: tb_sync_fifo.check File: ../tb/shared/tb_sync_fifo.sv Line: 76
-# ** Error: FAIL: rd_data[7]
-#    Time: 275 ns  Scope: tb_sync_fifo.check File: ../tb/shared/tb_sync_fifo.sv Line: 76
-# ** Error: FAIL: rd_data[8]
-#    Time: 285 ns  Scope: tb_sync_fifo.check File: ../tb/shared/tb_sync_fifo.sv Line: 76
-# ** Error: FAIL: rd_data[9]
-#    Time: 295 ns  Scope: tb_sync_fifo.check File: ../tb/shared/tb_sync_fifo.sv Line: 76
-# ** Error: FAIL: rd_data[10]
-#    Time: 305 ns  Scope: tb_sync_fifo.check File: ../tb/shared/tb_sync_fifo.sv Line: 76
 # --- test_concurrent_rdwr ---
 # --- test_overflow ---
 # --- test_underflow ---
 # --- test_flush_during_write ---
 # --- test_almost_full ---
 # --- test_small_fifo ---
-# ** Error: FAIL: small: rd[1]
-#    Time: 2685 ns  Scope: tb_sync_fifo.check File: ../tb/shared/tb_sync_fifo.sv Line: 76
-# ** Error: FAIL: small: rd[2]
-#    Time: 2695 ns  Scope: tb_sync_fifo.check File: ../tb/shared/tb_sync_fifo.sv Line: 76
-# ** Error: FAIL: small: rd[3]
-#    Time: 2705 ns  Scope: tb_sync_fifo.check File: ../tb/shared/tb_sync_fifo.sv Line: 76
 # 
 # ===================================
-# tb_sync_fifo: FAIL (54 passed, 13 failed)
-# ** Fatal: Assertion error.
-#    Time: 2785 ns  Scope: tb_sync_fifo File: ../tb/shared/tb_sync_fifo.sv Line: 323
-# ** Note: $finish    : ../tb/shared/tb_sync_fifo.sv(323)
+# tb_sync_fifo: PASS (67 checks passed)
+# ===================================
+# ** Note: $finish    : ../tb/shared/tb_sync_fifo.sv(326)
 #    Time: 2785 ns  Iteration: 1  Instance: /tb_sync_fifo
 # 1
-# Break in Module tb_sync_fifo at ../tb/shared/tb_sync_fifo.sv line 323
-# End time: 09:01:34 on Mar 31,2026, Elapsed time: 0:00:16
-# Errors: 14, Warnings: 1
+# Break in Module tb_sync_fifo at ../tb/shared/tb_sync_fifo.sv line 326
+# End time: 09:59:47 on Mar 31,2026, Elapsed time: 0:00:13
+# Errors: 0, Warnings: 1
+# >>> FAIL: tb_sync_fifo
 # 
 # ===========================================
 #  [3/6] Shared + Link ? tb_lfsr32
 # ===========================================
 # vsim -voptargs="+acc" work.tb_lfsr32 -quiet 
-# Start time: 09:01:34 on Mar 31,2026
+# Start time: 09:59:47 on Mar 31,2026
 # --- test_reset ---
 # --- test_load_hold ---
 # --- test_golden_deadbeef ---
-# ** Error: FAIL: DEADBEEF step[0] — got deadbeef, exp 6f16df70
-#    Time: 145 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: DEADBEEF step[1] — got 6f16df70, exp 378b6fb8
-#    Time: 155 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: DEADBEEF step[2] — got 378b6fb8, exp 1bc5b7dc
-#    Time: 165 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: DEADBEEF step[3] — got 1bc5b7dc, exp 0de2dbee
-#    Time: 175 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: DEADBEEF step[4] — got 0de2dbee, exp 06f16df7
-#    Time: 185 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: DEADBEEF step[5] — got 06f16df7, exp 0338b6fc
-#    Time: 195 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: DEADBEEF step[6] — got 0338b6fc, exp 019c5b7e
-#    Time: 205 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: DEADBEEF step[7] — got 019c5b7e, exp 00ce2dbf
-#    Time: 215 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: DEADBEEF step[8] — got 00ce2dbf, exp 002716d8
-#    Time: 225 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: DEADBEEF step[9] — got 002716d8, exp 00138b6c
-#    Time: 235 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: DEADBEEF step[10] — got 00138b6c, exp 0009c5b6
-#    Time: 245 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: DEADBEEF step[11] — got 0009c5b6, exp 0004e2db
-#    Time: 255 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: DEADBEEF step[12] — got 0004e2db, exp 0042716a
-#    Time: 265 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: DEADBEEF step[13] — got 0042716a, exp 002138b5
-#    Time: 275 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: DEADBEEF step[14] — got 002138b5, exp 00509c5d
-#    Time: 285 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: DEADBEEF step[15] — got 00509c5d, exp 00684e29
-#    Time: 295 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
 # --- test_golden_seed1 ---
-# ** Error: FAIL: SEED1 step[0] — got 00000001, exp 00400007
-#    Time: 325 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: SEED1 step[1] — got 00400007, exp 00600004
-#    Time: 335 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: SEED1 step[2] — got 00600004, exp 00300002
-#    Time: 345 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: SEED1 step[3] — got 00300002, exp 00180001
-#    Time: 355 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: SEED1 step[4] — got 00180001, exp 004c0007
-#    Time: 365 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: SEED1 step[5] — got 004c0007, exp 00660004
-#    Time: 375 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: SEED1 step[6] — got 00660004, exp 00330002
-#    Time: 385 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: SEED1 step[7] — got 00330002, exp 00198001
-#    Time: 395 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: SEED1 step[8] — got 00198001, exp 004cc007
-#    Time: 405 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: SEED1 step[9] — got 004cc007, exp 00666004
-#    Time: 415 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: SEED1 step[10] — got 00666004, exp 00333002
-#    Time: 425 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: SEED1 step[11] — got 00333002, exp 00199801
-#    Time: 435 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: SEED1 step[12] — got 00199801, exp 004ccc07
-#    Time: 445 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: SEED1 step[13] — got 004ccc07, exp 00666604
-#    Time: 455 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: SEED1 step[14] — got 00666604, exp 00333302
-#    Time: 465 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: SEED1 step[15] — got 00333302, exp 00199981
-#    Time: 475 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
 # --- test_zero_seed_remap ---
-# ** Error: FAIL: Zero remap step[0] — got 00000001, exp 00400007
-#    Time: 505 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: Zero remap step[1] — got 00400007, exp 00600004
-#    Time: 515 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: Zero remap step[2] — got 00600004, exp 00300002
-#    Time: 525 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: Zero remap step[3] — got 00300002, exp 00180001
-#    Time: 535 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: Zero remap step[4] — got 00180001, exp 004c0007
-#    Time: 545 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: Zero remap step[5] — got 004c0007, exp 00660004
-#    Time: 555 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: Zero remap step[6] — got 00660004, exp 00330002
-#    Time: 565 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
-# ** Error: FAIL: Zero remap step[7] — got 00330002, exp 00198001
-#    Time: 575 ns  Scope: tb_lfsr32.check32 File: ../tb/shared/tb_lfsr32.sv Line: 47
 # --- test_all_ones_seed ---
 # --- test_load_during_enable ---
 # --- test_simultaneous_load_enable ---
@@ -1863,21 +670,21 @@ do run_all.do
 # --- test_never_zero ---
 # 
 # ===================================
-# tb_lfsr32: FAIL (1140 passed, 40 failed)
-# ** Fatal: Assertion error.
-#    Time: 12335 ns  Scope: tb_lfsr32 File: ../tb/shared/tb_lfsr32.sv Line: 283
-# ** Note: $finish    : ../tb/shared/tb_lfsr32.sv(283)
+# tb_lfsr32: PASS (1180 checks passed)
+# ===================================
+# ** Note: $finish    : ../tb/shared/tb_lfsr32.sv(286)
 #    Time: 12335 ns  Iteration: 1  Instance: /tb_lfsr32
 # 1
-# Break in Module tb_lfsr32 at ../tb/shared/tb_lfsr32.sv line 283
-# End time: 09:01:54 on Mar 31,2026, Elapsed time: 0:00:20
-# Errors: 41, Warnings: 1
+# Break in Module tb_lfsr32 at ../tb/shared/tb_lfsr32.sv line 286
+# End time: 09:59:59 on Mar 31,2026, Elapsed time: 0:00:12
+# Errors: 0, Warnings: 1
+# >>> FAIL: tb_lfsr32
 # 
 # ===========================================
 #  [4/6] Shared + Link ? tb_link_tx
 # ===========================================
 # vsim -voptargs="+acc" work.tb_link_tx -quiet 
-# Start time: 09:01:54 on Mar 31,2026
+# Start time: 09:59:59 on Mar 31,2026
 # --- test_single_quote ---
 # --- test_all_msg_types ---
 # --- test_multi_frame_burst ---
@@ -1891,61 +698,43 @@ do run_all.do
 #    Time: 6335 ns  Iteration: 1  Instance: /tb_link_tx
 # 1
 # Break in Module tb_link_tx at ../tb/link/tb_link_tx.sv line 223
-# End time: 09:02:10 on Mar 31,2026, Elapsed time: 0:00:16
+# End time: 10:00:11 on Mar 31,2026, Elapsed time: 0:00:12
 # Errors: 0, Warnings: 1
+# >>> FAIL: tb_link_tx
 # 
 # ===========================================
 #  [5/6] Shared + Link ? tb_link_rx
 # ===========================================
 # vsim -voptargs="+acc" work.tb_link_rx -quiet 
-# Start time: 09:02:10 on Mar 31,2026
+# Start time: 10:00:11 on Mar 31,2026
 # --- test_idle ---
 # --- test_truncated ---
 # --- test_valid_quote ---
-# ** Error: FAIL: valid: frame received
-#    Time: 3315 ns  Scope: tb_link_rx.check File: ../tb/link/tb_link_rx.sv Line: 56
-# ** Error: FAIL: valid: frame matches — got 00000000000000000000000000000000, exp 1123456789abcdef00fedcba98765432
-#    Time: 3315 ns  Scope: tb_link_rx.check128 File: ../tb/link/tb_link_rx.sv Line: 64
 # ** Error: FAIL: valid: no new errors
-#    Time: 3315 ns  Scope: tb_link_rx.check File: ../tb/link/tb_link_rx.sv Line: 56
+#    Time: 2126 ns  Scope: tb_link_rx.check File: ../tb/link/tb_link_rx.sv Line: 56
 # --- test_invalid_msg_type ---
 # --- test_link_up_recovery ---
-# ** Error: FAIL: recovery: frame received
-#    Time: 6935 ns  Scope: tb_link_rx.check File: ../tb/link/tb_link_rx.sv Line: 56
-# ** Error: FAIL: recovery: frame matches — got 00000000000000000000000000000000, exp 20100064000000320001123400000000
-#    Time: 6935 ns  Scope: tb_link_rx.check128 File: ../tb/link/tb_link_rx.sv Line: 64
 # --- test_counter_clr ---
 # --- test_back_to_back ---
-# ** Error: FAIL: b2b[0]: received
-#    Time: 8855 ns  Scope: tb_link_rx.check File: ../tb/link/tb_link_rx.sv Line: 56
-# ** Error: FAIL: b2b[0]: match — got 00000000000000000000000000000000, exp 10000000000000000000000000000001
-#    Time: 8855 ns  Scope: tb_link_rx.check128 File: ../tb/link/tb_link_rx.sv Line: 64
-# ** Error: FAIL: b2b[1]: received
-#    Time: 10755 ns  Scope: tb_link_rx.check File: ../tb/link/tb_link_rx.sv Line: 56
-# ** Error: FAIL: b2b[1]: match — got 00000000000000000000000000000000, exp 10100000000000000000000000000002
-#    Time: 10755 ns  Scope: tb_link_rx.check128 File: ../tb/link/tb_link_rx.sv Line: 64
-# ** Error: FAIL: b2b[2]: received
-#    Time: 12655 ns  Scope: tb_link_rx.check File: ../tb/link/tb_link_rx.sv Line: 56
-# ** Error: FAIL: b2b[2]: match — got 00000000000000000000000000000000, exp 10200000000000000000000000000003
-#    Time: 12655 ns  Scope: tb_link_rx.check128 File: ../tb/link/tb_link_rx.sv Line: 64
 # --- test_msg_type_0 ---
 # 
 # ===================================
-# tb_link_rx: FAIL (302 passed, 11 failed)
+# tb_link_rx: FAIL (312 passed, 1 failed)
 # ** Fatal: Assertion error.
-#    Time: 14315 ns  Scope: tb_link_rx File: ../tb/link/tb_link_rx.sv Line: 240
-# ** Note: $finish    : ../tb/link/tb_link_rx.sv(240)
-#    Time: 14315 ns  Iteration: 1  Instance: /tb_link_rx
+#    Time: 8356 ns  Scope: tb_link_rx File: ../tb/link/tb_link_rx.sv Line: 250
+# ** Note: $finish    : ../tb/link/tb_link_rx.sv(250)
+#    Time: 8356 ns  Iteration: 0  Instance: /tb_link_rx
 # 1
-# Break in Module tb_link_rx at ../tb/link/tb_link_rx.sv line 240
-# End time: 09:02:31 on Mar 31,2026, Elapsed time: 0:00:21
-# Errors: 12, Warnings: 1
+# Break in Module tb_link_rx at ../tb/link/tb_link_rx.sv line 250
+# End time: 10:00:24 on Mar 31,2026, Elapsed time: 0:00:13
+# Errors: 2, Warnings: 1
+# >>> FAIL: tb_link_rx
 # 
 # ===========================================
 #  [6/6] Shared + Link ? tb_link_loopback
 # ===========================================
 # vsim -voptargs="+acc" work.tb_link_loopback -quiet 
-# Start time: 09:02:31 on Mar 31,2026
+# Start time: 10:00:25 on Mar 31,2026
 # --- test_all_msg_types ---
 # --- test_10_frame_stress ---
 # --- test_patterns ---
@@ -1957,8 +746,9 @@ do run_all.do
 #    Time: 12545 ns  Iteration: 1  Instance: /tb_link_loopback
 # 1
 # Break in Module tb_link_loopback at ../tb/link/tb_link_loopback.sv line 194
-# End time: 09:02:46 on Mar 31,2026, Elapsed time: 0:00:15
+# End time: 10:00:49 on Mar 31,2026, Elapsed time: 0:00:24
 # Errors: 0, Warnings: 1
+# >>> FAIL: tb_link_loopback
 # 
 # 
 ###############################################
@@ -1969,309 +759,40 @@ do run_all.do
 #  [1/6] Board A ? tb_market_sim
 # ===========================================
 # vsim -voptargs="+acc" work.tb_market_sim -quiet 
-# Start time: 09:02:46 on Mar 31,2026
+# Start time: 10:00:49 on Mar 31,2026
 # --- test_golden_quotes ---
 # ** Error: FAIL: quotes_generated=16 — got 00000011, exp 00000010
-#    Time: 305 ns  Scope: tb_market_sim.check32 File: ../tb/board_a/tb_market_sim.sv Line: 79
+#    Time: 306 ns  Scope: tb_market_sim.check32 File: ../tb/board_a/tb_market_sim.sv Line: 79
 # --- test_all_regimes ---
 # --- test_counter_clr ---
+# ** Error: FAIL: counter_clr: count=0 — got 00000001, exp 00000000
+#    Time: 726 ns  Scope: tb_market_sim.check32 File: ../tb/board_a/tb_market_sim.sv Line: 79
 # --- test_interval_0 ---
-# ** Error: FAIL: interval0: 10 quotes — got 0000000b, exp 0000000a
-#    Time: 925 ns  Scope: tb_market_sim.check32 File: ../tb/board_a/tb_market_sim.sv Line: 79
 # --- test_backpressure ---
-# ** Error: FAIL: bp: no quote_valid
-#    Time: 1005 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1005 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1015 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1025 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1035 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1045 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1055 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1065 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1075 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1085 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1095 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1105 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1115 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1125 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1135 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1145 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1155 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1165 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1175 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1185 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1195 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1205 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1215 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1225 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1235 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1245 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1255 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1265 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1275 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1285 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1295 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1305 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1315 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1325 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1335 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1345 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1355 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1365 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1375 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1385 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1395 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1405 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1415 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1425 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1435 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1445 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1455 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1465 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1475 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1485 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1495 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1505 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1515 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1525 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1535 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1545 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1555 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1565 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1575 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1585 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1595 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1605 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1615 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1625 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1635 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1645 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1655 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1665 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1675 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1685 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1695 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1705 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1715 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1725 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1735 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1745 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1755 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1765 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1775 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1785 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1795 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1805 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1815 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1825 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1835 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1845 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1855 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1865 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1875 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1885 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1895 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1905 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1915 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1925 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1935 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1945 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1955 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1965 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1975 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1985 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count stable
-#    Time: 1995 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: bp: count advanced
-#    Time: 2015 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
 # --- test_active_transition ---
-# ** Error: FAIL: active2 q2 sym<2
-#    Time: 2125 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
-# ** Error: FAIL: active2 q3 sym<2
-#    Time: 2135 ns  Scope: tb_market_sim.check File: ../tb/board_a/tb_market_sim.sv Line: 71
 # --- test_price_clamp ---
 # --- test_mean_reversion ---
 # --- test_lfsr_load_reload ---
 # 
 # ===================================
-# tb_market_sim: FAIL (250 passed, 106 failed)
+# tb_market_sim: FAIL (354 passed, 2 failed)
 # ** Fatal: Assertion error.
-#    Time: 4525 ns  Scope: tb_market_sim File: ../tb/board_a/tb_market_sim.sv Line: 376
-# ** Note: $finish    : ../tb/board_a/tb_market_sim.sv(376)
-#    Time: 4525 ns  Iteration: 1  Instance: /tb_market_sim
+#    Time: 4455 ns  Scope: tb_market_sim File: ../tb/board_a/tb_market_sim.sv Line: 377
+# ** Note: $finish    : ../tb/board_a/tb_market_sim.sv(377)
+#    Time: 4455 ns  Iteration: 1  Instance: /tb_market_sim
 # 1
-# Break in Module tb_market_sim at ../tb/board_a/tb_market_sim.sv line 376
-# End time: 09:03:03 on Mar 31,2026, Elapsed time: 0:00:17
-# Errors: 107, Warnings: 1
+# Break in Module tb_market_sim at ../tb/board_a/tb_market_sim.sv line 377
+# End time: 10:01:17 on Mar 31,2026, Elapsed time: 0:00:28
+# Errors: 3, Warnings: 1
+# >>> FAIL: tb_market_sim
 # 
 # ===========================================
 #  [2/6] Board A ? tb_market_noise_gen
 # ===========================================
 # vsim -voptargs="+acc" work.tb_market_noise_gen -quiet 
-# Start time: 09:03:04 on Mar 31,2026
+# Start time: 10:01:17 on Mar 31,2026
 # --- test_reset ---
 # --- test_golden_vectors ---
-# ** Error: FAIL: golden t0 s0 — got 000007b0, exp 00000780
-#    Time: 145 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t0 s1 — got 00000878, exp 00000780
-#    Time: 145 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t0 s3 — got 00000808, exp 00000780
-#    Time: 145 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t1 s0 — got 000004e0, exp 000007b0
-#    Time: 165 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t1 s1 — got 00000610, exp 00000878
-#    Time: 165 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t1 s2 — got 00000598, exp 00000780
-#    Time: 165 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t1 s3 — got 00000668, exp 00000808
-#    Time: 165 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t2 s0 — got 00000458, exp 000004e0
-#    Time: 185 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t2 s1 — got 000005b8, exp 00000610
-#    Time: 185 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t2 s2 — got 00000680, exp 00000598
-#    Time: 185 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t2 s3 — got 00000778, exp 00000668
-#    Time: 185 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t3 s0 — got 00000510, exp 00000458
-#    Time: 205 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t3 s1 — got 00000688, exp 000005b8
-#    Time: 205 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t3 s2 — got 000007f0, exp 00000680
-#    Time: 205 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t3 s3 — got 00000900, exp 00000778
-#    Time: 205 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t4 s0 — got fffffd68, exp 00000510
-#    Time: 225 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t4 s1 — got fffffdf0, exp 00000688
-#    Time: 225 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t4 s2 — got 000000a0, exp 000007f0
-#    Time: 225 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t4 s3 — got 000000c0, exp 00000900
-#    Time: 225 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t5 s0 — got fffffeb0, exp fffffd68
-#    Time: 245 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t5 s1 — got ffffffc0, exp fffffdf0
-#    Time: 245 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t5 s2 — got 00000418, exp 000000a0
-#    Time: 245 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t5 s3 — got 000002c0, exp 000000c0
-#    Time: 245 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t6 s0 — got 00000230, exp fffffeb0
-#    Time: 265 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t6 s1 — got 00000380, exp ffffffc0
-#    Time: 265 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t6 s2 — got 000007b0, exp 00000418
-#    Time: 265 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t6 s3 — got 00000498, exp 000002c0
-#    Time: 265 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t7 s0 — got fffffaf0, exp 00000230
-#    Time: 285 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t7 s1 — got fffffc60, exp 00000380
-#    Time: 285 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t7 s2 — got 00000078, exp 000007b0
-#    Time: 285 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
-# ** Error: FAIL: golden t7 s3 — got fffffc80, exp 00000498
-#    Time: 285 ns  Scope: tb_market_noise_gen.check32 File: ../tb/board_a/tb_market_noise_gen.sv Line: 71
 # --- test_enable_gating ---
 # --- test_active_1 ---
 # --- test_determinism ---
@@ -2280,101 +801,71 @@ do run_all.do
 # --- test_lfsr_load_clears_drift ---
 # 
 # ===================================
-# tb_market_noise_gen: FAIL (207 passed, 31 failed)
-# ** Fatal: Assertion error.
-#    Time: 84945 ns  Scope: tb_market_noise_gen File: ../tb/board_a/tb_market_noise_gen.sv Line: 288
-# ** Note: $finish    : ../tb/board_a/tb_market_noise_gen.sv(288)
-#    Time: 84945 ns  Iteration: 1  Instance: /tb_market_noise_gen
+# tb_market_noise_gen: PASS (238 checks passed)
+# ===================================
+# ** Note: $finish    : ../tb/board_a/tb_market_noise_gen.sv(291)
+#    Time: 84956 ns  Iteration: 0  Instance: /tb_market_noise_gen
 # 1
-# Break in Module tb_market_noise_gen at ../tb/board_a/tb_market_noise_gen.sv line 288
-# End time: 09:03:23 on Mar 31,2026, Elapsed time: 0:00:19
-# Errors: 32, Warnings: 1
+# Break in Module tb_market_noise_gen at ../tb/board_a/tb_market_noise_gen.sv line 291
+# End time: 10:01:32 on Mar 31,2026, Elapsed time: 0:00:15
+# Errors: 0, Warnings: 1
+# >>> FAIL: tb_market_noise_gen
 # 
 # ===========================================
 #  [3/6] Board A ? tb_exchange_lite
 # ===========================================
 # vsim -voptargs="+acc" work.tb_exchange_lite -quiet 
-# Start time: 09:03:23 on Mar 31,2026
+# Start time: 10:01:32 on Mar 31,2026
 # --- test_golden_fills ---
 # --- test_boundary ---
 # --- test_counter_clr ---
 # --- test_enable_low ---
 # --- test_backpressure ---
-# ** Error: FAIL: bp: consumed
-#    Time: 675 ns  Scope: tb_exchange_lite.check File: ../tb/board_a/tb_exchange_lite.sv Line: 62
 # --- test_wrong_msg_type ---
 # --- test_back_to_back ---
 # --- test_sym3 ---
 # 
 # ===================================
-# tb_exchange_lite: FAIL (57 passed, 1 failed)
-# ** Fatal: Assertion error.
-#    Time: 855 ns  Scope: tb_exchange_lite File: ../tb/board_a/tb_exchange_lite.sv Line: 312
-# ** Note: $finish    : ../tb/board_a/tb_exchange_lite.sv(312)
-#    Time: 855 ns  Iteration: 1  Instance: /tb_exchange_lite
+# tb_exchange_lite: PASS (58 checks passed)
+# ===================================
+# ** Note: $finish    : ../tb/board_a/tb_exchange_lite.sv(314)
+#    Time: 715 ns  Iteration: 1  Instance: /tb_exchange_lite
 # 1
-# Break in Module tb_exchange_lite at ../tb/board_a/tb_exchange_lite.sv line 312
-# End time: 09:03:42 on Mar 31,2026, Elapsed time: 0:00:19
-# Errors: 2, Warnings: 1
+# Break in Module tb_exchange_lite at ../tb/board_a/tb_exchange_lite.sv line 314
+# End time: 10:01:47 on Mar 31,2026, Elapsed time: 0:00:15
+# Errors: 0, Warnings: 1
+# >>> FAIL: tb_exchange_lite
 # 
 # ===========================================
 #  [4/6] Board A ? tb_tx_arbiter
 # ===========================================
 # vsim -voptargs="+acc" work.tb_tx_arbiter -quiet 
-# Start time: 09:03:42 on Mar 31,2026
+# Start time: 10:01:47 on Mar 31,2026
 # --- test_reset ---
 # --- test_fill_priority ---
-# ** Error: FAIL: fill wins: tx_valid
-#    Time: 115 ns  Scope: tb_tx_arbiter.check File: ../tb/board_a/tb_tx_arbiter.sv Line: 54
-# ** Error: FAIL: fill wins: frame=F1 — got 00000000000000000000000000000000, exp 30000000000000000000000000000001
-#    Time: 115 ns  Scope: tb_tx_arbiter.check128 File: ../tb/board_a/tb_tx_arbiter.sv Line: 62
-# ** Error: FAIL: consumed F1: tx_valid=0
-#    Time: 135 ns  Scope: tb_tx_arbiter.check File: ../tb/board_a/tb_tx_arbiter.sv Line: 54
-# ** Error: FAIL: F2 accepted
-#    Time: 145 ns  Scope: tb_tx_arbiter.check File: ../tb/board_a/tb_tx_arbiter.sv Line: 54
-# ** Error: FAIL: F2 frame — got 30000000000000000000000000000001, exp 30000000000000000000000000000002
-#    Time: 145 ns  Scope: tb_tx_arbiter.check128 File: ../tb/board_a/tb_tx_arbiter.sv Line: 62
-# ** Error: FAIL: Q1 accepted after fills
-#    Time: 165 ns  Scope: tb_tx_arbiter.check File: ../tb/board_a/tb_tx_arbiter.sv Line: 54
-# ** Error: FAIL: Q1 frame — got 30000000000000000000000000000002, exp 10000000000000000000000000000011
-#    Time: 165 ns  Scope: tb_tx_arbiter.check128 File: ../tb/board_a/tb_tx_arbiter.sv Line: 62
 # --- test_quote_only ---
-# ** Error: FAIL: quote only: accepted
-#    Time: 185 ns  Scope: tb_tx_arbiter.check File: ../tb/board_a/tb_tx_arbiter.sv Line: 54
-# ** Error: FAIL: quote only: Q2 — got 10000000000000000000000000000011, exp 10000000000000000000000000000022
-#    Time: 185 ns  Scope: tb_tx_arbiter.check128 File: ../tb/board_a/tb_tx_arbiter.sv Line: 62
-# ** Error: FAIL: quote consumed
-#    Time: 195 ns  Scope: tb_tx_arbiter.check File: ../tb/board_a/tb_tx_arbiter.sv Line: 54
 # --- test_no_preempt ---
-# ** Error: FAIL: Q3 buffered
-#    Time: 205 ns  Scope: tb_tx_arbiter.check File: ../tb/board_a/tb_tx_arbiter.sv Line: 54
-# ** Error: FAIL: Q3 consumed
-#    Time: 245 ns  Scope: tb_tx_arbiter.check File: ../tb/board_a/tb_tx_arbiter.sv Line: 54
-# ** Error: FAIL: F3 accepted
-#    Time: 255 ns  Scope: tb_tx_arbiter.check File: ../tb/board_a/tb_tx_arbiter.sv Line: 54
-# ** Error: FAIL: F3 frame — got 10000000000000000000000000000033, exp 30000000000000000000000000000003
-#    Time: 255 ns  Scope: tb_tx_arbiter.check128 File: ../tb/board_a/tb_tx_arbiter.sv Line: 62
 # --- test_starvation ---
 # --- test_back_to_back_quotes ---
 # --- test_ready_toggling ---
 # --- test_mid_reset ---
 # 
 # ===================================
-# tb_tx_arbiter: FAIL (20 passed, 14 failed)
-# ** Fatal: Assertion error.
-#    Time: 835 ns  Scope: tb_tx_arbiter File: ../tb/board_a/tb_tx_arbiter.sv Line: 279
-# ** Note: $finish    : ../tb/board_a/tb_tx_arbiter.sv(279)
-#    Time: 835 ns  Iteration: 1  Instance: /tb_tx_arbiter
+# tb_tx_arbiter: PASS (39 checks passed)
+# ===================================
+# ** Note: $finish    : ../tb/board_a/tb_tx_arbiter.sv(282)
+#    Time: 836 ns  Iteration: 0  Instance: /tb_tx_arbiter
 # 1
-# Break in Module tb_tx_arbiter at ../tb/board_a/tb_tx_arbiter.sv line 279
-# End time: 09:03:58 on Mar 31,2026, Elapsed time: 0:00:16
-# Errors: 15, Warnings: 1
+# Break in Module tb_tx_arbiter at ../tb/board_a/tb_tx_arbiter.sv line 282
+# End time: 10:02:04 on Mar 31,2026, Elapsed time: 0:00:17
+# Errors: 0, Warnings: 1
+# >>> FAIL: tb_tx_arbiter
 # 
 # ===========================================
 #  [5/6] Board A ? tb_board_a_ctrl
 # ===========================================
 # vsim -voptargs="+acc" work.tb_board_a_ctrl -quiet 
-# Start time: 09:03:58 on Mar 31,2026
+# Start time: 10:02:04 on Mar 31,2026
 # --- test_regime_switch ---
 # --- test_sw_override ---
 # --- test_all_buttons ---
@@ -2392,14 +883,15 @@ do run_all.do
 #    Time: 6005 ns  Iteration: 1  Instance: /tb_board_a_ctrl
 # 1
 # Break in Module tb_board_a_ctrl at ../tb/board_a/tb_board_a_ctrl.sv line 272
-# End time: 09:04:16 on Mar 31,2026, Elapsed time: 0:00:18
+# End time: 10:02:20 on Mar 31,2026, Elapsed time: 0:00:16
 # Errors: 0, Warnings: 1
+# >>> FAIL: tb_board_a_ctrl
 # 
 # ===========================================
 #  [6/6] Board A ? tb_board_a_top
 # ===========================================
 # vsim -voptargs="+acc" work.tb_board_a_top -quiet 
-# Start time: 09:04:16 on Mar 31,2026
+# Start time: 10:02:20 on Mar 31,2026
 # --- test_axi_config ---
 # --- test_fsm_start ---
 # --- test_quote_generation ---
@@ -2421,8 +913,9 @@ do run_all.do
 #    Time: 753515 ns  Iteration: 1  Instance: /tb_board_a_top
 # 1
 # Break in Module tb_board_a_top at ../tb/board_a/tb_board_a_top.sv line 409
-# End time: 09:04:38 on Mar 31,2026, Elapsed time: 0:00:22
+# End time: 10:02:42 on Mar 31,2026, Elapsed time: 0:00:22
 # Errors: 0, Warnings: 1
+# >>> FAIL: tb_board_a_top
 # 
 # 
 ###############################################
@@ -2433,7 +926,7 @@ do run_all.do
 #  [1/12] Board B ? tb_msg_demux
 # ===========================================
 # vsim -voptargs="+acc" work.tb_msg_demux -quiet 
-# Start time: 09:04:38 on Mar 31,2026
+# Start time: 10:02:42 on Mar 31,2026
 # 
 # === TEST 1: Single QUOTE frame ===
 # 
@@ -2458,29 +951,26 @@ do run_all.do
 # === TEST 11: Clear mid-stream ===
 # 
 # === TEST 12: Alternating QUOTE/FILL burst ===
-# [FAIL] T12c: quote third at time 945000
-# [FAIL] T12d: fill fourth at time 955000
 # 
 # ══════════════════════════════════════════
 #   msg_demux testbench complete
-#   PASSED: 68
-#   FAILED: 2
+#   PASSED: 70
+#   FAILED: 0
 # ══════════════════════════════════════════
 # 
-# ** Fatal: TESTBENCH FAILED
-#    Time: 985 ns  Scope: tb_msg_demux File: ../tb/board_b/tb_msg_demux.sv Line: 441
-# ** Note: $finish    : ../tb/board_b/tb_msg_demux.sv(441)
-#    Time: 985 ns  Iteration: 1  Instance: /tb_msg_demux
+# ** Note: $finish    : ../tb/board_b/tb_msg_demux.sv(445)
+#    Time: 955 ns  Iteration: 1  Instance: /tb_msg_demux
 # 1
-# Break in Module tb_msg_demux at ../tb/board_b/tb_msg_demux.sv line 441
-# End time: 09:04:58 on Mar 31,2026, Elapsed time: 0:00:20
-# Errors: 1, Warnings: 1
+# Break in Module tb_msg_demux at ../tb/board_b/tb_msg_demux.sv line 445
+# End time: 10:03:02 on Mar 31,2026, Elapsed time: 0:00:20
+# Errors: 0, Warnings: 1
+# >>> FAIL: tb_msg_demux
 # 
 # ===========================================
 #  [2/12] Board B ? tb_quote_book
 # ===========================================
 # vsim -voptargs="+acc" work.tb_quote_book -quiet 
-# Start time: 09:04:58 on Mar 31,2026
+# Start time: 10:03:02 on Mar 31,2026
 # 
 # === TEST 1: First round (cycles 0-3) ===
 # 
@@ -2499,29 +989,26 @@ do run_all.do
 # === TEST 8: Golden model 4th round (cycles 12-15) ===
 # 
 # === TEST 9: Triple overwrite same symbol ===
-# [FAIL] T9: last bid wins at time 595000
-# [FAIL] T9: last ask wins at time 595000
 # 
 # ══════════════════════════════════════════
 #   quote_book testbench complete
-#   PASSED: 52
-#   FAILED: 2
+#   PASSED: 54
+#   FAILED: 0
 # ══════════════════════════════════════════
 # 
-# ** Fatal: TESTBENCH FAILED
-#    Time: 625 ns  Scope: tb_quote_book File: ../tb/board_b/tb_quote_book.sv Line: 373
-# ** Note: $finish    : ../tb/board_b/tb_quote_book.sv(373)
+# ** Note: $finish    : ../tb/board_b/tb_quote_book.sv(374)
 #    Time: 625 ns  Iteration: 1  Instance: /tb_quote_book
 # 1
-# Break in Module tb_quote_book at ../tb/board_b/tb_quote_book.sv line 373
-# End time: 09:05:15 on Mar 31,2026, Elapsed time: 0:00:17
-# Errors: 1, Warnings: 1
+# Break in Module tb_quote_book at ../tb/board_b/tb_quote_book.sv line 374
+# End time: 10:03:30 on Mar 31,2026, Elapsed time: 0:00:28
+# Errors: 0, Warnings: 1
+# >>> FAIL: tb_quote_book
 # 
 # ===========================================
 #  [3/12] Board B ? tb_feature_compute
 # ===========================================
 # vsim -voptargs="+acc" work.tb_feature_compute -quiet 
-# Start time: 09:05:15 on Mar 31,2026
+# Start time: 10:03:30 on Mar 31,2026
 # 
 # === TEST 1: First-sample initialization (cycles 0-3) ===
 # 
@@ -2544,31 +1031,26 @@ do run_all.do
 # === TEST 10: Idle ===
 # 
 # === TEST 11: Back-to-back quotes ===
-# [FAIL] T11a: mid sym0: got 0x01a40021, expected 0x00b4001e at time 1455000
-# [FAIL] T11b: mid sym1: got 0x03840016, expected 0x01a40021 at time 1465000
-# [FAIL] T11c: mid sym2: got 0x0073001d, expected 0x03840016 at time 1475000
-# [FAIL] T11d: valid for sym3 at time 1485000
 # 
 # ══════════════════════════════════════════
 #   feature_compute testbench complete
-#   PASSED: 95
-#   FAILED: 4
+#   PASSED: 99
+#   FAILED: 0
 # ══════════════════════════════════════════
 # 
-# ** Fatal: TESTBENCH FAILED
-#    Time: 1525 ns  Scope: tb_feature_compute File: ../tb/board_b/tb_feature_compute.sv Line: 404
 # ** Note: $finish    : ../tb/board_b/tb_feature_compute.sv(404)
-#    Time: 1525 ns  Iteration: 1  Instance: /tb_feature_compute
+#    Time: 1515 ns  Iteration: 1  Instance: /tb_feature_compute
 # 1
 # Break in Module tb_feature_compute at ../tb/board_b/tb_feature_compute.sv line 404
-# End time: 09:05:34 on Mar 31,2026, Elapsed time: 0:00:19
-# Errors: 1, Warnings: 1
+# End time: 10:03:51 on Mar 31,2026, Elapsed time: 0:00:21
+# Errors: 0, Warnings: 1
+# >>> FAIL: tb_feature_compute
 # 
 # ===========================================
 #  [4/12] Board B ? tb_strategy_engine
 # ===========================================
 # vsim -voptargs="+acc" work.tb_strategy_engine -quiet 
-# Start time: 09:05:34 on Mar 31,2026
+# Start time: 10:03:51 on Mar 31,2026
 # 
 # === Golden model vectors (9 cases) ===
 # 
@@ -2592,14 +1074,15 @@ do run_all.do
 #    Time: 455 ns  Iteration: 1  Instance: /tb_strategy_engine
 # 1
 # Break in Module tb_strategy_engine at ../tb/board_b/tb_strategy_engine.sv line 236
-# End time: 09:05:52 on Mar 31,2026, Elapsed time: 0:00:18
+# End time: 10:04:18 on Mar 31,2026, Elapsed time: 0:00:27
 # Errors: 0, Warnings: 1
+# >>> FAIL: tb_strategy_engine
 # 
 # ===========================================
 #  [5/12] Board B ? tb_risk_manager
 # ===========================================
 # vsim -voptargs="+acc" work.tb_risk_manager -quiet 
-# Start time: 09:05:52 on Mar 31,2026
+# Start time: 10:04:18 on Mar 31,2026
 # 
 # === T1: Basic approval ===
 # 
@@ -2635,14 +1118,15 @@ do run_all.do
 #    Time: 835 ns  Iteration: 1  Instance: /tb_risk_manager
 # 1
 # Break in Module tb_risk_manager at ../tb/board_b/tb_risk_manager.sv line 360
-# End time: 09:06:07 on Mar 31,2026, Elapsed time: 0:00:15
+# End time: 10:04:45 on Mar 31,2026, Elapsed time: 0:00:27
 # Errors: 0, Warnings: 1
+# >>> FAIL: tb_risk_manager
 # 
 # ===========================================
 #  [6/12] Board B ? tb_order_manager
 # ===========================================
 # vsim -voptargs="+acc" work.tb_order_manager -quiet 
-# Start time: 09:06:07 on Mar 31,2026
+# Start time: 10:04:45 on Mar 31,2026
 # 
 # === T1: BUY order frame packing ===
 # 
@@ -2651,10 +1135,6 @@ do run_all.do
 # === T3: Backpressure ===
 # 
 # === T4: Simultaneous held-release + new order ===
-# [FAIL] T4-setup-B: holding at time 265000
-# [FAIL] T4: B symbol==1 at time 285000
-# [FAIL] T4: C in holding at time 285000
-# [FAIL] T4b: C now out at time 295000
 # 
 # === T5: Rapid 3-order burst ===
 # 
@@ -2666,24 +1146,23 @@ do run_all.do
 # 
 # ══════════════════════════════════════════
 #   order_manager testbench complete
-#   PASSED: 38
-#   FAILED: 4
+#   PASSED: 42
+#   FAILED: 0
 # ══════════════════════════════════════════
 # 
-# ** Fatal: TESTBENCH FAILED
-#    Time: 635 ns  Scope: tb_order_manager File: ../tb/board_b/tb_order_manager.sv Line: 292
-# ** Note: $finish    : ../tb/board_b/tb_order_manager.sv(292)
+# ** Note: $finish    : ../tb/board_b/tb_order_manager.sv(291)
 #    Time: 635 ns  Iteration: 1  Instance: /tb_order_manager
 # 1
-# Break in Module tb_order_manager at ../tb/board_b/tb_order_manager.sv line 292
-# End time: 09:06:23 on Mar 31,2026, Elapsed time: 0:00:16
-# Errors: 1, Warnings: 1
+# Break in Module tb_order_manager at ../tb/board_b/tb_order_manager.sv line 291
+# End time: 10:05:06 on Mar 31,2026, Elapsed time: 0:00:21
+# Errors: 0, Warnings: 1
+# >>> FAIL: tb_order_manager
 # 
 # ===========================================
 #  [7/12] Board B ? tb_position_tracker
 # ===========================================
 # vsim -voptargs="+acc" work.tb_position_tracker -quiet 
-# Start time: 09:06:24 on Mar 31,2026
+# Start time: 10:05:06 on Mar 31,2026
 # 
 # === GM Step 0: BUY sym=0 ===
 # 
@@ -2715,14 +1194,15 @@ do run_all.do
 #    Time: 445 ns  Iteration: 1  Instance: /tb_position_tracker
 # 1
 # Break in Module tb_position_tracker at ../tb/board_b/tb_position_tracker.sv line 272
-# End time: 09:06:41 on Mar 31,2026, Elapsed time: 0:00:17
+# End time: 10:05:31 on Mar 31,2026, Elapsed time: 0:00:25
 # Errors: 0, Warnings: 1
+# >>> FAIL: tb_position_tracker
 # 
 # ===========================================
 #  [8/12] Board B ? tb_latency_histogram
 # ===========================================
 # vsim -voptargs="+acc" work.tb_latency_histogram -quiet 
-# Start time: 09:06:41 on Mar 31,2026
+# Start time: 10:05:31 on Mar 31,2026
 # 
 # === GM Sample 0: lat=40 ===
 # 
@@ -2760,14 +1240,15 @@ do run_all.do
 #    Time: 495 ns  Iteration: 1  Instance: /tb_latency_histogram
 # 1
 # Break in Module tb_latency_histogram at ../tb/board_b/tb_latency_histogram.sv line 225
-# End time: 09:06:58 on Mar 31,2026, Elapsed time: 0:00:17
+# End time: 10:05:55 on Mar 31,2026, Elapsed time: 0:00:24
 # Errors: 0, Warnings: 1
+# >>> FAIL: tb_latency_histogram
 # 
 # ===========================================
 #  [9/12] Board B ? tb_board_b_ctrl
 # ===========================================
 # vsim -voptargs="+acc" work.tb_board_b_ctrl -quiet 
-# Start time: 09:06:58 on Mar 31,2026
+# Start time: 10:05:55 on Mar 31,2026
 # 
 # === T1: Switch mapping ===
 # 
@@ -2797,14 +1278,15 @@ do run_all.do
 #    Time: 2365 ns  Iteration: 1  Instance: /tb_board_b_ctrl
 # 1
 # Break in Module tb_board_b_ctrl at ../tb/board_b/tb_board_b_ctrl.sv line 248
-# End time: 09:07:20 on Mar 31,2026, Elapsed time: 0:00:22
+# End time: 10:06:20 on Mar 31,2026, Elapsed time: 0:00:25
 # Errors: 0, Warnings: 1
+# >>> FAIL: tb_board_b_ctrl
 # 
 # ===========================================
 #  [10/12] Board B ? tb_board_b_axi_regs
 # ===========================================
 # vsim -voptargs="+acc" work.tb_board_b_axi_regs -quiet 
-# Start time: 09:07:20 on Mar 31,2026
+# Start time: 10:06:20 on Mar 31,2026
 # 
 # === T1: Config write/read ===
 # 
@@ -2836,14 +1318,15 @@ do run_all.do
 #    Time: 1105 ns  Iteration: 1  Instance: /tb_board_b_axi_regs
 # 1
 # Break in Module tb_board_b_axi_regs at ../tb/board_b/tb_board_b_axi_regs.sv line 291
-# End time: 09:07:44 on Mar 31,2026, Elapsed time: 0:00:24
+# End time: 10:06:47 on Mar 31,2026, Elapsed time: 0:00:27
 # Errors: 0, Warnings: 1
+# >>> FAIL: tb_board_b_axi_regs
 # 
 # ===========================================
 #  [11/12] Board B ? tb_board_b_top
 # ===========================================
 # vsim -voptargs="+acc" work.tb_board_b_top -quiet 
-# Start time: 09:07:44 on Mar 31,2026
+# Start time: 10:06:47 on Mar 31,2026
 # 
 # === Phase 1: FSM Transitions ===
 #   Sending first QUOTE via link...
@@ -2854,8 +1337,6 @@ do run_all.do
 #   orders_sent = 0
 # 
 # === Phase 3: FSM Control ===
-# [FAIL] P3a: → ARMED at 10095000
-# [FAIL] P3a: order_en==0 at 10095000
 # 
 # === Phase 4: Fill Injection ===
 #   fills_rcvd = 1
@@ -2863,8 +1344,6 @@ do run_all.do
 #   cash_lo = 0xb9acd7cc
 # 
 # === Phase 5: Risk Halt → HALTED ===
-# [FAIL] P5a: → HALTED at 11075000
-# [FAIL] P5c: → RESET at 11185000
 # 
 # === Phase 6: AXI Config Registers ===
 #   STATUS w/ override = 0x00000007
@@ -2886,24 +1365,23 @@ do run_all.do
 # 
 # ══════════════════════════════════════════
 #   board_b_top testbench complete
-#   PASSED: 38
-#   FAILED: 4
+#   PASSED: 42
+#   FAILED: 0
 # ══════════════════════════════════════════
 # 
-# ** Fatal: TESTBENCH FAILED
-#    Time: 29895 ns  Scope: tb_board_b_top File: ../tb/board_b/tb_board_b_top.sv Line: 457
 # ** Note: $finish    : ../tb/board_b/tb_board_b_top.sv(457)
-#    Time: 29895 ns  Iteration: 1  Instance: /tb_board_b_top
+#    Time: 29885 ns  Iteration: 1  Instance: /tb_board_b_top
 # 1
 # Break in Module tb_board_b_top at ../tb/board_b/tb_board_b_top.sv line 457
-# End time: 09:08:22 on Mar 31,2026, Elapsed time: 0:00:38
-# Errors: 1, Warnings: 1
+# End time: 10:07:15 on Mar 31,2026, Elapsed time: 0:00:28
+# Errors: 0, Warnings: 1
+# >>> FAIL: tb_board_b_top
 # 
 # ===========================================
 #  [12/12] Board B ? tb_board_b_pipeline
 # ===========================================
 # vsim -voptargs="+acc" work.tb_board_b_pipeline -quiet 
-# Start time: 09:08:22 on Mar 31,2026
+# Start time: 10:07:15 on Mar 31,2026
 # 
 # === Phase 1: Drive 20 golden QUOTE frames ===
 # 
@@ -2913,7 +1391,6 @@ do run_all.do
 #   order_count_observed = 0
 # 
 # === Phase 3: Inject synthetic FILL ===
-# [FAIL] P3: fill_processed at time 545000
 #   position[0] = 100 (signed)
 #   total_pnl   = -18004
 # 
@@ -2923,19 +1400,18 @@ do run_all.do
 # 
 # ══════════════════════════════════════════
 #   board_b_pipeline testbench complete
-#   PASSED: 9
-#   FAILED: 1
+#   PASSED: 10
+#   FAILED: 0
 #   Orders observed: 0
 # ══════════════════════════════════════════
 # 
-# ** Fatal: TESTBENCH FAILED
-#    Time: 875 ns  Scope: tb_board_b_pipeline File: ../tb/board_b/tb_board_b_pipeline.sv Line: 322
-# ** Note: $finish    : ../tb/board_b/tb_board_b_pipeline.sv(322)
+# ** Note: $finish    : ../tb/board_b/tb_board_b_pipeline.sv(324)
 #    Time: 875 ns  Iteration: 1  Instance: /tb_board_b_pipeline
 # 1
-# Break in Module tb_board_b_pipeline at ../tb/board_b/tb_board_b_pipeline.sv line 322
-# End time: 09:08:47 on Mar 31,2026, Elapsed time: 0:00:25
-# Errors: 1, Warnings: 1
+# Break in Module tb_board_b_pipeline at ../tb/board_b/tb_board_b_pipeline.sv line 324
+# End time: 10:07:45 on Mar 31,2026, Elapsed time: 0:00:30
+# Errors: 0, Warnings: 1
+# >>> FAIL: tb_board_b_pipeline
 # 
 # 
 ###############################################
@@ -2946,7 +1422,7 @@ do run_all.do
 #  [1/1] System ? tb_system_top
 # ===========================================
 # vsim -voptargs="+acc" work.tb_system_top -quiet 
-# Start time: 09:08:47 on Mar 31,2026
+# Start time: 10:07:45 on Mar 31,2026
 # 
 # === Phase 1: Configure Board A ===
 #   Board A configured: 4 symbols, interval=200, CALM regime
@@ -2967,48 +1443,45 @@ do run_all.do
 # 
 # === Phase 7: Counter Readback ===
 #   Board A quotes_sent   = 401
-#   Board A orders_rcvd   = 1
+#   Board A orders_rcvd   = 46
 #   Board A STATUS        = 0x00000003
 #   Board B quotes_rcvd   = 401
-#   Board B orders_sent   = 1
-#   Board B fills_rcvd    = 1
-#   Board B risk_rejects  = 45
+#   Board B orders_sent   = 46
+#   Board B fills_rcvd    = 46
+#   Board B risk_rejects  = 0
 #   Board B link_errors   = 0
-#   Board B STATUS        = 0x00000070
-# [FAIL] P7: B no risk_halt at 804145000
-# [FAIL] P7: B TRADING at 804145000
+#   Board B STATUS        = 0x0000002c
 # 
 # === Phase 8: End-to-End Verification ===
 #   A quotes_sent=401 → B quotes_rcvd=401
-#   Board B generated 1 orders
-#   Board A received 1 orders
-#   Board B processed 1 fills
-#   position[0] = 0 (signed)
-#   cash_lo = 0xa06da288
-#   cash_hi = 0xfffffffe
+#   Board B generated 46 orders
+#   Board A received 46 orders
+#   Board B processed 46 fills
+#   position[0] = -200 (signed)
+#   cash_lo = 0x59213c1c
+#   cash_hi = 0xffffffe7
 #   lat_min   = 140
 #   lat_max   = 140
-#   lat_count = 1
+#   lat_count = 46
 # 
 # === Phase 9: Stop Board A ===
-#   Board B STATUS after A stop = 0x00000070
+#   Board B STATUS after A stop = 0x0000002c
 # 
 # === Phase 10: Reset Board B ===
 # 
 # ══════════════════════════════════════════
 #   tb_system_top complete
-#   PASSED: 16
-#   FAILED: 2
+#   PASSED: 18
+#   FAILED: 0
 # ══════════════════════════════════════════
 # 
-# ** Fatal: TESTBENCH FAILED
-#    Time: 804935 ns  Scope: tb_system_top File: ../tb/tb_system_top.sv Line: 482
-# ** Note: $finish    : ../tb/tb_system_top.sv(482)
+# ** Note: $finish    : ../tb/tb_system_top.sv(483)
 #    Time: 804935 ns  Iteration: 1  Instance: /tb_system_top
 # 1
-# Break in Module tb_system_top at ../tb/tb_system_top.sv line 482
-# End time: 09:09:13 on Mar 31,2026, Elapsed time: 0:00:26
-# Errors: 1, Warnings: 1
+# Break in Module tb_system_top at ../tb/tb_system_top.sv line 483
+# End time: 10:08:20 on Mar 31,2026, Elapsed time: 0:00:35
+# Errors: 0, Warnings: 1
+# >>> FAIL: tb_system_top
 # 25
 # 
 # 
@@ -3016,8 +1489,33 @@ do run_all.do
 #  FULL REGRESSION SUMMARY
 ###############################################
 #  Total : 25
-#  Pass  : 25
-#  Fail  : 0
+#  Pass  : 0
+#  Fail  : 25
 # -----------------------------------------------
-#  ALL 25 TESTBENCHES PASSED
+#  FAILED:
+#    - tb_debounce
+#    - tb_sync_fifo
+#    - tb_lfsr32
+#    - tb_link_tx
+#    - tb_link_rx
+#    - tb_link_loopback
+#    - tb_market_sim
+#    - tb_market_noise_gen
+#    - tb_exchange_lite
+#    - tb_tx_arbiter
+#    - tb_board_a_ctrl
+#    - tb_board_a_top
+#    - tb_msg_demux
+#    - tb_quote_book
+#    - tb_feature_compute
+#    - tb_strategy_engine
+#    - tb_risk_manager
+#    - tb_order_manager
+#    - tb_position_tracker
+#    - tb_latency_histogram
+#    - tb_board_b_ctrl
+#    - tb_board_b_axi_regs
+#    - tb_board_b_top
+#    - tb_board_b_pipeline
+#    - tb_system_top
 ###############################################

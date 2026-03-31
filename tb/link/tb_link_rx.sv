@@ -145,7 +145,8 @@ module tb_link_rx;
         // ─────────────────────────────────────────────────────
         $display("--- test_truncated ---");
         begin
-            int err_before = error_count;
+            int err_before;
+            err_before = error_count;
             send_frame(128'hDEAD_BEEF_F00D_1234_5678_9ABC_DEF0_0001, 5, 0);
             no_frame_for(80, "truncated");
             check("truncated: error_count incremented", error_count > err_before);
@@ -157,7 +158,8 @@ module tb_link_rx;
         $display("--- test_valid_quote ---");
         good_frame = {4'h1, 124'h1234_5678_9ABC_DEF0_0FED_CBA9_8765_432};
         begin
-            int err_before = error_count;
+            int err_before;
+            err_before = error_count;
             fork
                 send_frame(good_frame, BEATS, 10);
                 wait_frame(got, rx_frame);
@@ -175,7 +177,8 @@ module tb_link_rx;
         $display("--- test_invalid_msg_type ---");
         bad_frame = {4'hF, 124'h0};
         begin
-            int err_before = error_count;
+            int err_before;
+            err_before = error_count;
             send_frame(bad_frame, BEATS, 10);
             no_frame_for(90, "invalid msg");
             check("invalid: error_count++", error_count > err_before);
@@ -231,7 +234,8 @@ module tb_link_rx;
         // ─────────────────────────────────────────────────────
         $display("--- test_msg_type_0 ---");
         begin
-            int err_before = error_count;
+            int err_before;
+            err_before = error_count;
             bad_frame = {4'h0, 124'hAAAA_BBBB_CCCC_DDDD_EEEE_FFFF_0000_000};
             send_frame(bad_frame, BEATS, 10);
             no_frame_for(90, "msg_type_0");
