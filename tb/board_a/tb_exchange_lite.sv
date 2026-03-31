@@ -103,7 +103,7 @@ module tb_exchange_lite;
     task automatic wait_fill(input int timeout = 10, input string tag = "");
         int cnt = 0;
         while (!fill_valid && cnt < timeout) begin
-            @(posedge clk);
+            @(posedge clk); #1;
             cnt++;
         end
         check($sformatf("%s: fill arrived", tag), fill_valid);
@@ -111,7 +111,7 @@ module tb_exchange_lite;
 
     task automatic no_fill_for(input int cycles, input string tag);
         for (int i = 0; i < cycles; i++) begin
-            @(posedge clk);
+            @(posedge clk); #1;
             check($sformatf("%s[%0d]: no fill", tag, i), !fill_valid);
         end
     endtask
@@ -229,7 +229,7 @@ module tb_exchange_lite;
         counter_clr_sig = 1'b1;
         @(posedge clk);
         counter_clr_sig = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("clr: orders_rcvd=0", orders_rcvd, 0);
         check32("clr: fills_sent=0", fills_sent, 0);
         check32("clr: rejects_sent=0", rejects_sent, 0);
@@ -253,14 +253,13 @@ module tb_exchange_lite;
         fill_ready = 1'b0;
         send_order(build_order(8'd0, 1'b0, G_ASK[0], 16'd5, 16'd30, 16'hAAAA));
         wait_fill(10, "bp fill");
-        // fill_valid should stay high while ready=0
         repeat (4) begin
-            @(posedge clk);
+            @(posedge clk); #1;
             check("bp: fill_valid held", fill_valid == 1'b1);
             check("bp: frame stable", fill_frame[63:48] == 16'd30);
         end
         fill_ready = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("bp: consumed", fill_valid == 1'b0);
 
         // ─────────────────────────────────────────────────────

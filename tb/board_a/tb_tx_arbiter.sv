@@ -67,7 +67,7 @@ module tb_tx_arbiter;
     // Consume the current buffered frame
     task automatic consume();
         tx_ready = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         tx_ready = 1'b0;
     endtask
 
@@ -93,7 +93,7 @@ module tb_tx_arbiter;
         Q5 = {MSG_QUOTE, 124'h0000_0000_0000_0000_0000_0000_0055};
 
         wait (rst_n === 1'b1);
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 1) Reset: tx_valid=0
@@ -113,13 +113,13 @@ module tb_tx_arbiter;
         #1;
         check("both valid: quote_ready=0", quote_ready == 1'b0);
         check("both valid: not both ready", !(fill_ready && quote_ready));
-        @(posedge clk);
+        @(posedge clk); #1;
         check("fill wins: tx_valid", tx_valid == 1'b1);
         check128("fill wins: frame=F1", tx_frame, F1);
 
         // While stalled, no new accepts
         fill_frame = F2;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("stalled: fill_ready=0", fill_ready == 1'b0);
         check("stalled: quote_ready=0", quote_ready == 1'b0);
         check128("stalled: frame stable", tx_frame, F1);
@@ -129,14 +129,14 @@ module tb_tx_arbiter;
         check("consumed F1: tx_valid=0", tx_valid == 1'b0);
 
         // Now fill F2 should be accepted (still both valid)
-        @(posedge clk);
+        @(posedge clk); #1;
         check("F2 accepted", tx_valid == 1'b1);
         check128("F2 frame", tx_frame, F2);
         fill_valid = 1'b0;
         consume();
 
         // Now Q1 should be accepted
-        @(posedge clk);
+        @(posedge clk); #1;
         check("Q1 accepted after fills", tx_valid == 1'b1);
         check128("Q1 frame", tx_frame, Q1);
         quote_valid = 1'b0;
@@ -150,10 +150,10 @@ module tb_tx_arbiter;
         quote_valid = 1'b1;
         quote_frame = Q2;
         tx_ready    = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("quote only: accepted", tx_valid == 1'b1);
         check128("quote only: Q2", tx_frame, Q2);
-        @(posedge clk);
+        @(posedge clk); #1;
         check("quote consumed", tx_valid == 1'b0);
         quote_valid = 1'b0;
         tx_ready = 1'b0;
@@ -166,28 +166,28 @@ module tb_tx_arbiter;
         quote_valid = 1'b1;
         quote_frame = Q3;
         fill_valid  = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("Q3 buffered", tx_valid && tx_frame == Q3);
 
         // Now present fill while Q3 is buffered
         fill_valid = 1'b1;
         fill_frame = F3;
         repeat (3) begin
-            @(posedge clk);
+            @(posedge clk); #1;
             check128("no preempt: still Q3", tx_frame, Q3);
             check("no preempt: no dual ready", !(fill_ready && quote_ready));
         end
         // Consume Q3
         tx_ready = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("Q3 consumed", tx_valid == 1'b0);
         // F3 should be next
         quote_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("F3 accepted", tx_valid == 1'b1);
         check128("F3 frame", tx_frame, F3);
         fill_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         tx_ready = 1'b0;
 
         // ─────────────────────────────────────────────────────
@@ -202,22 +202,22 @@ module tb_tx_arbiter;
             for (int i = 0; i < 10; i++) begin
                 fill_frame = {MSG_FILL, 124'(i + 100)};
                 fill_valid = 1'b1;
-                @(posedge clk);
+                @(posedge clk); #1;
                 if (tx_valid && tx_frame[127:124] == MSG_QUOTE) quote_accepted++;
-                @(posedge clk); // consume cycle
+                @(posedge clk); #1; // consume cycle
             end
             fill_valid = 1'b0;
             check("starvation: quotes starved during fills", quote_accepted == 0);
         end
         // After fills stop, quote should get through
-        @(posedge clk);
-        @(posedge clk);
+        @(posedge clk); #1;
+        @(posedge clk); #1;
         if (tx_valid) begin
             check("starvation: quote gets through after fills", tx_frame[127:124] == MSG_QUOTE);
         end
         quote_valid = 1'b0;
         tx_ready = 1'b0;
-        repeat (3) @(posedge clk);
+        repeat (3) @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 6) Back-to-back quotes
@@ -228,15 +228,15 @@ module tb_tx_arbiter;
         for (int i = 0; i < 5; i++) begin
             quote_frame = {MSG_QUOTE, 124'(i + 500)};
             quote_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             if (tx_valid) begin
                 check($sformatf("b2b quote[%0d]: msg_type", i), tx_frame[127:124] == MSG_QUOTE);
             end
-            @(posedge clk); // allow bubble
+            @(posedge clk); #1; // allow bubble
         end
         quote_valid = 1'b0;
         tx_ready = 1'b0;
-        repeat (3) @(posedge clk);
+        repeat (3) @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 7) tx_ready toggling: no data corruption
@@ -247,7 +247,7 @@ module tb_tx_arbiter;
         fill_valid  = 1'b0;
         for (int i = 0; i < 10; i++) begin
             tx_ready = (i % 2 == 0) ? 1'b1 : 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
             if (tx_valid)
                 check($sformatf("toggle[%0d]: frame ok", i), tx_frame[127:124] == MSG_QUOTE);
         end
@@ -260,13 +260,13 @@ module tb_tx_arbiter;
         $display("--- test_mid_reset ---");
         quote_frame = Q1;
         quote_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         rst_n = 1'b0;
-        repeat (4) @(posedge clk);
+        repeat (4) @(posedge clk); #1;
         check("mid-reset: tx_valid=0", tx_valid == 1'b0);
         rst_n = 1'b1;
         quote_valid = 1'b0;
-        repeat (4) @(posedge clk);
+        repeat (4) @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // Summary

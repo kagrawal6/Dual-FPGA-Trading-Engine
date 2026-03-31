@@ -111,7 +111,7 @@ module tb_lfsr32;
         check32("seed DEADBEEF loaded", rand_out, 32'hDEAD_BEEF);
         enable = 1'b1;
         for (int i = 0; i < GVLEN; i++) begin
-            @(posedge clk);
+            @(posedge clk); #1;
             check32($sformatf("DEADBEEF step[%0d]", i), rand_out, GV_DEADBEEF[i]);
         end
         enable = 1'b0;
@@ -127,7 +127,7 @@ module tb_lfsr32;
         @(posedge clk);
         enable = 1'b1;
         for (int i = 0; i < GVLEN; i++) begin
-            @(posedge clk);
+            @(posedge clk); #1;
             check32($sformatf("SEED1 step[%0d]", i), rand_out, GV_SEED1[i]);
         end
         enable = 1'b0;
@@ -145,7 +145,7 @@ module tb_lfsr32;
         // Should produce same sequence as seed 1
         enable = 1'b1;
         for (int i = 0; i < 8; i++) begin
-            @(posedge clk);
+            @(posedge clk); #1;
             check32($sformatf("Zero remap step[%0d]", i), rand_out, GV_SEED1[i]);
         end
         enable = 1'b0;

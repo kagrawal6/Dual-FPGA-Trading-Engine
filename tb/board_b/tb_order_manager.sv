@@ -164,11 +164,9 @@ module tb_order_manager;
 
         // Fill output with order A
         approve_order(1'b0, 32'h00640000, 16'd10, 8'd0, 16'h0100);
+        order_ready = 1'b0;
         @(posedge clk);
         check("T4-setup-A: valid",       order_valid == 1'b1);
-
-        // Now: output occupied with A, backpressure on
-        order_ready = 1'b0;
 
         // Send order B → goes to holding
         approve_order(1'b1, 32'h00C80000, 16'd20, 8'd1, 16'h0110);

@@ -16,6 +16,7 @@ do compile_all.do
 
 set all_pass {}
 set all_fail {}
+set ::sim_ok 1
 
 proc run_group {group_name tb_list} {
     upvar all_pass all_pass
@@ -34,15 +35,27 @@ proc run_group {group_name tb_list} {
         puts " \[$idx/$total\] $group_name — $tb"
         puts "==========================================="
 
+        set ::sim_ok 1
+        onbreak {
+            set ::sim_ok 0
+            resume
+        }
+
         if {[catch {
             vsim -voptargs=+acc work.$tb -quiet
             run -all
             quit -sim
         } err]} {
-            puts "*** FAIL: $tb ($err)"
-            lappend all_fail $tb
-        } else {
+            puts "*** FAIL: $tb (Tcl error: $err)"
+            set ::sim_ok 0
+        }
+
+        if {$::sim_ok} {
+            puts ">>> PASS: $tb"
             lappend all_pass $tb
+        } else {
+            puts ">>> FAIL: $tb"
+            lappend all_fail $tb
         }
     }
 }

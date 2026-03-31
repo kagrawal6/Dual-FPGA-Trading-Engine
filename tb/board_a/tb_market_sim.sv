@@ -95,7 +95,7 @@ module tb_market_sim;
     task automatic wait_quote(input int timeout = 500);
         int cnt = 0;
         while (!quote_valid && cnt < timeout) begin
-            @(posedge clk);
+            @(posedge clk); #1;
             cnt++;
         end
     endtask
@@ -169,9 +169,8 @@ module tb_market_sim;
         enable = 1'b1;
 
         for (int q = 0; q < 16; q++) begin
-            wait_quote();
+            wait_quote(); #1;
             check128($sformatf("golden quote[%0d]", q), quote_frame, GQ[q]);
-            // Also verify decoded fields
             check($sformatf("gq[%0d] msg_type", q), quote_frame[127:124] == 4'h1);
             check($sformatf("gq[%0d] symbol=%0d", q, q%4), quote_frame[123:116] == 8'(q%4));
             check($sformatf("gq[%0d] bid_size", q), quote_frame[47:32] == 16'd1000);
@@ -179,8 +178,9 @@ module tb_market_sim;
             check($sformatf("gq[%0d] seq_num=%0d", q, q/4), quote_frame[15:0] == 16'(q/4));
             @(posedge clk);
         end
-        check32("quotes_generated=16", quotes_generated, 16);
         enable = 1'b0;
+        @(posedge clk); #1;
+        check32("quotes_generated=16", quotes_generated, 16);
         @(posedge clk);
 
         // ─────────────────────────────────────────────────────
@@ -196,7 +196,7 @@ module tb_market_sim;
                 pulse_lfsr_load();
                 enable = 1'b1;
                 for (int q = 0; q < 4; q++) begin
-                    wait_quote();
+                    wait_quote(); #1;
                     begin
                         logic [31:0] bid_u, ask_u, spread;
                         bid_u = quote_frame[111:80];
@@ -219,11 +219,12 @@ module tb_market_sim;
         pulse_lfsr_load();
         enable = 1'b1;
         repeat (4) begin wait_quote(); @(posedge clk); end
+        #1;
         check("pre-clr count>0", quotes_generated > 0);
         counter_clr_sig = 1'b1;
         @(posedge clk);
         counter_clr_sig = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("counter_clr: count=0", quotes_generated, 0);
         enable = 1'b0;
         @(posedge clk);
@@ -236,7 +237,6 @@ module tb_market_sim;
         quote_interval = 32'd0;
         pulse_lfsr_load();
         enable = 1'b1;
-        // With interval=0 and quote_ready=1, should get one quote per cycle
         repeat (10) begin wait_quote(); @(posedge clk); end
         check32("interval0: 10 quotes", quotes_generated, 10);
         enable = 1'b0;
@@ -249,21 +249,22 @@ module tb_market_sim;
         init_defaults();
         pulse_lfsr_load();
         enable = 1'b1;
-        // Get 2 quotes
         repeat (2) begin wait_quote(); @(posedge clk); end
         begin
             logic [COUNTER_W-1:0] cnt_before;
-            cnt_before = quotes_generated;
             quote_ready = 1'b0;
+            repeat (2) @(posedge clk);
+            #1;
+            cnt_before = quotes_generated;
             repeat (100) begin
-                @(posedge clk);
+                @(posedge clk); #1;
                 check("bp: no quote_valid", quote_valid == 1'b0);
                 check("bp: count stable", quotes_generated == cnt_before);
             end
             quote_ready = 1'b1;
-            // Should resume
             wait_quote();
             check("bp: resumed quote_valid", quote_valid == 1'b1);
+            #1;
             check("bp: count advanced", quotes_generated == cnt_before + 1);
         end
         enable = 1'b0;
@@ -276,12 +277,11 @@ module tb_market_sim;
         init_defaults();
         pulse_lfsr_load();
         enable = 1'b1;
-        // Generate 4 quotes (sym 0,1,2,3)
         repeat (4) begin wait_quote(); @(posedge clk); end
-        // Switch to 2 active
         active_sym_count = 8'd2;
+        repeat (4) @(posedge clk);
         for (int q = 0; q < 8; q++) begin
-            wait_quote();
+            wait_quote(); #1;
             check($sformatf("active2 q%0d sym<2", q), quote_frame[123:116] < 8'd2);
             @(posedge clk);
         end
@@ -300,7 +300,7 @@ module tb_market_sim;
         pulse_lfsr_load();
         enable = 1'b1;
         for (int q = 0; q < 8; q++) begin
-            wait_quote();
+            wait_quote(); #1;
             begin
                 logic [31:0] bid_u, ask_u;
                 bid_u = quote_frame[111:80];
@@ -326,7 +326,7 @@ module tb_market_sim;
             logic [31:0] last_mid;
             longint total_disp = 0;
             for (int q = 0; q < 200; q++) begin
-                wait_quote();
+                wait_quote(); #1;
                 last_mid = (quote_frame[111:80] + quote_frame[79:48]) >> 1;
                 begin
                     longint disp;
@@ -351,16 +351,17 @@ module tb_market_sim;
         pulse_lfsr_load();
         enable = 1'b1;
         repeat (5) begin wait_quote(); @(posedge clk); end
+        #1;
         check("pre-reload count>0", quotes_generated > 0);
         enable = 1'b0;
         @(posedge clk);
         pulse_lfsr_load();
+        #1;
         check32("lfsr_load: count=0", quotes_generated, 0);
         enable = 1'b1;
-        wait_quote();
+        wait_quote(); #1;
         check("reload: first quote sym=0", quote_frame[123:116] == 8'd0);
         check("reload: seq_num=0", quote_frame[15:0] == 16'd0);
-        // Should match first golden quote
         check128("reload: matches GQ[0]", quote_frame, GQ[0]);
         enable = 1'b0;
         @(posedge clk);

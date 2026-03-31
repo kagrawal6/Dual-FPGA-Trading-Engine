@@ -270,11 +270,12 @@ module tb_board_b_pipeline;
         fill_frame = 128'h300000B4081500640001002A00000000;
         fill_valid_in = 1'b1;
         @(posedge clk);
+        #1;
+        check("P3: fill_processed",     fill_processed == 1'b1);
         fill_valid_in = 1'b0;
         @(posedge clk);
         @(posedge clk);
 
-        check("P3: fill_processed",     fill_processed == 1'b1);
         check("P3: fills_rcvd==1",      fills_rcvd == 32'd1);
         check("P3: position[0] updated", position[0] != 32'd0 || fills_rcvd == 32'd1);
         $display("  position[0] = %0d (signed)", $signed(position[0]));

@@ -251,7 +251,7 @@ module tb_board_b_top;
 
         // Disable trading_enable → TRADING → ARMED
         sw = 8'h00;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("P3a: → ARMED",      dut.fsm_state == B_ARMED);
         check("P3a: order_en==0",  dut.order_enable == 1'b0);
 
@@ -286,7 +286,7 @@ module tb_board_b_top;
         $display("\n=== Phase 5: Risk Halt → HALTED ===");
 
         force dut.risk_halt = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("P5a: → HALTED",     dut.fsm_state == B_HALTED);
         release dut.risk_halt;
 
@@ -297,9 +297,8 @@ module tb_board_b_top;
 
         // Reset → HALTED → RESET → IDLE
         axi_write(9'h000, 32'h0000_0002);
-        @(posedge clk);
         check("P5c: → RESET",      dut.fsm_state == B_RESET);
-        @(posedge clk);
+        @(posedge clk); #1;
         check("P5d: → IDLE",       dut.fsm_state == B_IDLE);
 
         // ══════════════════════════════════════════════════════════

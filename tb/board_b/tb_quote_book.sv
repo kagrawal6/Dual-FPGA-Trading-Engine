@@ -345,12 +345,12 @@ module tb_quote_book;
         $display("\n=== TEST 9: Triple overwrite same symbol ===");
         begin
             // 3 consecutive writes to sym=0 with different prices
-            quote_frame = 128'h100000010000000200000000000000000;
+            quote_frame = 128'h10000001000000020000000000000000;
             quote_valid = 1'b1;
             @(posedge clk);
-            quote_frame = 128'h100000030000000400000000000000000;
+            quote_frame = 128'h10000003000000040000000000000000;
             @(posedge clk);
-            quote_frame = 128'h100000050000000600000000000000000;
+            quote_frame = 128'h10000005000000060000000000000000;
             @(posedge clk);
             quote_valid = 1'b0;
 

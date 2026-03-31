@@ -21,6 +21,7 @@ set pass_list {}
 set fail_list {}
 set total [llength $tb_list]
 set idx 0
+set ::sim_ok 1
 
 foreach tb $tb_list {
     incr idx
@@ -28,15 +29,27 @@ foreach tb $tb_list {
     puts " \[$idx/$total\] Running: $tb"
     puts "==========================================="
 
+    set ::sim_ok 1
+    onbreak {
+        set ::sim_ok 0
+        resume
+    }
+
     if {[catch {
         vsim -voptargs=+acc work.$tb -quiet
         run -all
         quit -sim
     } err]} {
-        puts "*** FAIL: $tb ($err)"
-        lappend fail_list $tb
-    } else {
+        puts "*** FAIL: $tb (Tcl error: $err)"
+        set ::sim_ok 0
+    }
+
+    if {$::sim_ok} {
+        puts ">>> PASS: $tb"
         lappend pass_list $tb
+    } else {
+        puts ">>> FAIL: $tb"
+        lappend fail_list $tb
     }
 }
 

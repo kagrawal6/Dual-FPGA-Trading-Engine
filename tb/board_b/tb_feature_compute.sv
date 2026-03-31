@@ -139,6 +139,8 @@ module tb_feature_compute;
 
     // ── Test sequence ─────────────────────────────────────────
     initial begin
+        logic [31:0] sym0_ema_after;
+
         bid_price  = '0;
         ask_price  = '0;
         symbol_id  = '0;
@@ -337,7 +339,6 @@ module tb_feature_compute;
         send_quote(32'h006FC000, 32'h00704000, 8'd0);
         @(posedge clk);
         check("T9c: sym0 ema moved",      ema != 32'h00640000);
-        logic [31:0] sym0_ema_after;
         sym0_ema_after = ema;
 
         // Re-read sym=1 — EMA should still be at its seed
@@ -374,8 +375,7 @@ module tb_feature_compute;
         @(posedge clk);
         book_valid = 1'b0;
 
-        // Wait for pipeline and check outputs arrive in order
-        @(posedge clk);
+        // Check outputs arrive in order (first output already visible)
         check("T11a: valid for sym0",     feature_valid == 1'b1);
         check32("T11a: mid sym0",         mid, GM_MID[0]);
         @(posedge clk);

@@ -81,7 +81,6 @@ vlog -sv -work work ../tb/board_b/tb_board_b_top.sv
 vlog -sv -work work ../tb/board_b/tb_board_b_pipeline.sv
 
 # 10. System-level testbench
-vlog -sv -work work ../tb/stubs/board_b_top_stub.sv
 vlog -sv -work work ../tb/tb_system_top.sv
 
 puts "========================================="

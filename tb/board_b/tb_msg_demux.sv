@@ -411,20 +411,23 @@ module tb_msg_demux;
             qf[2] = make_quote(8'd1, REGIME_VOLATILE, 32'h00C80000, 32'h00C88000, 16'd200, 16'd200, 16'd31);
             qf[3] = make_fill(8'd1, 1'b1, 3'b000, 32'h00C80000, 16'd100, 16'd2, 16'h0020);
 
-            for (int i = 0; i < 4; i++) begin
-                frame_in = qf[i];
-                frame_in_valid = 1'b1;
-                @(posedge clk);
-            end
-            frame_in_valid = 1'b0;
-
-            // Check: first output is quote
+            frame_in = qf[0];
+            frame_in_valid = 1'b1;
+            @(posedge clk);
+            #1;
+            frame_in = qf[1];
             check("T12a: quote first",    quote_valid == 1'b1);
             @(posedge clk);
+            #1;
+            frame_in = qf[2];
             check("T12b: fill second",    fill_valid == 1'b1);
             @(posedge clk);
+            #1;
+            frame_in = qf[3];
             check("T12c: quote third",    quote_valid == 1'b1);
             @(posedge clk);
+            #1;
+            frame_in_valid = 1'b0;
             check("T12d: fill fourth",    fill_valid == 1'b1);
         end
 

@@ -77,14 +77,14 @@ module tb_market_noise_gen;
         tick = 1'b1;
         @(posedge clk);
         tick = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
     endtask
 
     task automatic pulse_lfsr_load;
         lfsr_load = 1'b1;
         @(posedge clk);
         lfsr_load = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
     endtask
 
     task automatic check_decomp(string tag, int n_act);
@@ -150,11 +150,11 @@ module tb_market_noise_gen;
         $display("--- test_golden_vectors ---");
         pulse_lfsr_load();
         for (int t = 0; t < 8; t++) begin
-            do_tick();
             check_decomp($sformatf("golden t%0d", t), TB_NUM_SYM);
             for (int s = 0; s < 4; s++) begin
                 check32($sformatf("golden t%0d s%0d", t, s), step_out_q16_16[s], GOLDEN_STEP[t][s]);
             end
+            do_tick();
         end
 
         // ─────────────────────────────────────────────────────

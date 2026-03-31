@@ -287,14 +287,14 @@ module tb_system_top;
         // base_qty = 100
         axi_write_b(9'h010, 32'd100);
 
-        // max_position = 5000
-        axi_write_b(9'h014, 32'd5000);
+        // max_position = 50000
+        axi_write_b(9'h014, 32'd50000);
 
         // max_order_rate = 10000
         axi_write_b(9'h018, 32'd10000);
 
-        // max_loss = $10000 (generous)
-        axi_write_b(9'h01C, 32'd10000);
+        // max_loss = $10,000,000 (generous enough for 80k-cycle test with $180-$900 prices)
+        axi_write_b(9'h01C, 32'd10_000_000);
 
         $display("  Board B configured: MEAN_REV, threshold=$0.004, qty=100");
 

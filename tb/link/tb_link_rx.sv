@@ -101,7 +101,7 @@ module tb_link_rx;
         got_frame = 1'b0;
         captured = '0;
         while (!frame_out_valid && cnt < timeout) begin
-            @(posedge clk);
+            @(posedge clk); #1;
             cnt++;
         end
         if (frame_out_valid) begin
@@ -113,7 +113,7 @@ module tb_link_rx;
     // Verify no frame arrives for N cycles
     task automatic no_frame_for(input int cycles, input string tag);
         for (int i = 0; i < cycles; i++) begin
-            @(posedge clk);
+            @(posedge clk); #1;
             check($sformatf("%s: no frame at cycle %0d", tag, i), frame_out_valid == 1'b0);
         end
     endtask
@@ -158,10 +158,13 @@ module tb_link_rx;
         good_frame = {4'h1, 124'h1234_5678_9ABC_DEF0_0FED_CBA9_8765_432};
         begin
             int err_before = error_count;
-            send_frame(good_frame, BEATS, 10);
-            wait_frame(got, rx_frame);
+            fork
+                send_frame(good_frame, BEATS, 10);
+                wait_frame(got, rx_frame);
+            join
             check("valid: frame received", got);
             check128("valid: frame matches", rx_frame, good_frame);
+            @(posedge clk); #1;
             check("valid: link_up=1", link_up == 1'b1);
             check("valid: no new errors", error_count == err_before);
         end
@@ -184,21 +187,25 @@ module tb_link_rx;
         // ─────────────────────────────────────────────────────
         $display("--- test_link_up_recovery ---");
         good_frame = {4'h2, 8'h01, 1'b0, 3'b000, 32'h0064_0000, 16'd50, 16'd1, 16'h1234, 32'h0};
-        send_frame(good_frame, BEATS, 10);
-        wait_frame(got, rx_frame);
+        fork
+            send_frame(good_frame, BEATS, 10);
+            wait_frame(got, rx_frame);
+        join
         check("recovery: frame received", got);
         check128("recovery: frame matches", rx_frame, good_frame);
+        @(posedge clk); #1;
         check("recovery: link_up=1 again", link_up == 1'b1);
 
         // ─────────────────────────────────────────────────────
         // 6) counter_clr → link_up drops, error_count=0
         // ─────────────────────────────────────────────────────
         $display("--- test_counter_clr ---");
+        @(posedge clk); #1;
         check("pre-clr: link_up=1", link_up == 1'b1);
         counter_clr = 1'b1;
         @(posedge clk);
         counter_clr = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("counter_clr: link_up=0", link_up == 1'b0);
         check("counter_clr: error_count=0", error_count == 32'h0);
 
@@ -209,11 +216,14 @@ module tb_link_rx;
         for (int i = 0; i < 3; i++) begin
             logic [127:0] bf;
             bf = {4'h1, 8'(i), 116'(i + 1)};
-            send_frame(bf, BEATS, 4);
-            wait_frame(got, rx_frame);
+            fork
+                send_frame(bf, BEATS, 4);
+                wait_frame(got, rx_frame);
+            join
             check($sformatf("b2b[%0d]: received", i), got);
             check128($sformatf("b2b[%0d]: match", i), rx_frame, bf);
         end
+        @(posedge clk); #1;
         check("b2b: link_up=1", link_up == 1'b1);
 
         // ─────────────────────────────────────────────────────

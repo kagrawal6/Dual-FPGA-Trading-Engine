@@ -111,19 +111,19 @@ module tb_sync_fifo;
         // ─────────────────────────────────────────────────────
         $display("--- test_fill_drain ---");
         for (int i = 1; i <= 10; i++) begin
-            @(posedge clk);
             wr_data = 128'(i);
             wr_en = 1'b1;
+            @(posedge clk);
         end
-        @(posedge clk);
         wr_en = 1'b0;
+        @(posedge clk);
         check32("count after 10 writes", count, 10);
         check("!empty after writes", empty == 1'b0);
 
         for (int i = 1; i <= 10; i++) begin
             check($sformatf("rd_data[%0d]", i), rd_data === 128'(i));
             rd_en = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
         end
         rd_en = 1'b0;
         @(posedge clk);
@@ -285,7 +285,7 @@ module tb_sync_fifo;
         for (int i = 0; i < 4; i++) begin
             check($sformatf("small: rd[%0d]", i), sm_rd_data === 128'(i + 1000));
             sm_rd_en = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
         end
         sm_rd_en = 1'b0;
         @(posedge clk);
