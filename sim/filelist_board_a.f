@@ -20,6 +20,7 @@
 ../rtl/board_a/market_sim.sv
 ../rtl/board_a/market_noise_gen.sv
 ../rtl/board_a/exchange_lite.sv
+../rtl/board_a/exchange_plus.sv
 ../rtl/board_a/tx_arbiter.sv
 ../rtl/board_a/board_a_ctrl.sv
 ../rtl/board_a/board_a_axi_regs.sv

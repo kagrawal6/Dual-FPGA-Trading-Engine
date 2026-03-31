@@ -34,6 +34,7 @@ vlog -sv -work work ../rtl/link/link_rx.sv
 vlog -sv -work work ../rtl/board_a/market_sim.sv
 vlog -sv -work work ../rtl/board_a/market_noise_gen.sv
 vlog -sv -work work ../rtl/board_a/exchange_lite.sv
+vlog -sv -work work ../rtl/board_a/exchange_plus.sv
 vlog -sv -work work ../rtl/board_a/tx_arbiter.sv
 vlog -sv -work work ../rtl/board_a/board_a_ctrl.sv
 vlog -sv -work work ../rtl/board_a/board_a_axi_regs.sv

@@ -1,26 +1,20 @@
 # =============================================================================
-# ModelSim script — Run ALL Board B testbenches
+# ModelSim script — Run ALL Shared + Link testbenches
 #
 # Prerequisites:
-#   do compile_board_b.do           ;# or do compile_all.do
+#   do compile_shared.do            ;# or do compile_all.do
 #
 # Usage (from sim/ directory):
-#   do run_all_board_b.do
+#   do run_all_shared.do
 # =============================================================================
 
 set tb_list {
-    tb_msg_demux
-    tb_quote_book
-    tb_feature_compute
-    tb_strategy_engine
-    tb_risk_manager
-    tb_order_manager
-    tb_position_tracker
-    tb_latency_histogram
-    tb_board_b_ctrl
-    tb_board_b_axi_regs
-    tb_board_b_top
-    tb_board_b_pipeline
+    tb_debounce
+    tb_sync_fifo
+    tb_lfsr32
+    tb_link_tx
+    tb_link_rx
+    tb_link_loopback
 }
 
 set pass_list {}
@@ -47,7 +41,7 @@ foreach tb $tb_list {
 }
 
 puts "\n==========================================="
-puts " Board B Results"
+puts " Shared + Link Results"
 puts "==========================================="
 puts " Total : $total"
 puts " Pass  : [llength $pass_list]"
