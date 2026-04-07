@@ -1,0 +1,1495 @@
+m255
+K4
+z2
+!s11f vlog 2020.1 2020.02, Feb 28 2020
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+dC:/intelFPGA/20.1
+vboard_a_axi_regs
+Z0 DXx6 sv_std 3 std 0 22 VYECXdT12H8WgbUP_5Y6:3
+Z1 DXx4 work 7 hft_pkg 0 22 a^zZ;TiiGoN1nGnOmObe?3
+Z2 !s110 1775596970
+!i10b 1
+!s100 YHOFLoN_TJ6Y;T8k:5?o50
+Z3 !s11b Dg1SIo80bB@j0V0VzS_@n1
+I_jobVFeKm7<k^@Rli>IPe0
+Z4 VDg1SIo80bB@j0V0VzS_@n1
+S1
+Z5 dC:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/sim_run
+Z6 w1774564897
+8../rtl/board_a/board_a_axi_regs.sv
+F../rtl/board_a/board_a_axi_regs.sv
+!i122 145
+L0 12 198
+Z7 OV;L;2020.1;71
+r1
+!s85 0
+31
+Z8 !s108 1775596970.000000
+!s107 ../rtl/board_a/board_a_axi_regs.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_a/board_a_axi_regs.sv|
+!i113 1
+Z9 o-sv -work work
+Z10 tCvgOpt 0
+vboard_a_ctrl
+R0
+R1
+R2
+!i10b 1
+!s100 B>8:4Q3`0iJR=l53C^;b30
+R3
+IC4BZjDk?>20Wbkgi[T`8d2
+R4
+S1
+R5
+R6
+8../rtl/board_a/board_a_ctrl.sv
+F../rtl/board_a/board_a_ctrl.sv
+!i122 144
+L0 12 78
+R7
+r1
+!s85 0
+31
+R8
+!s107 ../rtl/board_a/board_a_ctrl.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_a/board_a_ctrl.sv|
+!i113 1
+R9
+R10
+vboard_a_top
+R0
+R1
+R2
+!i10b 1
+!s100 hCb:h<KZC5f1KQaZjhgY_0
+R3
+I>=GcC]TeGZL1UfSV14a_91
+R4
+S1
+R5
+R6
+8../rtl/board_a/board_a_top.sv
+F../rtl/board_a/board_a_top.sv
+!i122 146
+L0 11 346
+R7
+r1
+!s85 0
+31
+R8
+!s107 ../rtl/board_a/board_a_top.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_a/board_a_top.sv|
+!i113 1
+R9
+R10
+vboard_b_axi_regs
+R0
+R1
+Z11 !s110 1775596972
+!i10b 1
+!s100 nVFIYlbY;:cFZRTEgj<W@3
+R3
+Ih:gojbn4hl6Kb5Ha3JWFz3
+R4
+S1
+R5
+w1774857214
+8../rtl/board_b/board_b_axi_regs.sv
+F../rtl/board_b/board_b_axi_regs.sv
+!i122 156
+L0 34 195
+R7
+r1
+!s85 0
+31
+Z12 !s108 1775596972.000000
+!s107 ../rtl/board_b/board_b_axi_regs.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_b/board_b_axi_regs.sv|
+!i113 1
+R9
+R10
+vboard_b_ctrl
+R0
+R1
+R11
+!i10b 1
+!s100 PbmAM4`Ng8kQdhYibg3V70
+R3
+ISa6Jo`IFSS?^67O@?FMFT0
+R4
+S1
+R5
+w1774777120
+8../rtl/board_b/board_b_ctrl.sv
+F../rtl/board_b/board_b_ctrl.sv
+!i122 155
+L0 12 96
+R7
+r1
+!s85 0
+31
+R12
+!s107 ../rtl/board_b/board_b_ctrl.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_b/board_b_ctrl.sv|
+!i113 1
+R9
+R10
+vboard_b_top
+R0
+R1
+R11
+!i10b 1
+!s100 zRi0Q93moak1YXlE5zR]<1
+R3
+In_eRdZ0igYDhIVDMN=o[=0
+R4
+S1
+R5
+w1774780564
+8../rtl/board_b/board_b_top.sv
+F../rtl/board_b/board_b_top.sv
+!i122 157
+L0 11 340
+R7
+r1
+!s85 0
+31
+R12
+!s107 ../rtl/board_b/board_b_top.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_b/board_b_top.sv|
+!i113 1
+R9
+R10
+vdebounce
+R0
+Z13 !s110 1775596969
+!i10b 1
+!s100 L5JlDoGLg>JVH]DnX>4EY3
+R3
+IzoHG7njS1:ZXnCZzC^@_83
+R4
+S1
+R5
+w1774555034
+8../rtl/shared/debounce.sv
+F../rtl/shared/debounce.sv
+!i122 134
+L0 10 49
+R7
+r1
+!s85 0
+31
+!s108 1775596968.000000
+!s107 ../rtl/shared/debounce.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/shared/debounce.sv|
+!i113 1
+R9
+R10
+vexchange_lite
+R0
+R1
+R2
+!i10b 1
+!s100 DP>lbOGi1T?eF0VPZ9NF20
+R3
+INCMfRcCQJ5BQUQi^ajW;;3
+R4
+S1
+R5
+R6
+8../rtl/board_a/exchange_lite.sv
+F../rtl/board_a/exchange_lite.sv
+!i122 141
+L0 14 165
+R7
+r1
+!s85 0
+31
+R8
+!s107 ../rtl/board_a/exchange_lite.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_a/exchange_lite.sv|
+!i113 1
+R9
+R10
+vexchange_plus
+R0
+R1
+R2
+!i10b 1
+!s100 X=@K;YWzE;MQIThfk0gI=1
+R3
+IOE:PAH?`K[0`6LY:25_KH3
+R4
+S1
+R5
+R6
+8../rtl/board_a/exchange_plus.sv
+F../rtl/board_a/exchange_plus.sv
+!i122 142
+L0 22 504
+R7
+r1
+!s85 0
+31
+R8
+!s107 ../rtl/board_a/exchange_plus.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_a/exchange_plus.sv|
+!i113 1
+R9
+R10
+vfeature_compute
+R0
+R1
+Z14 !s110 1775596971
+!i10b 1
+!s100 Zgin22T]6Fh]MK3<9dUQ73
+R3
+I2dNoV:n5E2z]LS5eoFIN21
+R4
+S1
+R5
+w1774857153
+8../rtl/board_b/feature_compute.sv
+F../rtl/board_b/feature_compute.sv
+!i122 149
+L0 19 167
+R7
+r1
+!s85 0
+31
+Z15 !s108 1775596971.000000
+!s107 ../rtl/board_b/feature_compute.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_b/feature_compute.sv|
+!i113 1
+R9
+R10
+Xhft_pkg
+R0
+Z16 !s110 1775597456
+!i10b 1
+!s100 ieOdCIaC;zheak8_oXI`T2
+R3
+IM8Pzcci@f]aB`M>E3>Y`]1
+VM8Pzcci@f]aB`M>E3>Y`]1
+S1
+R5
+Z17 w1774960885
+8C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/shared/hft_pkg.sv
+FC:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/shared/hft_pkg.sv
+!i122 186
+L0 7 0
+R7
+r1
+!s85 0
+31
+Z18 !s108 1775597456.000000
+!s107 C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/shared/hft_pkg.sv|
+!s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/shared/hft_pkg.sv|
+!i113 1
+Z19 o-work work -sv
+R10
+vlatency_histogram
+R0
+R1
+R11
+!i10b 1
+!s100 PK<k68^aeo1zSk4mk<aDS3
+R3
+If=TZIW[hIYoP0n4AF[SdJ0
+R4
+S1
+R5
+w1774777021
+8../rtl/board_b/latency_histogram.sv
+F../rtl/board_b/latency_histogram.sv
+!i122 154
+L0 11 65
+R7
+r1
+!s85 0
+31
+R12
+!s107 ../rtl/board_b/latency_histogram.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_b/latency_histogram.sv|
+!i113 1
+R9
+R10
+vlfsr32
+R0
+Z20 DXx4 work 7 hft_pkg 0 22 M8Pzcci@f]aB`M>E3>Y`]1
+R16
+!i10b 1
+!s100 ^m6UXTRXi6=;noi7JfDao1
+R3
+I?WW^=^0NZ??P<4ZmWII^@3
+R4
+S1
+R5
+R6
+8C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/shared/lfsr32.sv
+FC:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/shared/lfsr32.sv
+!i122 187
+L0 10 41
+R7
+r1
+!s85 0
+31
+R18
+!s107 C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/shared/lfsr32.sv|
+!s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/shared/lfsr32.sv|
+!i113 1
+R19
+R10
+vlink_rx
+R0
+R13
+!i10b 1
+!s100 h[MPzEcKZmLOiFVJlf^BX1
+R3
+IEE8hLP`5KP^kQj0[9jN8Q1
+R4
+S1
+R5
+w1774857417
+8../rtl/link/link_rx.sv
+F../rtl/link/link_rx.sv
+!i122 138
+L0 11 158
+R7
+r1
+!s85 0
+31
+Z21 !s108 1775596969.000000
+!s107 ../rtl/link/link_rx.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/link/link_rx.sv|
+!i113 1
+R9
+R10
+vlink_tx
+R0
+R13
+!i10b 1
+!s100 b`5=i77F9`n]F`F9b4RXY0
+R3
+I>Y]l_mn:gJj1baojaPQ^]3
+R4
+S1
+R5
+w1774770587
+8../rtl/link/link_tx.sv
+F../rtl/link/link_tx.sv
+!i122 137
+L0 14 85
+R7
+r1
+!s85 0
+31
+R21
+!s107 ../rtl/link/link_tx.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/link/link_tx.sv|
+!i113 1
+R9
+R10
+vmarket_noise_gen
+R0
+R1
+R2
+!i10b 1
+!s100 XD4KIVOTdX3zAl?OlQnJJ1
+R3
+IIJ5nl[_34fL:54<64Io8T1
+R4
+S1
+R5
+R17
+8../rtl/board_a/market_noise_gen.sv
+F../rtl/board_a/market_noise_gen.sv
+!i122 140
+L0 17 202
+R7
+r1
+!s85 0
+31
+R8
+!s107 ../rtl/board_a/market_noise_gen.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_a/market_noise_gen.sv|
+!i113 1
+R9
+R10
+vmarket_sim
+R0
+R1
+R2
+!i10b 1
+!s100 l=GYJn;Vgzbcg<KzkR;ZN0
+R3
+I_m`[H05cHmKXhIL]OZ5ea0
+R4
+S1
+R5
+R17
+8../rtl/board_a/market_sim.sv
+F../rtl/board_a/market_sim.sv
+!i122 139
+L0 33 277
+R7
+r1
+!s85 0
+31
+R21
+!s107 ../rtl/board_a/market_sim.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_a/market_sim.sv|
+!i113 1
+R9
+R10
+vmsg_demux
+R0
+R1
+R14
+!i10b 1
+!s100 ]6>BLIj^o2RgiB?^jhkDz0
+R3
+IC3AAV?2jAQONWV^4:j5;^1
+R4
+S1
+R5
+w1774776095
+8../rtl/board_b/msg_demux.sv
+F../rtl/board_b/msg_demux.sv
+!i122 147
+L0 13 64
+R7
+r1
+!s85 0
+31
+R15
+!s107 ../rtl/board_b/msg_demux.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_b/msg_demux.sv|
+!i113 1
+R9
+R10
+vorder_manager
+R0
+R1
+R14
+!i10b 1
+!s100 ZzdQ:Af:D1Zkz=USD>0;80
+R3
+I1oLHC=d@EX?ehGE@7TC1e0
+R4
+S1
+R5
+w1774857306
+8../rtl/board_b/order_manager.sv
+F../rtl/board_b/order_manager.sv
+!i122 152
+L0 14 94
+R7
+r1
+!s85 0
+31
+R15
+!s107 ../rtl/board_b/order_manager.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_b/order_manager.sv|
+!i113 1
+R9
+R10
+vposition_tracker
+R0
+R1
+R14
+!i10b 1
+!s100 ChKPbS0XN5VOCen^EH6RI3
+R3
+I<2kR<k=eci74j^3KQ4Q5^1
+R4
+S1
+R5
+w1774776928
+8../rtl/board_b/position_tracker.sv
+F../rtl/board_b/position_tracker.sv
+!i122 153
+L0 14 112
+R7
+r1
+!s85 0
+31
+R15
+!s107 ../rtl/board_b/position_tracker.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_b/position_tracker.sv|
+!i113 1
+R9
+R10
+vquote_book
+R0
+R1
+R14
+!i10b 1
+!s100 ^j4abe@NnO<HXNckQ^imP0
+R3
+I88CL>f4MgT@<]TD`RETkL1
+R4
+S1
+R5
+w1774776421
+8../rtl/board_b/quote_book.sv
+F../rtl/board_b/quote_book.sv
+!i122 148
+L0 13 80
+R7
+r1
+!s85 0
+31
+R15
+!s107 ../rtl/board_b/quote_book.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_b/quote_book.sv|
+!i113 1
+R9
+R10
+vrisk_manager
+R0
+R1
+R14
+!i10b 1
+!s100 o:D1F^nc_KzmMz6BBdAlM1
+R3
+I2FMdebbJ4R7Fh:XgaX8?O1
+R4
+S1
+R5
+w1774857199
+8../rtl/board_b/risk_manager.sv
+F../rtl/board_b/risk_manager.sv
+!i122 151
+L0 17 193
+R7
+r1
+!s85 0
+31
+R15
+!s107 ../rtl/board_b/risk_manager.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_b/risk_manager.sv|
+!i113 1
+R9
+R10
+vstrategy_engine
+R0
+R1
+R14
+!i10b 1
+!s100 WNSZ_Pfj8Lfl[BF9RjXn>1
+R3
+IZoL1Bd;IGI_K>;6N@LS]G2
+R4
+S1
+R5
+w1774776639
+8../rtl/board_b/strategy_engine.sv
+F../rtl/board_b/strategy_engine.sv
+!i122 150
+L0 13 60
+R7
+r1
+!s85 0
+31
+R15
+!s107 ../rtl/board_b/strategy_engine.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_b/strategy_engine.sv|
+!i113 1
+R9
+R10
+vsync_fifo
+R0
+R13
+!i10b 1
+!s100 5`9RcBYG99eCL9OB3P<ed1
+R3
+I3V:QR::2@5`]Lia[zZ:aY1
+R4
+S1
+R5
+R6
+8../rtl/shared/sync_fifo.sv
+F../rtl/shared/sync_fifo.sv
+!i122 135
+L0 9 69
+R7
+r1
+!s85 0
+31
+R21
+!s107 ../rtl/shared/sync_fifo.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/shared/sync_fifo.sv|
+!i113 1
+R9
+R10
+vtb_board_a_ctrl
+R0
+R1
+Z22 !s110 1775596973
+!i10b 1
+!s100 XFJ<<Vgcz0j`h>:]@`7471
+R3
+I7PN1<kFldB^>aAh3Ziz130
+R4
+S1
+R5
+Z23 w1775589051
+8../simulation_tb/tb_board_a_ctrl.sv
+F../simulation_tb/tb_board_a_ctrl.sv
+!i122 168
+L0 3 109
+R7
+r1
+!s85 0
+31
+Z24 !s108 1775596973.000000
+!s107 ../simulation_tb/tb_board_a_ctrl.sv|
+!s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_board_a_ctrl.sv|
+!i113 1
+R9
+R10
+vtb_board_a_top
+R0
+R1
+Z25 !s110 1775596974
+!i10b 1
+!s100 jo1fE7Yg_;>AKf`j^zYJz2
+R3
+IL;=4nI2[5kH7XYI`^L9LN1
+R4
+S1
+R5
+Z26 w1775588910
+8../simulation_tb/tb_board_a_top.sv
+F../simulation_tb/tb_board_a_top.sv
+!i122 169
+Z27 L0 3 148
+R7
+r1
+!s85 0
+31
+Z28 !s108 1775596974.000000
+!s107 ../simulation_tb/tb_board_a_top.sv|
+!s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_board_a_top.sv|
+!i113 1
+R9
+R10
+vtb_board_b_axi_regs
+R0
+R1
+DXx4 work 27 tb_board_b_axi_regs_sv_unit 0 22 zGO2VflUbBo^]iblRjdOd2
+Z29 !s110 1775596975
+R4
+r1
+!s85 0
+!i10b 1
+!s100 AFe`BHDQ@hUaGkghdf]E43
+I7OcfU;@:CflABCj=gV8M=0
+!s105 tb_board_b_axi_regs_sv_unit
+S1
+R5
+R23
+Z30 8../simulation_tb/tb_board_b_axi_regs.sv
+Z31 F../simulation_tb/tb_board_b_axi_regs.sv
+!i122 179
+L0 4 144
+R7
+31
+Z32 !s108 1775596975.000000
+Z33 !s107 ../simulation_tb/tb_board_b_axi_regs.sv|
+Z34 !s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_board_b_axi_regs.sv|
+!i113 1
+R9
+R10
+Xtb_board_b_axi_regs_sv_unit
+R0
+R1
+R29
+VzGO2VflUbBo^]iblRjdOd2
+r1
+!s85 0
+!i10b 1
+!s100 [51Ak;zal[MZ3V4A7D8MK2
+IzGO2VflUbBo^]iblRjdOd2
+!i103 1
+S1
+R5
+R23
+R30
+R31
+!i122 179
+Z35 L0 2 0
+R7
+31
+R32
+R33
+R34
+!i113 1
+R9
+R10
+vtb_board_b_ctrl
+R0
+R1
+DXx4 work 23 tb_board_b_ctrl_sv_unit 0 22 IdXSB?Fbe>>lYo@GI67Zi0
+R29
+R4
+r1
+!s85 0
+!i10b 1
+!s100 aT8BOz=IJhVCoL?Kb7El11
+IU6N9S?Y<6lB[n3QI`0X@D2
+!s105 tb_board_b_ctrl_sv_unit
+S1
+R5
+R23
+Z36 8../simulation_tb/tb_board_b_ctrl.sv
+Z37 F../simulation_tb/tb_board_b_ctrl.sv
+!i122 178
+L0 4 118
+R7
+31
+R32
+Z38 !s107 ../simulation_tb/tb_board_b_ctrl.sv|
+Z39 !s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_board_b_ctrl.sv|
+!i113 1
+R9
+R10
+Xtb_board_b_ctrl_sv_unit
+R0
+R1
+R29
+VIdXSB?Fbe>>lYo@GI67Zi0
+r1
+!s85 0
+!i10b 1
+!s100 l_QgmF?z?AeeGCAU2fzZ22
+IIdXSB?Fbe>>lYo@GI67Zi0
+!i103 1
+S1
+R5
+R23
+R36
+R37
+!i122 178
+R35
+R7
+31
+R32
+R38
+R39
+!i113 1
+R9
+R10
+vtb_board_b_pipeline
+R0
+R1
+DXx4 work 27 tb_board_b_pipeline_sv_unit 0 22 ^ig2mz39WBFcYCKn8jd_D0
+R29
+R4
+r1
+!s85 0
+!i10b 1
+!s100 j?iD8a>i7ME^V2ZmmND9?3
+I7_cL2oiPQeRDADj;cNFT92
+!s105 tb_board_b_pipeline_sv_unit
+S1
+R5
+R23
+Z40 8../simulation_tb/tb_board_b_pipeline.sv
+Z41 F../simulation_tb/tb_board_b_pipeline.sv
+!i122 181
+L0 4 172
+R7
+31
+R32
+Z42 !s107 ../simulation_tb/tb_board_b_pipeline.sv|
+Z43 !s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_board_b_pipeline.sv|
+!i113 1
+R9
+R10
+Xtb_board_b_pipeline_sv_unit
+R0
+R1
+R29
+V^ig2mz39WBFcYCKn8jd_D0
+r1
+!s85 0
+!i10b 1
+!s100 RdAJ:EY0d7_NmDncA9<Bk2
+I^ig2mz39WBFcYCKn8jd_D0
+!i103 1
+S1
+R5
+R23
+R40
+R41
+!i122 181
+R35
+R7
+31
+R32
+R42
+R43
+!i113 1
+R9
+R10
+vtb_board_b_top
+R0
+R1
+DXx4 work 22 tb_board_b_top_sv_unit 0 22 3:Kf0348=O6LG7YKNa[@L2
+R29
+R4
+r1
+!s85 0
+!i10b 1
+!s100 D2J^Hc?^me4]>n:[2^_CH3
+I:L`RMJWzAjSPPYaC`[:c31
+!s105 tb_board_b_top_sv_unit
+S1
+R5
+R23
+Z44 8../simulation_tb/tb_board_b_top.sv
+Z45 F../simulation_tb/tb_board_b_top.sv
+!i122 180
+L0 4 163
+R7
+31
+R32
+Z46 !s107 ../simulation_tb/tb_board_b_top.sv|
+Z47 !s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_board_b_top.sv|
+!i113 1
+R9
+R10
+Xtb_board_b_top_sv_unit
+R0
+R1
+R29
+V3:Kf0348=O6LG7YKNa[@L2
+r1
+!s85 0
+!i10b 1
+!s100 fMZM[iT?J;kMmGBk0[PoG3
+I3:Kf0348=O6LG7YKNa[@L2
+!i103 1
+S1
+R5
+R23
+R44
+R45
+!i122 180
+R35
+R7
+31
+R32
+R46
+R47
+!i113 1
+R9
+R10
+vtb_debounce
+R0
+R1
+R11
+!i10b 1
+!s100 7E^OgGT:f;Q2>87>NGH:M0
+R3
+I8aKOCK<edW15J_7;MkIjd1
+R4
+S1
+R5
+R23
+8../simulation_tb/tb_debounce.sv
+F../simulation_tb/tb_debounce.sv
+!i122 158
+L0 3 74
+R7
+r1
+!s85 0
+31
+R12
+!s107 ../simulation_tb/tb_debounce.sv|
+!s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_debounce.sv|
+!i113 1
+R9
+R10
+vtb_exchange_lite
+R0
+R1
+R22
+!i10b 1
+!s100 YJROMWEVE6E2DD3V4X1GB1
+R3
+IJFcS10VT?2Loo^N;o_KT?3
+R4
+S1
+R5
+R23
+8../simulation_tb/tb_exchange_lite.sv
+F../simulation_tb/tb_exchange_lite.sv
+!i122 166
+R27
+R7
+r1
+!s85 0
+31
+R24
+!s107 ../simulation_tb/tb_exchange_lite.sv|
+!s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_exchange_lite.sv|
+!i113 1
+R9
+R10
+vtb_feature_compute
+R0
+R1
+R25
+!i10b 1
+!s100 Ke^michYF4gGD[LkP06LW0
+R3
+I_C>;hiod7IUZNzWCgnO<c0
+R4
+S1
+R5
+R23
+8../simulation_tb/tb_feature_compute.sv
+F../simulation_tb/tb_feature_compute.sv
+!i122 172
+L0 3 117
+R7
+r1
+!s85 0
+31
+R28
+!s107 ../simulation_tb/tb_feature_compute.sv|
+!s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_feature_compute.sv|
+!i113 1
+R9
+R10
+vtb_latency_histogram
+R0
+R1
+DXx4 work 28 tb_latency_histogram_sv_unit 0 22 ^L8F@=Kn@`d]?3leB_:3d1
+R29
+R4
+r1
+!s85 0
+!i10b 1
+!s100 18Yfmz?@J3zZ<bLf1fNO>3
+I0eN?g1zBLTzlcL9nV90HP0
+!s105 tb_latency_histogram_sv_unit
+S1
+R5
+R26
+Z48 8../simulation_tb/tb_latency_histogram.sv
+Z49 F../simulation_tb/tb_latency_histogram.sv
+!i122 177
+L0 4 105
+R7
+31
+R32
+Z50 !s107 ../simulation_tb/tb_latency_histogram.sv|
+Z51 !s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_latency_histogram.sv|
+!i113 1
+R9
+R10
+Xtb_latency_histogram_sv_unit
+R0
+R1
+R29
+V^L8F@=Kn@`d]?3leB_:3d1
+r1
+!s85 0
+!i10b 1
+!s100 6GJ?<2j1m3OAIVTfF4K7b0
+I^L8F@=Kn@`d]?3leB_:3d1
+!i103 1
+S1
+R5
+R26
+R48
+R49
+!i122 177
+R35
+R7
+31
+R32
+R50
+R51
+!i113 1
+R9
+R10
+vtb_lfsr32
+R0
+R20
+R16
+!i10b 1
+!s100 UEe>MH>c0X2Pgfd0=f`If0
+R3
+I2e8n9bQW:0A@zcg>j8QUo3
+R4
+S1
+R5
+R23
+8C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/simulation_tb/tb_lfsr32.sv
+FC:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/simulation_tb/tb_lfsr32.sv
+!i122 188
+L0 3 83
+R7
+r1
+!s85 0
+31
+R18
+!s107 C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/simulation_tb/tb_lfsr32.sv|
+!s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/simulation_tb/tb_lfsr32.sv|
+!i113 1
+R19
+R10
+vtb_link_loopback
+R0
+R1
+R22
+!i10b 1
+!s100 l5gNa=WaH`6_WOgNR@?eW3
+R3
+I[M?j>1YkH>4M=HbC9:<bT2
+R4
+S1
+R5
+R23
+8../simulation_tb/tb_link_loopback.sv
+F../simulation_tb/tb_link_loopback.sv
+!i122 163
+L0 3 103
+R7
+r1
+!s85 0
+31
+R24
+!s107 ../simulation_tb/tb_link_loopback.sv|
+!s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_link_loopback.sv|
+!i113 1
+R9
+R10
+vtb_link_rx
+R0
+R1
+R22
+!i10b 1
+!s100 2Xag6dhCK]Zid<?g9RmoE0
+R3
+I=]jZ;_f0:]GRVg_kj?3Lh1
+R4
+S1
+R5
+R26
+8../simulation_tb/tb_link_rx.sv
+F../simulation_tb/tb_link_rx.sv
+!i122 162
+L0 3 86
+R7
+r1
+!s85 0
+31
+R24
+!s107 ../simulation_tb/tb_link_rx.sv|
+!s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_link_rx.sv|
+!i113 1
+R9
+R10
+vtb_link_tx
+R0
+R1
+R22
+!i10b 1
+!s100 Zhk?0=EWCR1CS6e:AdYjH2
+R3
+InnMY4=0E:5QVe;Okf_ejX0
+R4
+S1
+R5
+R26
+8../simulation_tb/tb_link_tx.sv
+F../simulation_tb/tb_link_tx.sv
+!i122 161
+L0 3 81
+R7
+r1
+!s85 0
+31
+R12
+!s107 ../simulation_tb/tb_link_tx.sv|
+!s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_link_tx.sv|
+!i113 1
+R9
+R10
+vtb_market_noise_gen
+R0
+R1
+R22
+!i10b 1
+!s100 k=0oQFhhlfLda_C]]BWOW3
+R3
+IQY]faD@6N=2J65V9c0jV53
+R4
+S1
+R5
+R26
+8../simulation_tb/tb_market_noise_gen.sv
+F../simulation_tb/tb_market_noise_gen.sv
+!i122 165
+L0 3 92
+R7
+r1
+!s85 0
+31
+R24
+!s107 ../simulation_tb/tb_market_noise_gen.sv|
+!s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_market_noise_gen.sv|
+!i113 1
+R9
+R10
+vtb_market_sim
+R0
+R1
+R22
+!i10b 1
+!s100 UYYe=QZoDBzi9IEBkG[CC1
+R3
+IIM?]LehJ:h[HeYW5ScG5^3
+R4
+S1
+R5
+w1775595003
+8../simulation_tb/tb_market_sim.sv
+F../simulation_tb/tb_market_sim.sv
+!i122 164
+L0 3 124
+R7
+r1
+!s85 0
+31
+R24
+!s107 ../simulation_tb/tb_market_sim.sv|
+!s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_market_sim.sv|
+!i113 1
+R9
+R10
+vtb_msg_demux
+R0
+R1
+R25
+!i10b 1
+!s100 RX9m[VN7g]6TjP46Rk3Sj2
+R3
+I8[KDLTQdbaIdAfF2C7ieM0
+R4
+S1
+R5
+R23
+8../simulation_tb/tb_msg_demux.sv
+F../simulation_tb/tb_msg_demux.sv
+!i122 170
+L0 3 121
+R7
+r1
+!s85 0
+31
+R28
+!s107 ../simulation_tb/tb_msg_demux.sv|
+!s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_msg_demux.sv|
+!i113 1
+R9
+R10
+vtb_order_manager
+R0
+R1
+R25
+!i10b 1
+!s100 W@?F_j<VEi;3o;GS8[g<D1
+R3
+I98d4ZoER]DQ`CNg8JM03B3
+R4
+S1
+R5
+R23
+8../simulation_tb/tb_order_manager.sv
+F../simulation_tb/tb_order_manager.sv
+!i122 175
+L0 3 118
+R7
+r1
+!s85 0
+31
+R28
+!s107 ../simulation_tb/tb_order_manager.sv|
+!s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_order_manager.sv|
+!i113 1
+R9
+R10
+vtb_position_tracker
+R0
+R1
+DXx4 work 27 tb_position_tracker_sv_unit 0 22 b@B1in^XJcL:>[K^j1Vja1
+R25
+R4
+r1
+!s85 0
+!i10b 1
+!s100 QVGaH^lOi^VLbgJcGGYOQ2
+I:mEd`YoM?O^iYm6nGIC5g0
+!s105 tb_position_tracker_sv_unit
+S1
+R5
+R23
+Z52 8../simulation_tb/tb_position_tracker.sv
+Z53 F../simulation_tb/tb_position_tracker.sv
+!i122 176
+L0 4 116
+R7
+31
+R28
+Z54 !s107 ../simulation_tb/tb_position_tracker.sv|
+Z55 !s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_position_tracker.sv|
+!i113 1
+R9
+R10
+Xtb_position_tracker_sv_unit
+R0
+R1
+R25
+Vb@B1in^XJcL:>[K^j1Vja1
+r1
+!s85 0
+!i10b 1
+!s100 Z7nVEGWlfaWal^dn2;UX=1
+Ib@B1in^XJcL:>[K^j1Vja1
+!i103 1
+S1
+R5
+R23
+R52
+R53
+!i122 176
+R35
+R7
+31
+R28
+R54
+R55
+!i113 1
+R9
+R10
+vtb_quote_book
+R0
+R1
+R25
+!i10b 1
+!s100 ZLEk?@gj4Se^bIcXR9YZ`3
+R3
+IYBAV[]FlWG<_3ne[VUNMR0
+R4
+S1
+R5
+R26
+8../simulation_tb/tb_quote_book.sv
+F../simulation_tb/tb_quote_book.sv
+!i122 171
+L0 3 122
+R7
+r1
+!s85 0
+31
+R28
+!s107 ../simulation_tb/tb_quote_book.sv|
+!s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_quote_book.sv|
+!i113 1
+R9
+R10
+vtb_risk_manager
+R0
+R1
+R25
+!i10b 1
+!s100 l=`ICFkmf4zY^I_<3hB>P3
+R3
+IkT4m]cC:h>h`acPk6MNEo2
+R4
+S1
+R5
+R23
+8../simulation_tb/tb_risk_manager.sv
+F../simulation_tb/tb_risk_manager.sv
+!i122 174
+L0 3 129
+R7
+r1
+!s85 0
+31
+R28
+!s107 ../simulation_tb/tb_risk_manager.sv|
+!s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_risk_manager.sv|
+!i113 1
+R9
+R10
+vtb_strategy_engine
+R0
+R1
+R25
+!i10b 1
+!s100 `<H3llaQm@4[WMZJTAI@U3
+R3
+Ie9@bjho;GBEQEhAG[h1MG3
+R4
+S1
+R5
+R23
+8../simulation_tb/tb_strategy_engine.sv
+F../simulation_tb/tb_strategy_engine.sv
+!i122 173
+L0 3 144
+R7
+r1
+!s85 0
+31
+R28
+!s107 ../simulation_tb/tb_strategy_engine.sv|
+!s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_strategy_engine.sv|
+!i113 1
+R9
+R10
+vtb_sync_fifo
+R0
+R1
+R11
+!i10b 1
+!s100 ]onZ4S>cL^cJ[H3adAU>T1
+R3
+I7X6?m7f3T[?WV60eTIZQ20
+R4
+S1
+R5
+R26
+8../simulation_tb/tb_sync_fifo.sv
+F../simulation_tb/tb_sync_fifo.sv
+!i122 159
+L0 3 111
+R7
+r1
+!s85 0
+31
+R12
+!s107 ../simulation_tb/tb_sync_fifo.sv|
+!s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_sync_fifo.sv|
+!i113 1
+R9
+R10
+vtb_system_top
+R0
+R1
+DXx4 work 21 tb_system_top_sv_unit 0 22 @JSUSFNN>mORn[3OC3@Y71
+R29
+R4
+r1
+!s85 0
+!i10b 1
+!s100 DYBm9cJe;>4JKgzUK4lgZ0
+I1mERNhdIafTh77zXPz7=z3
+!s105 tb_system_top_sv_unit
+S1
+R5
+R23
+Z56 8../simulation_tb/tb_system_top.sv
+Z57 F../simulation_tb/tb_system_top.sv
+!i122 182
+L0 4 151
+R7
+31
+R32
+Z58 !s107 ../simulation_tb/tb_system_top.sv|
+Z59 !s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_system_top.sv|
+!i113 1
+R9
+R10
+Xtb_system_top_sv_unit
+R0
+R1
+R29
+V@JSUSFNN>mORn[3OC3@Y71
+r1
+!s85 0
+!i10b 1
+!s100 =`U1hhjZo;fKGEK9o3>N^0
+I@JSUSFNN>mORn[3OC3@Y71
+!i103 1
+S1
+R5
+R23
+R56
+R57
+!i122 182
+R35
+R7
+31
+R32
+R58
+R59
+!i113 1
+R9
+R10
+vtb_tx_arbiter
+R0
+R1
+R22
+!i10b 1
+!s100 hGLjm>lGeThV26Y0GD?^o3
+R3
+I0k4M^;:EKf3m6?zl1<69D1
+R4
+S1
+R5
+R23
+8../simulation_tb/tb_tx_arbiter.sv
+F../simulation_tb/tb_tx_arbiter.sv
+!i122 167
+L0 3 116
+R7
+r1
+!s85 0
+31
+R24
+!s107 ../simulation_tb/tb_tx_arbiter.sv|
+!s90 -reportprogress|300|-sv|-work|work|../simulation_tb/tb_tx_arbiter.sv|
+!i113 1
+R9
+R10
+vtx_arbiter
+R0
+R1
+R2
+!i10b 1
+!s100 62FE`OGP`]HSn_Ne2eYVa3
+R3
+I[EfzmUP61TPGIc;i_3Pzm0
+R4
+S1
+R5
+R6
+8../rtl/board_a/tx_arbiter.sv
+F../rtl/board_a/tx_arbiter.sv
+!i122 143
+L0 57 63
+R7
+r1
+!s85 0
+31
+R8
+!s107 ../rtl/board_a/tx_arbiter.sv|
+!s90 -reportprogress|300|-sv|-work|work|../rtl/board_a/tx_arbiter.sv|
+!i113 1
+R9
+R10

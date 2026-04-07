@@ -1,0 +1,44 @@
+# Compile of hft_pkg.sv was successful.
+# Compile of lfsr32.sv was successful.
+# Compile of tb_lfsr32.sv was successful.
+# 3 compiles, 0 failed with no errors.
+vsim work.lfsr32
+# vsim work.lfsr32 
+# Start time: 16:31:03 on Apr 07,2026
+# Loading sv_std.std
+# Loading work.hft_pkg
+# Loading work.lfsr32
+run -all
+vsim work.tb_lfsr32
+# End time: 16:31:44 on Apr 07,2026, Elapsed time: 0:00:41
+# Errors: 0, Warnings: 6
+# vsim work.tb_lfsr32 
+# Start time: 16:31:44 on Apr 07,2026
+# Loading sv_std.std
+# Loading work.hft_pkg
+# Loading work.tb_lfsr32
+# Loading work.lfsr32
+run -all
+# PASS: reset state = 0x00000001
+# PASS: loaded seed 0xDEADBEEF
+# PASS: first step = 0x6F16DF70
+# PASS: second step = 0x378B6FB8
+# PASS: zero seed remapped to 1
+# ALL TESTS PASSED
+# ** Note: $stop    : C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/simulation_tb/tb_lfsr32.sv(82)
+#    Time: 76 ns  Iteration: 0  Instance: /tb_lfsr32
+# Break in Module tb_lfsr32 at C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/simulation_tb/tb_lfsr32.sv line 82
+restart
+run -all
+# GetModuleFileName: The specified module could not be found.
+# 
+# 
+# PASS: reset state = 0x00000001
+# PASS: loaded seed 0xDEADBEEF
+# PASS: first step = 0x6F16DF70
+# PASS: second step = 0x378B6FB8
+# PASS: zero seed remapped to 1
+# ALL TESTS PASSED
+# ** Note: $stop    : C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/simulation_tb/tb_lfsr32.sv(82)
+#    Time: 76 ns  Iteration: 0  Instance: /tb_lfsr32
+# Break in Module tb_lfsr32 at C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/simulation_tb/tb_lfsr32.sv line 82

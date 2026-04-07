@@ -80,8 +80,28 @@ module tb_market_sim();
             $display("PASS: bid < ask (bid=%h, ask=%h)", quote_frame[111:80], quote_frame[79:48]);
 
         // Test 4: symbols rotate 1, 2, 3
+        // With quote_interval==0, quote_valid stays high every cycle (do_quote every
+        // clk); there is no second posedge on quote_valid. Step on clk until the
+        // frame's symbol field matches.
         for (i = 1; i < 4; i++) begin
-            @(posedge quote_valid); #1;
+            begin : wait_sym
+                automatic int guard = 0;
+                // Sample after posedge + delay so quote_frame_hold NBA has settled (avoid
+                // reading stale symbol_id on the same tick as the clock edge).
+                while (1) begin
+                    @(posedge clk);
+                    #1;
+                    guard++;
+                    if (guard > 500) begin
+                        $display("FAIL: timeout waiting for symbol %0d", i);
+                        err_cnt = err_cnt + 1;
+                        disable wait_sym;
+                    end
+                    if (quote_frame[123:116] === i[7:0])
+                        disable wait_sym;
+                end
+            end
+            #1;
             if (quote_frame[123:116] !== i[7:0]) begin
                 $display("FAIL: symbol=%0d, expected %0d", quote_frame[123:116], i);
                 err_cnt = err_cnt + 1;
