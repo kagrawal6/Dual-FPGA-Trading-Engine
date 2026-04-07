@@ -64,7 +64,7 @@ module tb_position_tracker();
         end
 
         // Test 2: SELL fill sym=0, qty=50, price=$1.00
-        // side=1(SELL) → byte [119:112]=0x08
+        // side=1(SELL) -> byte [119:112]=0x08
         $display("Test 2: SELL sym=0 qty=50 @ $1.00");
         fill_frame = 128'h3008_0001_0000_0032_0002_0050_0000_0000;
         fill_valid = 1;
@@ -86,7 +86,7 @@ module tb_position_tracker();
             err_cnt = err_cnt + 1;
         end
 
-        // Test 4: REJECTED fill (status=001) → position unchanged
+        // Test 4: REJECTED fill (status=001) -> position unchanged
         $display("Test 4: REJECTED fill unchanged");
         fill_frame = 128'h3001_0001_0000_0064_0003_0060_0000_0000;
         fill_valid = 1;

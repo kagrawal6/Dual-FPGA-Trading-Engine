@@ -114,8 +114,8 @@ module tb_system_top();
             else begin $display("  FAIL: no link_up"); err_cnt=err_cnt+1; end
         end
 
-        // Test 3: Start Board B → ARMED → TRADING
-        $display("Test 3: Board B → TRADING");
+        // Test 3: Start Board B -> ARMED -> TRADING
+        $display("Test 3: Board B -> TRADING");
         sw_b = 8'h01;
         @(posedge clk); awaddr_b=9'h000; awvalid_b=1; wdata_b=32'h1; wstrb_b=4'hF; wvalid_b=1; bready_b=1;
         @(posedge clk); awvalid_b=0; wvalid_b=0; while(!bvalid_b) @(posedge clk); bready_b=0;
@@ -135,7 +135,7 @@ module tb_system_top();
         @(posedge clk); araddr_b=9'h044; arvalid_b=1; rready_b=1;
         @(posedge clk); arvalid_b=0; while(!rvalid_b) @(posedge clk);
         $display("  quotes_rcvd = %0d", rdata_b);
-        if (rdata_b > 0) $display("  PASS: quotes flowing A→B");
+        if (rdata_b > 0) $display("  PASS: quotes flowing A -> B");
         else begin $display("  FAIL: no quotes received"); err_cnt=err_cnt+1; end
         @(posedge clk); rready_b=0;
 

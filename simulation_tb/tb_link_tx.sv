@@ -38,18 +38,18 @@ module tb_link_tx();
         #20; rst_n = 1;
         @(posedge clk);
 
-        // ---- T1: Idle — pmod_valid should be 0 ----
+        // Idle: no frame in flight -> pmod_valid should stay 0.
         @(posedge clk); #1;
         if (pmod_valid !== 1'b0) begin
-            $display("FAIL: T1 pmod_valid=%0b in idle", pmod_valid);
+            $display("FAIL: idle pmod_valid=%0b (expected 0)", pmod_valid);
             err_cnt = err_cnt + 1;
-        end else $display("PASS: T1 pmod_valid=0 in idle");
+        end else $display("PASS: idle pmod_valid=0");
 
         // Enable remote_ready, let 2-FF sync settle
         remote_ready = 1;
         repeat(3) @(posedge clk);
 
-        // ---- T2: Send QUOTE frame, verify 32 MSB-first nibbles ----
+        // Send one 128b frame; check each of 32 nibbles MSB-first vs TEST_FRAME (golden).
         frame_in = TEST_FRAME;
         frame_in_valid = 1;
         @(posedge clk);
@@ -60,20 +60,20 @@ module tb_link_tx();
             @(posedge clk); #1;
             exp_nib = TEST_FRAME[127 - i*4 -: 4];
             if (pmod_data !== exp_nib) begin
-                $display("FAIL: T2 nibble[%0d] pmod_data=%h, expected %h",
+                $display("FAIL: nibble[%0d] got %h expected %h",
                          i, pmod_data, exp_nib);
                 err_cnt = err_cnt + 1;
             end
             @(posedge clk);
         end
-        $display("T2: checked 32 nibbles (%0d errors so far)", err_cnt);
+        $display("done nibbles, err_cnt=%0d", err_cnt);
 
-        // ---- T3: After transmission, pmod_valid returns to 0 ----
+        // After last nibble, pmod_valid must drop back to 0.
         @(posedge clk); #1;
         if (pmod_valid !== 1'b0) begin
-            $display("FAIL: T3 pmod_valid=%0b after TX done", pmod_valid);
+            $display("FAIL: after TX pmod_valid=%0b (expected 0)", pmod_valid);
             err_cnt = err_cnt + 1;
-        end else $display("PASS: T3 pmod_valid=0 after TX complete");
+        end else $display("PASS: pmod_valid low after packet");
 
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);

@@ -39,70 +39,70 @@ module tb_board_a_ctrl();
 
         #20; rst_n = 1; @(posedge clk);
 
-        // ---- Test 1: btn[0] press → ctrl_start_pulse ----
+        // Test 1: btn[0] press -> ctrl_start_pulse
         btn[0] = 1;
         repeat(4) @(posedge clk); #1;
         if (ctrl_start_pulse !== 1'b1) begin
-            $display("FAIL: T1 ctrl_start_pulse=%b, expected 1", ctrl_start_pulse);
+            $display("FAIL: ctrl_start_pulse=%b, expected 1", ctrl_start_pulse);
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T1 ctrl_start_pulse fired");
+            $display("PASS: ctrl_start_pulse fired");
         btn[0] = 0;
         repeat(5) @(posedge clk);
 
-        // ---- Test 2: btn[1] press → ctrl_stop_pulse ----
+        // Test 2: btn[1] press -> ctrl_stop_pulse
         btn[1] = 1;
         repeat(4) @(posedge clk); #1;
         if (ctrl_stop_pulse !== 1'b1) begin
-            $display("FAIL: T2 ctrl_stop_pulse=%b, expected 1", ctrl_stop_pulse);
+            $display("FAIL: ctrl_stop_pulse=%b, expected 1", ctrl_stop_pulse);
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T2 ctrl_stop_pulse fired");
+            $display("PASS: ctrl_stop_pulse fired");
         btn[1] = 0;
         repeat(5) @(posedge clk);
 
-        // ---- Test 3: sw[1:0] decodes regime ----
+        // Test 3: sw[1:0] decodes regime
         sw[1:0] = REGIME_VOLATILE;
         @(posedge clk); #1;
         if (regime_sw !== REGIME_VOLATILE) begin
-            $display("FAIL: T3 regime_sw=%b, expected VOLATILE", regime_sw);
+            $display("FAIL: regime_sw=%b, expected VOLATILE", regime_sw);
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T3 regime_sw = VOLATILE");
+            $display("PASS: regime_sw = VOLATILE");
 
-        // ---- Test 4: LED reflects running status ----
+        // Test 4: LED reflects running status
         running = 1; active_regime = REGIME_CALM;
         @(posedge clk); #1;
         if (led[2] !== 1'b1) begin
-            $display("FAIL: T4 led[2]=%b, expected 1 (running)", led[2]);
+            $display("FAIL: led[2]=%b, expected 1 (running)", led[2]);
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T4 led[2]=1 when running");
+            $display("PASS: led[2]=1 when running");
 
         if (led[1:0] !== 2'b00) begin
-            $display("FAIL: T4 led[1:0]=%b, expected 00 (CALM)", led[1:0]);
+            $display("FAIL: led[1:0]=%b, expected 00 (CALM)", led[1:0]);
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T4 led[1:0]=00 for REGIME_CALM");
+            $display("PASS: led[1:0]=00 for REGIME_CALM");
 
-        // ---- Test 5: RGB1 reflects link status ----
+        // Test 5: RGB1 reflects link status
         link_up = 0; link_error = 0;
         @(posedge clk); #1;
         if (rgb1 !== 3'b100) begin
-            $display("FAIL: T5a rgb1=%b, expected 100 (link down=red)", rgb1);
+            $display("FAIL: rgb1=%b, expected 100 (link down=red)", rgb1);
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T5a rgb1=100 (link down)");
+            $display("PASS: rgb1=100 (link down)");
 
         link_up = 1; link_error = 0;
         @(posedge clk); #1;
         if (rgb1 !== 3'b010) begin
-            $display("FAIL: T5b rgb1=%b, expected 010 (link ok=green)", rgb1);
+            $display("FAIL: rgb1=%b, expected 010 (link ok=green)", rgb1);
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T5b rgb1=010 (link ok)");
+            $display("PASS: rgb1=010 (link ok)");
 
-        // ---- Summary ----
+        // Summary
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);
         $stop;

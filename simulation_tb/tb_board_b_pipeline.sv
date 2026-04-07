@@ -76,14 +76,14 @@ module tb_board_b_pipeline();
         #20; rst_n = 1; @(posedge clk);
         repeat (5) @(posedge clk);
 
-        // ---- Configure via AXI (generous risk limits) ----
+        // Configure via AXI (generous risk limits)
         // strategy = MEAN_REV
         @(posedge clk); awaddr=9'h004; awvalid=1; wdata=32'd0; wstrb=4'hF; wvalid=1; bready=1;
         @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
         // threshold = $0.50
         @(posedge clk); awaddr=9'h008; awvalid=1; wdata=32'h8000; wstrb=4'hF; wvalid=1; bready=1;
         @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
-        // ema_alpha ≈ 10%
+        // ema_alpha ~ 10%
         @(posedge clk); awaddr=9'h00C; awvalid=1; wdata=32'd6554; wstrb=4'hF; wvalid=1; bready=1;
         @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
         // base_qty = 100
@@ -99,12 +99,12 @@ module tb_board_b_pipeline();
         @(posedge clk); awaddr=9'h01C; awvalid=1; wdata=32'd10_000_000; wstrb=4'hF; wvalid=1; bready=1;
         @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
 
-        // ---- Send first frame to establish link_up ----
+        // Send first frame to establish link_up
         tx_frame = QUOTES[0]; tx_valid = 1;
         @(posedge clk); tx_valid = 0;
         repeat (80) @(posedge clk);
 
-        // ---- Start FSM → ARMED → TRADING ----
+        // Start FSM -> ARMED -> TRADING
         sw = 8'h01;
         @(posedge clk); awaddr=9'h000; awvalid=1; wdata=32'h1; wstrb=4'hF; wvalid=1; bready=1;
         @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
@@ -113,7 +113,7 @@ module tb_board_b_pipeline();
         @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
         repeat (3) @(posedge clk);
 
-        // ---- Test 1: Pipeline processes 5 quote frames ----
+        // Test 1: Pipeline processes 5 quote frames
         $display("Test 1: Drive 5 quotes through pipeline");
         for (int i = 0; i < 5; i++) begin
             tx_frame = QUOTES[i]; tx_valid = 1;
@@ -122,7 +122,7 @@ module tb_board_b_pipeline();
         end
         repeat (30) @(posedge clk);
 
-        // ---- Test 2: Check quotes_rcvd ----
+        // Test 2: Check quotes_rcvd
         $display("Test 2: quotes_rcvd counter");
         @(posedge clk); araddr=9'h044; arvalid=1; rready=1;
         @(posedge clk); arvalid=0; while(!rvalid) @(posedge clk);
@@ -134,7 +134,7 @@ module tb_board_b_pipeline();
         end
         @(posedge clk); rready=0;
 
-        // ---- Test 3: Check orders_sent (pipeline generated orders) ----
+        // Test 3: Check orders_sent (pipeline generated orders)
         $display("Test 3: orders_sent counter");
         @(posedge clk); araddr=9'h048; arvalid=1; rready=1;
         @(posedge clk); arvalid=0; while(!rvalid) @(posedge clk);
@@ -145,7 +145,7 @@ module tb_board_b_pipeline();
             $display("  INFO: no orders (deviation below threshold)");
         @(posedge clk); rready=0;
 
-        // ---- Test 4: No risk halt (generous limits) ----
+        // Test 4: No risk halt (generous limits)
         $display("Test 4: No risk halt");
         @(posedge clk); #1;
         if (!dut.risk_halt)
@@ -155,7 +155,7 @@ module tb_board_b_pipeline();
             err_cnt = err_cnt + 1;
         end
 
-        // ---- Test 5: Check link_errors = 0 ----
+        // Test 5: Check link_errors = 0
         $display("Test 5: No link errors");
         @(posedge clk); araddr=9'h054; arvalid=1; rready=1;
         @(posedge clk); arvalid=0; while(!rvalid) @(posedge clk);

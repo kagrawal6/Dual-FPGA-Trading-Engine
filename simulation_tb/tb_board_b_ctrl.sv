@@ -48,7 +48,7 @@ module tb_board_b_ctrl();
         risk_halt = 0; link_up = 1; total_pnl = 0;
         #20; rst_n = 1; @(posedge clk);
 
-        // Test 1: Switch mapping — sw[0]=trading_en, sw[2:1]=strategy, sw[3]=override
+        // Test 1: Switch mapping - sw[0]=trading_en, sw[2:1]=strategy, sw[3]=override
         $display("Test 1: Switch mapping");
         sw = 8'b0000_1001;
         @(posedge clk); #1;
@@ -61,7 +61,7 @@ module tb_board_b_ctrl();
             err_cnt = err_cnt + 1;
         end
 
-        // Test 2: Button 0 press → start pulse (BTN_DEB_W=2 → 4+1 stable cycles)
+        // Test 2: Button 0 press -> start pulse (BTN_DEB_W=2 -> 4+1 stable cycles)
         $display("Test 2: Button start pulse");
         btn[0] = 1;
         begin
@@ -91,7 +91,7 @@ module tb_board_b_ctrl();
             err_cnt = err_cnt + 1;
         end
 
-        // Test 4: RGB0 — positive PnL → green
+        // Test 4: RGB0 - positive PnL -> green
         $display("Test 4: RGB0 PnL color");
         total_pnl = 32'sd500;
         @(posedge clk); #1;
@@ -102,7 +102,7 @@ module tb_board_b_ctrl();
             err_cnt = err_cnt + 1;
         end
 
-        // Test 5: RGB1 — risk_halt → red
+        // Test 5: RGB1 - risk_halt -> red
         $display("Test 5: RGB1 risk halt");
         risk_halt = 1;
         @(posedge clk); #1;

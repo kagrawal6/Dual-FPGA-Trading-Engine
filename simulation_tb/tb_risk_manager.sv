@@ -56,7 +56,7 @@ module tb_risk_manager();
         #20; rst_n = 1;
         @(posedge clk);
 
-        // ---- Test 1: Normal order, all limits OK → approved ----
+        // Test 1: Normal order, all limits OK -> approved
         $display("TEST 1: Normal order -> approved");
         signal_valid = 1; signal_side = 0;
         signal_price = 32'd500; signal_qty = 16'd10; signal_symbol = 8'd0;
@@ -71,7 +71,7 @@ module tb_risk_manager();
         end else $display("PASS: approved_price=500");
         @(posedge clk); #1;
 
-        // ---- Test 2: order_enable=0 → rejected ----
+        // Test 2: order_enable=0 -> rejected
         $display("TEST 2: order_enable=0 -> rejected");
         order_enable = 0;
         signal_valid = 1; signal_side = 0;
@@ -85,7 +85,7 @@ module tb_risk_manager();
         order_enable = 1;
         @(posedge clk); #1;
 
-        // ---- Test 3: Position at limit → rejected ----
+        // Test 3: Position at limit -> rejected
         $display("TEST 3: Position at limit -> rejected");
         position[0] = 32'sd995;
         signal_valid = 1; signal_side = 0;
@@ -99,7 +99,7 @@ module tb_risk_manager();
         position[0] = 0;
         @(posedge clk); #1;
 
-        // ---- Test 4: max_loss exceeded → risk_halt latches ----
+        // Test 4: max_loss exceeded -> risk_halt latches
         $display("TEST 4: PnL below -max_loss -> risk_halt");
         total_pnl = -32'sd6000;
         signal_valid = 1; signal_side = 0;
@@ -111,7 +111,7 @@ module tb_risk_manager();
             $display("FAIL: risk_halt should latch high"); err_cnt = err_cnt + 1;
         end else $display("PASS: risk_halt latched");
 
-        // ---- Test 5: Clear resets risk_halt ----
+        // Test 5: Clear resets risk_halt
         $display("TEST 5: Clear resets risk_halt");
         total_pnl = 0; clear = 1;
         @(posedge clk);

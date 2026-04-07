@@ -46,46 +46,46 @@ module tb_market_noise_gen();
         lfsr_load = 1; @(posedge clk);
         lfsr_load = 0; @(posedge clk); #1;
 
-        // ---- Test 1: pre-tick, all step_out equal global_noise (drifts=0) ----
+        // Test 1: pre-tick, all step_out equal global_noise (drifts=0)
         for (i = 0; i < NUM_SYM; i++) begin
             if (step_out[i] !== global_noise) begin
-                $display("FAIL: T1 step_out[%0d]=%0d != global_noise=%0d", i, step_out[i], global_noise);
+                $display("FAIL: step_out[%0d]=%0d != global_noise=%0d", i, step_out[i], global_noise);
                 err_cnt = err_cnt + 1;
             end else
-                $display("PASS: T1 step_out[%0d] == global_noise (%0d)", i, global_noise);
+                $display("PASS: step_out[%0d] == global_noise (%0d)", i, global_noise);
         end
 
-        // ---- Test 2: tick once with enable, step_out non-zero and bounded ----
+        // Test 2: tick once with enable, step_out non-zero and bounded
         enable = 1;
         tick = 1; @(posedge clk);
         tick = 0; @(posedge clk); #1;
 
         for (i = 0; i < NUM_SYM; i++) begin
             if (step_out[i] > 32'sh0001_0000 || step_out[i] < -32'sh0001_0000) begin
-                $display("FAIL: T2 step_out[%0d]=%h out of bounds", i, step_out[i]);
+                $display("FAIL: step_out[%0d]=%h out of bounds", i, step_out[i]);
                 err_cnt = err_cnt + 1;
             end else
-                $display("PASS: T2 step_out[%0d]=%0d bounded", i, step_out[i]);
+                $display("PASS: step_out[%0d]=%0d bounded", i, step_out[i]);
         end
 
         // Save step_out for gating test
         for (i = 0; i < NUM_SYM; i++) saved_step[i] = step_out[i];
 
-        // ---- Test 3: enable=0, tick does not change step_out ----
+        // Test 3: enable=0, tick does not change step_out
         enable = 0;
         tick = 1; @(posedge clk);
         tick = 0; @(posedge clk); #1;
 
         for (i = 0; i < NUM_SYM; i++) begin
             if (step_out[i] !== saved_step[i]) begin
-                $display("FAIL: T3 step_out[%0d] changed when disabled (%0d -> %0d)",
+                $display("FAIL: step_out[%0d] changed when disabled (%0d -> %0d)",
                          i, saved_step[i], step_out[i]);
                 err_cnt = err_cnt + 1;
             end else
-                $display("PASS: T3 step_out[%0d] unchanged when disabled", i);
+                $display("PASS: step_out[%0d] unchanged when disabled", i);
         end
 
-        // ---- Summary ----
+        // Summary
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);
         $stop;

@@ -92,30 +92,30 @@ module tb_board_a_top();
         @(posedge clk); s_axi_awvalid = 0; s_axi_wvalid = 0;
         @(posedge clk);
 
-        // ---- Test 1: write CTRL[0]=1 to start ----
+        // Test 1: write CTRL[0]=1 to start
         s_axi_awaddr = 8'h00; s_axi_awvalid = 1;
         s_axi_wdata = 32'h0000_0001; s_axi_wvalid = 1;
         @(posedge clk); s_axi_awvalid = 0; s_axi_wvalid = 0;
         @(posedge clk);
 
-        // ---- Test 2: check led[2] = running ----
+        // Test 2: check led[2] = running
         repeat(5) @(posedge clk); #1;
         if (led[2] !== 1'b1) begin
-            $display("FAIL: T2 led[2]=%b, expected 1 (running)", led[2]);
+            $display("FAIL: led[2]=%b, expected 1 (running)", led[2]);
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T2 led[2]=1, FSM is RUNNING");
+            $display("PASS: led[2]=1, FSM is RUNNING");
 
-        // ---- Test 3: wait for link TX activity (quotes) ----
+        // Test 3: wait for link TX activity (quotes)
         repeat(50) @(posedge clk);
         @(posedge clk); #1;
         if (pmod_ja_valid !== 1'b1) begin
-            $display("FAIL: T3 pmod_ja_valid=%b, expected 1", pmod_ja_valid);
+            $display("FAIL: pmod_ja_valid=%b, expected 1", pmod_ja_valid);
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T3 quotes appearing on link TX");
+            $display("PASS: quotes appearing on link TX");
 
-        // ---- Test 4: read STATUS register (addr 0xF4) ----
+        // Test 4: read STATUS register (addr 0xF4)
         s_axi_araddr = 8'hF4; s_axi_arvalid = 1;
         @(posedge clk); #1;
         s_axi_arvalid = 0;
@@ -123,12 +123,12 @@ module tb_board_a_top();
         @(posedge clk);
 
         if (read_data[0] !== 1'b1) begin
-            $display("FAIL: T4 STATUS.running=%b, expected 1", read_data[0]);
+            $display("FAIL: STATUS.running=%b, expected 1", read_data[0]);
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T4 STATUS register shows running=1");
+            $display("PASS: STATUS register shows running=1");
 
-        // ---- Test 5: read QUOTES_SENT (addr 0xF8), should be >0 ----
+        // Test 5: read QUOTES_SENT (addr 0xF8), should be >0
         s_axi_araddr = 8'hF8; s_axi_arvalid = 1;
         @(posedge clk); #1;
         s_axi_arvalid = 0;
@@ -136,12 +136,12 @@ module tb_board_a_top();
         @(posedge clk);
 
         if (read_data == 32'd0) begin
-            $display("FAIL: T5 quotes_sent=0, expected >0");
+            $display("FAIL: quotes_sent=0, expected >0");
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T5 quotes_sent=%0d", read_data);
+            $display("PASS: quotes_sent=%0d", read_data);
 
-        // ---- Summary ----
+        // Summary
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);
         $stop;

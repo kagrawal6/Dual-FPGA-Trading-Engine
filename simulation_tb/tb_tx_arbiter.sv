@@ -33,83 +33,83 @@ module tb_tx_arbiter();
 
         #20; rst_n = 1; @(posedge clk);
 
-        // ---- Test 1: idle — nothing valid in, nothing out ----
+        // Test 1: idle - nothing valid in, nothing out
         @(posedge clk); #1;
         if (tx_valid !== 1'b0) begin
-            $display("FAIL: T1 tx_valid=%b in idle, expected 0", tx_valid);
+            $display("FAIL: tx_valid=%b in idle, expected 0", tx_valid);
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T1 idle, tx_valid=0");
+            $display("PASS: idle, tx_valid=0");
 
-        // ---- Test 2: present fill only → appears on tx ----
+        // Test 2: present fill only -> appears on tx
         fill_frame = FILL_PAT; fill_valid = 1;
         @(posedge clk);
         fill_valid = 0;
         @(posedge clk); #1;
         if (tx_valid !== 1'b1) begin
-            $display("FAIL: T2 tx_valid=%b, expected 1", tx_valid);
+            $display("FAIL: tx_valid=%b, expected 1", tx_valid);
             err_cnt = err_cnt + 1;
         end else if (tx_frame !== FILL_PAT) begin
-            $display("FAIL: T2 tx_frame mismatch");
+            $display("FAIL: tx_frame mismatch");
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T2 fill frame forwarded");
+            $display("PASS: fill frame forwarded");
 
         // Consume (tx_ready=1), wait for buffer to clear
         @(posedge clk); @(posedge clk); #1;
 
-        // ---- Test 3: present quote only → appears on tx ----
+        // Test 3: present quote only -> appears on tx
         quote_frame = QUOTE_PAT; quote_valid = 1;
         @(posedge clk);
         quote_valid = 0;
         @(posedge clk); #1;
         if (tx_valid !== 1'b1) begin
-            $display("FAIL: T3 tx_valid=%b, expected 1", tx_valid);
+            $display("FAIL: tx_valid=%b, expected 1", tx_valid);
             err_cnt = err_cnt + 1;
         end else if (tx_frame !== QUOTE_PAT) begin
-            $display("FAIL: T3 tx_frame mismatch");
+            $display("FAIL: tx_frame mismatch");
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T3 quote frame forwarded");
+            $display("PASS: quote frame forwarded");
 
         @(posedge clk); @(posedge clk); #1;
 
-        // ---- Test 4: both valid simultaneously → fill wins ----
+        // Test 4: both valid simultaneously -> fill wins
         fill_frame  = FILL_PAT;  fill_valid  = 1;
         quote_frame = QUOTE_PAT; quote_valid = 1;
         @(posedge clk);
         fill_valid = 0; quote_valid = 0;
         @(posedge clk); #1;
         if (tx_frame !== FILL_PAT) begin
-            $display("FAIL: T4 fill did not win arbitration");
+            $display("FAIL: fill did not win arbitration");
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T4 fill wins priority over quote");
+            $display("PASS: fill wins priority over quote");
 
         @(posedge clk); @(posedge clk); #1;
 
-        // ---- Test 5: backpressure — tx_ready=0 holds frame ----
+        // Test 5: backpressure - tx_ready=0 holds frame
         tx_ready = 0;
         fill_frame = FILL_PAT; fill_valid = 1;
         @(posedge clk);
         fill_valid = 0;
         @(posedge clk); #1;
         if (tx_valid !== 1'b1) begin
-            $display("FAIL: T5 frame not buffered under backpressure");
+            $display("FAIL: frame not buffered under backpressure");
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T5 frame held under backpressure");
+            $display("PASS: frame held under backpressure");
 
         // Release backpressure
         tx_ready = 1;
         @(posedge clk); @(posedge clk); #1;
         if (tx_valid !== 1'b0) begin
-            $display("FAIL: T5 frame not consumed after ready");
+            $display("FAIL: frame not consumed after ready");
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T5 frame consumed after tx_ready");
+            $display("PASS: frame consumed after tx_ready");
 
-        // ---- Summary ----
+        // Summary
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);
         $stop;

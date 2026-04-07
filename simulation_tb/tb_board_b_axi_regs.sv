@@ -119,7 +119,7 @@ module tb_board_b_axi_regs();
         else begin $display("  FAIL: base_qty = %0d", s_axi_rdata[15:0]); err_cnt = err_cnt+1; end
         @(posedge clk); s_axi_rready=0;
 
-        // Test 4: Read STATUS (0x040) — expect {risk_halt=0,link_up=1,B_IDLE=001,strat=00}=0x24
+        // Test 4: Read STATUS (0x040) - expect {risk_halt=0,link_up=1,B_IDLE=001,strat=00}=0x24
         $display("Test 4: Read STATUS");
         @(posedge clk);
         s_axi_araddr=9'h040; s_axi_arvalid=1; s_axi_rready=1;
@@ -129,7 +129,7 @@ module tb_board_b_axi_regs();
         else begin $display("  FAIL: STATUS = 0x%08X, exp 0x24", s_axi_rdata); err_cnt = err_cnt+1; end
         @(posedge clk); s_axi_rready=0;
 
-        // Test 5: CTRL write → start pulse
+        // Test 5: CTRL write -> start pulse
         $display("Test 5: CTRL start pulse");
         @(posedge clk);
         s_axi_awaddr=9'h000; s_axi_awvalid=1; s_axi_wdata=32'h1;

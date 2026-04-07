@@ -28,7 +28,7 @@ module tb_msg_demux();
         #20; rst_n = 1;
         @(posedge clk);
 
-        // ---- Test 1: QUOTE frame (msg_type=4'h1 in [127:124]) ----
+        // Test 1: QUOTE frame (msg_type=4'h1 in [127:124])
         $display("TEST 1: Send QUOTE frame");
         frame_in = {MSG_QUOTE, 8'd5, 2'b00, 2'b0, 32'd100, 32'd200, 16'd10, 16'd20};
         frame_in_valid = 1;
@@ -50,7 +50,7 @@ module tb_msg_demux();
 
         @(posedge clk); #1;
 
-        // ---- Test 2: FILL frame (msg_type=4'h3) ----
+        // Test 2: FILL frame (msg_type=4'h3)
         $display("TEST 2: Send FILL frame");
         frame_in = {MSG_FILL, 124'hABCDEF};
         frame_in_valid = 1;
@@ -72,7 +72,7 @@ module tb_msg_demux();
 
         @(posedge clk); #1;
 
-        // ---- Test 3: Unknown msg_type → no valid, error counter ----
+        // Test 3: Unknown msg_type -> no valid, error counter
         $display("TEST 3: Unknown msg_type");
         frame_in = {4'hF, 124'd0};
         frame_in_valid = 1;
@@ -93,7 +93,7 @@ module tb_msg_demux();
             err_cnt = err_cnt + 1;
         end else $display("PASS: demux_errors = 1");
 
-        // ---- Test 4: Verify quotes_rcvd counter ----
+        // Test 4: Verify quotes_rcvd counter
         $display("TEST 4: Check quotes_rcvd counter");
         if (quotes_rcvd !== 32'd1) begin
             $display("FAIL: quotes_rcvd expected 1, got %0d", quotes_rcvd);
@@ -112,7 +112,7 @@ module tb_msg_demux();
             err_cnt = err_cnt + 1;
         end else $display("PASS: quotes_rcvd = 2 after second quote");
 
-        // ---- Summary ----
+        // Summary
         $display("=================================");
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);

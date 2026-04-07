@@ -70,14 +70,14 @@ module tb_board_b_top();
         #20; rst_n = 1; @(posedge clk);
         repeat (5) @(posedge clk);
 
-        // ---- AXI config ----
+        // AXI config
         // strategy = MEAN_REV
         @(posedge clk); awaddr=9'h004; awvalid=1; wdata=32'd0; wstrb=4'hF; wvalid=1; bready=1;
         @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
-        // threshold = $0.004 (tiny → always triggers)
+        // threshold = $0.004 (tiny -> always triggers)
         @(posedge clk); awaddr=9'h008; awvalid=1; wdata=32'h100; wstrb=4'hF; wvalid=1; bready=1;
         @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
-        // ema_alpha ≈ 10%
+        // ema_alpha ~ 10%
         @(posedge clk); awaddr=9'h00C; awvalid=1; wdata=32'd6554; wstrb=4'hF; wvalid=1; bready=1;
         @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
         // base_qty = 100
@@ -89,11 +89,11 @@ module tb_board_b_top();
         // max_order_rate = 10000
         @(posedge clk); awaddr=9'h018; awvalid=1; wdata=32'd10000; wstrb=4'hF; wvalid=1; bready=1;
         @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
-        // max_loss = 0 → halt on first strategy signal
+        // max_loss = 0 -> halt on first strategy signal
         @(posedge clk); awaddr=9'h01C; awvalid=1; wdata=32'd0; wstrb=4'hF; wvalid=1; bready=1;
         @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
 
-        // ---- Test 1: Send quote → link_up ----
+        // Test 1: Send quote -> link_up
         $display("Test 1: Link up after first frame");
         tx_frame = QUOTE_0; tx_valid = 1;
         @(posedge clk); tx_valid = 0;
@@ -105,8 +105,8 @@ module tb_board_b_top();
             err_cnt = err_cnt + 1;
         end
 
-        // ---- Test 2: Start → IDLE→ARMED ----
-        $display("Test 2: FSM IDLE → ARMED");
+        // Test 2: Start -> IDLE -> ARMED
+        $display("Test 2: FSM IDLE -> ARMED");
         @(posedge clk); awaddr=9'h000; awvalid=1; wdata=32'h1; wstrb=4'hF; wvalid=1; bready=1;
         @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
         repeat (3) @(posedge clk); #1;
@@ -117,8 +117,8 @@ module tb_board_b_top();
             err_cnt = err_cnt + 1;
         end
 
-        // ---- Test 3: Start → ARMED→TRADING ----
-        $display("Test 3: FSM ARMED → TRADING");
+        // Test 3: Start -> ARMED -> TRADING
+        $display("Test 3: FSM ARMED -> TRADING");
         sw = 8'h01;
         @(posedge clk);
         @(posedge clk); awaddr=9'h000; awvalid=1; wdata=32'h1; wstrb=4'hF; wvalid=1; bready=1;
@@ -131,7 +131,7 @@ module tb_board_b_top();
             err_cnt = err_cnt + 1;
         end
 
-        // ---- Test 4: Send 3 quotes, check counter ----
+        // Test 4: Send 3 quotes, check counter
         $display("Test 4: Quotes flow through pipeline");
         repeat (3) begin
             tx_frame = QUOTE_0; tx_valid = 1;
@@ -148,7 +148,7 @@ module tb_board_b_top();
         end
         @(posedge clk); rready=0;
 
-        // ---- Test 5: Halt check (max_loss=0 → halt after first signal) ----
+        // Test 5: Halt check (max_loss=0 -> halt after first signal)
         $display("Test 5: Risk halt engaged");
         repeat (20) @(posedge clk); #1;
         if (dut.fsm_state == B_HALTED || dut.risk_halt)

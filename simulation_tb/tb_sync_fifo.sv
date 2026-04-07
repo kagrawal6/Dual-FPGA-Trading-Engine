@@ -29,14 +29,14 @@ module tb_sync_fifo();
         #20; rst_n = 1;
         @(posedge clk);
 
-        // ---- T1: Empty after reset ----
+        // After reset: empty should be 1 and count 0 (DEPTH=4 FIFO).
         @(posedge clk); #1;
         if (!empty || count !== 0) begin
-            $display("FAIL: T1 empty=%0b count=%0d after reset", empty, count);
+            $display("FAIL: after reset empty=%0b count=%0d (want empty=1 count=0)", empty, count);
             err_cnt = err_cnt + 1;
-        end else $display("PASS: T1 empty=1 count=0 after reset");
+        end else $display("PASS: empty and count OK after reset");
 
-        // ---- T2: Write 4 items, check full ----
+        // Write four bytes; full flag should set and count==4.
         wr_en = 1;
         wr_data = 8'hAA; @(posedge clk);
         wr_data = 8'hBB; @(posedge clk);
@@ -45,54 +45,54 @@ module tb_sync_fifo();
         wr_en = 0;
         @(posedge clk); #1;
         if (!full || count !== 4) begin
-            $display("FAIL: T2 full=%0b count=%0d, expected full=1 count=4", full, count);
+            $display("FAIL: not full after 4 writes", full, count);
             err_cnt = err_cnt + 1;
-        end else $display("PASS: T2 full=1 count=4 after 4 writes");
+        end else $display("PASS: full after four writes");
 
-        // ---- T3: Read back in FIFO order ----
+        // Pop in order: expect AA, BB, CC, DD (combinational rd_data before each rd_en).
         #1;
         if (rd_data !== 8'hAA) begin
-            $display("FAIL: T3 first rd_data=%h, expected AA", rd_data);
+            $display("FAIL: first rd_data=%h expected AA", rd_data);
             err_cnt = err_cnt + 1;
-        end else $display("PASS: T3a rd_data=AA (head of FIFO)");
+        end else $display("ok: first byte AA");
 
         rd_en = 1;
         @(posedge clk); #1;
         if (rd_data !== 8'hBB) begin
-            $display("FAIL: T3b rd_data=%h, expected BB", rd_data);
+            $display("FAIL: second pop %h want BB", rd_data);
             err_cnt = err_cnt + 1;
         end
 
         @(posedge clk); #1;
         if (rd_data !== 8'hCC) begin
-            $display("FAIL: T3c rd_data=%h, expected CC", rd_data);
+            $display("FAIL: third pop %h want CC", rd_data);
             err_cnt = err_cnt + 1;
         end
 
         @(posedge clk); #1;
         if (rd_data !== 8'hDD) begin
-            $display("FAIL: T3d rd_data=%h, expected DD", rd_data);
+            $display("FAIL: fourth pop %h want DD", rd_data);
             err_cnt = err_cnt + 1;
         end
         @(posedge clk);
         rd_en = 0;
-        if (err_cnt == 0) $display("PASS: T3 FIFO order AA→BB→CC→DD correct");
+        if (err_cnt == 0) $display("PASS: FIFO order AA BB CC DD");
 
-        // ---- T4: Empty after full read ----
+        // All reads done: empty again, count 0.
         @(posedge clk); #1;
         if (!empty || count !== 0) begin
-            $display("FAIL: T4 empty=%0b count=%0d after read-all", empty, count);
+            $display("FAIL: after drain empty=%0b count=%0d", empty, count);
             err_cnt = err_cnt + 1;
-        end else $display("PASS: T4 empty=1 count=0 after reading all");
+        end else $display("PASS: empty after full drain");
 
-        // ---- T5: Flush clears FIFO ----
+        // Flush: write two entries then assert flush; FIFO should clear.
         wr_en = 1;
         wr_data = 8'hEE; @(posedge clk);
         wr_data = 8'hFF; @(posedge clk);
         wr_en = 0;
         @(posedge clk); #1;
         if (count !== 2) begin
-            $display("FAIL: T5 pre-flush count=%0d, expected 2", count);
+            $display("FAIL: count before flush=%0d expected 2", count);
             err_cnt = err_cnt + 1;
         end
 
@@ -101,9 +101,9 @@ module tb_sync_fifo();
         flush = 0;
         @(posedge clk); #1;
         if (!empty || count !== 0) begin
-            $display("FAIL: T5 flush did not clear, empty=%0b count=%0d", empty, count);
+            $display("FAIL: after flush empty=%0b count=%0d", empty, count);
             err_cnt = err_cnt + 1;
-        end else $display("PASS: T5 flush clears FIFO");
+        end else $display("PASS: flush cleared FIFO");
 
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);

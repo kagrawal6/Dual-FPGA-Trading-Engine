@@ -35,7 +35,7 @@ module tb_feature_compute();
         #20; rst_n = 1;
         @(posedge clk);
 
-        // ---- Test 1: First quote → EMA seeds to mid ----
+        // Test 1: First quote -> EMA seeds to mid
         $display("TEST 1: First quote, EMA init to mid");
         bid_price = 32'd100; ask_price = 32'd200; symbol_id = 8'd0;
         book_valid = 1;
@@ -59,7 +59,7 @@ module tb_feature_compute();
         end else $display("PASS: deviation=0");
         @(posedge clk); #1;
 
-        // ---- Test 2: Second quote → EMA = 0.5*200 + 0.5*150 = 175 ----
+        // Test 2: Second quote -> EMA = 0.5*200 + 0.5*150 = 175
         $display("TEST 2: Second quote, EMA update");
         bid_price = 32'd180; ask_price = 32'd220; symbol_id = 8'd0;
         book_valid = 1;
@@ -80,7 +80,7 @@ module tb_feature_compute();
         end else $display("PASS: deviation=25");
         @(posedge clk); #1;
 
-        // ---- Test 3: Third quote → EMA = 0.5*170 + 0.5*175 = 172 ----
+        // Test 3: Third quote -> EMA = 0.5*170 + 0.5*175 = 172
         $display("TEST 3: Third quote, continued EMA");
         bid_price = 32'd160; ask_price = 32'd180; symbol_id = 8'd0;
         book_valid = 1;
@@ -95,7 +95,7 @@ module tb_feature_compute();
         end else $display("PASS: ema=172");
         @(posedge clk); #1;
 
-        // ---- Test 4: New symbol gets fresh EMA init ----
+        // Test 4: New symbol gets fresh EMA init
         $display("TEST 4: New symbol -> fresh EMA init");
         bid_price = 32'd500; ask_price = 32'd600; symbol_id = 8'd3;
         book_valid = 1;

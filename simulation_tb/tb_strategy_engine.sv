@@ -38,8 +38,8 @@ module tb_strategy_engine();
         #20; rst_n = 1;
         @(posedge clk);
 
-        // ---- Test 1: deviation > +threshold → SELL at bid ----
-        // Mean-rev: price above average → sell (expect revert down)
+        // Test 1: deviation > +threshold -> SELL at bid
+        // Mean-rev: price above average -> sell (expect revert down)
         $display("TEST 1: deviation=+20 > threshold=10 -> SELL");
         deviation = 32'sd20;
         bid_price = 32'd1000; ask_price = 32'd1010;
@@ -67,7 +67,7 @@ module tb_strategy_engine();
 
         @(posedge clk); #1;
 
-        // ---- Test 2: deviation < -threshold → BUY at ask ----
+        // Test 2: deviation < -threshold -> BUY at ask
         $display("TEST 2: deviation=-15 < -threshold=-10 -> BUY");
         deviation = -32'sd15;
         bid_price = 32'd900; ask_price = 32'd910;
@@ -96,7 +96,7 @@ module tb_strategy_engine();
 
         @(posedge clk); #1;
 
-        // ---- Test 3: deviation within threshold → no trade ----
+        // Test 3: deviation within threshold -> no trade
         $display("TEST 3: deviation=+5, within threshold -> HOLD");
         deviation = 32'sd5;
         bid_price = 32'd950; ask_price = 32'd960;
@@ -112,7 +112,7 @@ module tb_strategy_engine();
 
         @(posedge clk); #1;
 
-        // ---- Test 4: Exactly at threshold → no trade (strict inequality) ----
+        // Test 4: Exactly at threshold -> no trade (strict inequality)
         $display("TEST 4: deviation=+10 exactly at threshold -> no trade");
         deviation = 32'sd10;
         bid_price = 32'd950; ask_price = 32'd960;
@@ -128,7 +128,7 @@ module tb_strategy_engine();
 
         @(posedge clk); #1;
 
-        // ---- Test 5: feature_valid=0 → no output ----
+        // Test 5: feature_valid=0 -> no output
         $display("TEST 5: feature_valid=0 -> no output");
         deviation = 32'sd100; feature_valid = 0;
         @(posedge clk); @(posedge clk); #1;

@@ -34,7 +34,7 @@ module tb_order_manager();
         #20; rst_n = 1;
         @(posedge clk);
 
-        // ---- Test 1: BUY order → correct ORDER frame fields ----
+        // Test 1: BUY order -> correct ORDER frame fields
         $display("TEST 1: BUY order -> ORDER frame");
         approved_valid = 1; approved_side = 0;
         approved_price = 32'd5000; approved_qty = 16'd25;
@@ -66,7 +66,7 @@ module tb_order_manager();
         end else $display("PASS: order_id=0");
         @(posedge clk); #1;
 
-        // ---- Test 2: SELL order → side=1, incremented order_id ----
+        // Test 2: SELL order -> side=1, incremented order_id
         $display("TEST 2: SELL order -> correct frame");
         approved_valid = 1; approved_side = 1;
         approved_price = 32'd8000; approved_qty = 16'd50;
@@ -83,7 +83,7 @@ module tb_order_manager();
         end else $display("PASS: order_id=1 (incremented)");
         @(posedge clk); #1;
 
-        // ---- Test 3: Backpressure: order_ready=0 holds output ----
+        // Test 3: Backpressure: order_ready=0 holds output
         $display("TEST 3: Backpressure holds output");
         order_ready = 0;
         approved_valid = 1; approved_side = 0;

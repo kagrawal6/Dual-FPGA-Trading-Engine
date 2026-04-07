@@ -42,14 +42,14 @@ module tb_link_rx();
         #20; rst_n = 1;
         @(posedge clk);
 
-        // ---- T1: Idle — no frame output ----
+        // Before any traffic: frame_out_valid should be 0.
         @(posedge clk); #1;
         if (frame_out_valid !== 1'b0) begin
-            $display("FAIL: T1 frame_out_valid=%0b in idle", frame_out_valid);
+            $display("FAIL: idle frame_out_valid=%0b (expected 0)", frame_out_valid);
             err_cnt = err_cnt + 1;
-        end else $display("PASS: T1 no frame in idle");
+        end else $display("PASS: no frame pulse in idle");
 
-        // ---- T2: Drive 32 nibbles (2 clk each), verify frame ----
+        // Drive 32 nibbles, 2 clk per nibble (same timing as link_tx).
         // RX has 2-FF sync, so data arrives 2 clocks late; hold each nibble 2 clk
         repeat(2) @(posedge clk);
         pmod_valid = 1;
@@ -63,22 +63,22 @@ module tb_link_rx();
         repeat(10) @(posedge clk); #1;
 
         if (frame_out !== TEST_FRAME) begin
-            $display("FAIL: T2 frame_out=%h", frame_out);
+            $display("FAIL: frame_out=%h", frame_out);
             $display("       expected =%h", TEST_FRAME);
             err_cnt = err_cnt + 1;
-        end else $display("PASS: T2 frame_out matches TEST_FRAME");
+        end else $display("PASS: frame_out matches TEST_FRAME");
 
-        // ---- T3: link_up asserted after valid frame ----
+        // Valid QUOTE frame assembled -> link_up should be 1.
         if (link_up !== 1'b1) begin
-            $display("FAIL: T3 link_up=%0b, expected 1", link_up);
+            $display("FAIL: link_up=%0b (expected 1)", link_up);
             err_cnt = err_cnt + 1;
-        end else $display("PASS: T3 link_up=1 after valid frame");
+        end else $display("PASS: link_up after good frame");
 
-        // ---- T4: No framing errors ----
+        // No framing/msg errors on this path -> error_count stays 0.
         if (error_count !== 32'h0) begin
-            $display("FAIL: T4 error_count=%0d, expected 0", error_count);
+            $display("FAIL: error_count=%0d (expected 0)", error_count);
             err_cnt = err_cnt + 1;
-        end else $display("PASS: T4 error_count=0");
+        end else $display("PASS: error_count=0");
 
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);

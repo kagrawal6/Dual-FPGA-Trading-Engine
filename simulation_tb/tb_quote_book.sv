@@ -34,7 +34,7 @@ module tb_quote_book();
         // Frame layout: [127:124]=msg_type, [123:116]=symbol, [115:114]=regime,
         //   [113:112]=unused, [111:80]=bid, [79:48]=ask, [47:32]=bid_sz, [31:16]=ask_sz
 
-        // ---- Test 1: Write symbol 0, bid=100, ask=200 ----
+        // Test 1: Write symbol 0, bid=100, ask=200
         $display("TEST 1: Write symbol 0 bid=100 ask=200");
         quote_frame = {MSG_QUOTE, 8'd0, 2'b00, 2'b0,
                         32'd100, 32'd200, 16'd10, 16'd20};
@@ -61,7 +61,7 @@ module tb_quote_book();
 
         @(posedge clk); #1;
 
-        // ---- Test 2: Write symbol 1 (independent storage) ----
+        // Test 2: Write symbol 1 (independent storage)
         $display("TEST 2: Write symbol 1 bid=300 ask=400");
         quote_frame = {MSG_QUOTE, 8'd1, 2'b01, 2'b0,
                         32'd300, 32'd400, 16'd5, 16'd8};
@@ -88,7 +88,7 @@ module tb_quote_book();
 
         @(posedge clk); #1;
 
-        // ---- Test 3: Overwrite symbol 0, verify new values ----
+        // Test 3: Overwrite symbol 0, verify new values
         $display("TEST 3: Overwrite symbol 0 bid=500 ask=600");
         quote_frame = {MSG_QUOTE, 8'd0, 2'b00, 2'b0,
                         32'd500, 32'd600, 16'd15, 16'd25};
@@ -113,7 +113,7 @@ module tb_quote_book();
             $display("FAIL: ask_size=%0d, exp 25", ask_size); err_cnt = err_cnt + 1;
         end else $display("PASS: ask_size=25");
 
-        // ---- Summary ----
+        // Summary
         $display("=================================");
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);

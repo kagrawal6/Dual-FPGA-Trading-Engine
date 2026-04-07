@@ -57,47 +57,47 @@ module tb_market_sim();
         lfsr_load = 1; @(posedge clk);
         lfsr_load = 0; enable = 1;
 
-        // ---- Test 1: first quote msg_type = QUOTE (0x1) ----
+        // Test 1: first quote msg_type = QUOTE (0x1)
         @(posedge quote_valid); #1;
         if (quote_frame[127:124] !== MSG_QUOTE) begin
-            $display("FAIL: T1 msg_type=%h, expected %h", quote_frame[127:124], MSG_QUOTE);
+            $display("FAIL: msg_type=%h, expected %h", quote_frame[127:124], MSG_QUOTE);
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T1 msg_type = QUOTE");
+            $display("PASS: msg_type = QUOTE");
 
-        // ---- Test 2: first quote symbol == 0 ----
+        // Test 2: first quote symbol == 0
         if (quote_frame[123:116] !== 8'd0) begin
-            $display("FAIL: T2 symbol=%0d, expected 0", quote_frame[123:116]);
+            $display("FAIL: symbol=%0d, expected 0", quote_frame[123:116]);
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T2 first symbol = 0");
+            $display("PASS: first symbol = 0");
 
-        // ---- Test 3: bid < ask ----
+        // Test 3: bid < ask
         if (quote_frame[111:80] >= quote_frame[79:48]) begin
-            $display("FAIL: T3 bid=%h >= ask=%h", quote_frame[111:80], quote_frame[79:48]);
+            $display("FAIL: bid=%h >= ask=%h", quote_frame[111:80], quote_frame[79:48]);
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T3 bid < ask (bid=%h, ask=%h)", quote_frame[111:80], quote_frame[79:48]);
+            $display("PASS: bid < ask (bid=%h, ask=%h)", quote_frame[111:80], quote_frame[79:48]);
 
-        // ---- Test 4: symbols rotate 1, 2, 3 ----
+        // Test 4: symbols rotate 1, 2, 3
         for (i = 1; i < 4; i++) begin
             @(posedge quote_valid); #1;
             if (quote_frame[123:116] !== i[7:0]) begin
-                $display("FAIL: T4 symbol=%0d, expected %0d", quote_frame[123:116], i);
+                $display("FAIL: symbol=%0d, expected %0d", quote_frame[123:116], i);
                 err_cnt = err_cnt + 1;
             end else
-                $display("PASS: T4 symbol %0d rotated correctly", i);
+                $display("PASS: symbol %0d rotated correctly", i);
         end
 
-        // ---- Test 5: quotes_generated counter ----
+        // Test 5: quotes_generated counter
         @(posedge clk); #1;
         if (quotes_generated < 32'd4) begin
-            $display("FAIL: T5 quotes_generated=%0d, expected >= 4", quotes_generated);
+            $display("FAIL: quotes_generated=%0d, expected >= 4", quotes_generated);
             err_cnt = err_cnt + 1;
         end else
-            $display("PASS: T5 quotes_generated=%0d", quotes_generated);
+            $display("PASS: quotes_generated=%0d", quotes_generated);
 
-        // ---- Summary ----
+        // Summary
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);
         $stop;
