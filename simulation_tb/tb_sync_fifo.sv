@@ -1,0 +1,113 @@
+`timescale 1ns / 1ps
+
+module tb_sync_fifo();
+
+    import hft_pkg::*;
+
+    localparam DATA_W = 8;
+    localparam DEPTH  = 4;
+
+    logic                    clk, rst_n, flush;
+    logic                    wr_en, rd_en;
+    logic [DATA_W-1:0]       wr_data, rd_data;
+    logic                    full, empty, almost_full;
+    logic [$clog2(DEPTH):0]  count;
+    integer err_cnt = 0;
+
+    always #5 clk = ~clk;
+
+    sync_fifo #(.DATA_W(DATA_W), .DEPTH(DEPTH)) dut (
+        .clk(clk), .rst_n(rst_n), .flush(flush),
+        .wr_en(wr_en), .wr_data(wr_data), .full(full),
+        .rd_en(rd_en), .rd_data(rd_data), .empty(empty),
+        .almost_full(almost_full), .count(count)
+    );
+
+    initial begin
+        clk = 0; rst_n = 0; flush = 0;
+        wr_en = 0; rd_en = 0; wr_data = '0;
+        #20; rst_n = 1;
+        @(posedge clk);
+
+        // ---- T1: Empty after reset ----
+        @(posedge clk); #1;
+        if (!empty || count !== 0) begin
+            $display("FAIL: T1 empty=%0b count=%0d after reset", empty, count);
+            err_cnt = err_cnt + 1;
+        end else $display("PASS: T1 empty=1 count=0 after reset");
+
+        // ---- T2: Write 4 items, check full ----
+        wr_en = 1;
+        wr_data = 8'hAA; @(posedge clk);
+        wr_data = 8'hBB; @(posedge clk);
+        wr_data = 8'hCC; @(posedge clk);
+        wr_data = 8'hDD; @(posedge clk);
+        wr_en = 0;
+        @(posedge clk); #1;
+        if (!full || count !== 4) begin
+            $display("FAIL: T2 full=%0b count=%0d, expected full=1 count=4", full, count);
+            err_cnt = err_cnt + 1;
+        end else $display("PASS: T2 full=1 count=4 after 4 writes");
+
+        // ---- T3: Read back in FIFO order ----
+        #1;
+        if (rd_data !== 8'hAA) begin
+            $display("FAIL: T3 first rd_data=%h, expected AA", rd_data);
+            err_cnt = err_cnt + 1;
+        end else $display("PASS: T3a rd_data=AA (head of FIFO)");
+
+        rd_en = 1;
+        @(posedge clk); #1;
+        if (rd_data !== 8'hBB) begin
+            $display("FAIL: T3b rd_data=%h, expected BB", rd_data);
+            err_cnt = err_cnt + 1;
+        end
+
+        @(posedge clk); #1;
+        if (rd_data !== 8'hCC) begin
+            $display("FAIL: T3c rd_data=%h, expected CC", rd_data);
+            err_cnt = err_cnt + 1;
+        end
+
+        @(posedge clk); #1;
+        if (rd_data !== 8'hDD) begin
+            $display("FAIL: T3d rd_data=%h, expected DD", rd_data);
+            err_cnt = err_cnt + 1;
+        end
+        @(posedge clk);
+        rd_en = 0;
+        if (err_cnt == 0) $display("PASS: T3 FIFO order AA→BB→CC→DD correct");
+
+        // ---- T4: Empty after full read ----
+        @(posedge clk); #1;
+        if (!empty || count !== 0) begin
+            $display("FAIL: T4 empty=%0b count=%0d after read-all", empty, count);
+            err_cnt = err_cnt + 1;
+        end else $display("PASS: T4 empty=1 count=0 after reading all");
+
+        // ---- T5: Flush clears FIFO ----
+        wr_en = 1;
+        wr_data = 8'hEE; @(posedge clk);
+        wr_data = 8'hFF; @(posedge clk);
+        wr_en = 0;
+        @(posedge clk); #1;
+        if (count !== 2) begin
+            $display("FAIL: T5 pre-flush count=%0d, expected 2", count);
+            err_cnt = err_cnt + 1;
+        end
+
+        flush = 1;
+        @(posedge clk);
+        flush = 0;
+        @(posedge clk); #1;
+        if (!empty || count !== 0) begin
+            $display("FAIL: T5 flush did not clear, empty=%0b count=%0d", empty, count);
+            err_cnt = err_cnt + 1;
+        end else $display("PASS: T5 flush clears FIFO");
+
+        if (err_cnt == 0) $display("ALL TESTS PASSED");
+        else $display("FAILED: %0d errors", err_cnt);
+        $stop;
+    end
+
+endmodule
