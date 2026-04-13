@@ -691,21 +691,26 @@ module tb_board_a_top;
         axi_read(ADDR_QUOTES_SENT, rd_val);
         $display("  With interval=500: quotes = %0d (expect ~5-6)", rd_val);
         check("slow interval: quotes in range", rd_val >= 32'd3 && rd_val <= 32'd20);
-        axi_write(ADDR_QUOTE_INT, 32'd0);
 
         // ─────────────────────────────────────────────────────
-        // 24) Back-to-back rapid order injection (4 orders, no gap)
+        // 24) Back-to-back rapid order injection (4 orders)
+        //     Keep quote_interval large so tx_arbiter is mostly
+        //     idle — exchange_lite can only accept the next order
+        //     after the previous fill is consumed (fill_ready).
         // ─────────────────────────────────────────────────────
         $display("--- test_rapid_orders ---");
         begin
             logic [31:0] ords_before;
+            axi_write(ADDR_QUOTE_INT, 32'd5000);
+            repeat (200) @(posedge clk);
             axi_read(ADDR_ORDERS_RCVD, ords_before);
             for (int i = 0; i < 4; i++)
                 inject_order(i[7:0], 1'b0, gm_mid[i] + 32'h0005_0000, 25, 100+i, 16'h2000+i);
-            repeat (1000) @(posedge clk);
+            repeat (2000) @(posedge clk);
             axi_read(ADDR_ORDERS_RCVD, rd_val);
             $display("  rapid orders: before=%0d after=%0d (expect +4)", ords_before, rd_val);
             check("rapid orders: rcvd>=+4", rd_val >= ords_before + 32'd4);
+            axi_write(ADDR_QUOTE_INT, 32'd0);
         end
 
         // ─────────────────────────────────────────────────────

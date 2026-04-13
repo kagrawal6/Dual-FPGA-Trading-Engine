@@ -34,7 +34,8 @@ proc run_group {group_name tb_list} {
         puts " \[$idx/$total\] $group_name — $tb"
         puts "==========================================="
 
-        onbreak {resume}
+        set ::_tb_break 0
+        onbreak {set ::_tb_break 1; resume}
 
         set fsize 0
         if {[file exists transcript]} {
@@ -52,23 +53,19 @@ proc run_group {group_name tb_list} {
             continue
         }
 
-        set had_fatal 0
-        if {[file exists transcript]} {
+        set had_fatal $::_tb_break
+
+        if {!$had_fatal && [file exists transcript]} {
+            after 200
             set fp [open transcript r]
             seek $fp $fsize
             set new_content [read $fp]
             close $fp
-            if {[string first "** Fatal:" $new_content] >= 0} {
-                set had_fatal 1
-            }
-            if {[string first "** Error: FAIL:" $new_content] >= 0} {
-                set had_fatal 1
-            }
-            if {[string first "FAIL (" $new_content] >= 0} {
-                set had_fatal 1
-            }
-            if {[string first "TESTBENCH FAILED" $new_content] >= 0} {
-                set had_fatal 1
+            foreach pat {"** Fatal:" "** Error: FAIL:" "FAIL (" "TESTBENCH FAILED"} {
+                if {[string first $pat $new_content] >= 0} {
+                    set had_fatal 1
+                    break
+                }
             }
         }
 
