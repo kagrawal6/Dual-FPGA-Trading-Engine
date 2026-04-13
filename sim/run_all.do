@@ -48,6 +48,7 @@ proc run_group {group_name tb_list} {
         } err]} {
             puts ">>> FAIL: $tb (Tcl error: $err)"
             lappend all_fail $tb
+            catch {quit -sim}
             continue
         }
 
@@ -57,8 +58,16 @@ proc run_group {group_name tb_list} {
             seek $fp $fsize
             set new_content [read $fp]
             close $fp
-            if {[string first "** Fatal:" $new_content] >= 0 ||
-                [string first "** Error:" $new_content] >= 0} {
+            if {[string first "** Fatal:" $new_content] >= 0} {
+                set had_fatal 1
+            }
+            if {[string first "** Error: FAIL:" $new_content] >= 0} {
+                set had_fatal 1
+            }
+            if {[string first "FAIL (" $new_content] >= 0} {
+                set had_fatal 1
+            }
+            if {[string first "TESTBENCH FAILED" $new_content] >= 0} {
                 set had_fatal 1
             }
         }

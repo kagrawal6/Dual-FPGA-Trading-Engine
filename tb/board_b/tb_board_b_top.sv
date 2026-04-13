@@ -348,7 +348,8 @@ module tb_board_b_top;
         $display("  lat_count = %0d", axi_rd_data);
 
         begin
-            int total_hist = 0;
+            int total_hist;
+            total_hist = 0;
             for (int i = 0; i < 16; i++) begin
                 axi_read(9'h0A0 + i*4);
                 if (axi_rd_data > 0)

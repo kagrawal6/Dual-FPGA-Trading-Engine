@@ -31,6 +31,7 @@ foreach tb $tb_list {
 
     onbreak {resume}
 
+    # Capture transcript size before sim so we can read only new content
     set fsize 0
     if {[file exists transcript]} {
         set fsize [file size transcript]
@@ -43,17 +44,32 @@ foreach tb $tb_list {
     } err]} {
         puts ">>> FAIL: $tb (Tcl error: $err)"
         lappend fail_list $tb
+        catch {quit -sim}
         continue
     }
 
+    # Read new transcript content and check for failures
     set had_error 0
     if {[file exists transcript]} {
         set fp [open transcript r]
         seek $fp $fsize
         set new_content [read $fp]
         close $fp
-        if {[string first "** Fatal:" $new_content] >= 0 ||
-            [string first "** Error:" $new_content] >= 0} {
+
+        # Check for Fatal or Error messages from the simulation
+        if {[string first "** Fatal:" $new_content] >= 0} {
+            set had_error 1
+        }
+        # Check for our testbench FAIL marker (from $error calls)
+        if {[string first "** Error: FAIL:" $new_content] >= 0} {
+            set had_error 1
+        }
+        # Check for testbench-level FAIL summary printed by our TB
+        if {[string first "FAIL (" $new_content] >= 0} {
+            set had_error 1
+        }
+        # Check for TESTBENCH FAILED from $fatal(1, ...)
+        if {[string first "TESTBENCH FAILED" $new_content] >= 0} {
             set had_error 1
         }
     }

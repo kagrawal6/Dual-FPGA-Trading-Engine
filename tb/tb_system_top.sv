@@ -350,7 +350,8 @@ module tb_system_top;
         // ══════════════════════════════════════════════════════════
         $display("\n=== Phase 4: Wait for Board B link_up ===");
         begin
-            int wcnt = 0;
+            int wcnt;
+            wcnt = 0;
             while (!u_board_b.link_up && wcnt < 5000) begin
                 @(posedge clk); wcnt++;
             end
@@ -475,7 +476,8 @@ module tb_system_top;
         // ══════════════════════════════════════════════════════════
         $display("\n=== Phase 10: All 16 Positions ===");
         begin
-            int nonzero_pos = 0;
+            int nonzero_pos;
+            nonzero_pos = 0;
             for (int i = 0; i < 16; i++) begin
                 axi_read_b(9'h058 + i*4);
                 if (axi_rd_b != 32'd0) nonzero_pos++;
@@ -510,7 +512,8 @@ module tb_system_top;
         $display("  lat_count = %0d", axi_rd_b);
 
         begin
-            int total_hist = 0;
+            int total_hist;
+            total_hist = 0;
             for (int i = 0; i < 16; i++) begin
                 axi_read_b(9'h0A0 + i*4);
                 if (axi_rd_b > 0)
@@ -604,7 +607,8 @@ module tb_system_top;
 
         // Wait for link_up again
         begin
-            int wcnt2 = 0;
+            int wcnt2;
+            wcnt2 = 0;
             while (!u_board_b.link_up && wcnt2 < 5000) begin
                 @(posedge clk); wcnt2++;
             end
@@ -641,7 +645,8 @@ module tb_system_top;
         axi_write_a(8'h0C, 32'd3);
 
         begin
-            int halt_wait = 0;
+            int halt_wait;
+            halt_wait = 0;
             while (u_board_b.fsm_state != B_HALTED && halt_wait < 200_000) begin
                 @(posedge clk); halt_wait++;
             end
