@@ -1,0 +1,112 @@
+% ECE 554 — Progress Report (LaTeX)
+% Compile: pdflatex progress_report_2026-04-09.tex
+\documentclass[11pt,twocolumn]{article}
+
+% headsep = space below header block (after date line) to first line of body
+\usepackage[margin=0.75in,headsep=32pt]{geometry}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\setlength{\columnsep}{0.38in}
+% Avoid huge vertical glue between columns/pages (common twocolumn issue)
+\raggedbottom
+
+% --- Paragraphs: justified, no indent, modest gap between paragraphs ---
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.35em plus 0.1em minus 0.05em}
+
+% --- Section-style headings (bold reads clearly in two-column) ---
+% Slightly gentler pre-skip so breaks to page 2 do not leave obvious holes.
+\newcommand{\Rsec}[1]{%
+  \par\addvspace{0.65\baselineskip plus 0.12\baselineskip minus 0.08\baselineskip}%
+  {\noindent\large\bfseries #1\par}%
+  \addvspace{0.42\baselineskip plus 0.06\baselineskip}%
+}
+\newcommand{\Rsub}[1]{%
+  \par\addvspace{0.55\baselineskip}%
+  {\noindent\normalsize\itshape #1\par}%
+  \addvspace{0.38\baselineskip}%
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\setlength{\headheight}{36pt}
+\renewcommand{\headruleskip}{0pt}
+\fancyhead[L]{\begin{tabular}[t]{@{}l@{}}
+  \textbf{ECE 554}\\[0.2em]
+  \textbf{Progress Report}\\[0.25em]
+  \normalsize\normalfont 2026-04-09
+\end{tabular}}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+\begin{document}
+\thispagestyle{fancy}
+
+% Members: use tabular so "Members" is not a separate \par (avoids \parskip
+% stacking between the heading line and the names).
+\noindent\begin{tabular}[t]{@{}l@{}}
+  {\large\bfseries Members} \\[0.28em]
+  Kushal Agrawal \\
+  Eeshana Hari
+\end{tabular}
+
+\Rsec{Current Progress}
+
+The team has brought the dual-FPGA trading engine from specification to exercised RTL. On the \emph{verification} side, we built a Python golden model and exported structured test vectors (JSON) so that RTL simulation can be checked against known-good arithmetic for exchange behavior, feature computation, and other data-plane paths. That gives us a single source of truth for ``what should happen'' when the same seeds and parameters are applied in hardware and software.
+
+On the \emph{implementation} side, all major PL blocks are in place for both boards: Board~A (market simulation, exchange, arbitration, and control), Board~B (quote handling through strategy, risk, orders, positions, and telemetry registers), the shared PMOD link layer, and shared primitives (LFSR, FIFOs, debounce, etc.). PS-facing logic is integrated through AXI-Lite register files as described in the design specification. We have run extensive \textbf{unit tests} per module and \textbf{integration tests} that stitch full \texttt{board\_a\_top} and \texttt{board\_b\_top} hierarchies, including a full-system testbench and comparison against golden vectors where applicable. Regression scripts (e.g., ModelSim \texttt{run\_all.do}) give us a repeatable pass/fail gate before hardware.
+
+On the hardware side, we have moved past pure RTL-only validation: bring-up has started on AUP-ZU3 (Zynq UltraScale+). So far we have validated the tool flow with an LED blinker, exercised \textbf{PS--PL connectivity} (loading overlays and performing AXI/MMIO read--write smoke tests), and \textbf{successfully generated bitstreams} from Vivado for our design. The next milestones are to stabilize the Board~A block design and AXI path to our packaged IP, repeat the flow for Board~B, then connect the boards over PMOD and run the PYNQ scripts (\texttt{config\_symbols.py}, \texttt{telemetry\_server.py}) end-to-end. A separate schedule table (not reproduced here) tracks week-by-week hardware vs.\ software deliverables for the course.
+
+\Rsec{Testing}
+
+\Rsub{Software (golden model and vectors)}
+
+The golden model lives under \texttt{golden\_model/} with per-block vector files in \texttt{golden\_model/vectors/} (e.g., exchange, features, LFSR). Those files capture expected outputs for chosen seeds and configuration so that simulation and (eventually) selective hardware checks can be compared without hand-calculating Q-format math. Generating vectors once and reusing them across regressions reduced disagreement between teammates and made integration failures easier to localize (RTL vs.\ testbench vs.\ vector).
+
+\Rsub{Simulation (unit, integration, system)}
+
+Every major RTL subtree has a dedicated SystemVerilog testbench under \texttt{simulation\_tb/}: shared blocks (LFSR, debounce, synchronous FIFO), link TX/RX and loopback, Board~A pipeline pieces (market sim, exchange, arbiter), and Board~B (demux, quote book, features, strategy, risk, order manager, position tracker, histogram, etc.). We also run \textbf{cross-cutting tests}: for example, link loopback proves the serializer and receiver together; \texttt{tb\_system\_top} exercises the full split design in simulation. Most tests are self-checking (\texttt{PASS}/\texttt{FAIL} and error counts). Remaining work on simulation is mostly \textbf{final integration hardening}: occasional tool or timing-report noise during long runs, and closing any last corner cases before we freeze RTL for the demo.
+
+\Rsub{Hardware (TODO)}
+
+Hardware validation is the main focus for this reporting period and the next. Current blockers include confirming that the \textbf{Vivado block design for Board~A} matches our intent (clock/reset/AXI connectivity) and resolving \textbf{AXI read/write} behavior through the interconnect into our custom IP---we need deterministic MMIO from Linux before standalone Board~A tests are meaningful. Synthesis and bitstream generation are already in the loop; the emphasis shifts to \textbf{deploying} \texttt{.bit}/\texttt{.hwh} pairs on each board and stepping through the lab's bring-up phases.
+
+\noindent\textbf{Concrete next steps} (aligned with our internal checklist and course milestones):
+
+\begin{itemize}[
+  leftmargin=1.15em,
+  itemsep=0.28em,
+  topsep=0.35em,
+  parsep=0pt,
+  partopsep=0pt
+]
+  \item[\textbf{A1.}] Finish debugging AXI and wrapper wiring for Board~A; timing is tentatively meeting goals at 100~MHz but we continue to verify on hardware.
+  \item[\textbf{A2.}] Reload overlay on Board~A and run \texttt{config\_symbols.py} in a standalone configuration (status registers, quote activity, no dependency on Board~B yet).
+  \item[\textbf{A3.}] Use slide switches to change regime or related controls and confirm visible changes in status or quote behavior per the spec.
+  \item[\textbf{B1.}] Complete Board~B Vivado build (block design + same PS shell pattern as Board~A).
+  \item[\textbf{B2.}] Repeat LED and AXI smoke tests on Board~B before trusting larger tests.
+  \item[\textbf{B3.}] Deploy Board~B \texttt{.bit} and \texttt{.hwh} to the SD card overlay path expected by PYNQ.
+  \item[\textbf{S1.}] Connect Board~A and Board~B via PMOD; verify \texttt{link\_up}, FSM states, and that \texttt{telemetry\_server.py} streams sensible JSON.
+  \item[\textbf{S2.}] Compare quote throughput: Board~B \texttt{quotes\_rcvd} vs Board~A \texttt{quotes\_sent} (allowing small skew while both sides run).
+  \item[\textbf{S3.}] Raise \texttt{trading\_enable} (switch) and confirm orders and fills propagate as designed.
+  \item[\textbf{S4.}] Attach the laptop \texttt{dashboard.py} to Board~B's UART and verify live plots at the target baud rate.
+\end{itemize}
+
+\Rsec{Individual Contributions}
+
+\Rsub{Kushal Agrawal}
+
+Led the \textbf{golden model} effort: structure of the Python reference, vector generation, and alignment with \texttt{hft\_pkg} conventions (fixed-point formats, message layouts). Owns much of the \textbf{Board~A integration testing} story (top-level testbench usage, regression triage) and \textbf{Board~B} RTL in several subsystems plus shared peripherals \texttt{debounce.sv} and \texttt{sync\_fifo.sv}, each with unit tests. Has been driving \textbf{Board~B integration} simulation and will continue supporting \textbf{Board~B hardware bring-up} (overlay load, MMIO, telemetry path) in parallel with the checklist above.
+
+\Rsub{Outstanding}
+Close out any remaining full-chip integration test gaps; complete Board~B on-hardware steps (B1--B3, then S1--S4 as the link comes up).
+
+\Rsub{Eeshana Hari}
+
+Primary ownership of \textbf{Board~A RTL} modules and their \textbf{unit testbenches}, from control and datapath glue through exchange-side behavior. Implemented and tested the \textbf{link layer} blocks and the \texttt{tb\_link\_*} / loopback path. Implemented the shared \textbf{\texttt{lfsr32.sv}} primitive used by the noise and simulation flows, with matching TB and golden vectors.
+
+\Rsub{Outstanding}
+Lead \textbf{Board~A hardware bring-up}: iterating through Vivado IP packaging, AXI interconnect hookup, block-design layout, and on-board validation. Will coordinate with Kushal when the PMOD link joins both boards for system-level tests.
+
+\end{document}

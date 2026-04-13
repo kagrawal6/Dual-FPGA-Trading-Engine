@@ -1,13 +1,17 @@
 // ============================================================================
 // Testbench: tb_board_b_top
-// Full integration test for board_b_top. Exercises:
-//   - 5-state FSM (RESET→IDLE→ARMED→TRADING→HALTED) via link injection + AXI
-//   - Pipeline: golden QUOTE frames via PMOD link → order generation
-//   - FILL injection → position_tracker → AXI readback
+// Full integration test for board_b_top with 16 symbols. Exercises:
+//   - 5-state FSM (RESET→IDLE→ARMED→TRADING→HALTED) via link + AXI
+//   - Full 16-symbol pipeline via PMOD link injection
+//   - FILL injection → position_tracker → AXI readback for all 16 symbols
+//   - Cash accounting and histogram readback
 //   - AXI config write/readback and status verification
 //   - Counter clear on FSM RESET
 //   - LED/RGB structural checks
 //   - Strategy override via switches
+//   - Risk halt trigger and recovery
+//   - Multiple regime values
+//   - Back-to-back frame stress
 // ============================================================================
 
 `timescale 1ns / 1ps
@@ -16,7 +20,7 @@ import hft_pkg::*;
 
 module tb_board_b_top;
 
-    localparam int TB_NUM_SYM = 4;
+    localparam int TB_NUM_SYM = 16;
     localparam int LINK_W     = 4;
 
     logic        clk, rst_n;
@@ -117,9 +121,7 @@ module tb_board_b_top;
         rready = 1'b0;
     endtask
 
-    // ── Link frame injection (mimics link_tx protocol) ────────────
-    // Sends MSB nibble first, each held 2 core clocks. Keeps
-    // pmod_ja_valid HIGH for the entire 32-nibble frame duration.
+    // ── Link frame injection ──────────────────────────────────────
     task automatic send_link_frame(input logic [127:0] frame);
         pmod_ja_valid = 1'b0;
         pmod_ja = '0;
@@ -133,41 +135,52 @@ module tb_board_b_top;
         end
         pmod_ja_valid = 1'b0;
         pmod_ja = '0;
-
         repeat (10) @(posedge clk);
     endtask
 
-    // ── Golden QUOTE frames (pipeline_vectors.json, first 20) ─────
-    localparam logic [127:0] GM_FRAMES [0:19] = '{
-        128'h100000B3F81E00B4081E03E803E80000,  // sym 0
-        128'h101001A3F82101A4082103E803E80000,  // sym 1
-        128'h10200383F8160384081603E803E80000,  // sym 2
-        128'h10300072F81D0073081D03E803E80000,  // sym 3
-        128'h100000B3F83100B4083103E803E80001,  // sym 0
-        128'h101001A3F81601A4081603E803E80001,  // sym 1
-        128'h10200383F8250384082503E803E80001,  // sym 2
-        128'h10300072F82E0073082E03E803E80001,  // sym 3
-        128'h100000B3F81A00B4081A03E803E80002,  // sym 0
-        128'h101001A3F81801A4081803E803E80002,  // sym 1
-        128'h10200383F81B0384081B03E803E80002,  // sym 2
-        128'h10300072F80D0073080D03E803E80002,  // sym 3
-        128'h100000B3F80B00B4080B03E803E80003,  // sym 0
-        128'h101001A3F7F401A407F403E803E80003,  // sym 1
-        128'h10200383F7FE038407FE03E803E80003,  // sym 2
-        128'h10300072F80F0073080F03E803E80003,  // sym 3
-        128'h100000B3F81500B4081503E803E80004,  // sym 0
-        128'h101001A3F7DD01A407DD03E803E80004,  // sym 1
-        128'h10200383F7FF038407FF03E803E80004,  // sym 2
-        128'h10300072F7F1007307F103E803E80004   // sym 3
-    };
+    // ── 16-symbol init_mid values ─────────────────────────────────
+    logic [31:0] init_mid [0:15];
+    initial begin
+        init_mid[ 0] = 32'h00B4_0000;  // AAPL  $180
+        init_mid[ 1] = 32'h01A4_0000;  // MSFT  $420
+        init_mid[ 2] = 32'h0384_0000;  // NVDA  $900
+        init_mid[ 3] = 32'h0073_0000;  // XOM   $115
+        init_mid[ 4] = 32'h00A0_0000;  // CVX   $160
+        init_mid[ 5] = 32'h009B_0000;  // JNJ   $155
+        init_mid[ 6] = 32'h0208_0000;  // UNH   $520
+        init_mid[ 7] = 32'h00B9_0000;  // AMZN  $185
+        init_mid[ 8] = 32'h00FA_0000;  // TSLA  $250
+        init_mid[ 9] = 32'h00C8_0000;  // JPM   $200
+        init_mid[10] = 32'h01E0_0000;  // GS    $480
+        init_mid[11] = 32'h0168_0000;  // CAT   $360
+        init_mid[12] = 32'h00C8_0000;  // HON   $200
+        init_mid[13] = 32'h00A5_0000;  // PG    $165
+        init_mid[14] = 32'h003C_0000;  // KO    $60
+        init_mid[15] = 32'h00AF_0000;  // GOOGL $175
+    end
 
-    // FILL: sym=0, BUY, FILL_OK, price=0x00B40815, qty=100, oid=1, ts=42
-    localparam logic [127:0] FILL_SYM0_BUY =
-        128'h3000_00B4_0815_0064_0001_002A_0000_0000;
+    // Helper: build QUOTE frame
+    function automatic logic [127:0] build_quote(
+        input int sym, input logic [31:0] bid, input logic [31:0] ask,
+        input int regime, input int seq
+    );
+        return {4'h1, sym[7:0], regime[1:0], 2'b00, bid, ask, 16'h03E8, 16'h03E8, seq[15:0]};
+    endfunction
 
-    // FILL: sym=1, SELL, FILL_OK, price=0x01A40821, qty=50, oid=2, ts=55
-    localparam logic [127:0] FILL_SYM1_SELL =
-        128'h3010_8000_0000_0032_0002_0037_0000_0000;
+    // Helper: build FILL frame
+    function automatic logic [127:0] build_fill(
+        input int sym, input logic side, input logic [2:0] status,
+        input logic [31:0] price, input int qty, input int oid, input int ts
+    );
+        return {4'h3, sym[7:0], side, status, price, qty[15:0], oid[15:0], ts[15:0], 32'h0};
+    endfunction
+
+    // ── Simulation timeout ────────────────────────────────────────
+    initial begin
+        #5_000_000;
+        $display("[TIMEOUT] tb_board_b_top exceeded 5 ms");
+        $finish;
+    end
 
     // ── Main test ─────────────────────────────────────────────────
     initial begin
@@ -186,262 +199,449 @@ module tb_board_b_top;
         @(posedge clk);
 
         // ══════════════════════════════════════════════════════════
-        // Phase 1: FSM transitions
+        // Phase 1: FSM transitions (same as before, quick check)
         // ══════════════════════════════════════════════════════════
         $display("\n=== Phase 1: FSM Transitions ===");
 
-        // T1: RESET → IDLE (automatic 1-cycle)
-        check("T1: starts RESET",  dut.fsm_state == B_RESET);
+        check("T1: starts RESET", dut.fsm_state == B_RESET);
         @(posedge clk);
-        check("T1: → IDLE",        dut.fsm_state == B_IDLE);
+        check("T1: → IDLE", dut.fsm_state == B_IDLE);
 
-        // T2: start without link_up → stays IDLE
-        check("T2: link_up==0",    dut.link_up == 1'b0);
+        // Start without link_up
         axi_write(9'h000, 32'h0000_0001);
         repeat (2) @(posedge clk);
-        check("T2: stays IDLE",    dut.fsm_state == B_IDLE);
+        check("T2: stays IDLE", dut.fsm_state == B_IDLE);
 
-        // T3: send golden QUOTE → link_up asserts
-        $display("  Sending first QUOTE via link...");
-        send_link_frame(GM_FRAMES[0]);
-        check("T3: link_up==1",    dut.link_up == 1'b1);
+        // Send first QUOTE to establish link_up
+        send_link_frame(build_quote(0, init_mid[0] - 32'h1000, init_mid[0] + 32'h1000, 0, 0));
+        check("T3: link_up", dut.link_up == 1'b1);
 
-        // T4: start with link_up → IDLE → ARMED
+        // IDLE → ARMED → TRADING
         axi_write(9'h000, 32'h0000_0001);
         repeat (2) @(posedge clk);
-        check("T4: → ARMED",       dut.fsm_state == B_ARMED);
-        check("T4: order_en==0",   dut.order_enable == 1'b0);
+        check("T4: ARMED", dut.fsm_state == B_ARMED);
 
-        // T5: start + trading_enable → ARMED → TRADING
         sw = 8'h01;
         @(posedge clk);
         axi_write(9'h000, 32'h0000_0001);
         repeat (2) @(posedge clk);
-        check("T5: → TRADING",     dut.fsm_state == B_TRADING);
-        check("T5: order_en==1",   dut.order_enable == 1'b1);
+        check("T5: TRADING", dut.fsm_state == B_TRADING);
 
         // ══════════════════════════════════════════════════════════
-        // Phase 2: Pipeline — 11 more golden quotes in TRADING
+        // Phase 2: AXI config — write all params and verify
         // ══════════════════════════════════════════════════════════
-        $display("\n=== Phase 2: Pipeline (12 quotes total) ===");
+        $display("\n=== Phase 2: AXI Config ===");
 
-        for (int i = 1; i < 12; i++)
-            send_link_frame(GM_FRAMES[i]);
+        axi_write(9'h008, 32'h0000_0100);  // threshold ≈ $0.004
+        axi_write(9'h00C, 32'd6554);        // alpha
+        axi_write(9'h010, 32'd50);           // base_qty
+        axi_write(9'h014, 32'd100_000);      // max_position
+        axi_write(9'h018, 32'd100_000);      // max_order_rate
+        axi_write(9'h01C, 32'd50_000_000);   // max_loss
 
+        axi_read(9'h008);
+        check32("P2: threshold", axi_rd_data, 32'h0000_0100);
+        axi_read(9'h010);
+        check32("P2: base_qty", axi_rd_data, 32'd50);
+        axi_read(9'h014);
+        check32("P2: max_pos", axi_rd_data, 32'd100_000);
+
+        // ══════════════════════════════════════════════════════════
+        // Phase 3: Send 16-symbol QUOTE frames (EMA seeding)
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 3: 16-Symbol EMA Seeding ===");
+
+        for (int i = 1; i < 16; i++)
+            send_link_frame(build_quote(i, init_mid[i] - 32'h1000, init_mid[i] + 32'h1000, 0, 0));
         repeat (30) @(posedge clk);
 
-        // Verify quotes_rcvd
         axi_read(9'h044);
-        $display("  quotes_rcvd = %0d (expect 12)", axi_rd_data);
-        check32("P2: quotes==12", axi_rd_data, 32'd12);
+        $display("  quotes_rcvd = %0d (expect 16)", axi_rd_data);
+        check32("P3: 16 quotes", axi_rd_data, 32'd16);
 
-        // STATUS: risk_halt=0, link_up=1, fsm=B_TRADING(011), strat=MEAN_REV(00)
-        // {25'b0, 0, 1, 011, 00} = 0x2C
-        axi_read(9'h040);
-        $display("  STATUS = 0x%08X (expect 0x2C)", axi_rd_data);
-        check32("P2: STATUS", axi_rd_data, 32'h0000_002C);
+        // ══════════════════════════════════════════════════════════
+        // Phase 4: 2nd round with price shifts → orders
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 4: Price Shifts → Orders ===");
+
+        for (int i = 0; i < 16; i++) begin
+            logic [31:0] shifted;
+            shifted = init_mid[i] + 32'h0002_0000;  // +$2
+            send_link_frame(build_quote(i, shifted - 32'h1000, shifted + 32'h1000, 0, 1));
+        end
+        repeat (50) @(posedge clk);
+
+        axi_read(9'h044);
+        $display("  quotes_rcvd = %0d (expect 32)", axi_rd_data);
+        check32("P4: 32 quotes", axi_rd_data, 32'd32);
 
         axi_read(9'h048);
         $display("  orders_sent = %0d", axi_rd_data);
 
-        // ══════════════════════════════════════════════════════════
-        // Phase 3: FSM control — TRADING ↔ ARMED
-        // ══════════════════════════════════════════════════════════
-        $display("\n=== Phase 3: FSM Control ===");
-
-        // Disable trading_enable → TRADING → ARMED
-        sw = 8'h00;
-        @(posedge clk); #1;
-        check("P3a: → ARMED",      dut.fsm_state == B_ARMED);
-        check("P3a: order_en==0",  dut.order_enable == 1'b0);
-
-        // Re-enable + start → ARMED → TRADING
-        sw = 8'h01;
-        @(posedge clk);
-        axi_write(9'h000, 32'h0000_0001);
-        repeat (2) @(posedge clk);
-        check("P3b: → TRADING",    dut.fsm_state == B_TRADING);
+        // STATUS check
+        axi_read(9'h040);
+        $display("  STATUS = 0x%08X", axi_rd_data);
+        check("P4: no risk_halt", axi_rd_data[6] == 1'b0);
+        check("P4: link_up", axi_rd_data[5] == 1'b1);
+        check("P4: TRADING", axi_rd_data[4:2] == 3'b011);
 
         // ══════════════════════════════════════════════════════════
-        // Phase 4: Fill injection via link
+        // Phase 5: FILL injection for 8 symbols
         // ══════════════════════════════════════════════════════════
-        $display("\n=== Phase 4: Fill Injection ===");
+        $display("\n=== Phase 5: Fill Injection (8 symbols) ===");
 
-        send_link_frame(FILL_SYM0_BUY);
+        for (int i = 0; i < 8; i++) begin
+            send_link_frame(build_fill(i, 1'b0, 3'b000, init_mid[i], 100, i, 42+i));
+        end
 
         axi_read(9'h04C);
         $display("  fills_rcvd = %0d", axi_rd_data);
-        check32("P4: fills==1", axi_rd_data, 32'd1);
+        check("P5: fills>=8", axi_rd_data >= 32'd8);
+
+        // Read all 16 positions
+        $display("  --- Position readback ---");
+        for (int i = 0; i < 16; i++) begin
+            axi_read(9'h058 + i*4);
+            $display("  pos[%2d] = %7d", i, $signed(axi_rd_data));
+        end
+
+        // First 8 should be 100 (BUY fill)
+        axi_read(9'h058);
+        check32("P5: pos[0]=100", axi_rd_data, 32'd100);
+        axi_read(9'h07C);  // pos[9] at 0x058+9*4=0x07C
+        check32("P5: pos[9]=0 (no fill)", axi_rd_data, 32'd0);
+
+        // ══════════════════════════════════════════════════════════
+        // Phase 6: SELL fills for symbols 0-3
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 6: SELL Fills (sym 0-3) ===");
+
+        for (int i = 0; i < 4; i++)
+            send_link_frame(build_fill(i, 1'b1, 3'b000, init_mid[i] + 32'h0001_0000, 50, 20+i, 80+i));
 
         axi_read(9'h058);
-        $display("  position[0] = %0d (signed)", $signed(axi_rd_data));
-        check32("P4: pos[0]==100", axi_rd_data, 32'd100);
+        $display("  pos[0] after SELL = %0d (expect 50)", $signed(axi_rd_data));
+        check32("P6: pos[0]=50", axi_rd_data, 32'd50);
+
+        // ══════════════════════════════════════════════════════════
+        // Phase 7: Cash readback
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 7: Cash Readback ===");
 
         axi_read(9'h098);
         $display("  cash_lo = 0x%08X", axi_rd_data);
+        axi_read(9'h09C);
+        $display("  cash_hi = 0x%08X", axi_rd_data);
 
         // ══════════════════════════════════════════════════════════
-        // Phase 5: Risk halt → HALTED, only reset exits
+        // Phase 8: Latency histogram
         // ══════════════════════════════════════════════════════════
-        $display("\n=== Phase 5: Risk Halt → HALTED ===");
+        $display("\n=== Phase 8: Latency Histogram ===");
 
-        force dut.risk_halt = 1'b1;
-        @(posedge clk); #1;
-        check("P5a: → HALTED",     dut.fsm_state == B_HALTED);
-        release dut.risk_halt;
+        axi_read(9'h0E0);
+        $display("  lat_min   = %0d", axi_rd_data);
 
-        // Start in HALTED → stays HALTED
-        axi_write(9'h000, 32'h0000_0001);
-        repeat (2) @(posedge clk);
-        check("P5b: stays HALTED", dut.fsm_state == B_HALTED);
+        axi_read(9'h0E4);
+        $display("  lat_max   = %0d", axi_rd_data);
 
-        // Reset → HALTED → RESET → IDLE
-        axi_write(9'h000, 32'h0000_0002);
-        check("P5c: → RESET",      dut.fsm_state == B_RESET);
-        @(posedge clk); #1;
-        check("P5d: → IDLE",       dut.fsm_state == B_IDLE);
+        axi_read(9'h0EC);
+        $display("  lat_count = %0d", axi_rd_data);
+
+        begin
+            int total_hist = 0;
+            for (int i = 0; i < 16; i++) begin
+                axi_read(9'h0A0 + i*4);
+                if (axi_rd_data > 0)
+                    $display("  hist[%2d] = %0d", i, axi_rd_data);
+                total_hist += axi_rd_data;
+            end
+            $display("  Total histogram entries: %0d", total_hist);
+        end
 
         // ══════════════════════════════════════════════════════════
-        // Phase 6: AXI config write + readback
+        // Phase 9: Strategy override via switches
         // ══════════════════════════════════════════════════════════
-        $display("\n=== Phase 6: AXI Config Registers ===");
+        $display("\n=== Phase 9: Strategy Override ===");
 
-        axi_write(9'h008, 32'h0002_0000);
-        axi_read(9'h008);
-        check32("P6: threshold",     axi_rd_data, 32'h0002_0000);
-
-        axi_write(9'h00C, 32'h0000_3333);
-        axi_read(9'h00C);
-        check32("P6: ema_alpha",     axi_rd_data, 32'h0000_3333);
-
-        axi_write(9'h010, 32'h0000_00C8);
-        axi_read(9'h010);
-        check32("P6: base_qty",      axi_rd_data, 32'h0000_00C8);
-
-        axi_write(9'h014, 32'h0000_03E8);
-        axi_read(9'h014);
-        check32("P6: max_position",  axi_rd_data, 32'h0000_03E8);
-
-        axi_read(9'h018);
-        check32("P6: max_ord_rate",  axi_rd_data, 32'd1000);
-
-        axi_read(9'h01C);
-        check32("P6: max_loss",      axi_rd_data, 32'd100);
-
-        axi_write(9'h004, 32'h0000_0001);
-        axi_read(9'h004);
-        check32("P6: strategy=MOM",  axi_rd_data, 32'h0000_0001);
-
-        // Strategy override via switches
-        sw = 8'h0E;  // sw[3]=override, sw[2:1]=11=AUTO, sw[0]=0
+        // sw[3]=override, sw[2:1]=strategy, sw[0]=trading_enable
+        sw = 8'h0F;  // override=1, strat=11(AUTO), enable=1
         @(posedge clk);
         axi_read(9'h040);
         $display("  STATUS w/ override = 0x%08X", axi_rd_data);
-        check("P6: strat override=AUTO", axi_rd_data[1:0] == 2'b11);
-        sw = 8'h00;
+        check("P9a: strat=AUTO", axi_rd_data[1:0] == 2'b11);
+
+        sw = 8'h07;  // override=0, strat=11, enable=1
+        @(posedge clk);
+        axi_read(9'h040);
+        check("P9b: strat=MEAN_REV (no override)", axi_rd_data[1:0] == 2'b00);
+
+        sw = 8'h0B;  // override=1, strat=01(MOMENTUM), enable=1
+        @(posedge clk);
+        axi_read(9'h040);
+        check("P9c: strat=MOMENTUM", axi_rd_data[1:0] == 2'b01);
+
+        sw = 8'h01;  // restore normal
         @(posedge clk);
 
         // ══════════════════════════════════════════════════════════
-        // Phase 7: Counter clear on FSM RESET
+        // Phase 10: FSM control — TRADING ↔ ARMED
         // ══════════════════════════════════════════════════════════
-        $display("\n=== Phase 7: Counter Clear ===");
+        $display("\n=== Phase 10: FSM Control ===");
 
-        send_link_frame(GM_FRAMES[0]);
-        axi_read(9'h044);
-        $display("  quotes after 1 frame = %0d", axi_rd_data);
-        check("P7a: quotes>=1", axi_rd_data >= 32'd1);
+        sw = 8'h00;  // disable trading
+        @(posedge clk); #1;
+        check("P10a: → ARMED", dut.fsm_state == B_ARMED);
+
+        sw = 8'h01;
+        @(posedge clk);
+        axi_write(9'h000, 32'h0000_0001);
+        repeat (2) @(posedge clk);
+        check("P10b: → TRADING", dut.fsm_state == B_TRADING);
+
+        // ══════════════════════════════════════════════════════════
+        // Phase 11: Risk halt → HALTED, only reset exits
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 11: Risk Halt ===");
+
+        force dut.risk_halt = 1'b1;
+        @(posedge clk); #1;
+        check("P11a: → HALTED", dut.fsm_state == B_HALTED);
+        release dut.risk_halt;
+
+        axi_write(9'h000, 32'h0000_0001);
+        repeat (2) @(posedge clk);
+        check("P11b: stays HALTED", dut.fsm_state == B_HALTED);
 
         axi_write(9'h000, 32'h0000_0002);
-        repeat (3) @(posedge clk);
+        check("P11c: → RESET", dut.fsm_state == B_RESET);
+        @(posedge clk); #1;
+        check("P11d: → IDLE", dut.fsm_state == B_IDLE);
+
+        // ══════════════════════════════════════════════════════════
+        // Phase 12: Counter clear verification
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 12: Counter Clear ===");
 
         axi_read(9'h044);
-        check32("P7b: quotes cleared", axi_rd_data, 32'd0);
-
+        check32("P12: quotes=0", axi_rd_data, 32'd0);
         axi_read(9'h048);
-        check32("P7c: orders cleared", axi_rd_data, 32'd0);
-
+        check32("P12: orders=0", axi_rd_data, 32'd0);
         axi_read(9'h04C);
-        check32("P7d: fills cleared",  axi_rd_data, 32'd0);
+        check32("P12: fills=0", axi_rd_data, 32'd0);
+        axi_read(9'h050);
+        check32("P12: rejects=0", axi_rd_data, 32'd0);
+
+        // All 16 positions should be cleared
+        for (int i = 0; i < 16; i++) begin
+            axi_read(9'h058 + i*4);
+            check32($sformatf("P12: pos[%0d]=0", i), axi_rd_data, 32'd0);
+        end
 
         // ══════════════════════════════════════════════════════════
-        // Phase 8: LED / RGB structural
+        // Phase 13: Full restart + back-to-back stress
         // ══════════════════════════════════════════════════════════
-        $display("\n=== Phase 8: LED/RGB Outputs ===");
+        $display("\n=== Phase 13: Restart + Stress ===");
 
-        // Currently in IDLE (B_IDLE = 3'b001)
-        check("P8a: LED[2:0]=IDLE",  led[2:0] == 3'b001);
-        check("P8b: LED[5]=0 halt",  led[5] == 1'b0);
-        check("P8c: LED[6]=0 ord_en",led[6] == 1'b0);
+        send_link_frame(build_quote(0, init_mid[0] - 32'h1000, init_mid[0] + 32'h1000, 0, 0));
 
-        // RGB1: link_up is cleared by the reset in phase 7
-        // After counter_clr, link_up=0, so rgb1 = yellow (110)
-        check("P8d: rgb1 yellow",    rgb1 == 3'b110);
-
-        // ══════════════════════════════════════════════════════════
-        // Phase 9: Full round-trip with more golden frames
-        // ══════════════════════════════════════════════════════════
-        $display("\n=== Phase 9: Full Round-Trip ===");
-
-        send_link_frame(GM_FRAMES[0]);
         axi_write(9'h000, 32'h0000_0001);
         repeat (2) @(posedge clk);
         sw = 8'h01;
         @(posedge clk);
         axi_write(9'h000, 32'h0000_0001);
         repeat (2) @(posedge clk);
-        check("P9a: in TRADING",     dut.fsm_state == B_TRADING);
+        check("P13a: TRADING", dut.fsm_state == B_TRADING);
 
-        // LED should reflect TRADING
-        check("P9b: LED[2:0]=TRADING", led[2:0] == 3'b011);
-        check("P9c: LED[6]=order_en",  led[6] == 1'b1);
-
-        for (int i = 1; i < 20; i++)
-            send_link_frame(GM_FRAMES[i]);
-
-        repeat (30) @(posedge clk);
+        // Burst: 16 symbols × 4 rounds = 64 frames
+        for (int round = 0; round < 4; round++) begin
+            for (int i = 0; i < 16; i++) begin
+                logic [31:0] mid_s;
+                if (round == 0)
+                    mid_s = init_mid[i];
+                else if (round[0])
+                    mid_s = init_mid[i] + 32'h0003_0000;
+                else
+                    mid_s = init_mid[i] - 32'h0002_0000;
+                if ($signed(mid_s) < $signed(32'h0001_0000))
+                    mid_s = 32'h0001_0000;
+                send_link_frame(build_quote(i, mid_s - 32'h1000, mid_s + 32'h1000, 0, round));
+            end
+        end
+        repeat (50) @(posedge clk);
 
         axi_read(9'h044);
-        $display("  Final quotes = %0d (expect 21: 1 setup + 19 pipeline + 1 from phase 9 setup)", axi_rd_data);
-        check("P9d: quotes>=20", axi_rd_data >= 32'd20);
+        $display("  Final quotes = %0d", axi_rd_data);
+        check("P13b: quotes>=64", axi_rd_data >= 32'd64);
 
         axi_read(9'h048);
         $display("  Final orders = %0d", axi_rd_data);
 
-        axi_read(9'h050);
-        $display("  Final rejects = %0d", axi_rd_data);
-
         axi_read(9'h054);
         $display("  link_errors = %0d", axi_rd_data);
-        check32("P9e: link_errors==0", axi_rd_data, 32'd0);
+        check32("P13c: link_errors==0", axi_rd_data, 32'd0);
 
         // ══════════════════════════════════════════════════════════
-        // Phase 10: Second fill + position readback
+        // Phase 14: LED structural checks
         // ══════════════════════════════════════════════════════════
-        $display("\n=== Phase 10: Second Fill + Position ===");
+        $display("\n=== Phase 14: LED/RGB ===");
+        check("P14a: LED[2:0]=TRADING", led[2:0] == 3'b011);
+        check("P14b: LED[6]=order_en", led[6] == 1'b1);
 
-        // Construct valid FILL for sym=1, SELL, qty=50
-        // {MSG_FILL, sym=1, side=1(SELL), status=000, price=0x01A40821, qty=50, ...}
-        // [127:124]=3, [123:116]=0x01, [115]=1, [114:112]=000, [111:80]=0x01A40821
-        // Hex: 3 01 8 01A40821 0032 0002 0037 00000000
-        // Bytes: 30 18 01A40821 0032 0002 0037 00000000
-        // Actually let me construct carefully:
-        // [127:120] = {4'h3, 4'h0} = 0x30 (msg_type + upper nibble of symbol)
-        // [119:112] = {4'h1, 1'b1, 3'b000} = 0001_1000 = 0x18 (lower nibble of sym + side + status)
-        // [111:80]  = 0x01A40821
-        // [79:64]   = 0x0032 (qty=50)
-        // [63:48]   = 0x0002
-        // [47:32]   = 0x0037 (ts=55)
-        // [31:0]    = 0x00000000
-        send_link_frame(128'h3018_01A4_0821_0032_0002_0037_0000_0000);
+        // ══════════════════════════════════════════════════════════
+        // Phase 15: Rejected fill (no position change)
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 15: Rejected Fill ===");
+
+        begin
+            logic [31:0] pos7_before;
+            axi_read(9'h058 + 7*4);
+            pos7_before = axi_rd_data;
+
+            send_link_frame(build_fill(7, 1'b0, 3'b001, 32'h0, 0, 99, 60));
+
+            axi_read(9'h058 + 7*4);
+            check32("P15: pos[7] unchanged", axi_rd_data, pos7_before);
+        end
+
+        // ══════════════════════════════════════════════════════════
+        // Phase 16: Regime field propagation
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 16: Regime Field ===");
+
+        send_link_frame(build_quote(0, init_mid[0], init_mid[0] + 32'h2000, 2, 99));
         repeat (5) @(posedge clk);
 
-        axi_read(9'h04C);
-        $display("  fills_rcvd = %0d", axi_rd_data);
+        send_link_frame(build_quote(0, init_mid[0], init_mid[0] + 32'h2000, 3, 100));
+        repeat (5) @(posedge clk);
 
-        axi_read(9'h05C);  // POS_SYM[1] = 0x058 + 4 = 0x05C
-        $display("  position[1] = %0d (signed)", $signed(axi_rd_data));
-        // SELL fill: position goes down → -50
-        check32("P10: pos[1]==-50", axi_rd_data, 32'hFFFF_FFCE);  // -50 in 2's complement
+        // Quotes counted
+        axi_read(9'h044);
+        check("P16: more quotes", axi_rd_data > 32'd64);
+
+        // ══════════════════════════════════════════════════════════
+        // Phase 17: All 16 positions via BUY+SELL fills
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 17: Full 16-sym Position Test ===");
+
+        for (int i = 0; i < 16; i++)
+            send_link_frame(build_fill(i, 1'b0, 3'b000, init_mid[i], 200, 200+i, 500+i));
+
+        for (int i = 0; i < 16; i++) begin
+            axi_read(9'h058 + i*4);
+            check($sformatf("P17: pos[%0d]>0", i), $signed(axi_rd_data) > 0);
+        end
+
+        for (int i = 8; i < 16; i++)
+            send_link_frame(build_fill(i, 1'b1, 3'b000, init_mid[i] + 32'h0001_0000, 100, 300+i, 600+i));
+
+        axi_read(9'h058 + 8*4);
+        $display("  pos[8] after partial sell = %0d", $signed(axi_rd_data));
+        check("P17: pos[8]>0 after partial sell", $signed(axi_rd_data) > 0);
+
+        // ══════════════════════════════════════════════════════════
+        // Phase 18: Histogram consistency (lat_count == sum bins)
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 18: Histogram Consistency ===");
+
+        begin
+            int sum_bins;
+            logic [31:0] lat_count_reg;
+            sum_bins = 0;
+            for (int i = 0; i < 16; i++) begin
+                axi_read(9'h0A0 + i*4);
+                sum_bins += axi_rd_data;
+            end
+            axi_read(9'h0EC);
+            lat_count_reg = axi_rd_data;
+            $display("  lat_count=%0d, sum_bins=%0d", lat_count_reg, sum_bins);
+            check32("P18: lat_count == sum bins", lat_count_reg, sum_bins[31:0]);
+
+            axi_read(9'h0E0);
+            begin
+                logic [31:0] lmin;
+                lmin = axi_rd_data;
+                axi_read(9'h0E4);
+                if (lat_count_reg > 0)
+                    check("P18: lat_min <= lat_max", lmin <= axi_rd_data);
+            end
+        end
+
+        // ══════════════════════════════════════════════════════════
+        // Phase 19: Out-of-range symbol fill (no crash)
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 19: Out-of-range Symbol Fill ===");
+        begin
+            logic [31:0] fills_before;
+            axi_read(9'h04C);
+            fills_before = axi_rd_data;
+
+            send_link_frame(build_fill(255, 1'b0, 3'b000, 32'h00FF_0000, 50, 999, 999));
+            repeat (5) @(posedge clk);
+
+            axi_read(9'h04C);
+            $display("  fills after OOR: %0d (was %0d)", axi_rd_data, fills_before);
+        end
+
+        // ══════════════════════════════════════════════════════════
+        // Phase 20: Double risk halt + recovery
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 20: Double Halt/Recovery ===");
+
+        force dut.risk_halt = 1'b1;
+        @(posedge clk); #1;
+        check("P20a: HALTED", dut.fsm_state == B_HALTED);
+        release dut.risk_halt;
+
+        axi_write(9'h000, 32'h0000_0002);
+        @(posedge clk); #1;
+        check("P20b: IDLE after reset", dut.fsm_state == B_IDLE);
+
+        send_link_frame(build_quote(0, init_mid[0] - 32'h1000, init_mid[0] + 32'h1000, 0, 0));
+        sw = 8'h01;
+        @(posedge clk);
+        axi_write(9'h000, 32'h0000_0001);
+        repeat (2) @(posedge clk);
+        axi_write(9'h000, 32'h0000_0001);
+        repeat (2) @(posedge clk);
+        check("P20c: TRADING again", dut.fsm_state == B_TRADING);
+
+        force dut.risk_halt = 1'b1;
+        @(posedge clk); #1;
+        check("P20d: HALTED again", dut.fsm_state == B_HALTED);
+        release dut.risk_halt;
+
+        axi_write(9'h000, 32'h0000_0002);
+        @(posedge clk); #1;
+        check("P20e: IDLE after 2nd reset", dut.fsm_state == B_IDLE);
+
+        // ══════════════════════════════════════════════════════════
+        // Phase 21: link_errors stays 0
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 21: Link Error Check ===");
+        axi_read(9'h054);
+        check32("P21: link_errors=0", axi_rd_data, 32'd0);
+
+        // ══════════════════════════════════════════════════════════
+        // Phase 22: Config survives FSM transitions
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 22: Config Persistence ===");
+        axi_read(9'h008);
+        check32("P22: threshold intact", axi_rd_data, 32'h0000_0100);
+        axi_read(9'h010);
+        check32("P22: base_qty intact", axi_rd_data, 32'd50);
+        axi_read(9'h014);
+        check32("P22: max_pos intact", axi_rd_data, 32'd100_000);
+        axi_read(9'h01C);
+        check32("P22: max_loss intact", axi_rd_data, 32'd50_000_000);
+
+        // ══════════════════════════════════════════════════════════
+        // Phase 23: AXI alpha and max_order_rate readback
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 23: Extra AXI Readback ===");
+        axi_read(9'h00C);
+        check32("P23: alpha", axi_rd_data, 32'd6554);
+        axi_read(9'h018);
+        check32("P23: max_order_rate", axi_rd_data, 32'd100_000);
 
         // ══════════════════════════════════════════════════════════
         // Summary

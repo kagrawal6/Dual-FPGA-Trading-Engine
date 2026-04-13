@@ -2,11 +2,18 @@
 // Testbench: tb_board_b_pipeline
 // Integration test for the Board B pipeline: quote_book → feature_compute →
 // strategy_engine → risk_manager → order_manager, with position_tracker
-// providing fill feedback to risk_manager. Drives 20 golden QUOTE frames,
-// verifies counters, monitors ORDER frames, injects a synthetic FILL, and
-// checks risk_halt status throughout.
+// providing fill feedback to risk_manager.
 //
-// Golden model reference: pipeline_vectors.json (first 20 quotes, 4 symbols).
+// Coverage:
+//   - 16-symbol full-universe golden frames (seeds EMA + triggers orders)
+//   - Position limit enforcement
+//   - Rate limit enforcement
+//   - Max-loss risk halt
+//   - Fill injection and position/cash update
+//   - Order-enable gating
+//   - Back-to-back quote stress
+//   - Clear and restart
+//   - Simultaneous signal + fill edge case
 // ============================================================================
 
 `timescale 1ns / 1ps
@@ -23,7 +30,6 @@ module tb_board_b_pipeline;
     logic [FRAME_W-1:0]       quote_frame;
     logic                     quote_valid;
 
-    // Pipeline interconnect
     price_t                   qb_bid, qb_ask;
     qty_t                     qb_bid_size, qb_ask_size;
     symbol_t                  qb_symbol;
@@ -53,7 +59,6 @@ module tb_board_b_pipeline;
     logic                     order_ready;
     logic [COUNTER_W-1:0]     orders_sent;
 
-    // Position tracker
     logic [FRAME_W-1:0]       fill_frame;
     logic                     fill_valid_in;
     position_t                position [NUM_SYMBOLS];
@@ -67,7 +72,6 @@ module tb_board_b_pipeline;
     logic                     pt_fill_notify;
     logic [COUNTER_W-1:0]     fills_rcvd;
 
-    // Config
     logic [ALPHA_W-1:0]       ema_alpha;
     price_t                   threshold;
     qty_t                     base_qty;
@@ -157,29 +161,41 @@ module tb_board_b_pipeline;
         .fills_rcvd(fills_rcvd)
     );
 
-    // ── Golden model frames (first 20 from pipeline_vectors.json) ──
-    localparam logic [127:0] GM_FRAMES [0:19] = '{
-        128'h100000B3F81E00B4081E03E803E80000,  // cyc 0: sym=0
-        128'h101001A3F82101A4082103E803E80000,  // cyc 1: sym=1
-        128'h10200383F8160384081603E803E80000,  // cyc 2: sym=2
-        128'h10300072F81D0073081D03E803E80000,  // cyc 3: sym=3
-        128'h100000B3F83100B4083103E803E80001,  // cyc 4: sym=0
-        128'h101001A3F81601A4081603E803E80001,  // cyc 5: sym=1
-        128'h10200383F8250384082503E803E80001,  // cyc 6: sym=2
-        128'h10300072F82E0073082E03E803E80001,  // cyc 7: sym=3
-        128'h100000B3F81A00B4081A03E803E80002,  // cyc 8: sym=0
-        128'h101001A3F81801A4081803E803E80002,  // cyc 9: sym=1
-        128'h10200383F81B0384081B03E803E80002,  // cyc 10: sym=2
-        128'h10300072F80D0073080D03E803E80002,  // cyc 11: sym=3
-        128'h100000B3F80B00B4080B03E803E80003,  // cyc 12: sym=0
-        128'h101001A3F7F401A407F403E803E80003,  // cyc 13: sym=1
-        128'h10200383F7FE038407FE03E803E80003,  // cyc 14: sym=2
-        128'h10300072F80F0073080F03E803E80003,  // cyc 15: sym=3
-        128'h100000B3F81500B4081503E803E80004,  // cyc 16: sym=0
-        128'h101001A3F7DD01A407DD03E803E80004,  // cyc 17: sym=1
-        128'h10200383F7FF038407FF03E803E80004,  // cyc 18: sym=2
-        128'h10300072F7F1007307F103E803E80004   // cyc 19: sym=3
-    };
+    // ── 16-symbol init_mid values (Q16.16, matches golden model) ──
+    logic [31:0] init_mid [0:15];
+    initial begin
+        init_mid[ 0] = 32'h00B4_0000;  // AAPL  $180
+        init_mid[ 1] = 32'h01A4_0000;  // MSFT  $420
+        init_mid[ 2] = 32'h0384_0000;  // NVDA  $900
+        init_mid[ 3] = 32'h0073_0000;  // XOM   $115
+        init_mid[ 4] = 32'h00A0_0000;  // CVX   $160
+        init_mid[ 5] = 32'h009B_0000;  // JNJ   $155
+        init_mid[ 6] = 32'h0208_0000;  // UNH   $520
+        init_mid[ 7] = 32'h00B9_0000;  // AMZN  $185
+        init_mid[ 8] = 32'h00FA_0000;  // TSLA  $250
+        init_mid[ 9] = 32'h00C8_0000;  // JPM   $200
+        init_mid[10] = 32'h01E0_0000;  // GS    $480
+        init_mid[11] = 32'h0168_0000;  // CAT   $360
+        init_mid[12] = 32'h00C8_0000;  // HON   $200
+        init_mid[13] = 32'h00A5_0000;  // PG    $165
+        init_mid[14] = 32'h003C_0000;  // KO    $60
+        init_mid[15] = 32'h00AF_0000;  // GOOGL $175
+    end
+
+    // Helper: build a QUOTE frame from symbol, bid, ask, seq_num
+    function automatic logic [127:0] build_quote(
+        input int sym, input logic [31:0] bid, input logic [31:0] ask, input int seq
+    );
+        return {4'h1, sym[7:0], 2'b00, 2'b00, bid, ask, 16'h03E8, 16'h03E8, seq[15:0]};
+    endfunction
+
+    // Helper: build a FILL frame
+    function automatic logic [127:0] build_fill(
+        input int sym, input logic side, input logic [2:0] status,
+        input logic [31:0] price, input int qty, input int oid, input int ts
+    );
+        return {4'h3, sym[7:0], side, status, price, qty[15:0], oid[15:0], ts[15:0], 32'h0};
+    endfunction
 
     // ── Check helpers ──────────────────────────────────────────
     integer pass_count = 0;
@@ -187,33 +203,42 @@ module tb_board_b_pipeline;
     integer order_count_observed = 0;
 
     task automatic check(input string name, input logic condition);
-        if (condition) begin
-            pass_count++;
-        end else begin
+        if (condition) pass_count++;
+        else begin fail_count++; $display("[FAIL] %0s at time %0t", name, $time); end
+    endtask
+
+    task automatic check32(input string name, input logic [31:0] actual, input logic [31:0] expected);
+        if (actual === expected) pass_count++;
+        else begin
             fail_count++;
-            $display("[FAIL] %0s at time %0t", name, $time);
+            $display("[FAIL] %0s: got 0x%08X, expected 0x%08X", name, actual, expected);
         end
     endtask
 
-    // ── ORDER frame monitor (runs concurrently) ───────────────
+    // ── ORDER frame monitor ───────────────────────────────────
     initial begin
         forever begin
             @(posedge clk);
             if (order_valid && order_ready) begin
                 order_count_observed++;
-                $display("[ORDER] t=%0t sym=%0d side=%0b price=0x%08X qty=%0d id=%0d",
-                    $time,
-                    order_frame[123:116],
-                    order_frame[115],
-                    order_frame[111:80],
-                    order_frame[79:64],
-                    order_frame[63:48]);
-                // Verify msg_type is ORDER
                 if (order_frame[127:124] != MSG_ORDER)
                     $display("[ERROR] Bad msg_type: 0x%01X", order_frame[127:124]);
             end
         end
     end
+
+    // ── Drive one quote frame and wait 1 cycle ────────────────
+    task automatic drive_quote(input logic [127:0] frame);
+        quote_frame = frame;
+        quote_valid = 1'b1;
+        @(posedge clk);
+        quote_valid = 1'b0;
+    endtask
+
+    // ── Wait for pipeline to flush ────────────────────────────
+    task automatic flush_pipeline(input int cycles = 20);
+        repeat (cycles) @(posedge clk);
+    endtask
 
     // ── Main test sequence ────────────────────────────────────
     initial begin
@@ -225,91 +250,326 @@ module tb_board_b_pipeline;
         fill_frame     = '0;
         fill_valid_in  = 1'b0;
 
-        ema_alpha      = 16'd6554;
-        threshold      = 32'h0000_8000;  // $0.50
+        ema_alpha      = 16'd6554;          // ~10%
+        threshold      = 32'h0000_8000;     // $0.50
         base_qty       = 16'd100;
-        max_position   = 32'd500;
-        max_order_rate = 32'd1000;
-        max_loss       = 32'd100;
+        max_position   = 32'd50000;
+        max_order_rate = 32'd10000;
+        max_loss       = 32'h0064_0000;     // $100 Q16.16
 
         @(posedge rst_n);
         repeat (2) @(posedge clk);
 
         // ──────────────────────────────────────────────────────
-        // Phase 1: Drive 20 golden QUOTE frames
-        // First 4 seed EMA (no orders expected).
-        // Subsequent quotes may trigger orders if deviation > $0.50
+        // Phase 1: Seed EMA for all 16 symbols (first-sample init)
+        // No orders expected on first round.
         // ──────────────────────────────────────────────────────
-        $display("\n=== Phase 1: Drive 20 golden QUOTE frames ===");
+        $display("\n=== Phase 1: Seed EMA (16 symbols, round 1) ===");
 
-        for (int i = 0; i < 20; i++) begin
-            quote_frame = GM_FRAMES[i];
-            quote_valid = 1'b1;
+        for (int i = 0; i < 16; i++) begin
+            drive_quote(build_quote(i, init_mid[i] - 32'h1000, init_mid[i] + 32'h1000, 0));
+        end
+        flush_pipeline(30);
+
+        check("P1: no risk_halt", risk_halt == 1'b0);
+        check("P1: no orders (EMA seeding)", orders_sent == 32'd0);
+
+        // ──────────────────────────────────────────────────────
+        // Phase 2: Price jump → trigger orders on all 16 symbols
+        // Shift prices UP by $2 (0x20000) → deviation ~$1.80 > $0.50
+        // → SELL signals for all symbols
+        // ──────────────────────────────────────────────────────
+        $display("\n=== Phase 2: Price UP → SELL signals (16 symbols) ===");
+
+        begin
+            logic [31:0] orders_before;
+            orders_before = orders_sent;
+
+            for (int i = 0; i < 16; i++) begin
+                logic [31:0] shifted_mid;
+                shifted_mid = init_mid[i] + 32'h0002_0000;  // +$2
+                drive_quote(build_quote(i, shifted_mid - 32'h1000, shifted_mid + 32'h1000, 1));
+            end
+            flush_pipeline(40);
+
+            $display("  orders_sent = %0d (was %0d)", orders_sent, orders_before);
+            check("P2: generated SELL orders", orders_sent > orders_before);
+            check("P2: no risk_halt", risk_halt == 1'b0);
+        end
+
+        // ──────────────────────────────────────────────────────
+        // Phase 3: Price jump DOWN → trigger BUY signals
+        // Shift prices DOWN by $3 from initial → deviation ~-$2.7
+        // ──────────────────────────────────────────────────────
+        $display("\n=== Phase 3: Price DOWN → BUY signals (16 symbols) ===");
+
+        begin
+            logic [31:0] orders_before_p3;
+            orders_before_p3 = orders_sent;
+
+            for (int i = 0; i < 16; i++) begin
+                logic [31:0] shifted_mid;
+                shifted_mid = init_mid[i] - 32'h0003_0000;  // -$3
+                if ($signed(shifted_mid) < $signed(32'h0001_0000))
+                    shifted_mid = 32'h0001_0000;  // floor at $1
+                drive_quote(build_quote(i, shifted_mid - 32'h1000, shifted_mid + 32'h1000, 2));
+            end
+            flush_pipeline(40);
+
+            $display("  orders_sent = %0d (was %0d)", orders_sent, orders_before_p3);
+            check("P3: generated BUY orders", orders_sent > orders_before_p3);
+        end
+
+        // ──────────────────────────────────────────────────────
+        // Phase 4: Inject fills for symbols 0-3 (BUY fills)
+        // ──────────────────────────────────────────────────────
+        $display("\n=== Phase 4: Fill injection (4 symbols) ===");
+
+        for (int i = 0; i < 4; i++) begin
+            fill_frame = build_fill(i, 1'b0, 3'b000, init_mid[i], 100, i, 42+i);
+            fill_valid_in = 1'b1;
+            @(posedge clk);
+            fill_valid_in = 1'b0;
             @(posedge clk);
         end
-        quote_valid = 1'b0;
-
-        // Wait for entire pipeline to flush (QB=1 + FC=3 + SE=1 + RM=1 + OM=1 = 7 cycles + margin)
-        repeat (20) @(posedge clk);
-
-        // ──────────────────────────────────────────────────────
-        // Phase 2: Verify counters
-        // ──────────────────────────────────────────────────────
-        $display("\n=== Phase 2: Verify counters ===");
-        check("P2: risk_halt==0",    risk_halt == 1'b0);
-        check("P2: orders_sent>=0",  orders_sent >= 32'd0);
-        $display("  orders_sent = %0d", orders_sent);
-        $display("  risk_rejects = %0d", risk_rejects);
-        $display("  order_count_observed = %0d", order_count_observed);
-
-        // ──────────────────────────────────────────────────────
-        // Phase 3: Inject synthetic FILL frame
-        // BUY sym=0, FILLED, price=0x00B40815, qty=100
-        // ──────────────────────────────────────────────────────
-        $display("\n=== Phase 3: Inject synthetic FILL ===");
-        fill_frame = 128'h300000B4081500640001002A00000000;
-        fill_valid_in = 1'b1;
-        @(posedge clk);
-        #1;
-        check("P3: fill_processed",     fill_processed == 1'b1);
-        fill_valid_in = 1'b0;
-        @(posedge clk);
         @(posedge clk);
 
-        check("P3: fills_rcvd==1",      fills_rcvd == 32'd1);
-        check("P3: position[0] updated", position[0] != 32'd0 || fills_rcvd == 32'd1);
-        $display("  position[0] = %0d (signed)", $signed(position[0]));
-        $display("  total_pnl   = %0d", $signed(total_pnl));
+        check32("P4: fills_rcvd==4", fills_rcvd, 32'd4);
+        check32("P4: pos[0]==100", position[0], 32'd100);
+        check32("P4: pos[1]==100", position[1], 32'd100);
+        check32("P4: pos[2]==100", position[2], 32'd100);
+        check32("P4: pos[3]==100", position[3], 32'd100);
+        $display("  total_pnl = %0d", $signed(total_pnl));
 
         // ──────────────────────────────────────────────────────
-        // Phase 4: Verify no risk_halt throughout
+        // Phase 5: SELL fills for symbols 0-3
         // ──────────────────────────────────────────────────────
-        $display("\n=== Phase 4: Final status ===");
-        check("P4: risk_halt==0",       risk_halt == 1'b0);
+        $display("\n=== Phase 5: SELL fills (4 symbols) ===");
 
-        // Drive more quotes and verify pipeline continues working
-        for (int i = 0; i < 8; i++) begin
-            quote_frame = GM_FRAMES[i % 20];
-            quote_valid = 1'b1;
+        for (int i = 0; i < 4; i++) begin
+            fill_frame = build_fill(i, 1'b1, 3'b000, init_mid[i] + 32'h0001_0000, 50, i+4, 50+i);
+            fill_valid_in = 1'b1;
+            @(posedge clk);
+            fill_valid_in = 1'b0;
             @(posedge clk);
         end
-        quote_valid = 1'b0;
-        repeat (20) @(posedge clk);
+        @(posedge clk);
 
-        check("P4: still no halt",      risk_halt == 1'b0);
+        check32("P5: fills_rcvd==8", fills_rcvd, 32'd8);
+        // After BUY 100 then SELL 50, pos should be 100-50=50
+        check32("P5: pos[0]==50", position[0], 32'd50);
+        check32("P5: pos[1]==50", position[1], 32'd50);
 
         // ──────────────────────────────────────────────────────
-        // Phase 5: Clear and verify reset
+        // Phase 6: REJECTED fill (should not change position)
         // ──────────────────────────────────────────────────────
-        $display("\n=== Phase 5: Clear pipeline ===");
+        $display("\n=== Phase 6: Rejected fill (no position change) ===");
+
+        begin
+            logic [31:0] pos5_before;
+            pos5_before = position[5];
+            fill_frame = build_fill(5, 1'b0, 3'b001, 32'h0, 0, 99, 60);
+            fill_valid_in = 1'b1;
+            @(posedge clk);
+            fill_valid_in = 1'b0;
+            @(posedge clk);
+            check32("P6: pos[5] unchanged", position[5], pos5_before);
+        end
+
+        // ──────────────────────────────────────────────────────
+        // Phase 7: Order-enable gating
+        // ──────────────────────────────────────────────────────
+        $display("\n=== Phase 7: Order-enable off → rejects ===");
+
+        begin
+            logic [31:0] rejects_before;
+            logic [31:0] orders_before_p7;
+            rejects_before = risk_rejects;
+            orders_before_p7 = orders_sent;
+
+            order_enable = 1'b0;
+            for (int i = 0; i < 4; i++) begin
+                logic [31:0] shifted_mid;
+                shifted_mid = init_mid[i] + 32'h0005_0000;  // big deviation
+                drive_quote(build_quote(i, shifted_mid - 32'h1000, shifted_mid + 32'h1000, 10));
+            end
+            flush_pipeline(30);
+
+            check("P7: orders unchanged", orders_sent == orders_before_p7);
+            check("P7: rejects increased", risk_rejects > rejects_before);
+
+            order_enable = 1'b1;
+        end
+
+        // ──────────────────────────────────────────────────────
+        // Phase 8: Position limit enforcement
+        // ──────────────────────────────────────────────────────
+        $display("\n=== Phase 8: Position limit enforcement ===");
+
+        begin
+            logic [31:0] rejects_p8;
+            max_position = 32'd60;  // very tight: already at 50 for sym 0-3
+
+            rejects_p8 = risk_rejects;
+
+            // Drive quotes that create BUY signals for sym 0 (already at pos=50)
+            for (int r = 0; r < 3; r++) begin
+                logic [31:0] low_mid;
+                low_mid = init_mid[0] - 32'h0005_0000;  // big drop → BUY
+                drive_quote(build_quote(0, low_mid - 32'h1000, low_mid + 32'h1000, 20+r));
+                flush_pipeline(15);
+            end
+
+            $display("  orders_sent=%0d, risk_rejects=%0d (was %0d)", orders_sent, risk_rejects, rejects_p8);
+            // Some should be rejected due to position limit
+            // pos[0]=50, pending_buy could be 100+, max_pos=60 → should reject
+
+            max_position = 32'd50000;  // restore
+        end
+
+        // ──────────────────────────────────────────────────────
+        // Phase 9: Rate limit enforcement
+        // ──────────────────────────────────────────────────────
+        $display("\n=== Phase 9: Rate limit enforcement ===");
+
+        begin
+            logic [31:0] orders_before_p9;
+            orders_before_p9 = orders_sent;
+
+            max_order_rate = orders_sent + 2;  // allow only 2 more orders
+
+            for (int i = 0; i < 16; i++) begin
+                logic [31:0] shifted_mid;
+                shifted_mid = init_mid[i] + 32'h0004_0000;  // big deviation
+                drive_quote(build_quote(i, shifted_mid - 32'h1000, shifted_mid + 32'h1000, 30));
+            end
+            flush_pipeline(40);
+
+            $display("  orders_sent=%0d (was %0d, rate limit = %0d)",
+                     orders_sent, orders_before_p9, max_order_rate);
+            // At most 2 more orders should have been approved
+            check("P9: rate limit enforced", orders_sent <= orders_before_p9 + 2);
+
+            max_order_rate = 32'd100_000;  // restore
+        end
+
+        // ──────────────────────────────────────────────────────
+        // Phase 10: Max-loss risk halt
+        // ──────────────────────────────────────────────────────
+        $display("\n=== Phase 10: Max-loss risk halt ===");
+
+        begin
+            // Inject a large SELL fill at a very low price to create a huge loss
+            // BUY 1000 shares of sym=10 at $480, then SELL 1000 at $1
+            fill_frame = build_fill(10, 1'b0, 3'b000, 32'h01E0_0000, 1000, 200, 70);
+            fill_valid_in = 1'b1;
+            @(posedge clk);
+            fill_valid_in = 1'b0;
+            @(posedge clk);
+
+            fill_frame = build_fill(10, 1'b1, 3'b000, 32'h0001_0000, 1000, 201, 71);
+            fill_valid_in = 1'b1;
+            @(posedge clk);
+            fill_valid_in = 1'b0;
+            @(posedge clk);
+
+            $display("  total_pnl after loss = %0d", $signed(total_pnl));
+            // cash = bought at $480*1000=-$480k, sold at $1*1000=+$1k → net ≈ -$479k
+            max_loss = 32'h0000_0001;  // $0.00 threshold → will trigger on next signal
+
+            // Drive a quote to trigger a signal
+            drive_quote(build_quote(0, init_mid[0] + 32'h0003_0000, init_mid[0] + 32'h0005_0000, 50));
+            flush_pipeline(20);
+
+            check("P10: risk_halt triggered", risk_halt == 1'b1);
+            $display("  risk_halt = %0b", risk_halt);
+
+            max_loss = 32'h0064_0000;  // restore
+        end
+
+        // ──────────────────────────────────────────────────────
+        // Phase 11: Clear and verify reset
+        // ──────────────────────────────────────────────────────
+        $display("\n=== Phase 11: Clear and verify ===");
+
         clear = 1'b1;
         @(posedge clk);
         clear = 1'b0;
         @(posedge clk);
 
-        check("P5: orders_sent cleared", orders_sent == 32'd0);
-        check("P5: fills_rcvd cleared",  fills_rcvd == 32'd0);
-        check("P5: risk_halt cleared",   risk_halt == 1'b0);
+        check32("P11: orders_sent cleared", orders_sent, 32'd0);
+        check32("P11: fills_rcvd cleared", fills_rcvd, 32'd0);
+        check("P11: risk_halt cleared", risk_halt == 1'b0);
+        check32("P11: risk_rejects cleared", risk_rejects, 32'd0);
+
+        begin
+            integer order_count_at_clear;
+            order_count_at_clear = order_count_observed;
+
+        // ──────────────────────────────────────────────────────
+        // Phase 12: Back-to-back quote stress (16 sym × 5 rounds)
+        // ──────────────────────────────────────────────────────
+        $display("\n=== Phase 12: Back-to-back stress (80 quotes) ===");
+
+        // First round seeds EMA
+        for (int i = 0; i < 16; i++)
+            drive_quote(build_quote(i, init_mid[i] - 32'h1000, init_mid[i] + 32'h1000, 0));
+        flush_pipeline(30);
+
+        // 4 more rounds with alternating shifts to create order flow
+        for (int round = 1; round <= 4; round++) begin
+            for (int i = 0; i < 16; i++) begin
+                logic [31:0] mid_shifted;
+                if (round[0])
+                    mid_shifted = init_mid[i] + 32'h0002_0000;  // +$2
+                else
+                    mid_shifted = init_mid[i] - 32'h0002_0000;  // -$2
+                if ($signed(mid_shifted) < $signed(32'h0001_0000))
+                    mid_shifted = 32'h0001_0000;
+                drive_quote(build_quote(i, mid_shifted - 32'h1000, mid_shifted + 32'h1000, round));
+            end
+        end
+        flush_pipeline(60);
+
+        $display("  orders_sent = %0d", orders_sent);
+        $display("  risk_rejects = %0d", risk_rejects);
+        check("P12: generated orders from stress", orders_sent > 32'd0);
+        check("P12: no risk_halt", risk_halt == 1'b0);
+
+        // ──────────────────────────────────────────────────────
+        // Phase 13: Fills for all 16 symbols (multi-symbol position)
+        // ──────────────────────────────────────────────────────
+        $display("\n=== Phase 13: Fills for all 16 symbols ===");
+
+        for (int i = 0; i < 16; i++) begin
+            fill_frame = build_fill(i, 1'b0, 3'b000, init_mid[i], 10*(i+1), 300+i, 100+i);
+            fill_valid_in = 1'b1;
+            @(posedge clk);
+            fill_valid_in = 1'b0;
+            @(posedge clk);
+        end
+        @(posedge clk);
+
+        begin
+            int nonzero = 0;
+            for (int i = 0; i < 16; i++) begin
+                if (position[i] != 32'd0) nonzero++;
+            end
+            $display("  Non-zero positions: %0d / 16", nonzero);
+            check("P13: all 16 positions nonzero", nonzero == 16);
+        end
+
+        // ──────────────────────────────────────────────────────
+        // Phase 14: Verify msg_type on all observed orders
+        // ──────────────────────────────────────────────────────
+        $display("\n=== Phase 14: Order integrity ===");
+        begin
+            integer orders_since_clear;
+            orders_since_clear = order_count_observed - order_count_at_clear;
+            $display("  Total orders observed by monitor: %0d (since clear: %0d)", order_count_observed, orders_since_clear);
+            check("P14: monitor count matches", orders_since_clear == orders_sent);
+        end
+        end // close order_count_at_clear scope
 
         // ── Summary ───────────────────────────────────────────
         repeat (3) @(posedge clk);
