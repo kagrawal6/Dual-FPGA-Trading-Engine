@@ -60,6 +60,8 @@ module tb_board_b_top();
 
     localparam logic [127:0] QUOTE_0 =
         128'h1000_00B3_F81E_00B4_081E_03E8_03E8_0000;
+    localparam logic [127:0] QUOTE_1 =
+        128'h1000_00C3_F81E_00C4_081E_03E8_03E8_0000;
 
     initial begin
         $display("=== tb_board_b_top ===");
@@ -74,8 +76,8 @@ module tb_board_b_top();
         // strategy = MEAN_REV
         @(posedge clk); awaddr=9'h004; awvalid=1; wdata=32'd0; wstrb=4'hF; wvalid=1; bready=1;
         @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
-        // threshold = $0.004 (tiny -> always triggers)
-        @(posedge clk); awaddr=9'h008; awvalid=1; wdata=32'h100; wstrb=4'hF; wvalid=1; bready=1;
+        // threshold = 1 (minimal -> always triggers)
+        @(posedge clk); awaddr=9'h008; awvalid=1; wdata=32'd1; wstrb=4'hF; wvalid=1; bready=1;
         @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
         // ema_alpha ~ 10%
         @(posedge clk); awaddr=9'h00C; awvalid=1; wdata=32'd6554; wstrb=4'hF; wvalid=1; bready=1;
@@ -149,12 +151,91 @@ module tb_board_b_top();
         @(posedge clk); rready=0;
 
         // Test 5: Halt check (max_loss=0 -> halt after first signal)
+        //   Alternate QUOTE_0/QUOTE_1 to create large price swings
+        //   (~$16 deviation) that exceed threshold=1 in Q16.16.
         $display("Test 5: Risk halt engaged");
-        repeat (20) @(posedge clk); #1;
+        repeat (15) begin
+            tx_frame = QUOTE_0; tx_valid = 1;
+            @(posedge clk); tx_valid = 0;
+            repeat (100) @(posedge clk);
+            tx_frame = QUOTE_1; tx_valid = 1;
+            @(posedge clk); tx_valid = 0;
+            repeat (100) @(posedge clk);
+        end
+        repeat (2000) @(posedge clk); #1;
         if (dut.fsm_state == B_HALTED || dut.risk_halt)
             $display("  PASS: FSM halted (state=%0d halt=%b)", dut.fsm_state, dut.risk_halt);
         else begin
             $display("  FAIL: FSM=%0d halt=%b", dut.fsm_state, dut.risk_halt);
+            err_cnt = err_cnt + 1;
+        end
+
+        // ──────────────────────────────────────────────────────────
+        // Test 6: AXI reset (CTRL=2) clears halt and returns to IDLE
+        // ──────────────────────────────────────────────────────────
+        $display("Test 6: AXI reset -> FSM returns to IDLE");
+        @(posedge clk); awaddr=9'h000; awvalid=1; wdata=32'h2; wstrb=4'hF; wvalid=1; bready=1;
+        @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
+        repeat (5) @(posedge clk); #1;
+        if (dut.fsm_state == B_IDLE && !dut.risk_halt)
+            $display("  PASS: FSM=IDLE, risk_halt cleared");
+        else begin
+            $display("  FAIL: FSM=%0d halt=%b, expected IDLE+clear",
+                     dut.fsm_state, dut.risk_halt);
+            err_cnt = err_cnt + 1;
+        end
+
+        // ──────────────────────────────────────────────────────────
+        // Test 7: POSITION[0] is 0 after reset (counters cleared)
+        // ──────────────────────────────────────────────────────────
+        $display("Test 7: POSITION[0] after reset");
+        @(posedge clk); araddr=9'h058; arvalid=1; rready=1;
+        @(posedge clk); arvalid=0; while(!rvalid) @(posedge clk);
+        if (rdata == 32'd0)
+            $display("  PASS: POSITION[0] = 0");
+        else begin
+            $display("  FAIL: POSITION[0] = %0d, expected 0", rdata);
+            err_cnt = err_cnt + 1;
+        end
+        @(posedge clk); rready=0;
+
+        // ──────────────────────────────────────────────────────────
+        // Test 8: Restart after reset — IDLE -> ARMED -> TRADING
+        //   Reconfigure max_loss to generous value so we don't halt
+        // ──────────────────────────────────────────────────────────
+        $display("Test 8: Restart after reset -> TRADING");
+        // Set generous max_loss so risk doesn't halt immediately
+        @(posedge clk); awaddr=9'h01C; awvalid=1; wdata=32'd10_000_000; wstrb=4'hF; wvalid=1; bready=1;
+        @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
+        // Send a quote to keep link_up active
+        tx_frame = QUOTE_0; tx_valid = 1;
+        @(posedge clk); tx_valid = 0;
+        repeat (80) @(posedge clk);
+        // Start -> ARMED
+        @(posedge clk); awaddr=9'h000; awvalid=1; wdata=32'h1; wstrb=4'hF; wvalid=1; bready=1;
+        @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
+        repeat (3) @(posedge clk);
+        // Start -> TRADING
+        @(posedge clk); awaddr=9'h000; awvalid=1; wdata=32'h1; wstrb=4'hF; wvalid=1; bready=1;
+        @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
+        repeat (3) @(posedge clk); #1;
+        if (dut.fsm_state == B_TRADING)
+            $display("  PASS: FSM reached TRADING after restart");
+        else begin
+            $display("  FAIL: FSM = %0d, expected TRADING", dut.fsm_state);
+            err_cnt = err_cnt + 1;
+        end
+
+        // ──────────────────────────────────────────────────────────
+        // Test 9: LED[2:0] reflects fsm_state value
+        // ──────────────────────────────────────────────────────────
+        $display("Test 9: LED reflects fsm_state");
+        @(posedge clk); #1;
+        if (led[2:0] == dut.fsm_state[2:0])
+            $display("  PASS: LED[2:0] = %03b matches fsm_state", led[2:0]);
+        else begin
+            $display("  FAIL: LED[2:0]=%03b, fsm_state=%03b",
+                     led[2:0], dut.fsm_state[2:0]);
             err_cnt = err_cnt + 1;
         end
 

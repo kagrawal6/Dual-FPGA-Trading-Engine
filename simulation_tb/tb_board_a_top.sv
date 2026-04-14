@@ -141,6 +141,102 @@ module tb_board_a_top();
         end else
             $display("PASS: quotes_sent=%0d", read_data);
 
+        // ──────────────────────────────────────────────────────────
+        // Phase 6: Read ORDERS_RCVD (0xFC)
+        //   No Board B connected, so should be 0
+        // ──────────────────────────────────────────────────────────
+        $display("Phase 6: ORDERS_RCVD with no Board B");
+        s_axi_araddr = 8'hFC; s_axi_arvalid = 1;
+        @(posedge clk); #1;
+        s_axi_arvalid = 0;
+        read_data = s_axi_rdata;
+        @(posedge clk);
+
+        if (read_data == 32'd0) begin
+            $display("  PASS: orders_rcvd = 0 (no Board B connected)");
+        end else begin
+            $display("  FAIL: orders_rcvd = %0d, expected 0", read_data);
+            err_cnt = err_cnt + 1;
+        end
+
+        // ──────────────────────────────────────────────────────────
+        // Phase 7: Regime change — write REGIME=VOLATILE (0x0C = 1)
+        //   Verify quotes still flowing after regime switch
+        // ──────────────────────────────────────────────────────────
+        $display("Phase 7: Regime change to VOLATILE");
+        s_axi_awaddr = 8'h0C; s_axi_awvalid = 1;
+        s_axi_wdata = 32'd1; s_axi_wvalid = 1;
+        @(posedge clk); s_axi_awvalid = 0; s_axi_wvalid = 0;
+        @(posedge clk);
+        repeat (50) @(posedge clk); #1;
+
+        if (pmod_ja_valid === 1'b1)
+            $display("  PASS: quotes still flowing after regime change");
+        else begin
+            $display("  FAIL: pmod_ja_valid=%b, expected quotes flowing", pmod_ja_valid);
+            err_cnt = err_cnt + 1;
+        end
+
+        // ──────────────────────────────────────────────────────────
+        // Phase 8: Stop via AXI — write CTRL=2 (reset/stop)
+        //   led[2] should go to 0 (not running)
+        // ──────────────────────────────────────────────────────────
+        $display("Phase 8: Stop via AXI (CTRL=2)");
+        s_axi_awaddr = 8'h00; s_axi_awvalid = 1;
+        s_axi_wdata = 32'h0000_0002; s_axi_wvalid = 1;
+        @(posedge clk); s_axi_awvalid = 0; s_axi_wvalid = 0;
+        repeat (5) @(posedge clk); #1;
+
+        if (led[2] === 1'b0)
+            $display("  PASS: led[2]=0, FSM stopped");
+        else begin
+            $display("  FAIL: led[2]=%b, expected 0 after stop", led[2]);
+            err_cnt = err_cnt + 1;
+        end
+
+        // ──────────────────────────────────────────────────────────
+        // Phase 9: Restart — write CTRL=1 (start)
+        //   led[2] goes back to 1, more quotes generated
+        // ──────────────────────────────────────────────────────────
+        $display("Phase 9: Restart (CTRL=1)");
+        // Capture current quotes_sent before restart
+        s_axi_araddr = 8'hF8; s_axi_arvalid = 1;
+        @(posedge clk); #1;
+        s_axi_arvalid = 0;
+        read_data = s_axi_rdata;
+        @(posedge clk);
+        begin
+            logic [31:0] quotes_before;
+            quotes_before = read_data;
+
+            s_axi_awaddr = 8'h00; s_axi_awvalid = 1;
+            s_axi_wdata = 32'h0000_0001; s_axi_wvalid = 1;
+            @(posedge clk); s_axi_awvalid = 0; s_axi_wvalid = 0;
+            repeat (5) @(posedge clk); #1;
+
+            if (led[2] !== 1'b1) begin
+                $display("  FAIL: led[2]=%b, expected 1 after restart", led[2]);
+                err_cnt = err_cnt + 1;
+            end else
+                $display("  PASS: led[2]=1, FSM restarted");
+
+            repeat (50) @(posedge clk);
+            s_axi_araddr = 8'hF8; s_axi_arvalid = 1;
+            @(posedge clk); #1;
+            s_axi_arvalid = 0;
+            read_data = s_axi_rdata;
+            @(posedge clk);
+
+            if (read_data > quotes_before)
+                $display("  PASS: quotes_sent increased %0d -> %0d",
+                         quotes_before, read_data);
+            else begin
+                $display("  FAIL: quotes_sent=%0d, was %0d (no new quotes)",
+                         read_data, quotes_before);
+                err_cnt = err_cnt + 1;
+            end
+        end
+
         // Summary
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);

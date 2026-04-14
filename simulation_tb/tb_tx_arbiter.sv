@@ -11,6 +11,8 @@ module tb_tx_arbiter();
     logic                tx_valid, tx_ready;
 
     integer err_cnt = 0;
+    integer cyc;
+    logic   quote_leaked;
 
     always #5 clk = ~clk;
 
@@ -43,8 +45,6 @@ module tb_tx_arbiter();
 
         // Test 2: present fill only -> appears on tx
         fill_frame = FILL_PAT; fill_valid = 1;
-        @(posedge clk);
-        fill_valid = 0;
         @(posedge clk); #1;
         if (tx_valid !== 1'b1) begin
             $display("FAIL: tx_valid=%b, expected 1", tx_valid);
@@ -55,13 +55,12 @@ module tb_tx_arbiter();
         end else
             $display("PASS: fill frame forwarded");
 
+        fill_valid = 0;
         // Consume (tx_ready=1), wait for buffer to clear
         @(posedge clk); @(posedge clk); #1;
 
         // Test 3: present quote only -> appears on tx
         quote_frame = QUOTE_PAT; quote_valid = 1;
-        @(posedge clk);
-        quote_valid = 0;
         @(posedge clk); #1;
         if (tx_valid !== 1'b1) begin
             $display("FAIL: tx_valid=%b, expected 1", tx_valid);
@@ -72,13 +71,12 @@ module tb_tx_arbiter();
         end else
             $display("PASS: quote frame forwarded");
 
+        quote_valid = 0;
         @(posedge clk); @(posedge clk); #1;
 
         // Test 4: both valid simultaneously -> fill wins
         fill_frame  = FILL_PAT;  fill_valid  = 1;
         quote_frame = QUOTE_PAT; quote_valid = 1;
-        @(posedge clk);
-        fill_valid = 0; quote_valid = 0;
         @(posedge clk); #1;
         if (tx_frame !== FILL_PAT) begin
             $display("FAIL: fill did not win arbitration");
@@ -86,13 +84,12 @@ module tb_tx_arbiter();
         end else
             $display("PASS: fill wins priority over quote");
 
+        fill_valid = 0; quote_valid = 0;
         @(posedge clk); @(posedge clk); #1;
 
         // Test 5: backpressure - tx_ready=0 holds frame
         tx_ready = 0;
         fill_frame = FILL_PAT; fill_valid = 1;
-        @(posedge clk);
-        fill_valid = 0;
         @(posedge clk); #1;
         if (tx_valid !== 1'b1) begin
             $display("FAIL: frame not buffered under backpressure");
@@ -100,6 +97,7 @@ module tb_tx_arbiter();
         end else
             $display("PASS: frame held under backpressure");
 
+        fill_valid = 0;
         // Release backpressure
         tx_ready = 1;
         @(posedge clk); @(posedge clk); #1;
@@ -108,6 +106,60 @@ module tb_tx_arbiter();
             err_cnt = err_cnt + 1;
         end else
             $display("PASS: frame consumed after tx_ready");
+
+        // ----------------------------------------------------------------
+        // Test 6: mid-reset — assert rst_n=0 while a frame is buffered,
+        //         verify tx_valid goes 0 after reset release.
+        // ----------------------------------------------------------------
+        // Buffer a fill frame under backpressure
+        tx_ready = 0;
+        fill_frame = FILL_PAT; fill_valid = 1;
+        @(posedge clk); #1;
+
+        // Frame should be buffered
+        if (tx_valid !== 1'b1) begin
+            $display("FAIL: setup for mid-reset — frame not buffered");
+            err_cnt = err_cnt + 1;
+        end
+
+        fill_valid = 0;
+        // Assert reset while frame is held
+        rst_n = 0;
+        repeat(2) @(posedge clk);
+        rst_n = 1;
+        @(posedge clk); #1;
+
+        if (tx_valid !== 1'b0) begin
+            $display("FAIL: tx_valid=%b after mid-reset, expected 0", tx_valid);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: mid-reset cleared buffered frame (tx_valid=0)");
+
+        tx_ready = 1;
+        @(posedge clk); @(posedge clk); #1;
+
+        // ----------------------------------------------------------------
+        // Test 7: quote starvation — continuous fill_valid prevents quote
+        //         from ever appearing on output.
+        // ----------------------------------------------------------------
+        quote_leaked = 0;
+        fill_frame  = FILL_PAT;  fill_valid  = 1;
+        quote_frame = QUOTE_PAT; quote_valid = 1;
+        tx_ready = 1;
+
+        for (cyc = 0; cyc < 20; cyc = cyc + 1) begin
+            @(posedge clk); #1;
+            if (tx_valid && tx_frame[127:124] === MSG_QUOTE)
+                quote_leaked = 1;
+        end
+
+        fill_valid = 0; quote_valid = 0;
+
+        if (quote_leaked) begin
+            $display("FAIL: quote appeared on output despite continuous fill");
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: quote starved — fill always wins with strict priority");
 
         // Summary
         if (err_cnt == 0) $display("ALL TESTS PASSED");

@@ -17,6 +17,10 @@ module tb_exchange_lite();
     integer err_cnt = 0;
     integer i;
 
+    // Test 7 / 8 helpers
+    integer guard;
+    logic   fill_seen;
+
     always #5 clk = ~clk;
 
     exchange_lite #(.NUM_SYM(NUM_SYM)) dut (
@@ -42,7 +46,6 @@ module tb_exchange_lite();
         enable = 1;
 
         // Test 1: BUY limit=$102 >= ask=$101 -> FILL at ask
-        //               {MSG_ORDER, sym=0, side=BUY, 3'b0, price, qty, oid, ts, 32'b0}
         order_frame = {MSG_ORDER, 8'd0, 1'b0, 3'b000,
                        32'h0066_0000, 16'd100, 16'd1, 16'd10, 32'h0};
         order_valid = 1;
@@ -140,6 +143,109 @@ module tb_exchange_lite();
             err_cnt = err_cnt + 1;
         end else
             $display("PASS: rejects_sent=1");
+
+        // ----------------------------------------------------------------
+        // Test 6: counter_clr resets all counters to 0
+        // ----------------------------------------------------------------
+        counter_clr = 1;
+        @(posedge clk);
+        counter_clr = 0;
+        @(posedge clk); #1;
+
+        if (orders_rcvd !== 32'd0 || fills_sent !== 32'd0 || rejects_sent !== 32'd0) begin
+            $display("FAIL: counter_clr — orders=%0d fills=%0d rejects=%0d, expected all 0",
+                     orders_rcvd, fills_sent, rejects_sent);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: counter_clr reset all counters to 0");
+
+        repeat(2) @(posedge clk);
+
+        // ----------------------------------------------------------------
+        // Test 7: enable=0 — order_valid pulse is ignored, no fill
+        // ----------------------------------------------------------------
+        enable = 0;
+        order_frame = {MSG_ORDER, 8'd0, 1'b0, 3'b000,
+                       32'h0066_0000, 16'd5, 16'hFF, 16'd50, 32'h0};
+        order_valid = 1;
+        @(posedge clk); order_valid = 0;
+
+        // Wait several cycles and verify fill_valid never asserts
+        fill_seen = 0;
+        for (guard = 0; guard < 6; guard = guard + 1) begin
+            @(posedge clk); #1;
+            if (fill_valid) fill_seen = 1;
+        end
+
+        if (fill_seen) begin
+            $display("FAIL: fill_valid asserted while enable=0");
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: order ignored when enable=0");
+
+        // Counters should still be 0 (order not accepted)
+        if (orders_rcvd !== 32'd0) begin
+            $display("FAIL: orders_rcvd=%0d, expected 0 (enable=0)", orders_rcvd);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: orders_rcvd stayed 0 while disabled");
+
+        enable = 1;
+        repeat(2) @(posedge clk);
+
+        // ----------------------------------------------------------------
+        // Test 8: back-to-back orders — two fills in rapid succession
+        // Pipeline: accept (1 cyc) → produce fill (1 cyc) → consume (1 cyc).
+        // Second order enters as soon as the pipeline drains.
+        // ----------------------------------------------------------------
+
+        // Order A: BUY at $102 → fill at ask=$101
+        order_frame = {MSG_ORDER, 8'd0, 1'b0, 3'b000,
+                       32'h0066_0000, 16'd10, 16'hB1, 16'd200, 32'h0};
+        order_valid = 1;
+        @(posedge clk); order_valid = 0;
+        @(posedge clk); #1;
+
+        if (fill_frame[127:124] !== MSG_FILL || fill_frame[114:112] !== 3'b000) begin
+            $display("FAIL: back-to-back order A not filled (type=%h status=%b)",
+                     fill_frame[127:124], fill_frame[114:112]);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: back-to-back order A filled at ask");
+
+        // Drain fill A (fill_ready=1 consumes it on the next edge)
+        @(posedge clk); #1;
+
+        // Order B: SELL at $99 → fill at bid=$100
+        order_frame = {MSG_ORDER, 8'd1, 1'b1, 3'b000,
+                       32'h0063_0000, 16'd20, 16'hB2, 16'd201, 32'h0};
+        order_valid = 1;
+        @(posedge clk); order_valid = 0;
+        @(posedge clk); #1;
+
+        if (fill_frame[127:124] !== MSG_FILL || fill_frame[114:112] !== 3'b000) begin
+            $display("FAIL: back-to-back order B not filled (type=%h status=%b)",
+                     fill_frame[127:124], fill_frame[114:112]);
+            err_cnt = err_cnt + 1;
+        end else if (fill_frame[63:48] !== 16'hB2) begin
+            $display("FAIL: order B order_id=%h, expected B2", fill_frame[63:48]);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: back-to-back order B filled, order_id echoed");
+
+        // Verify counters after both orders
+        repeat(3) @(posedge clk); #1;
+        if (orders_rcvd !== 32'd2) begin
+            $display("FAIL: orders_rcvd=%0d after back-to-back, expected 2", orders_rcvd);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: orders_rcvd=2 after back-to-back");
+
+        if (fills_sent !== 32'd2) begin
+            $display("FAIL: fills_sent=%0d after back-to-back, expected 2", fills_sent);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: fills_sent=2 after back-to-back");
 
         // Summary
         if (err_cnt == 0) $display("ALL TESTS PASSED");

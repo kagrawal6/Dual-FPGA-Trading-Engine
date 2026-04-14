@@ -39,8 +39,6 @@ module tb_order_manager();
         approved_valid = 1; approved_side = 0;
         approved_price = 32'd5000; approved_qty = 16'd25;
         approved_symbol = 8'd7; cycle_counter = 16'd42;
-        @(posedge clk);
-        approved_valid = 0;
         @(posedge clk); #1;
 
         if (order_valid !== 1'b1) begin
@@ -64,6 +62,7 @@ module tb_order_manager();
         if (order_frame[63:48] !== 16'd0) begin
             $display("FAIL: order_id=%0d, exp 0", order_frame[63:48]); err_cnt = err_cnt + 1;
         end else $display("PASS: order_id=0");
+        approved_valid = 0;
         @(posedge clk); #1;
 
         // Test 2: SELL order -> side=1, incremented order_id
@@ -71,8 +70,6 @@ module tb_order_manager();
         approved_valid = 1; approved_side = 1;
         approved_price = 32'd8000; approved_qty = 16'd50;
         approved_symbol = 8'd3; cycle_counter = 16'd55;
-        @(posedge clk);
-        approved_valid = 0;
         @(posedge clk); #1;
 
         if (order_frame[115] !== 1'b1) begin
@@ -81,6 +78,7 @@ module tb_order_manager();
         if (order_frame[63:48] !== 16'd1) begin
             $display("FAIL: order_id=%0d, exp 1", order_frame[63:48]); err_cnt = err_cnt + 1;
         end else $display("PASS: order_id=1 (incremented)");
+        approved_valid = 0;
         @(posedge clk); #1;
 
         // Test 3: Backpressure: order_ready=0 holds output
@@ -89,13 +87,12 @@ module tb_order_manager();
         approved_valid = 1; approved_side = 0;
         approved_price = 32'd1234; approved_qty = 16'd1;
         approved_symbol = 8'd0; cycle_counter = 16'd99;
-        @(posedge clk);
-        approved_valid = 0;
         @(posedge clk); #1;
 
         if (order_valid !== 1'b1) begin
             $display("FAIL: order_valid should be 1"); err_cnt = err_cnt + 1;
         end else $display("PASS: order_valid=1 during backpressure");
+        approved_valid = 0;
         @(posedge clk); #1;
         if (order_valid !== 1'b1) begin
             $display("FAIL: order_valid should hold"); err_cnt = err_cnt + 1;
@@ -109,6 +106,53 @@ module tb_order_manager();
         if (orders_sent !== 32'd3) begin
             $display("FAIL: orders_sent=%0d, exp 3", orders_sent); err_cnt = err_cnt + 1;
         end else $display("PASS: orders_sent=3");
+
+        // Test 4: Clear resets orders_sent and order_valid
+        $display("TEST 4: Clear resets counters");
+        clear = 1; @(posedge clk); clear = 0;
+        @(posedge clk); #1;
+        if (orders_sent !== 32'd0) begin
+            $display("FAIL: orders_sent=%0d, exp 0", orders_sent); err_cnt = err_cnt + 1;
+        end else $display("PASS: orders_sent=0 after clear");
+        if (order_valid !== 1'b0) begin
+            $display("FAIL: order_valid=%b, exp 0", order_valid); err_cnt = err_cnt + 1;
+        end else $display("PASS: order_valid=0 after clear");
+
+        // Test 5: Timestamp embedded in frame matches cycle_counter
+        $display("TEST 5: Timestamp in frame");
+        approved_valid = 1; approved_side = 0;
+        approved_price = 32'd1000; approved_qty = 16'd10;
+        approved_symbol = 8'd0; cycle_counter = 16'h1234;
+        @(posedge clk); #1;
+        if (order_frame[47:32] !== 16'h1234) begin
+            $display("FAIL: timestamp=%04X, exp 1234", order_frame[47:32]); err_cnt = err_cnt + 1;
+        end else $display("PASS: timestamp=0x1234 embedded");
+        approved_valid = 0;
+        @(posedge clk); #1;
+
+        // Test 6: Order ID restarts at 0 after clear, sequential IDs
+        $display("TEST 6: Order ID restarts after clear");
+        clear = 1; @(posedge clk); clear = 0;
+        @(posedge clk); #1;
+        // First order after clear -> ID=0
+        approved_valid = 1; approved_side = 0;
+        approved_price = 32'd2000; approved_qty = 16'd5;
+        approved_symbol = 8'd1; cycle_counter = 16'd200;
+        @(posedge clk); #1;
+        if (order_frame[63:48] !== 16'd0) begin
+            $display("FAIL: order_id=%0d, exp 0", order_frame[63:48]); err_cnt = err_cnt + 1;
+        end else $display("PASS: order_id=0 after clear");
+        approved_valid = 0;
+        @(posedge clk); #1;
+        // Second order -> ID=1
+        approved_valid = 1; approved_side = 1;
+        approved_price = 32'd3000; approved_qty = 16'd15;
+        approved_symbol = 8'd2; cycle_counter = 16'd210;
+        @(posedge clk); #1;
+        if (order_frame[63:48] !== 16'd1) begin
+            $display("FAIL: order_id=%0d, exp 1", order_frame[63:48]); err_cnt = err_cnt + 1;
+        end else $display("PASS: order_id=1 (sequential)");
+        approved_valid = 0;
 
         $display("=================================");
         if (err_cnt == 0) $display("ALL TESTS PASSED");

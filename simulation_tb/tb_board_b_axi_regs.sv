@@ -140,6 +140,49 @@ module tb_board_b_axi_regs();
         while (!s_axi_bvalid) @(posedge clk);
         @(posedge clk); s_axi_bready=0;
 
+        // Test 6: Read QUOTES_RCVD counter (0x044) — driven as quotes_in=42
+        $display("Test 6: Read QUOTES_RCVD");
+        @(posedge clk);
+        s_axi_araddr=9'h044; s_axi_arvalid=1; s_axi_rready=1;
+        @(posedge clk); s_axi_arvalid=0;
+        while (!s_axi_rvalid) @(posedge clk);
+        if (s_axi_rdata == 32'd42) $display("  PASS: QUOTES_RCVD = 42");
+        else begin $display("  FAIL: QUOTES_RCVD = %0d, exp 42", s_axi_rdata); err_cnt = err_cnt+1; end
+        @(posedge clk); s_axi_rready=0;
+
+        // Test 7: Read POSITION[0] (0x058) — signed value readback
+        $display("Test 7: Read POSITION[0]");
+        pos_in[0] = -32'sd50;
+        @(posedge clk);
+        s_axi_araddr=9'h058; s_axi_arvalid=1; s_axi_rready=1;
+        @(posedge clk); s_axi_arvalid=0;
+        while (!s_axi_rvalid) @(posedge clk);
+        if ($signed(s_axi_rdata) == -32'sd50) $display("  PASS: POSITION[0] = -50");
+        else begin $display("  FAIL: POSITION[0] = %0d, exp -50", $signed(s_axi_rdata)); err_cnt = err_cnt+1; end
+        @(posedge clk); s_axi_rready=0;
+
+        // Test 8: Read HIST_BIN[0] (0x0A0) — histogram bin readback
+        $display("Test 8: Read HIST_BIN[0]");
+        hbins_in[0] = 32'd123;
+        @(posedge clk);
+        s_axi_araddr=9'h0A0; s_axi_arvalid=1; s_axi_rready=1;
+        @(posedge clk); s_axi_arvalid=0;
+        while (!s_axi_rvalid) @(posedge clk);
+        if (s_axi_rdata == 32'd123) $display("  PASS: HIST_BIN[0] = 123");
+        else begin $display("  FAIL: HIST_BIN[0] = %0d, exp 123", s_axi_rdata); err_cnt = err_cnt+1; end
+        @(posedge clk); s_axi_rready=0;
+
+        // Test 9: CTRL write 2 -> axi_reset_pulse fires
+        $display("Test 9: CTRL reset pulse");
+        @(posedge clk);
+        s_axi_awaddr=9'h000; s_axi_awvalid=1; s_axi_wdata=32'h2;
+        s_axi_wstrb=4'hF; s_axi_wvalid=1; s_axi_bready=1;
+        @(posedge clk); s_axi_awvalid=0; s_axi_wvalid=0; #1;
+        if (axi_reset_pulse == 1) $display("  PASS: axi_reset_pulse fired");
+        else begin $display("  FAIL: axi_reset_pulse not set"); err_cnt = err_cnt+1; end
+        while (!s_axi_bvalid) @(posedge clk);
+        @(posedge clk); s_axi_bready=0;
+
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);
         $stop;

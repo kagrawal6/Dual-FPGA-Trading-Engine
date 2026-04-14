@@ -102,6 +102,115 @@ module tb_board_a_ctrl();
         end else
             $display("PASS: rgb1=010 (link ok)");
 
+        // ----------------------------------------------------------------
+        // Test 6: btn[2] press -> ctrl_reset_pulse
+        // ----------------------------------------------------------------
+        btn[2] = 1;
+        repeat(4) @(posedge clk); #1;
+        if (ctrl_reset_pulse !== 1'b1) begin
+            $display("FAIL: ctrl_reset_pulse=%b, expected 1", ctrl_reset_pulse);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: ctrl_reset_pulse fired");
+        btn[2] = 0;
+        repeat(5) @(posedge clk);
+
+        // ----------------------------------------------------------------
+        // Test 7: LED[1:0] reflects all four regimes
+        //   CALM=00, VOLATILE=01, BURST=10, ADVERSARIAL=11
+        // ----------------------------------------------------------------
+        running = 1;
+
+        active_regime = REGIME_CALM;
+        @(posedge clk); #1;
+        if (led[1:0] !== 2'b00) begin
+            $display("FAIL: led[1:0]=%b for CALM, expected 00", led[1:0]);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: led[1:0]=00 for REGIME_CALM");
+
+        active_regime = REGIME_VOLATILE;
+        @(posedge clk); #1;
+        if (led[1:0] !== 2'b01) begin
+            $display("FAIL: led[1:0]=%b for VOLATILE, expected 01", led[1:0]);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: led[1:0]=01 for REGIME_VOLATILE");
+
+        active_regime = REGIME_BURST;
+        @(posedge clk); #1;
+        if (led[1:0] !== 2'b10) begin
+            $display("FAIL: led[1:0]=%b for BURST, expected 10", led[1:0]);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: led[1:0]=10 for REGIME_BURST");
+
+        active_regime = REGIME_ADVERSARIAL;
+        @(posedge clk); #1;
+        if (led[1:0] !== 2'b11) begin
+            $display("FAIL: led[1:0]=%b for ADVERSARIAL, expected 11", led[1:0]);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: led[1:0]=11 for REGIME_ADVERSARIAL");
+
+        // ----------------------------------------------------------------
+        // Test 8: RGB0 color per regime
+        //   CALM       = green   = 3'b010
+        //   VOLATILE   = yellow  = 3'b110
+        //   BURST      = red     = 3'b100
+        //   ADVERSARIAL = magenta = 3'b101
+        // ----------------------------------------------------------------
+        active_regime = REGIME_CALM;
+        @(posedge clk); #1;
+        if (rgb0 !== 3'b010) begin
+            $display("FAIL: rgb0=%b for CALM, expected 010 (green)", rgb0);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: rgb0=010 (green) for REGIME_CALM");
+
+        active_regime = REGIME_VOLATILE;
+        @(posedge clk); #1;
+        if (rgb0 !== 3'b110) begin
+            $display("FAIL: rgb0=%b for VOLATILE, expected 110 (yellow)", rgb0);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: rgb0=110 (yellow) for REGIME_VOLATILE");
+
+        active_regime = REGIME_BURST;
+        @(posedge clk); #1;
+        if (rgb0 !== 3'b100) begin
+            $display("FAIL: rgb0=%b for BURST, expected 100 (red)", rgb0);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: rgb0=100 (red) for REGIME_BURST");
+
+        active_regime = REGIME_ADVERSARIAL;
+        @(posedge clk); #1;
+        if (rgb0 !== 3'b101) begin
+            $display("FAIL: rgb0=%b for ADVERSARIAL, expected 101 (magenta)", rgb0);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: rgb0=101 (magenta) for REGIME_ADVERSARIAL");
+
+        // ----------------------------------------------------------------
+        // Test 9: sw_override = sw[2]
+        // ----------------------------------------------------------------
+        sw[2] = 1'b0;
+        @(posedge clk); #1;
+        if (sw_override !== 1'b0) begin
+            $display("FAIL: sw_override=%b with sw[2]=0, expected 0", sw_override);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: sw_override=0 when sw[2]=0");
+
+        sw[2] = 1'b1;
+        @(posedge clk); #1;
+        if (sw_override !== 1'b1) begin
+            $display("FAIL: sw_override=%b with sw[2]=1, expected 1", sw_override);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: sw_override=1 when sw[2]=1");
+
         // Summary
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);

@@ -111,6 +111,68 @@ module tb_position_tracker();
             err_cnt = err_cnt + 1;
         end
 
+        // Test 6: ts_echo extraction — verify ts_echo output matches frame [47:32]
+        $display("Test 6: ts_echo extraction");
+        fill_frame = 128'h3000_0001_0000_000A_0010_ABCD_0000_0000;
+        fill_valid = 1;
+        @(posedge clk); fill_valid = 0;
+        @(posedge clk); #1;
+        if (ts_echo == 16'hABCD)
+            $display("  PASS: ts_echo = 0xABCD");
+        else begin
+            $display("  FAIL: ts_echo = 0x%04X, expected 0xABCD", ts_echo);
+            err_cnt = err_cnt + 1;
+        end
+
+        // Test 7: Multi-symbol independence — BUY sym=0 and sym=1 separately
+        $display("Test 7: Multi-symbol independence");
+        clear = 1; @(posedge clk); clear = 0;
+        @(posedge clk); #1;
+        // BUY sym=0, qty=10 @ $1.00
+        fill_frame = 128'h3000_0001_0000_000A_0020_0100_0000_0000;
+        fill_valid = 1;
+        @(posedge clk); fill_valid = 0;
+        @(posedge clk); #1;
+        // BUY sym=1, qty=20 @ $1.00
+        fill_frame = 128'h3010_0001_0000_0014_0021_0100_0000_0000;
+        fill_valid = 1;
+        @(posedge clk); fill_valid = 0;
+        @(posedge clk); #1;
+        if (position[0] == 32'sd10 && position[1] == 32'sd20)
+            $display("  PASS: pos[0]=10, pos[1]=20 (independent)");
+        else begin
+            $display("  FAIL: pos[0]=%0d, pos[1]=%0d",
+                     $signed(position[0]), $signed(position[1]));
+            err_cnt = err_cnt + 1;
+        end
+
+        // Test 8: Cash accounting — BUY 100@$1.00 then SELL 100@$2.00 = $100 profit
+        $display("Test 8: Cash accounting");
+        clear = 1; @(posedge clk); clear = 0;
+        @(posedge clk); #1;
+        // BUY 100 @ $1.00 (Q16.16 = 0x00010000)
+        fill_frame = 128'h3000_0001_0000_0064_0030_0200_0000_0000;
+        fill_valid = 1;
+        @(posedge clk); fill_valid = 0;
+        @(posedge clk); #1;
+        // SELL 100 @ $2.00 (Q16.16 = 0x00020000)
+        fill_frame = 128'h3008_0002_0000_0064_0031_0200_0000_0000;
+        fill_valid = 1;
+        @(posedge clk); fill_valid = 0;
+        @(posedge clk); #1;
+        if (total_pnl == 32'sd100)
+            $display("  PASS: total_pnl = +$100 profit");
+        else begin
+            $display("  FAIL: total_pnl = %0d, expected 100", $signed(total_pnl));
+            err_cnt = err_cnt + 1;
+        end
+        if (position[0] == 32'sd0)
+            $display("  PASS: position[0] = 0 (flat)");
+        else begin
+            $display("  FAIL: position[0] = %0d, expected 0", $signed(position[0]));
+            err_cnt = err_cnt + 1;
+        end
+
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);
         $stop;

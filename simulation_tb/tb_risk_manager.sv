@@ -60,8 +60,6 @@ module tb_risk_manager();
         $display("TEST 1: Normal order -> approved");
         signal_valid = 1; signal_side = 0;
         signal_price = 32'd500; signal_qty = 16'd10; signal_symbol = 8'd0;
-        @(posedge clk);
-        signal_valid = 0;
         @(posedge clk); #1;
         if (approved_valid !== 1'b1) begin
             $display("FAIL: approved_valid should be 1"); err_cnt = err_cnt + 1;
@@ -69,6 +67,7 @@ module tb_risk_manager();
         if (approved_price !== 32'd500) begin
             $display("FAIL: approved_price=%0d, exp 500", approved_price); err_cnt = err_cnt + 1;
         end else $display("PASS: approved_price=500");
+        signal_valid = 0;
         @(posedge clk); #1;
 
         // Test 2: order_enable=0 -> rejected
@@ -104,12 +103,13 @@ module tb_risk_manager();
         total_pnl = -32'sd6000;
         signal_valid = 1; signal_side = 0;
         signal_price = 32'd500; signal_qty = 16'd1; signal_symbol = 8'd1;
-        @(posedge clk);
-        signal_valid = 0;
         @(posedge clk); #1;
         if (risk_halt !== 1'b1) begin
             $display("FAIL: risk_halt should latch high"); err_cnt = err_cnt + 1;
         end else $display("PASS: risk_halt latched");
+
+        signal_valid = 0;
+        @(posedge clk);
 
         // Test 5: Clear resets risk_halt
         $display("TEST 5: Clear resets risk_halt");
@@ -120,6 +120,104 @@ module tb_risk_manager();
         if (risk_halt !== 1'b0) begin
             $display("FAIL: risk_halt should clear"); err_cnt = err_cnt + 1;
         end else $display("PASS: risk_halt cleared");
+
+        @(posedge clk); #1;
+
+        // ── Test 6: SELL with negative position exceeding limit ──────
+        // position[2] = -995. A SELL of qty=10 would bring worst-case
+        // to -1005, exceeding max_position=1000 → rejected.
+        $display("TEST 6: SELL position limit (negative) -> rejected");
+        position[2] = -32'sd995;
+        signal_valid = 1; signal_side = 1; // SELL
+        signal_price = 32'd500; signal_qty = 16'd10; signal_symbol = 8'd2;
+        @(posedge clk); #1;
+
+        if (approved_valid !== 1'b0) begin
+            $display("FAIL: should reject (negative pos limit)"); err_cnt = err_cnt + 1;
+        end else $display("PASS: rejected (SELL exceeds -max_position)");
+
+        signal_valid = 0;
+        position[2] = 0;
+        @(posedge clk); #1;
+
+        // ── Test 7: Rate limit ───────────────────────────────────────
+        // Clear to reset order_count, set max_order_rate=3. Send 3
+        // orders (all approved), then a 4th which must be rejected
+        // because order_count has reached the limit.
+        $display("TEST 7: Rate limit (max_order_rate=3)");
+        clear = 1;
+        @(posedge clk);
+        clear = 0;
+        @(posedge clk); #1;
+
+        max_order_rate = 32'd3;
+        total_pnl = 0;
+        for (i = 0; i < NUM_SYMBOLS; i = i + 1) position[i] = 0;
+
+        // Send 3 orders — all should be approved
+        for (i = 0; i < 3; i = i + 1) begin
+            signal_valid = 1; signal_side = 0;
+            signal_price = 32'd100; signal_qty = 16'd1; signal_symbol = 8'd0;
+            @(posedge clk); #1;
+            if (approved_valid !== 1'b1) begin
+                $display("FAIL: order %0d should be approved", i + 1);
+                err_cnt = err_cnt + 1;
+            end else $display("PASS: order %0d approved", i + 1);
+            signal_valid = 0;
+            @(posedge clk);
+        end
+
+        // 4th order — should be rejected (order_count=3, 3 < 3 is false)
+        signal_valid = 1; signal_side = 0;
+        signal_price = 32'd100; signal_qty = 16'd1; signal_symbol = 8'd0;
+        @(posedge clk); #1;
+        if (approved_valid !== 1'b0) begin
+            $display("FAIL: 4th order should be rejected (rate limit)");
+            err_cnt = err_cnt + 1;
+        end else $display("PASS: 4th order rejected (rate limit)");
+
+        signal_valid = 0;
+        // Restore max_order_rate
+        max_order_rate = 32'd100;
+        @(posedge clk); #1;
+
+        // ── Test 8: risk_rejects counter ─────────────────────────────
+        // Clear to reset counter, then send 2 orders with order_enable
+        // disabled. risk_rejects should increment to 2.
+        $display("TEST 8: risk_rejects counter increments");
+        clear = 1;
+        @(posedge clk);
+        clear = 0;
+        @(posedge clk); #1;
+
+        order_enable = 0;
+
+        // First rejected order
+        signal_valid = 1; signal_side = 0;
+        signal_price = 32'd100; signal_qty = 16'd1; signal_symbol = 8'd0;
+        @(posedge clk); #1;
+
+        if (risk_rejects !== 32'd1) begin
+            $display("FAIL: risk_rejects expected 1, got %0d", risk_rejects);
+            err_cnt = err_cnt + 1;
+        end else $display("PASS: risk_rejects=1 after first rejection");
+
+        signal_valid = 0;
+        @(posedge clk);
+
+        // Second rejected order
+        signal_valid = 1; signal_side = 0;
+        signal_price = 32'd200; signal_qty = 16'd2; signal_symbol = 8'd1;
+        @(posedge clk); #1;
+
+        if (risk_rejects !== 32'd2) begin
+            $display("FAIL: risk_rejects expected 2, got %0d", risk_rejects);
+            err_cnt = err_cnt + 1;
+        end else $display("PASS: risk_rejects=2 after second rejection");
+
+        signal_valid = 0;
+
+        order_enable = 1;
 
         $display("=================================");
         if (err_cnt == 0) $display("ALL TESTS PASSED");

@@ -24,7 +24,7 @@ module tb_system_top();
     integer err_cnt = 0;
     logic [31:0] init_mids [4] = '{32'h00B40000, 32'h01A40000, 32'h03840000, 32'h00730000};
     logic [8:0]  bcfg_addr [7] = '{9'h004,9'h008,9'h00C,9'h010,9'h014,9'h018,9'h01C};
-    logic [31:0] bcfg_data [7] = '{32'd0, 32'h100, 32'd6554, 32'd100, 32'd50000, 32'd10000, 32'd10_000_000};
+    logic [31:0] bcfg_data [7] = '{32'd0, 32'd1, 32'd6554, 32'd100, 32'd50000, 32'd10000, 32'd10_000_000};
 
     always #5 clk = ~clk;
 
@@ -83,8 +83,8 @@ module tb_system_top();
             @(posedge clk); awvalid_a=0; wvalid_a=0;
             while(!bvalid_a) @(posedge clk); bready_a=0;
         end
-        // quote_interval=200, active_sym_count=4
-        @(posedge clk); awaddr_a=8'h04; awvalid_a=1; wdata_a=32'd200; wstrb_a=4'hF; wvalid_a=1; bready_a=1;
+        // quote_interval=50 (faster quotes for more strategy triggers), active_sym_count=4
+        @(posedge clk); awaddr_a=8'h04; awvalid_a=1; wdata_a=32'd50; wstrb_a=4'hF; wvalid_a=1; bready_a=1;
         @(posedge clk); awvalid_a=0; wvalid_a=0; while(!bvalid_a) @(posedge clk); bready_a=0;
         @(posedge clk); awaddr_a=8'hF0; awvalid_a=1; wdata_a=32'd4; wstrb_a=4'hF; wvalid_a=1; bready_a=1;
         @(posedge clk); awvalid_a=0; wvalid_a=0; while(!bvalid_a) @(posedge clk); bready_a=0;
@@ -108,7 +108,8 @@ module tb_system_top();
         // Test 2: Wait for Board B link_up
         $display("Test 2: Board B link_up");
         begin
-            integer w = 0;
+            integer w;
+            w = 0;
             while (!u_board_b.link_up && w < 5000) begin @(posedge clk); w=w+1; end
             if (u_board_b.link_up) $display("  PASS: link_up after %0d cycles", w);
             else begin $display("  FAIL: no link_up"); err_cnt=err_cnt+1; end
@@ -126,9 +127,9 @@ module tb_system_top();
         if (u_board_b.fsm_state == B_TRADING) $display("  PASS: Board B TRADING");
         else begin $display("  FAIL: Board B state=%0d", u_board_b.fsm_state); err_cnt=err_cnt+1; end
 
-        // Run for 10k cycles
-        $display("Running system for 10000 cycles...");
-        repeat(10000) @(posedge clk);
+        // Run for 60k cycles (enough time for strategy signals + order/fill round-trips)
+        $display("Running system for 60000 cycles...");
+        repeat(60000) @(posedge clk);
 
         // Test 4: Board B received quotes
         $display("Test 4: Board B quotes_rcvd > 0");
@@ -146,6 +147,81 @@ module tb_system_top();
         if (rdata_b == 0) $display("  PASS: link_errors = 0");
         else begin $display("  FAIL: link_errors = %0d", rdata_b); err_cnt=err_cnt+1; end
         @(posedge clk); rready_b=0;
+
+        // ──────────────────────────────────────────────────────────
+        // Phase 6: Board B orders_sent (0x048) — pipeline generated orders
+        // ──────────────────────────────────────────────────────────
+        $display("Phase 6: Board B orders_sent");
+        @(posedge clk); araddr_b=9'h048; arvalid_b=1; rready_b=1;
+        @(posedge clk); arvalid_b=0; while(!rvalid_b) @(posedge clk);
+        $display("  orders_sent = %0d", rdata_b);
+        if (rdata_b > 0) $display("  PASS: Board B generated orders");
+        else begin $display("  FAIL: orders_sent = 0"); err_cnt=err_cnt+1; end
+        @(posedge clk); rready_b=0;
+
+        // ──────────────────────────────────────────────────────────
+        // Phase 7: Board A orders_rcvd (0xFC) — orders flowed B -> A
+        // ──────────────────────────────────────────────────────────
+        $display("Phase 7: Board A orders_rcvd");
+        @(posedge clk); araddr_a=8'hFC; arvalid_a=1; rready_a=1;
+        @(posedge clk); arvalid_a=0; while(!rvalid_a) @(posedge clk);
+        $display("  orders_rcvd = %0d", rdata_a);
+        if (rdata_a > 0) $display("  PASS: orders flowed B -> A");
+        else begin $display("  FAIL: orders_rcvd = 0"); err_cnt=err_cnt+1; end
+        @(posedge clk); rready_a=0;
+
+        // ──────────────────────────────────────────────────────────
+        // Phase 8: Board B fills_rcvd (0x04C) — fills flowed A -> B
+        // ──────────────────────────────────────────────────────────
+        $display("Phase 8: Board B fills_rcvd");
+        @(posedge clk); araddr_b=9'h04C; arvalid_b=1; rready_b=1;
+        @(posedge clk); arvalid_b=0; while(!rvalid_b) @(posedge clk);
+        $display("  fills_rcvd = %0d", rdata_b);
+        if (rdata_b > 0) $display("  PASS: fills flowed A -> B");
+        else begin $display("  FAIL: fills_rcvd = 0"); err_cnt=err_cnt+1; end
+        @(posedge clk); rready_b=0;
+
+        // ──────────────────────────────────────────────────────────
+        // Phase 9: Board B POSITION[0] (0x058) — fills updated positions
+        // ──────────────────────────────────────────────────────────
+        $display("Phase 9: Board B POSITION[0]");
+        @(posedge clk); araddr_b=9'h058; arvalid_b=1; rready_b=1;
+        @(posedge clk); arvalid_b=0; while(!rvalid_b) @(posedge clk);
+        $display("  POSITION[0] = %0d (signed: %0d)", rdata_b, $signed(rdata_b));
+        if (rdata_b != 32'd0) $display("  PASS: position updated by fills");
+        else begin $display("  FAIL: POSITION[0] = 0"); err_cnt=err_cnt+1; end
+        @(posedge clk); rready_b=0;
+
+        // ──────────────────────────────────────────────────────────
+        // Phase 10: Regime change — Board A REGIME to VOLATILE
+        //   Run 5000 more cycles, verify Board B quotes_rcvd increased
+        // ──────────────────────────────────────────────────────────
+        $display("Phase 10: Regime change to VOLATILE");
+        // Snapshot current quotes_rcvd
+        begin
+            logic [31:0] qr_before;
+            @(posedge clk); araddr_b=9'h044; arvalid_b=1; rready_b=1;
+            @(posedge clk); arvalid_b=0; while(!rvalid_b) @(posedge clk);
+            qr_before = rdata_b;
+            @(posedge clk); rready_b=0;
+
+            // Write REGIME=VOLATILE (addr 0x0C = 1) to Board A
+            @(posedge clk); awaddr_a=8'h0C; awvalid_a=1;
+            wdata_a=32'd1; wstrb_a=4'hF; wvalid_a=1; bready_a=1;
+            @(posedge clk); awvalid_a=0; wvalid_a=0;
+            while(!bvalid_a) @(posedge clk); bready_a=0;
+
+            $display("  Running 5000 more cycles in VOLATILE regime...");
+            repeat (5000) @(posedge clk);
+
+            // Re-read Board B quotes_rcvd
+            @(posedge clk); araddr_b=9'h044; arvalid_b=1; rready_b=1;
+            @(posedge clk); arvalid_b=0; while(!rvalid_b) @(posedge clk);
+            $display("  quotes_rcvd: %0d -> %0d", qr_before, rdata_b);
+            if (rdata_b > qr_before) $display("  PASS: quotes increased after regime change");
+            else begin $display("  FAIL: no new quotes after regime change"); err_cnt=err_cnt+1; end
+            @(posedge clk); rready_b=0;
+        end
 
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);

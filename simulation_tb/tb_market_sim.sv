@@ -22,6 +22,10 @@ module tb_market_sim();
     integer err_cnt = 0;
     integer i;
 
+    // Variables for new tests
+    price_t calm_spread, vol_spread;
+    logic [COUNTER_W-1:0] cnt_before;
+
     always #5 clk = ~clk;
 
     market_sim #(.NUM_SYM(NUM_SYM), .NUM_SECTORS(2)) dut (
@@ -80,18 +84,14 @@ module tb_market_sim();
             $display("PASS: bid < ask (bid=%h, ask=%h)", quote_frame[111:80], quote_frame[79:48]);
 
         // Test 4: symbols rotate 1, 2, 3
-        // With quote_interval==0, quote_valid stays high every cycle (do_quote every
-        // clk); there is no second posedge on quote_valid. Step on clk until the
-        // frame's symbol field matches.
         for (i = 1; i < 4; i++) begin
             begin : wait_sym
-                automatic int guard = 0;
-                // Sample after posedge + delay so quote_frame_hold NBA has settled (avoid
-                // reading stale symbol_id on the same tick as the clock edge).
+                automatic int guard;
+                guard = 0;
                 while (1) begin
                     @(posedge clk);
                     #1;
-                    guard++;
+                    guard = guard + 1;
                     if (guard > 500) begin
                         $display("FAIL: timeout waiting for symbol %0d", i);
                         err_cnt = err_cnt + 1;
@@ -116,6 +116,77 @@ module tb_market_sim();
             err_cnt = err_cnt + 1;
         end else
             $display("PASS: quotes_generated=%0d", quotes_generated);
+
+        // ----------------------------------------------------------------
+        // Test 6: regime change to VOLATILE widens spread
+        // CALM base_spread = 0x1000, VOLATILE base_spread = 0x4000 (4x wider)
+        // ----------------------------------------------------------------
+        calm_spread = best_ask[0] - best_bid[0];
+        active_regime = REGIME_VOLATILE;
+        // Let all 4 symbols cycle through twice under the new regime
+        repeat(10) @(posedge clk); #1;
+        vol_spread = best_ask[0] - best_bid[0];
+
+        if (vol_spread <= calm_spread) begin
+            $display("FAIL: VOLATILE spread=%h not wider than CALM spread=%h",
+                     vol_spread, calm_spread);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: VOLATILE spread=%h > CALM spread=%h",
+                     vol_spread, calm_spread);
+
+        // Restore CALM regime for remaining tests
+        active_regime = REGIME_CALM;
+        repeat(5) @(posedge clk);
+
+        // ----------------------------------------------------------------
+        // Test 7: counter_clr resets quotes_generated to 0
+        // ----------------------------------------------------------------
+        enable = 0;
+        quote_ready = 0;
+        repeat(3) @(posedge clk);
+        counter_clr = 1;
+        @(posedge clk);
+        counter_clr = 0;
+        @(posedge clk); #1;
+
+        if (quotes_generated !== 32'd0) begin
+            $display("FAIL: quotes_generated=%0d after counter_clr, expected 0",
+                     quotes_generated);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: counter_clr reset quotes_generated to 0");
+
+        quote_ready = 1;
+        enable = 1;
+
+        // Let a few quotes flow to get a non-zero baseline for Test 8
+        repeat(6) @(posedge clk); #1;
+
+        // ----------------------------------------------------------------
+        // Test 8: backpressure — quote_ready=0 suppresses emission
+        // market_sim uses pulse-valid semantics: quote_valid only fires when
+        // quote_ready is high, so backpressure stalls the producer entirely.
+        // ----------------------------------------------------------------
+        cnt_before = quotes_generated;
+        quote_ready = 0;
+        repeat(10) @(posedge clk); #1;
+
+        if (quote_valid !== 1'b0) begin
+            $display("FAIL: quote_valid=%b under backpressure, expected 0 (pulse-valid)",
+                     quote_valid);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: quote_valid=0 under backpressure (pulse-valid semantics)");
+
+        if (quotes_generated !== cnt_before) begin
+            $display("FAIL: quotes_generated advanced under backpressure (%0d -> %0d)",
+                     cnt_before, quotes_generated);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: quotes_generated stalled under backpressure (%0d)", cnt_before);
+
+        quote_ready = 1;
 
         // Summary
         if (err_cnt == 0) $display("ALL TESTS PASSED");

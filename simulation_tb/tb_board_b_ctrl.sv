@@ -61,11 +61,12 @@ module tb_board_b_ctrl();
             err_cnt = err_cnt + 1;
         end
 
-        // Test 2: Button 0 press -> start pulse (BTN_DEB_W=2 -> 4+1 stable cycles)
+        // Test 2: Button 0 press -> start pulse (BTN_DEB_W=2 -> threshold=4+1 stable cycles)
         $display("Test 2: Button start pulse");
         btn[0] = 1;
         begin
-            integer saw_pulse = 0;
+            integer saw_pulse;
+            saw_pulse = 0;
             repeat (10) begin
                 @(posedge clk); #1;
                 if (ctrl_start_pulse) saw_pulse = 1;
@@ -110,6 +111,97 @@ module tb_board_b_ctrl();
             $display("  PASS: rgb1=red for risk halt");
         else begin
             $display("  FAIL: rgb1=%b, expected 100", rgb1);
+            err_cnt = err_cnt + 1;
+        end
+
+        // Test 6: RGB0 - negative PnL -> red
+        $display("Test 6: RGB0 negative PnL");
+        total_pnl = -32'sd500;
+        @(posedge clk); #1;
+        if (rgb0 == 3'b100)
+            $display("  PASS: rgb0=red for negative PnL");
+        else begin
+            $display("  FAIL: rgb0=%b, expected 100", rgb0);
+            err_cnt = err_cnt + 1;
+        end
+
+        // Test 7: RGB0 - zero PnL -> off
+        $display("Test 7: RGB0 zero PnL");
+        total_pnl = 32'sd0;
+        @(posedge clk); #1;
+        if (rgb0 == 3'b000)
+            $display("  PASS: rgb0=off for zero PnL");
+        else begin
+            $display("  FAIL: rgb0=%b, expected 000", rgb0);
+            err_cnt = err_cnt + 1;
+        end
+
+        // Test 8: Stop and reset button pulses (btn[1]=stop, btn[2]=reset)
+        $display("Test 8: Stop and reset pulses");
+        btn[1] = 1;
+        begin
+            integer saw_stop;
+            saw_stop = 0;
+            repeat (10) begin
+                @(posedge clk); #1;
+                if (ctrl_stop_pulse) saw_stop = 1;
+            end
+            if (saw_stop)
+                $display("  PASS: ctrl_stop_pulse detected");
+            else begin
+                $display("  FAIL: no stop pulse");
+                err_cnt = err_cnt + 1;
+            end
+        end
+        btn[1] = 0;
+        repeat (10) @(posedge clk);
+
+        btn[2] = 1;
+        begin
+            integer saw_reset;
+            saw_reset = 0;
+            repeat (10) begin
+                @(posedge clk); #1;
+                if (ctrl_reset_pulse) saw_reset = 1;
+            end
+            if (saw_reset)
+                $display("  PASS: ctrl_reset_pulse detected");
+            else begin
+                $display("  FAIL: no reset pulse");
+                err_cnt = err_cnt + 1;
+            end
+        end
+        btn[2] = 0;
+        repeat (10) @(posedge clk);
+
+        // Test 9: All 4 strategy switch values decode correctly
+        $display("Test 9: Strategy switch decode");
+        sw[2:1] = 2'b00; @(posedge clk); #1;
+        if (strategy_sw == STRAT_MEAN_REV)
+            $display("  PASS: sw=00 -> MEAN_REV");
+        else begin
+            $display("  FAIL: sw=00 -> strat=%0d", strategy_sw);
+            err_cnt = err_cnt + 1;
+        end
+        sw[2:1] = 2'b01; @(posedge clk); #1;
+        if (strategy_sw == STRAT_MOMENTUM)
+            $display("  PASS: sw=01 -> MOMENTUM");
+        else begin
+            $display("  FAIL: sw=01 -> strat=%0d", strategy_sw);
+            err_cnt = err_cnt + 1;
+        end
+        sw[2:1] = 2'b10; @(posedge clk); #1;
+        if (strategy_sw == STRAT_NN)
+            $display("  PASS: sw=10 -> NN");
+        else begin
+            $display("  FAIL: sw=10 -> strat=%0d", strategy_sw);
+            err_cnt = err_cnt + 1;
+        end
+        sw[2:1] = 2'b11; @(posedge clk); #1;
+        if (strategy_sw == STRAT_AUTO)
+            $display("  PASS: sw=11 -> AUTO");
+        else begin
+            $display("  FAIL: sw=11 -> strat=%0d", strategy_sw);
             err_cnt = err_cnt + 1;
         end
 

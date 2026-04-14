@@ -100,6 +100,67 @@ module tb_latency_histogram();
             err_cnt = err_cnt + 1;
         end
 
+        // Test 6: Zero latency (cycle_counter == ts_echo) -> bin 0
+        $display("Test 6: Zero latency -> bin 0");
+        cycle_counter = 16'd500; ts_echo = 16'd500;
+        fill_processed = 1;
+        @(posedge clk); fill_processed = 0;
+        @(posedge clk); #1;
+        if (hist_bins[0] == 32'd1)
+            $display("  PASS: hist_bins[0] = 1");
+        else begin
+            $display("  FAIL: hist_bins[0] = %0d, expected 1", hist_bins[0]);
+            err_cnt = err_cnt + 1;
+        end
+        if (lat_min == 32'd0)
+            $display("  PASS: lat_min = 0");
+        else begin
+            $display("  FAIL: lat_min = %0d, expected 0", lat_min);
+            err_cnt = err_cnt + 1;
+        end
+
+        // Test 7: Large latency exceeding bin range -> clamped to bin 15
+        // latency = 600, bin = 600>>5 = 18, clamped to HIST_BINS-1 = 15
+        $display("Test 7: Large latency -> bin 15 (clamped)");
+        cycle_counter = 16'd600; ts_echo = 16'd0;
+        fill_processed = 1;
+        @(posedge clk); fill_processed = 0;
+        @(posedge clk); #1;
+        if (hist_bins[15] == 32'd1)
+            $display("  PASS: hist_bins[15] = 1 (clamped)");
+        else begin
+            $display("  FAIL: hist_bins[15] = %0d, expected 1", hist_bins[15]);
+            err_cnt = err_cnt + 1;
+        end
+        if (lat_max == 32'd600)
+            $display("  PASS: lat_max = 600");
+        else begin
+            $display("  FAIL: lat_max = %0d, expected 600", lat_max);
+            err_cnt = err_cnt + 1;
+        end
+
+        // Test 8: 16-bit timestamp wrap — latency computed correctly
+        // cycle_counter wrapped past 0xFFFF: 0x000A - 0xFFF0 = 26
+        $display("Test 8: 16-bit timestamp wrap");
+        clear = 1; @(posedge clk); clear = 0;
+        @(posedge clk); #1;
+        cycle_counter = 16'h000A; ts_echo = 16'hFFF0;
+        fill_processed = 1;
+        @(posedge clk); fill_processed = 0;
+        @(posedge clk); #1;
+        if (lat_min == 32'd26 && lat_max == 32'd26)
+            $display("  PASS: wrapped latency = 26");
+        else begin
+            $display("  FAIL: min=%0d max=%0d, expected 26", lat_min, lat_max);
+            err_cnt = err_cnt + 1;
+        end
+        if (hist_bins[0] == 32'd1)
+            $display("  PASS: bin 0 correct (26>>5=0)");
+        else begin
+            $display("  FAIL: hist_bins[0] = %0d, expected 1", hist_bins[0]);
+            err_cnt = err_cnt + 1;
+        end
+
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);
         $stop;

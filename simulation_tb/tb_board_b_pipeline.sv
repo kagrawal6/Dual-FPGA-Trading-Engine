@@ -167,6 +167,83 @@ module tb_board_b_pipeline();
         end
         @(posedge clk); rready=0;
 
+        // ──────────────────────────────────────────────────────────
+        // Test 6: Send a golden FILL frame and verify fills_rcvd
+        //   Frame: MSG_FILL=3, sym=0, side=0(BUY), status=000(FILLED),
+        //          price=$180 (Q16.16), qty=100, oid=1, ts_echo=0x0032
+        // ──────────────────────────────────────────────────────────
+        $display("Test 6: Inject FILL frame -> fills_rcvd increments");
+        begin
+            logic [127:0] fill_pkt;
+            fill_pkt = {4'h3, 8'h00, 1'b0, 3'b000,
+                        32'h00B4_0000, 16'd100, 16'd1, 16'h0032, 32'h0};
+            tx_frame = fill_pkt; tx_valid = 1;
+            @(posedge clk); tx_valid = 0;
+            repeat (80) @(posedge clk);
+        end
+        @(posedge clk); araddr=9'h04C; arvalid=1; rready=1;
+        @(posedge clk); arvalid=0; while(!rvalid) @(posedge clk);
+        if (rdata > 0)
+            $display("  PASS: fills_rcvd = %0d", rdata);
+        else begin
+            $display("  FAIL: fills_rcvd = 0, expected > 0");
+            err_cnt = err_cnt + 1;
+        end
+        @(posedge clk); rready=0;
+
+        // ──────────────────────────────────────────────────────────
+        // Test 7: Read POSITION[0] (addr 0x058)
+        //   After a BUY fill of qty=100, position should be +100
+        // ──────────────────────────────────────────────────────────
+        $display("Test 7: POSITION[0] after BUY fill");
+        @(posedge clk); araddr=9'h058; arvalid=1; rready=1;
+        @(posedge clk); arvalid=0; while(!rvalid) @(posedge clk);
+        if (rdata == 32'd100)
+            $display("  PASS: POSITION[0] = %0d", rdata);
+        else begin
+            $display("  FAIL: POSITION[0] = %0d, expected 100", rdata);
+            err_cnt = err_cnt + 1;
+        end
+        @(posedge clk); rready=0;
+
+        // ──────────────────────────────────────────────────────────
+        // Test 8: Read CASH_LO (addr 0x098)
+        //   After a BUY fill, cash should be non-zero (negative cost)
+        // ──────────────────────────────────────────────────────────
+        $display("Test 8: CASH_LO after fill");
+        @(posedge clk); araddr=9'h098; arvalid=1; rready=1;
+        @(posedge clk); arvalid=0; while(!rvalid) @(posedge clk);
+        if (rdata != 32'd0)
+            $display("  PASS: CASH_LO = 0x%08h (non-zero)", rdata);
+        else begin
+            $display("  FAIL: CASH_LO = 0, expected non-zero after fill");
+            err_cnt = err_cnt + 1;
+        end
+        @(posedge clk); rready=0;
+
+        // ──────────────────────────────────────────────────────────
+        // Test 9: Read STATUS (addr 0x040)
+        //   Format: {25'b0, risk_halt, link_up, fsm_state[2:0], strategy[1:0]}
+        //   Expect: link_up=1, strategy=MEAN_REV(0)
+        // ──────────────────────────────────────────────────────────
+        $display("Test 9: STATUS register bit fields");
+        @(posedge clk); araddr=9'h040; arvalid=1; rready=1;
+        @(posedge clk); arvalid=0; while(!rvalid) @(posedge clk);
+        begin
+            logic       stat_link_up;
+            logic [1:0] stat_strategy;
+            stat_link_up  = rdata[5];
+            stat_strategy = rdata[1:0];
+            if (stat_link_up && stat_strategy == 2'b00)
+                $display("  PASS: link_up=1, strategy=MEAN_REV");
+            else begin
+                $display("  FAIL: STATUS=0x%08h (link_up=%b strat=%b)",
+                         rdata, stat_link_up, stat_strategy);
+                err_cnt = err_cnt + 1;
+            end
+        end
+        @(posedge clk); rready=0;
+
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);
         $stop;

@@ -18,6 +18,10 @@ module tb_market_noise_gen();
     integer err_cnt = 0;
     integer i;
     logic signed [31:0] saved_step [NUM_SYM];
+    logic signed [31:0] replay_step [NUM_SYM];
+
+    // Sector correlation temporaries
+    logic signed [31:0] base_sym0, base_sym1, base_sym2;
 
     always #5 clk = ~clk;
 
@@ -68,7 +72,7 @@ module tb_market_noise_gen();
                 $display("PASS: step_out[%0d]=%0d bounded", i, step_out[i]);
         end
 
-        // Save step_out for gating test
+        // Save step_out for gating test and determinism replay
         for (i = 0; i < NUM_SYM; i++) saved_step[i] = step_out[i];
 
         // Test 3: enable=0, tick does not change step_out
@@ -84,6 +88,58 @@ module tb_market_noise_gen();
             end else
                 $display("PASS: step_out[%0d] unchanged when disabled", i);
         end
+
+        // ----------------------------------------------------------------
+        // Test 4: determinism — reset, reload same seed, tick once;
+        //         step_out must exactly match saved_step from Test 2.
+        // ----------------------------------------------------------------
+        rst_n = 0;
+        repeat(2) @(posedge clk);
+        rst_n = 1; @(posedge clk);
+
+        lfsr_load = 1; @(posedge clk);
+        lfsr_load = 0; @(posedge clk); #1;
+
+        enable = 1;
+        tick = 1; @(posedge clk);
+        tick = 0; @(posedge clk); #1;
+
+        for (i = 0; i < NUM_SYM; i++) replay_step[i] = step_out[i];
+
+        for (i = 0; i < NUM_SYM; i++) begin
+            if (replay_step[i] !== saved_step[i]) begin
+                $display("FAIL: determinism step_out[%0d]: replay=%0d, original=%0d",
+                         i, replay_step[i], saved_step[i]);
+                err_cnt = err_cnt + 1;
+            end else
+                $display("PASS: determinism step_out[%0d] matches (%0d)", i, saved_step[i]);
+        end
+
+        // ----------------------------------------------------------------
+        // Test 5: sector correlation — symbols in the same sector share
+        //         sector_noise; different sectors produce different noise.
+        //         sym 0,1 → sector 0; sym 2,3 → sector 1.
+        // ----------------------------------------------------------------
+
+        // 5a: same-sector symbols share the sector contribution
+        //     base = step_out - company_noise = global + sector_noise[sector]
+        base_sym0 = step_out[0] - company_noise[0];
+        base_sym1 = step_out[1] - company_noise[1];
+
+        if (base_sym0 !== base_sym1) begin
+            $display("FAIL: sector sharing — base[0]=%0d != base[1]=%0d", base_sym0, base_sym1);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: symbols 0,1 share sector 0 contribution (%0d)", base_sym0);
+
+        // 5b: different sectors produce different noise
+        base_sym2 = step_out[2] - company_noise[2];
+        if (base_sym0 === base_sym2) begin
+            $display("FAIL: sector_noise[0] == sector_noise[1] (both %0d), expected differ",
+                     base_sym0);
+            err_cnt = err_cnt + 1;
+        end else
+            $display("PASS: sector 0 (%0d) != sector 1 (%0d) noise", base_sym0, base_sym2);
 
         // Summary
         if (err_cnt == 0) $display("ALL TESTS PASSED");
