@@ -43,7 +43,7 @@ proc run_group {group_name tb_list} {
         }
 
         if {[catch {
-            vsim -voptargs=+acc work.$tb -quiet
+            vsim -voptargs=+acc work.$tb -quiet -onfinish stop
             run -all
             quit -sim
         } err]} {
