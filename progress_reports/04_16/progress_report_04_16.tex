@@ -1,0 +1,121 @@
+% ECE 554 — Progress Report (LaTeX)
+% Compile: pdflatex progress_report_04_16.tex
+\documentclass[11pt,twocolumn]{article}
+
+% headsep = space below header block (after date line) to first line of body
+\usepackage[margin=0.75in,headsep=32pt]{geometry}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\setlength{\columnsep}{0.38in}
+% Avoid huge vertical glue between columns/pages (common twocolumn issue)
+\raggedbottom
+
+% --- Paragraphs: justified, no indent, modest gap between paragraphs ---
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.35em plus 0.1em minus 0.05em}
+
+% --- Section-style headings (bold reads clearly in two-column) ---
+% Slightly gentler pre-skip so breaks to page 2 do not leave obvious holes.
+\newcommand{\Rsec}[1]{%
+  \par\addvspace{0.65\baselineskip plus 0.12\baselineskip minus 0.08\baselineskip}%
+  {\noindent\large\bfseries #1\par}%
+  \addvspace{0.42\baselineskip plus 0.06\baselineskip}%
+}
+\newcommand{\Rsub}[1]{%
+  \par\addvspace{0.55\baselineskip}%
+  {\noindent\normalsize\itshape #1\par}%
+  \addvspace{0.38\baselineskip}%
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\setlength{\headheight}{36pt}
+\renewcommand{\headruleskip}{0pt}
+\fancyhead[L]{\begin{tabular}[t]{@{}l@{}}
+  \textbf{ECE 554}\\[0.2em]
+  \textbf{Progress Report}\\[0.25em]
+  \normalsize\normalfont 2026-04-16
+\end{tabular}}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+\begin{document}
+\thispagestyle{fancy}
+
+% Members: use tabular so "Members" is not a separate \par (avoids \parskip
+% stacking between the heading line and the names).
+\noindent\begin{tabular}[t]{@{}l@{}}
+  {\large\bfseries Members} \\[0.28em]
+  Kushal Agrawal \\
+  Eeshana Hari
+\end{tabular}
+
+\Rsec{Current Progress}
+
+Since the 04-09 report the project has moved from ``RTL simulates, bitstream generates'' to \textbf{verified hardware on silicon}. On the simulation side, we completed full integration testing for Board~A, Board~B, and the combined system top, all running with 16 symbols (companies) and resolving timing issues that had affected earlier runs. The most significant milestone is that Board~A is now \textbf{fully operational on the AUP-ZU3 FPGA} running under PYNQ, with all 16 symbol slots exercised from Python over AXI-Lite MMIO.
+
+\Rsub{RTL Synthesis Fixes}
+
+Two classes of synthesis defects were identified and resolved during the Vivado build cycle:
+
+\begin{itemize}[leftmargin=1.15em,itemsep=0.18em,topsep=0.3em,parsep=0pt,partopsep=0pt]
+  \item \textbf{Latch elimination (board\_a\_axi\_regs.sv, board\_b\_axi\_regs.sv).}
+        Dynamic integer indexing inside \texttt{always\_ff} blocks caused Vivado to infer 1{,}536 latches per register file. Replaced with explicit \texttt{for}-loop address matching so every array element is assigned every cycle; combinational read mux moved to a separate \texttt{always\_comb} block.
+  \item \textbf{FDCPE removal (market\_sim.sv).}
+        Data-dependent assignments in the asynchronous reset path forced Vivado to emulate 1{,}536 complex FDCPE cells (UltraScale+ only supports constant async resets). The \texttt{init\_symbol\_tables} task was removed; the asynchronous reset now assigns only constants, and data-dependent initialization was moved to a synchronous path to comply with UltraScale+ flip-flop requirements (\texttt{market\_sim.sv}, \texttt{lfsr32.sv}).
+\end{itemize}
+
+After these fixes both Board~A and Board~B synthesise and implement with \textbf{zero critical warnings}, zero latches, and timing met at 50~MHz PL clock.
+
+\Rsub{PYNQ Deployment Flow}
+
+We transitioned to a \textbf{full PYNQ overlay workflow}. A persistent blocker was a faulty Vivado block design that prevented AXI reads and writes from reaching our custom IP. After extensive debugging, we resolved this by introducing a \texttt{board\_a\_top\_bd.v} wrapper and restructuring the block design's clock, reset, and AXI interconnect wiring in Vivado. With a working PS--PL path, we were able to deploy \texttt{.bit}/\texttt{.hwh} overlay pairs to each board's SD card and interact with the hardware from PYNQ's Jupyter environment. We also updated Python scripts (\texttt{config\_symbols.py}, \texttt{symbol\_config\_panel.py}, \texttt{telemetry\_server.py}) to use correct IP block names and dynamic MMIO address ranges from the overlay's \texttt{ip\_dict}.
+
+\Rsub{Board~A Hardware Verification}
+
+Board~A has been tested on silicon using Python scripts executed from PYNQ's Jupyter environment over AXI-Lite MMIO. Key results:
+
+\begin{itemize}[leftmargin=1.15em,itemsep=0.18em,topsep=0.3em,parsep=0pt,partopsep=0pt]
+  \item \textbf{Register read/write:} All scalar registers and all 16 per-symbol array registers (init\_mid, init\_spread, sector\_id) write and read back correctly.
+  \item \textbf{Market simulator:} Configured 4 and 16 symbols, started the simulator via CTRL, and confirmed ${\sim}68{,}300$ quotes/s at 50~MHz with \texttt{QUOTE\_INTERVAL}=1000. Quote counter increments steadily across multiple seconds.
+  \item \textbf{Regime switching:} Cycled through all four regimes (CALM, VOLATILE, BURST, ADVERSARIAL) while running; RGB0 LED color changes confirmed visually on the board.
+  \item \textbf{FSM reset/restart:} CTRL[1] reset pulse stops the simulator and clears counters to zero; CTRL[0] restart brings it back online.
+  \item \textbf{Board~B:} We have successfully generated \texttt{.bit} and \texttt{.hwh} files for Board~B; however, hardware testing has not yet been performed.
+\end{itemize}
+
+\Rsec{Remaining Work}
+
+\begin{itemize}[
+  leftmargin=1.15em,
+  itemsep=0.28em,
+  topsep=0.35em,
+  parsep=0pt,
+  partopsep=0pt
+]
+  \item[\textbf{B1.}] Run Board~B standalone PS tests: AXI register readback, strategy selection, position/cash registers, histogram readout.
+  \item[\textbf{B3.}] Verify Board~B LEDs and RGB indicators for FSM states (IDLE/ARMED/TRADING/HALTED).
+  \item[\textbf{S1.}] Connect Board~A and Board~B via PMOD cable; verify \texttt{link\_up} on both boards.
+  \item[\textbf{S2.}] Confirm quote flow: Board~A \texttt{quotes\_sent} vs Board~B \texttt{quotes\_rcvd}.
+  \item[\textbf{S3.}] Enable trading on Board~B; verify orders sent, fills received, and position updates.
+  \item[\textbf{S4.}] Run \texttt{telemetry\_server.py} on Board~B and connect laptop dashboard for live visualization.
+  \item[\textbf{S5.}] Run multi-regime demo: sweep CALM $\to$ VOLATILE $\to$ BURST $\to$ ADVERSARIAL while both boards are connected, observe strategy adaptation and P\&L behavior.
+  \item[\textbf{D1.}] Prepare final demo script and presentation materials.
+\end{itemize}
+
+\Rsec{Individual Contributions}
+
+\Rsub{Kushal Agrawal}
+
+Led \textbf{integration testing} for Board~A, Board~B, and the combined system top with 16 symbols, resolving timing issues from earlier runs. Diagnosed and resolved synthesis defects (latch elimination in AXI register files, FDCPE removal in \texttt{market\_sim.sv}) with RTL refactoring. Updated Python deployment scripts for correct IP block naming and MMIO address handling.
+
+\Rsub{Outstanding}
+Deploy Board~B overlay and run standalone hardware tests; connect both boards via PMOD and complete system-level integration (S1--S5).
+
+\Rsub{Eeshana Hari}
+
+Led \textbf{PYNQ deployment and hardware bring-up} for Board~A: flashed SD cards, configured USB gadget connectivity, uploaded overlays and Python scripts to Jupyter Lab, and executed all on-hardware tests. Debugged and restructured the Vivado block design to establish a working PS--PL AXI path. Continued ownership of \textbf{Board~A RTL} and \textbf{link layer} modules.
+
+\Rsub{Outstanding}
+Lead Board~B hardware bring-up; coordinate inter-board PMOD link testing and system-level demo preparation.
+
+\end{document}

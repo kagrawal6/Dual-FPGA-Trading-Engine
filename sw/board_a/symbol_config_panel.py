@@ -42,8 +42,8 @@ def _random_sample_full_universe(count: int, seed_text: str) -> List[str]:
 
 def show_symbol_config_panel(
     overlay_path: str = "overlays/board_a.bit",
-    ip_block: str = "board_a_top_0",
-    mmio_length: int = 256,
+    ip_block: str = "hft_core",
+    mmio_length: int = 4096,
 ) -> Any:
     """
     Display an interactive panel. Returns the top-level widget container.

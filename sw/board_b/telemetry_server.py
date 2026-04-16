@@ -80,8 +80,8 @@ def parse_args() -> argparse.Namespace:
                         help="Telemetry polling rate in Hz. Default: 20.")
     parser.add_argument("--overlay", type=str, default="overlays/board_b.bit",
                         help="Path to the Board B overlay bitstream.")
-    parser.add_argument("--ip-block", type=str, default="board_b_top_0",
-                        help="IP block name for MMIO.")
+    parser.add_argument("--ip-block", type=str, default="hft_core",
+                        help="IP block name in the overlay for MMIO.")
 
     return parser.parse_args()
 
@@ -90,7 +90,8 @@ def main():
     args = parse_args()
 
     ol = Overlay(args.overlay)
-    mmio = MMIO(ol.ip_dict[args.ip_block]['phys_addr'], 512)
+    mmio = MMIO(ol.ip_dict[args.ip_block]['phys_addr'],
+                ol.ip_dict[args.ip_block]['addr_range'])
 
     if args.status:
         print("Board B status:")

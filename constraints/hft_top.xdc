@@ -5,8 +5,11 @@
 # Source: AUP-ZU3 board master XDC from Real Digital
 # ==============================================================================
 
-# --- Clock (PS FCLK0, declared for timing analysis) ---
-create_clock -period 10.000 -name clk_pl [get_pins zynq_ps/FCLK_CLK0]
+# --- Clock (PS FCLK0) ---
+# The Zynq PS block design auto-constrains pl_clk0; no manual create_clock
+# needed.  Uncomment below ONLY for a non-block-design flow where the PS
+# instance is named "zynq_ps":
+# create_clock -period 10.000 -name clk_pl [get_pins zynq_ps/FCLK_CLK0]
 
 # ==============================================================================
 # PMOD JA — Cable 1 (A→B data path)

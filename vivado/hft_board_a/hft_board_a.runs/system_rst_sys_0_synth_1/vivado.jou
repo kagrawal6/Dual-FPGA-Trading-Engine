@@ -1,0 +1,24 @@
+#-----------------------------------------------------------
+# Vivado v2025.2 (64-bit)
+# SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+# IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+# SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+# Start of session at: Thu Apr 16 07:21:25 2026
+# Process ID         : 27924
+# Current directory  : C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/system_rst_sys_0_synth_1
+# Command line       : vivado.exe -log system_rst_sys_0.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source system_rst_sys_0.tcl
+# Log file           : C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/system_rst_sys_0_synth_1/system_rst_sys_0.vds
+# Journal file       : C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/system_rst_sys_0_synth_1\vivado.jou
+# Running On         : Kushal2009
+# Platform           : Windows Server 2016 or Windows 10
+# Operating System   : 26200
+# Processor Detail   : 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz
+# CPU Frequency      : 2803 MHz
+# CPU Physical cores : 4
+# CPU Logical cores  : 8
+# Host memory        : 16889 MB
+# Swap memory        : 16889 MB
+# Total Virtual      : 33779 MB
+# Available Virtual  : 13289 MB
+#-----------------------------------------------------------
+source system_rst_sys_0.tcl -notrace

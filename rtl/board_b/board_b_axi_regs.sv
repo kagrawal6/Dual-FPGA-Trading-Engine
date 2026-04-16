@@ -136,20 +136,54 @@ module board_b_axi_regs
     assign s_axi_arready = !s_axi_rvalid;
     assign s_axi_rresp   = 2'b00;
 
-    // ── Write + Read logic ──────────────────────────────────────
-    integer idx;
+    // Combinational read mux — avoids dynamic indexing in always_ff
+    logic [31:0] rd_data_mux;
+    always_comb begin
+        rd_data_mux = 32'h0;
 
+        if      (rd_addr == ADDR_CTRL)          rd_data_mux = 32'h0;
+        else if (rd_addr == ADDR_STRATEGY_SEL)  rd_data_mux = {30'b0, strategy_sel};
+        else if (rd_addr == ADDR_THRESHOLD)     rd_data_mux = threshold;
+        else if (rd_addr == ADDR_EMA_ALPHA)     rd_data_mux = {16'b0, ema_alpha};
+        else if (rd_addr == ADDR_BASE_QTY)      rd_data_mux = {16'b0, base_qty};
+        else if (rd_addr == ADDR_MAX_POSITION)  rd_data_mux = max_position;
+        else if (rd_addr == ADDR_MAX_ORD_RATE)  rd_data_mux = max_order_rate;
+        else if (rd_addr == ADDR_MAX_LOSS)      rd_data_mux = max_loss;
+        else if (rd_addr == ADDR_STATUS)
+            rd_data_mux = {25'b0, risk_halt, link_up, fsm_state, active_strategy};
+        else if (rd_addr == ADDR_QUOTES_RCVD)   rd_data_mux = quotes_rcvd;
+        else if (rd_addr == ADDR_ORDERS_SENT)   rd_data_mux = orders_sent;
+        else if (rd_addr == ADDR_FILLS_RCVD)    rd_data_mux = fills_rcvd;
+        else if (rd_addr == ADDR_RISK_REJECTS)  rd_data_mux = risk_rejects;
+        else if (rd_addr == ADDR_LINK_ERRORS)   rd_data_mux = link_errors;
+        else if (rd_addr == ADDR_CASH_LO)       rd_data_mux = cash[31:0];
+        else if (rd_addr == ADDR_CASH_HI)       rd_data_mux = {{16{cash[47]}}, cash[47:32]};
+        else if (rd_addr == ADDR_LAT_MIN)       rd_data_mux = lat_min;
+        else if (rd_addr == ADDR_LAT_MAX)       rd_data_mux = lat_max;
+        else if (rd_addr == ADDR_LAT_SUM)       rd_data_mux = lat_sum;
+        else if (rd_addr == ADDR_LAT_COUNT)     rd_data_mux = lat_count;
+
+        for (int i = 0; i < NUM_SYM; i++)
+            if (rd_addr == 9'(ADDR_POS_BASE + 4*i))
+                rd_data_mux = position[i];
+
+        for (int i = 0; i < HIST_BINS; i++)
+            if (rd_addr == 9'(ADDR_HIST_BASE + 4*i))
+                rd_data_mux = hist_bins[i];
+    end
+
+    // ── Write + Read logic ──────────────────────────────────────
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             axi_start_pulse <= 1'b0;
             axi_reset_pulse <= 1'b0;
             strategy_sel    <= STRAT_MEAN_REV;
-            threshold       <= 32'h0001_0000;   // $1.00 default
-            ema_alpha       <= 16'd6554;         // ~10%
+            threshold       <= 32'h0001_0000;
+            ema_alpha       <= 16'd6554;
             base_qty        <= 16'd100;
             max_position    <= 32'd500;
             max_order_rate  <= 32'd1000;
-            max_loss        <= 32'd100;           // $100 integer dollars (total_pnl = cash[47:16])
+            max_loss        <= 32'd100;
             s_axi_bvalid    <= 1'b0;
             s_axi_rvalid    <= 1'b0;
             s_axi_rdata     <= '0;
@@ -180,44 +214,7 @@ module board_b_axi_regs
 
             // ── Read path ───────────────────────────────────────
             if (read_fire) begin
-                s_axi_rdata <= 32'h0;
-
-                if (rd_addr == ADDR_CTRL)          s_axi_rdata <= 32'h0;
-                else if (rd_addr == ADDR_STRATEGY_SEL) s_axi_rdata <= {30'b0, strategy_sel};
-                else if (rd_addr == ADDR_THRESHOLD)    s_axi_rdata <= threshold;
-                else if (rd_addr == ADDR_EMA_ALPHA)    s_axi_rdata <= {16'b0, ema_alpha};
-                else if (rd_addr == ADDR_BASE_QTY)     s_axi_rdata <= {16'b0, base_qty};
-                else if (rd_addr == ADDR_MAX_POSITION) s_axi_rdata <= max_position;
-                else if (rd_addr == ADDR_MAX_ORD_RATE) s_axi_rdata <= max_order_rate;
-                else if (rd_addr == ADDR_MAX_LOSS)     s_axi_rdata <= max_loss;
-
-                else if (rd_addr == ADDR_STATUS)
-                    s_axi_rdata <= {25'b0, risk_halt, link_up, fsm_state, active_strategy};
-
-                else if (rd_addr == ADDR_QUOTES_RCVD)  s_axi_rdata <= quotes_rcvd;
-                else if (rd_addr == ADDR_ORDERS_SENT)  s_axi_rdata <= orders_sent;
-                else if (rd_addr == ADDR_FILLS_RCVD)   s_axi_rdata <= fills_rcvd;
-                else if (rd_addr == ADDR_RISK_REJECTS) s_axi_rdata <= risk_rejects;
-                else if (rd_addr == ADDR_LINK_ERRORS)  s_axi_rdata <= link_errors;
-
-                else if (rd_addr >= ADDR_POS_BASE && rd_addr < (ADDR_POS_BASE + NUM_SYM*4)) begin
-                    idx = (rd_addr - ADDR_POS_BASE) >> 2;
-                    if (idx < NUM_SYM) s_axi_rdata <= position[idx];
-                end
-
-                else if (rd_addr == ADDR_CASH_LO)     s_axi_rdata <= cash[31:0];
-                else if (rd_addr == ADDR_CASH_HI)     s_axi_rdata <= {{16{cash[47]}}, cash[47:32]};
-
-                else if (rd_addr >= ADDR_HIST_BASE && rd_addr < (ADDR_HIST_BASE + HIST_BINS*4)) begin
-                    idx = (rd_addr - ADDR_HIST_BASE) >> 2;
-                    if (idx < HIST_BINS) s_axi_rdata <= hist_bins[idx];
-                end
-
-                else if (rd_addr == ADDR_LAT_MIN)     s_axi_rdata <= lat_min;
-                else if (rd_addr == ADDR_LAT_MAX)     s_axi_rdata <= lat_max;
-                else if (rd_addr == ADDR_LAT_SUM)     s_axi_rdata <= lat_sum;
-                else if (rd_addr == ADDR_LAT_COUNT)   s_axi_rdata <= lat_count;
-
+                s_axi_rdata  <= rd_data_mux;
                 s_axi_rvalid <= 1'b1;
             end else if (s_axi_rvalid && s_axi_rready) begin
                 s_axi_rvalid <= 1'b0;

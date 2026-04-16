@@ -549,7 +549,8 @@ def main() -> None:
         raise ValueError("--hw-slots must be >= 1.")
 
     ol = Overlay("overlays/board_a.bit")
-    mmio = MMIO(ol.ip_dict["board_a_top_0"]["phys_addr"], 256)
+    mmio = MMIO(ol.ip_dict["hft_core"]["phys_addr"],
+                ol.ip_dict["hft_core"]["addr_range"])
 
     if args.status:
         print("Board A status:")

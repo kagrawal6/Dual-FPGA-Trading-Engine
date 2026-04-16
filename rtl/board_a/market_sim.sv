@@ -229,30 +229,27 @@ module market_sim
         end
     end
 
-    // Initialize prices, spread, bid/ask from init_* (reset or config reload pulse)
-    task automatic init_symbol_tables;
-        int             ti;
-        sprice_t        mid_sv, spr_sv, spr_hv, bid_sv, ask_sv;
-        for (ti = 0; ti < NUM_SYM; ti++) begin
-            mid_price[ti] <= init_mid[ti];
-            spread[ti]    <= (init_spread[ti] == '0) ? 32'h0000_0001 : init_spread[ti];
-            seq_num[ti]   <= 16'd0;
+    // Pre-compute initial bid/ask from init_mid/init_spread (combinational)
+    price_t init_bid_c [NUM_SYM];
+    price_t init_ask_c [NUM_SYM];
 
-            mid_sv = sprice_t'(init_mid[ti]);
-            spr_sv = sprice_t'((init_spread[ti] == '0) ? 32'h0000_0001 : init_spread[ti]);
-            spr_hv = spr_sv >>> 1;
-            bid_sv = mid_sv - spr_hv;
-            ask_sv = mid_sv + spr_hv;
+    always_comb begin
+        for (int ci = 0; ci < NUM_SYM; ci++) begin
+            sprice_t c_mid = sprice_t'(init_mid[ci]);
+            sprice_t c_spr = sprice_t'((init_spread[ci] == '0) ? 32'h0000_0001 : init_spread[ci]);
+            sprice_t c_hsp = c_spr >>> 1;
+            sprice_t c_bid = c_mid - c_hsp;
+            sprice_t c_ask = c_mid + c_hsp;
 
-            if (bid_sv < MIN_PRICE_Q16_16) best_bid[ti] <= price_t'(MIN_PRICE_Q16_16);
-            else if (bid_sv > MAX_PRICE_Q16_16) best_bid[ti] <= price_t'(MAX_PRICE_Q16_16);
-            else best_bid[ti] <= price_t'(bid_sv);
+            if (c_bid < MIN_PRICE_Q16_16)      init_bid_c[ci] = price_t'(MIN_PRICE_Q16_16);
+            else if (c_bid > MAX_PRICE_Q16_16) init_bid_c[ci] = price_t'(MAX_PRICE_Q16_16);
+            else                               init_bid_c[ci] = price_t'(c_bid);
 
-            if (ask_sv < MIN_PRICE_Q16_16) best_ask[ti] <= price_t'(MIN_PRICE_Q16_16);
-            else if (ask_sv > MAX_PRICE_Q16_16) best_ask[ti] <= price_t'(MAX_PRICE_Q16_16);
-            else best_ask[ti] <= price_t'(ask_sv);
+            if (c_ask < MIN_PRICE_Q16_16)      init_ask_c[ci] = price_t'(MIN_PRICE_Q16_16);
+            else if (c_ask > MAX_PRICE_Q16_16) init_ask_c[ci] = price_t'(MAX_PRICE_Q16_16);
+            else                               init_ask_c[ci] = price_t'(c_ask);
         end
-    endtask
+    end
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -261,17 +258,28 @@ module market_sim
             quote_valid      <= 1'b0;
             quote_frame_hold <= '0;
             quotes_generated <= '0;
-            init_symbol_tables();
+            for (int ri = 0; ri < NUM_SYM; ri++) begin
+                mid_price[ri] <= '0;
+                spread[ri]    <= 32'h0000_0001;
+                seq_num[ri]   <= 16'd0;
+                best_bid[ri]  <= '0;
+                best_ask[ri]  <= '0;
+            end
         end else if (counter_clr) begin
             quotes_generated <= '0;
         end else if (lfsr_load) begin
-            // Reload symbol state from init_* without full chip reset (new run / reconfig).
             sym_ptr          <= '0;
             quote_ctr        <= 32'd0;
             quote_valid      <= 1'b0;
             quote_frame_hold <= '0;
             quotes_generated <= '0;
-            init_symbol_tables();
+            for (int li = 0; li < NUM_SYM; li++) begin
+                mid_price[li] <= init_mid[li];
+                spread[li]    <= (init_spread[li] == '0) ? 32'h0000_0001 : init_spread[li];
+                seq_num[li]   <= 16'd0;
+                best_bid[li]  <= init_bid_c[li];
+                best_ask[li]  <= init_ask_c[li];
+            end
         end else begin
             // Default: pulse semantics — deassert unless this cycle commits a quote.
             quote_valid <= 1'b0;

@@ -92,9 +92,6 @@ module board_a_axi_regs
     logic read_fire;
     logic [7:0] wr_addr;
     logic [7:0] rd_addr;
-    integer i;
-    integer idx;
-    integer tok_idx;
 
     assign wr_addr = s_axi_awaddr[7:0];
     assign rd_addr = s_axi_araddr[7:0];
@@ -108,20 +105,48 @@ module board_a_axi_regs
     assign s_axi_arready = !s_axi_rvalid;
     assign s_axi_rresp   = 2'b00;
 
+    // Combinational read mux — avoids dynamic indexing in always_ff
+    logic [31:0] rd_data_mux;
+    always_comb begin
+        rd_data_mux = 32'h0;
+        if      (rd_addr == ADDR_QUOTE_INTERVAL) rd_data_mux = quote_interval;
+        else if (rd_addr == ADDR_LFSR_SEED)      rd_data_mux = lfsr_seed;
+        else if (rd_addr == ADDR_REGIME)          rd_data_mux = {{30{1'b0}}, regime_from_ps};
+        else if (rd_addr == ADDR_ACTIVE_CNT)      rd_data_mux = {{24{1'b0}}, active_sym_count};
+        else if (rd_addr == ADDR_STATUS)
+            rd_data_mux = {16'd0, fifo_fill, 5'd0, active_regime, link_up, running};
+        else if (rd_addr == ADDR_QUOTES_SENT)     rd_data_mux = quotes_sent;
+        else if (rd_addr == ADDR_ORDERS_RCVD)     rd_data_mux = orders_rcvd;
+
+        for (int i = 0; i < NUM_SYM; i++) begin
+            if (rd_addr == 8'(ADDR_INIT_MID_BASE + 4*i))
+                rd_data_mux = sym_init_mid[i];
+            if (rd_addr == 8'(ADDR_INIT_SPREAD_BASE + 4*i))
+                rd_data_mux = sym_init_spread[i];
+            if (rd_addr == 8'(ADDR_SECTOR_BASE + 4*i))
+                rd_data_mux = {{(32-SECTOR_ID_W){1'b0}}, sym_sector_id[i]};
+        end
+        for (int j = 0; j < (NUM_SYM+1)/2; j++) begin
+            if (rd_addr == 8'(ADDR_TOKEN_BASE + 4*j)) begin
+                rd_data_mux[15:0]  = sym_company_token[2*j];
+                rd_data_mux[31:16] = ((2*j+1) < NUM_SYM) ? sym_company_token[2*j+1] : 16'h0;
+            end
+        end
+    end
+
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            // ADDITION: reset defaults for new config outputs.
-            axi_start_pulse <= 1'b0;
-            axi_reset_pulse <= 1'b0;
-            regime_from_ps  <= REGIME_CALM;
-            quote_interval  <= 32'd1000;
-            lfsr_seed       <= 32'hDEAD_BEEF;
+            axi_start_pulse  <= 1'b0;
+            axi_reset_pulse  <= 1'b0;
+            regime_from_ps   <= REGIME_CALM;
+            quote_interval   <= 32'd1000;
+            lfsr_seed        <= 32'hDEAD_BEEF;
             active_sym_count <= (NUM_SYM < 255) ? NUM_SYM[7:0] : 8'd255;
-            s_axi_bvalid    <= 1'b0;
-            s_axi_rvalid    <= 1'b0;
-            s_axi_rdata     <= '0;
+            s_axi_bvalid     <= 1'b0;
+            s_axi_rvalid     <= 1'b0;
+            s_axi_rdata      <= '0;
 
-            for (i = 0; i < NUM_SYM; i++) begin
+            for (int i = 0; i < NUM_SYM; i++) begin
                 sym_init_mid[i]      <= '0;
                 sym_init_spread[i]   <= 32'h0000_0001;
                 sym_sector_id[i]     <= '0;
@@ -131,8 +156,8 @@ module board_a_axi_regs
             axi_start_pulse <= 1'b0;
             axi_reset_pulse <= 1'b0;
 
+            // ── Scalar register writes ──────────────────────────────
             if (write_fire) begin
-                // ADDITION: write decode supports extended metadata windows.
                 if (wr_addr == ADDR_CTRL) begin
                     axi_start_pulse <= s_axi_wdata[0];
                     axi_reset_pulse <= s_axi_wdata[1];
@@ -142,63 +167,38 @@ module board_a_axi_regs
                     lfsr_seed <= s_axi_wdata;
                 end else if (wr_addr == ADDR_REGIME) begin
                     regime_from_ps <= regime_e'(s_axi_wdata[1:0]);
-                end else if ((wr_addr >= ADDR_INIT_MID_BASE) && (wr_addr < (ADDR_INIT_MID_BASE + NUM_SYM*4))) begin
-                    idx = (wr_addr - ADDR_INIT_MID_BASE) >> 2;
-                    if (idx < NUM_SYM) sym_init_mid[idx] <= price_t'(s_axi_wdata);
-                end else if ((wr_addr >= ADDR_INIT_SPREAD_BASE) && (wr_addr < (ADDR_INIT_SPREAD_BASE + NUM_SYM*4))) begin
-                    idx = (wr_addr - ADDR_INIT_SPREAD_BASE) >> 2;
-                    if (idx < NUM_SYM) sym_init_spread[idx] <= price_t'((s_axi_wdata == 32'h0) ? 32'h1 : s_axi_wdata);
-                end else if ((wr_addr >= ADDR_SECTOR_BASE) && (wr_addr < (ADDR_SECTOR_BASE + NUM_SYM*4))) begin
-                    idx = (wr_addr - ADDR_SECTOR_BASE) >> 2;
-                    if (idx < NUM_SYM) sym_sector_id[idx] <= s_axi_wdata[SECTOR_ID_W-1:0];
-                end else if ((wr_addr >= ADDR_TOKEN_BASE) && (wr_addr < (ADDR_TOKEN_BASE + ((NUM_SYM+1)/2)*4))) begin
-                    // ADDITION: packed tokens, 2x16b per 32b word.
-                    tok_idx = ((wr_addr - ADDR_TOKEN_BASE) >> 2) * 2;
-                    if (tok_idx < NUM_SYM) sym_company_token[tok_idx] <= s_axi_wdata[15:0];
-                    if ((tok_idx + 1) < NUM_SYM) sym_company_token[tok_idx+1] <= s_axi_wdata[31:16];
                 end else if (wr_addr == ADDR_ACTIVE_CNT) begin
-                    if (s_axi_wdata[7:0] == 8'd0) active_sym_count <= 8'd1;
-                    else if (s_axi_wdata[7:0] > NUM_SYM[7:0]) active_sym_count <= NUM_SYM[7:0];
-                    else active_sym_count <= s_axi_wdata[7:0];
+                    if (s_axi_wdata[7:0] == 8'd0)              active_sym_count <= 8'd1;
+                    else if (s_axi_wdata[7:0] > NUM_SYM[7:0])  active_sym_count <= NUM_SYM[7:0];
+                    else                                        active_sym_count <= s_axi_wdata[7:0];
                 end
                 s_axi_bvalid <= 1'b1;
             end else if (s_axi_bvalid && s_axi_bready) begin
                 s_axi_bvalid <= 1'b0;
             end
 
-            if (read_fire) begin
-                // ADDITION: readback support for all new metadata windows.
-                s_axi_rdata <= 32'h0;
-                if (rd_addr == ADDR_QUOTE_INTERVAL) begin
-                    s_axi_rdata <= quote_interval;
-                end else if (rd_addr == ADDR_LFSR_SEED) begin
-                    s_axi_rdata <= lfsr_seed;
-                end else if (rd_addr == ADDR_REGIME) begin
-                    s_axi_rdata <= {{30{1'b0}}, regime_from_ps};
-                end else if ((rd_addr >= ADDR_INIT_MID_BASE) && (rd_addr < (ADDR_INIT_MID_BASE + NUM_SYM*4))) begin
-                    idx = (rd_addr - ADDR_INIT_MID_BASE) >> 2;
-                    if (idx < NUM_SYM) s_axi_rdata <= sym_init_mid[idx];
-                end else if ((rd_addr >= ADDR_INIT_SPREAD_BASE) && (rd_addr < (ADDR_INIT_SPREAD_BASE + NUM_SYM*4))) begin
-                    idx = (rd_addr - ADDR_INIT_SPREAD_BASE) >> 2;
-                    if (idx < NUM_SYM) s_axi_rdata <= sym_init_spread[idx];
-                end else if ((rd_addr >= ADDR_SECTOR_BASE) && (rd_addr < (ADDR_SECTOR_BASE + NUM_SYM*4))) begin
-                    idx = (rd_addr - ADDR_SECTOR_BASE) >> 2;
-                    if (idx < NUM_SYM)
-                        s_axi_rdata <= {{(32 - SECTOR_ID_W){1'b0}}, sym_sector_id[idx]};
-                end else if ((rd_addr >= ADDR_TOKEN_BASE) && (rd_addr < (ADDR_TOKEN_BASE + ((NUM_SYM+1)/2)*4))) begin
-                    tok_idx = ((rd_addr - ADDR_TOKEN_BASE) >> 2) * 2;
-                    s_axi_rdata[15:0] <= (tok_idx < NUM_SYM) ? sym_company_token[tok_idx] : 16'h0;
-                    s_axi_rdata[31:16] <= ((tok_idx + 1) < NUM_SYM) ? sym_company_token[tok_idx+1] : 16'h0;
-                end else if (rd_addr == ADDR_ACTIVE_CNT) begin
-                    s_axi_rdata <= {{24{1'b0}}, active_sym_count};
-                end else if (rd_addr == ADDR_STATUS) begin
-                    // {16 spare, fifo_fill[6:0], 5 spare, regime[1:0], link_up, running} = 32b
-                    s_axi_rdata <= {16'd0, fifo_fill, 5'd0, active_regime, link_up, running};
-                end else if (rd_addr == ADDR_QUOTES_SENT) begin
-                    s_axi_rdata <= quotes_sent;
-                end else if (rd_addr == ADDR_ORDERS_RCVD) begin
-                    s_axi_rdata <= orders_rcvd;
+            // ── Per-symbol array writes (for-loop eliminates latches) ─
+            for (int i = 0; i < NUM_SYM; i++) begin
+                if (write_fire && wr_addr == 8'(ADDR_INIT_MID_BASE + 4*i))
+                    sym_init_mid[i] <= price_t'(s_axi_wdata);
+
+                if (write_fire && wr_addr == 8'(ADDR_INIT_SPREAD_BASE + 4*i))
+                    sym_init_spread[i] <= price_t'((s_axi_wdata == 32'h0) ? 32'h1 : s_axi_wdata);
+
+                if (write_fire && wr_addr == 8'(ADDR_SECTOR_BASE + 4*i))
+                    sym_sector_id[i] <= s_axi_wdata[SECTOR_ID_W-1:0];
+
+                if (write_fire && wr_addr == 8'(ADDR_TOKEN_BASE + 4*(i/2))) begin
+                    if (i[0] == 1'b0)
+                        sym_company_token[i] <= s_axi_wdata[15:0];
+                    else
+                        sym_company_token[i] <= s_axi_wdata[31:16];
                 end
+            end
+
+            // ── Read path ───────────────────────────────────────────
+            if (read_fire) begin
+                s_axi_rdata  <= rd_data_mux;
                 s_axi_rvalid <= 1'b1;
             end else if (s_axi_rvalid && s_axi_rready) begin
                 s_axi_rvalid <= 1'b0;

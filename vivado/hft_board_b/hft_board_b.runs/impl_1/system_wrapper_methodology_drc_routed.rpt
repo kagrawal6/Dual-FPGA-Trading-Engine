@@ -1,0 +1,866 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2025.2 (win64) Build 6299465 Fri Nov 14 19:35:11 GMT 2025
+| Date         : Thu Apr 16 07:49:27 2026
+| Host         : Kushal2009 running 64-bit major release  (build 9200)
+| Command      : report_methodology -file system_wrapper_methodology_drc_routed.rpt -pb system_wrapper_methodology_drc_routed.pb -rpx system_wrapper_methodology_drc_routed.rpx
+| Design       : system_wrapper
+| Device       : xczu3eg-sfvc784-2-e
+| Speed File   : -2
+| Design State : Fully Routed
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Report Methodology
+
+Table of Contents
+-----------------
+1. REPORT SUMMARY
+2. REPORT DETAILS
+
+1. REPORT SUMMARY
+-----------------
+            Netlist: netlist
+          Floorplan: design_1
+      Design limits: <entire design considered>
+             Max checks: <unlimited>
+             Checks found: 166
++-----------+----------+-------------------------------+--------+
+| Rule      | Severity | Description                   | Checks |
++-----------+----------+-------------------------------+--------+
+| DPIR-2    | Warning  | Asynchronous driver check     | 129    |
+| TIMING-18 | Warning  | Missing input or output delay | 37     |
++-----------+----------+-------------------------------+--------+
+
+2. REPORT DETAILS
+-----------------
+DPIR-2#1 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/A[0] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#2 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/A[10] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#3 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/A[11] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#4 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/A[12] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#5 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/A[13] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#6 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/A[14] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#7 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/A[15] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#8 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/A[16] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#9 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/A[1] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#10 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/A[2] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#11 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/A[3] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#12 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/A[4] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#13 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/A[5] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#14 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/A[6] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#15 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/A[7] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#16 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/A[8] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#17 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/A[9] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#18 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/B[0] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#19 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/B[10] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#20 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/B[11] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#21 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/B[12] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#22 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/B[13] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#23 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/B[14] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#24 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/B[15] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#25 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/B[1] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#26 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/B[2] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#27 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/B[3] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#28 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/B[4] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#29 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/B[5] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#30 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/B[6] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#31 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/B[7] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#32 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/B[8] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#33 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0/B[9] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#34 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/A[0] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#35 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/A[10] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#36 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/A[11] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#37 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/A[12] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#38 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/A[13] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#39 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/A[14] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#40 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/A[15] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#41 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/A[1] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#42 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/A[2] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#43 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/A[3] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#44 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/A[4] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#45 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/A[5] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#46 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/A[6] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#47 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/A[7] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#48 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/A[8] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#49 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/A[9] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#50 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/B[0] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#51 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/B[10] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#52 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/B[11] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#53 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/B[12] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#54 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/B[13] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#55 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/B[1] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#56 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/B[2] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#57 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/B[3] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#58 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/B[4] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#59 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/B[5] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#60 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/B[6] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#61 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/B[7] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#62 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/B[8] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#63 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_a0__0/B[9] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#64 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_b0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_b0/A[0] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#65 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_feature/s2_prod_b0__0 input pin system_i/hft_core/inst/u_core/u_feature/s2_prod_b0__0/A[0] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#66 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/A[0] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#67 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/A[10] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#68 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/A[11] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#69 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/A[12] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#70 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/A[13] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#71 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/A[14] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#72 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/A[15] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#73 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/A[16] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#74 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/A[1] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#75 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/A[2] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#76 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/A[3] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#77 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/A[4] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#78 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/A[5] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#79 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/A[6] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#80 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/A[7] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#81 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/A[8] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#82 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/A[9] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#83 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/B[0] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#84 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/B[10] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#85 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/B[11] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#86 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/B[12] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#87 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/B[13] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#88 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/B[14] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#89 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/B[15] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#90 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/B[1] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#91 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/B[2] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#92 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/B[3] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#93 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/B[4] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#94 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/B[5] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#95 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/B[6] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#96 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/B[7] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#97 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/B[8] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#98 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product input pin system_i/hft_core/inst/u_core/u_pos_tracker/product/B[9] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#99 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/A[0] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#100 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/A[10] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#101 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/A[11] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#102 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/A[12] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#103 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/A[13] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#104 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/A[14] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#105 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/A[15] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#106 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/A[1] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#107 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/A[2] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#108 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/A[3] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#109 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/A[4] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#110 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/A[5] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#111 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/A[6] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#112 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/A[7] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#113 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/A[8] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#114 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/A[9] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#115 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/B[0] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#116 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/B[10] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#117 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/B[11] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#118 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/B[12] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#119 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/B[13] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#120 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/B[14] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#121 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/B[1] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#122 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/B[2] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#123 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/B[3] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#124 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/B[4] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#125 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/B[5] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#126 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/B[6] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#127 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/B[7] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#128 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/B[8] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#129 Warning
+Asynchronous driver check  
+DSP system_i/hft_core/inst/u_core/u_pos_tracker/product__0 input pin system_i/hft_core/inst/u_core/u_pos_tracker/product__0/B[9] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+TIMING-18#1 Warning
+Missing input or output delay  
+An input delay is missing on btn[0] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#2 Warning
+Missing input or output delay  
+An input delay is missing on btn[1] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#3 Warning
+Missing input or output delay  
+An input delay is missing on btn[2] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#4 Warning
+Missing input or output delay  
+An input delay is missing on btn[3] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#5 Warning
+Missing input or output delay  
+An input delay is missing on pmod_ja[0] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#6 Warning
+Missing input or output delay  
+An input delay is missing on pmod_ja[1] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#7 Warning
+Missing input or output delay  
+An input delay is missing on pmod_ja[2] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#8 Warning
+Missing input or output delay  
+An input delay is missing on pmod_ja[3] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#9 Warning
+Missing input or output delay  
+An input delay is missing on pmod_ja_valid relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#10 Warning
+Missing input or output delay  
+An input delay is missing on pmod_jb_ready relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#11 Warning
+Missing input or output delay  
+An input delay is missing on sw[0] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#12 Warning
+Missing input or output delay  
+An input delay is missing on sw[1] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#13 Warning
+Missing input or output delay  
+An input delay is missing on sw[2] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#14 Warning
+Missing input or output delay  
+An input delay is missing on sw[3] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#15 Warning
+Missing input or output delay  
+An input delay is missing on sw[4] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#16 Warning
+Missing input or output delay  
+An input delay is missing on sw[5] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#17 Warning
+Missing input or output delay  
+An input delay is missing on sw[6] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#18 Warning
+Missing input or output delay  
+An input delay is missing on sw[7] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#19 Warning
+Missing input or output delay  
+An output delay is missing on led[0] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#20 Warning
+Missing input or output delay  
+An output delay is missing on led[1] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#21 Warning
+Missing input or output delay  
+An output delay is missing on led[2] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#22 Warning
+Missing input or output delay  
+An output delay is missing on led[3] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#23 Warning
+Missing input or output delay  
+An output delay is missing on led[4] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#24 Warning
+Missing input or output delay  
+An output delay is missing on led[5] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#25 Warning
+Missing input or output delay  
+An output delay is missing on led[6] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#26 Warning
+Missing input or output delay  
+An output delay is missing on led[7] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#27 Warning
+Missing input or output delay  
+An output delay is missing on pmod_jb[0] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#28 Warning
+Missing input or output delay  
+An output delay is missing on pmod_jb[1] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#29 Warning
+Missing input or output delay  
+An output delay is missing on pmod_jb[2] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#30 Warning
+Missing input or output delay  
+An output delay is missing on pmod_jb[3] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#31 Warning
+Missing input or output delay  
+An output delay is missing on pmod_jb_valid relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#32 Warning
+Missing input or output delay  
+An output delay is missing on rgb0[0] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#33 Warning
+Missing input or output delay  
+An output delay is missing on rgb0[1] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#34 Warning
+Missing input or output delay  
+An output delay is missing on rgb0[2] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#35 Warning
+Missing input or output delay  
+An output delay is missing on rgb1[0] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#36 Warning
+Missing input or output delay  
+An output delay is missing on rgb1[1] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+TIMING-18#37 Warning
+Missing input or output delay  
+An output delay is missing on rgb1[2] relative to the rising and/or falling clock edge(s) of clk_pl_0.
+Related violations: <none>
+
+

@@ -1,0 +1,544 @@
+
+*** Running vivado
+    with args -log system_hft_core_0.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source system_hft_core_0.tcl
+
+
+
+****** Vivado v2025.2 (64-bit)
+  **** SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+  **** IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+  **** SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+  **** Start of session at: Thu Apr 16 07:21:24 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source system_hft_core_0.tcl -notrace
+create_project: Time (s): cpu = 00:00:16 ; elapsed = 00:00:11 . Memory (MB): peak = 533.000 ; gain = 221.125
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'C:/AMDDesignTools/2025.2/Vivado/data/ip'.
+WARNING: [IP_Flow 19-4995] The host OS only allows 260 characters in a normal path. The IP cache path is more than 80 characters. If you experience issues with IP caching, please consider changing the IP cache to a location with a shorter path. Alternately consider using the OS subst command to map part of the path to a drive letter. 
+Current IP cache path is c:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.cache/ip 
+Command: synth_design -top system_hft_core_0 -part xczu3eg-sfvc784-2-e -incremental_mode off -mode out_of_context
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xczu3eg'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xczu3eg'
+INFO: [Device 21-403] Loading part xczu3eg-sfvc784-2-e
+INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 2 processes.
+INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
+INFO: [Synth 8-7075] Helper process launched with PID 27340
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:10 ; elapsed = 00:00:11 . Memory (MB): peak = 1758.461 ; gain = 208.004
+---------------------------------------------------------------------------------
+WARNING: [Synth 8-10180] variable 'c_mid' must explicitly be declared as automatic or static [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:238]
+WARNING: [Synth 8-10180] variable 'c_spr' must explicitly be declared as automatic or static [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:239]
+WARNING: [Synth 8-10180] variable 'c_hsp' must explicitly be declared as automatic or static [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:240]
+WARNING: [Synth 8-10180] variable 'c_bid' must explicitly be declared as automatic or static [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:241]
+WARNING: [Synth 8-10180] variable 'c_ask' must explicitly be declared as automatic or static [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:242]
+INFO: [Synth 8-6157] synthesizing module 'system_hft_core_0' [c:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.gen/sources_1/bd/system/ip/system_hft_core_0/synth/system_hft_core_0.v:53]
+INFO: [Synth 8-6157] synthesizing module 'board_a_top_bd' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/board_a_top_bd.v:5]
+INFO: [Synth 8-6157] synthesizing module 'board_a_top' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/board_a_top.sv:11]
+	Parameter NUM_SYM bound to: 16 - type: integer 
+	Parameter LINK_W bound to: 4 - type: integer 
+	Parameter C_S_AXI_ADDR_WIDTH bound to: 8 - type: integer 
+	Parameter C_S_AXI_DATA_WIDTH bound to: 32 - type: integer 
+INFO: [Synth 8-294] found qualifier unique on case statement: implementing as parallel_case [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/board_a_top.sv:115]
+INFO: [Synth 8-226] default block is never used [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/board_a_top.sv:115]
+INFO: [Synth 8-6157] synthesizing module 'board_a_axi_regs' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/board_a_axi_regs.sv:12]
+	Parameter NUM_SYM bound to: 16 - type: integer 
+	Parameter C_S_AXI_ADDR_WIDTH bound to: 8 - type: integer 
+	Parameter C_S_AXI_DATA_WIDTH bound to: 32 - type: integer 
+INFO: [Synth 8-6155] done synthesizing module 'board_a_axi_regs' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/board_a_axi_regs.sv:12]
+INFO: [Synth 8-6157] synthesizing module 'board_a_ctrl' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/board_a_ctrl.sv:12]
+INFO: [Synth 8-6157] synthesizing module 'debounce' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/shared/debounce.sv:10]
+	Parameter COUNTER_W bound to: 32'sb00000000000000000000000000010000 
+INFO: [Synth 8-6155] done synthesizing module 'debounce' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/shared/debounce.sv:10]
+INFO: [Synth 8-294] found qualifier unique on case statement: implementing as parallel_case [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/board_a_ctrl.sv:71]
+INFO: [Synth 8-226] default block is never used [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/board_a_ctrl.sv:71]
+INFO: [Synth 8-6155] done synthesizing module 'board_a_ctrl' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/board_a_ctrl.sv:12]
+INFO: [Synth 8-6157] synthesizing module 'market_sim' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:33]
+	Parameter NUM_SYM bound to: 16 - type: integer 
+INFO: [Synth 8-294] found qualifier unique on case statement: implementing as parallel_case [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:80]
+INFO: [Synth 8-6157] synthesizing module 'market_noise_gen' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_noise_gen.sv:17]
+	Parameter NUM_SYM bound to: 16 - type: integer 
+	Parameter NUM_SECTORS bound to: 32'sb00000000000000000000000000001000 
+INFO: [Synth 8-6157] synthesizing module 'lfsr32' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/shared/lfsr32.sv:10]
+INFO: [Synth 8-6155] done synthesizing module 'lfsr32' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/shared/lfsr32.sv:10]
+INFO: [Synth 8-6155] done synthesizing module 'market_noise_gen' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_noise_gen.sv:17]
+INFO: [Synth 8-6155] done synthesizing module 'market_sim' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:33]
+INFO: [Synth 8-6157] synthesizing module 'sync_fifo' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/shared/sync_fifo.sv:9]
+	Parameter DATA_W bound to: 128 - type: integer 
+	Parameter DEPTH bound to: 64 - type: integer 
+	Parameter ALMOST_FULL_THRESH bound to: 60 - type: integer 
+INFO: [Synth 8-294] found qualifier unique on case statement: implementing as parallel_case [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/shared/sync_fifo.sv:61]
+INFO: [Synth 8-6155] done synthesizing module 'sync_fifo' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/shared/sync_fifo.sv:9]
+INFO: [Synth 8-6157] synthesizing module 'exchange_lite' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/exchange_lite.sv:14]
+	Parameter NUM_SYM bound to: 16 - type: integer 
+INFO: [Synth 8-6155] done synthesizing module 'exchange_lite' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/exchange_lite.sv:14]
+INFO: [Synth 8-6157] synthesizing module 'tx_arbiter' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/tx_arbiter.sv:57]
+INFO: [Synth 8-6155] done synthesizing module 'tx_arbiter' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/tx_arbiter.sv:57]
+INFO: [Synth 8-6157] synthesizing module 'link_tx' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/link/link_tx.sv:14]
+	Parameter FRAME_W bound to: 32'sb00000000000000000000000010000000 
+	Parameter DATA_W bound to: 4 - type: integer 
+INFO: [Synth 8-294] found qualifier unique on case statement: implementing as parallel_case [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/link/link_tx.sv:67]
+INFO: [Synth 8-226] default block is never used [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/link/link_tx.sv:67]
+INFO: [Synth 8-6155] done synthesizing module 'link_tx' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/link/link_tx.sv:14]
+INFO: [Synth 8-6157] synthesizing module 'link_rx' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/link/link_rx.sv:11]
+	Parameter FRAME_W bound to: 128 - type: integer 
+	Parameter DATA_W bound to: 4 - type: integer 
+INFO: [Synth 8-226] default block is never used [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/link/link_rx.sv:103]
+INFO: [Synth 8-294] found qualifier unique on case statement: implementing as parallel_case [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/link/link_rx.sv:130]
+INFO: [Synth 8-6155] done synthesizing module 'link_rx' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/link/link_rx.sv:11]
+INFO: [Synth 8-6155] done synthesizing module 'board_a_top' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/board_a_top.sv:11]
+INFO: [Synth 8-6155] done synthesizing module 'board_a_top_bd' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/board_a_top_bd.v:5]
+INFO: [Synth 8-6155] done synthesizing module 'system_hft_core_0' (0#1) [c:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.gen/sources_1/bd/system/ip/system_hft_core_0/synth/system_hft_core_0.v:53]
+WARNING: [Synth 8-6014] Unused sequential element spread_reg[0] was removed.  [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:263]
+WARNING: [Synth 8-6014] Unused sequential element spread_reg[1] was removed.  [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:263]
+WARNING: [Synth 8-6014] Unused sequential element spread_reg[2] was removed.  [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:263]
+WARNING: [Synth 8-6014] Unused sequential element spread_reg[3] was removed.  [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:263]
+WARNING: [Synth 8-6014] Unused sequential element spread_reg[4] was removed.  [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:263]
+WARNING: [Synth 8-6014] Unused sequential element spread_reg[5] was removed.  [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:263]
+WARNING: [Synth 8-6014] Unused sequential element spread_reg[6] was removed.  [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:263]
+WARNING: [Synth 8-6014] Unused sequential element spread_reg[7] was removed.  [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:263]
+WARNING: [Synth 8-6014] Unused sequential element spread_reg[8] was removed.  [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:263]
+WARNING: [Synth 8-6014] Unused sequential element spread_reg[9] was removed.  [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:263]
+WARNING: [Synth 8-6014] Unused sequential element spread_reg[10] was removed.  [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:263]
+WARNING: [Synth 8-6014] Unused sequential element spread_reg[11] was removed.  [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:263]
+WARNING: [Synth 8-6014] Unused sequential element spread_reg[12] was removed.  [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:263]
+WARNING: [Synth 8-6014] Unused sequential element spread_reg[13] was removed.  [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:263]
+WARNING: [Synth 8-6014] Unused sequential element spread_reg[14] was removed.  [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:263]
+WARNING: [Synth 8-6014] Unused sequential element spread_reg[15] was removed.  [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_a/market_sim.sv:263]
+WARNING: [Synth 8-7137] Register mem_reg in module sync_fifo has both Set and reset with same priority. This may cause simulation mismatches. Consider rewriting code 
+WARNING: [Synth 8-4767] Trying to implement RAM 'mem_reg' in registers. Block RAM or DRAM implementation is not possible; see log for reasons. [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/shared/sync_fifo.sv:68]
+Reason is one or more of the following :
+	1: RAM is sensitive to asynchronous reset signal. this RTL style is not supported. 
+WARNING: [Synth 8-6014] Unused sequential element assembled_next_reg was removed.  [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/link/link_rx.sv:126]
+INFO: [Synth 8-7129] Port order_frame[114] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[113] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[112] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[31] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[30] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[29] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[28] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[27] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[26] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[25] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[24] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[23] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[22] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[21] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[20] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[19] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[18] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[17] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[16] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[15] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[14] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[13] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[12] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[11] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[10] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[9] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[8] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[7] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[6] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[5] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[4] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[3] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[2] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[1] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port order_frame[0] in module exchange_lite is either unconnected or has no load
+INFO: [Synth 8-7129] Port sw[7] in module board_a_ctrl is either unconnected or has no load
+INFO: [Synth 8-7129] Port sw[6] in module board_a_ctrl is either unconnected or has no load
+INFO: [Synth 8-7129] Port sw[5] in module board_a_ctrl is either unconnected or has no load
+INFO: [Synth 8-7129] Port sw[4] in module board_a_ctrl is either unconnected or has no load
+INFO: [Synth 8-7129] Port sw[3] in module board_a_ctrl is either unconnected or has no load
+INFO: [Synth 8-7129] Port s_axi_awprot[2] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port s_axi_awprot[1] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port s_axi_awprot[0] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port s_axi_wstrb[3] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port s_axi_wstrb[2] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port s_axi_wstrb[1] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port s_axi_wstrb[0] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port s_axi_arprot[2] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port s_axi_arprot[1] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port s_axi_arprot[0] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[31] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[30] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[29] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[28] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[27] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[26] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[25] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[24] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[23] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[22] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[21] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[20] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[19] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[18] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[17] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[16] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[15] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[14] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[13] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[12] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[11] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[10] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[9] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[8] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[7] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[6] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[5] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[4] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[3] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[2] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[1] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port fills_sent[0] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[31] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[30] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[29] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[28] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[27] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[26] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[25] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[24] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[23] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[22] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[21] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[20] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[19] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[18] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[17] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[16] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[15] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Synth 8-7129] Port rejects_sent[14] in module board_a_axi_regs is either unconnected or has no load
+INFO: [Common 17-14] Message 'Synth 8-7129' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:14 ; elapsed = 00:00:16 . Memory (MB): peak = 1944.840 ; gain = 394.383
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:14 ; elapsed = 00:00:16 . Memory (MB): peak = 1944.840 ; gain = 394.383
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:14 ; elapsed = 00:00:16 . Memory (MB): peak = 1944.840 ; gain = 394.383
+---------------------------------------------------------------------------------
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.398 . Memory (MB): peak = 1944.840 ; gain = 0.000
+INFO: [Project 1-570] Preparing netlist for logic optimization
+
+Processing XDC Constraints
+Initializing timing engine
+Completed Processing XDC Constraints
+
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.019 . Memory (MB): peak = 2036.914 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+Constraint Validation Runtime : Time (s): cpu = 00:00:01 ; elapsed = 00:00:00.869 . Memory (MB): peak = 2036.914 ; gain = 0.000
+INFO: [Designutils 20-5008] Incremental synthesis strategy off
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:35 ; elapsed = 00:00:36 . Memory (MB): peak = 2036.914 ; gain = 486.457
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xczu3eg-sfvc784-2-e
+INFO: [Synth 8-6742] Reading net delay rules and data
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:35 ; elapsed = 00:00:36 . Memory (MB): peak = 2036.914 ; gain = 486.457
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying 'set_property' XDC Constraints
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:35 ; elapsed = 00:00:36 . Memory (MB): peak = 2036.914 ; gain = 486.457
+---------------------------------------------------------------------------------
+INFO: [Synth 8-802] inferred FSM for state register 'fsm_state_reg' in module 'board_a_top'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                 A_RESET |                               10 |                               00
+                  A_IDLE |                               11 |                               01
+               A_RUNNING |                               01 |                               10
+               A_STOPPED |                               00 |                               11
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'fsm_state_reg' using encoding 'sequential' in module 'board_a_top'
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:41 ; elapsed = 00:00:43 . Memory (MB): peak = 2036.914 ; gain = 486.457
+---------------------------------------------------------------------------------
+No constraint files found.
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+Detailed RTL Component Info : 
++---Adders : 
+	   2 Input   33 Bit       Adders := 16    
+	   3 Input   32 Bit       Adders := 35    
+	   2 Input   32 Bit       Adders := 21    
+	   2 Input   17 Bit       Adders := 4     
+	   2 Input   16 Bit       Adders := 1     
+	   2 Input    7 Bit       Adders := 26    
+	   2 Input    6 Bit       Adders := 2     
+	   2 Input    5 Bit       Adders := 3     
+	   2 Input    4 Bit       Adders := 10    
+	   2 Input    3 Bit       Adders := 4     
+	   2 Input    2 Bit       Adders := 2     
++---XORs : 
+	   2 Input     32 Bit         XORs := 50    
++---Registers : 
+	              128 Bit    Registers := 70    
+	               32 Bit    Registers := 138   
+	               17 Bit    Registers := 4     
+	               16 Bit    Registers := 35    
+	                8 Bit    Registers := 2     
+	                7 Bit    Registers := 1     
+	                6 Bit    Registers := 2     
+	                5 Bit    Registers := 2     
+	                4 Bit    Registers := 3     
+	                3 Bit    Registers := 16    
+	                2 Bit    Registers := 1     
+	                1 Bit    Registers := 34    
++---Multipliers : 
+	              18x32  Multipliers := 1     
++---Muxes : 
+	   2 Input  128 Bit        Muxes := 7     
+	   2 Input   32 Bit        Muxes := 288   
+	   4 Input   17 Bit        Muxes := 1     
+	   2 Input   17 Bit        Muxes := 4     
+	   4 Input   16 Bit        Muxes := 1     
+	   2 Input   16 Bit        Muxes := 4     
+	   2 Input   14 Bit        Muxes := 24    
+	   2 Input   13 Bit        Muxes := 24    
+	   2 Input    8 Bit        Muxes := 29    
+	   2 Input    7 Bit        Muxes := 1     
+	   2 Input    6 Bit        Muxes := 2     
+	   2 Input    5 Bit        Muxes := 19    
+	   2 Input    4 Bit        Muxes := 130   
+	   2 Input    3 Bit        Muxes := 65    
+	   4 Input    3 Bit        Muxes := 1     
+	   2 Input    2 Bit        Muxes := 45    
+	   3 Input    2 Bit        Muxes := 1     
+	   4 Input    2 Bit        Muxes := 3     
+	   2 Input    1 Bit        Muxes := 204   
+	   3 Input    1 Bit        Muxes := 1     
+	   4 Input    1 Bit        Muxes := 2     
+	   5 Input    1 Bit        Muxes := 1     
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 360 (col length:72)
+BRAMs: 432 (col length: RAMB18 72 RAMB36 36)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+No constraint files found.
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+DSP Report: Generating DSP p_1_out0, operation Mode is: C+A*B.
+DSP Report: operator p_1_out0 is absorbed into DSP p_1_out0.
+DSP Report: operator p_0_out is absorbed into DSP p_1_out0.
+DSP Report: Generating DSP p_1_out0, operation Mode is: C+A*B.
+DSP Report: operator p_1_out0 is absorbed into DSP p_1_out0.
+DSP Report: operator p_0_out is absorbed into DSP p_1_out0.
+DSP Report: Generating DSP p_1_out0, operation Mode is: C+A*B.
+DSP Report: operator p_1_out0 is absorbed into DSP p_1_out0.
+DSP Report: operator p_0_out is absorbed into DSP p_1_out0.
+DSP Report: Generating DSP p_1_out0, operation Mode is: C+A*B.
+DSP Report: operator p_1_out0 is absorbed into DSP p_1_out0.
+DSP Report: operator p_0_out is absorbed into DSP p_1_out0.
+DSP Report: Generating DSP p_1_out0, operation Mode is: C+A*B.
+DSP Report: operator p_1_out0 is absorbed into DSP p_1_out0.
+DSP Report: operator p_0_out is absorbed into DSP p_1_out0.
+DSP Report: Generating DSP p_1_out0, operation Mode is: C+A*B.
+DSP Report: operator p_1_out0 is absorbed into DSP p_1_out0.
+DSP Report: operator p_0_out is absorbed into DSP p_1_out0.
+DSP Report: Generating DSP p_1_out0, operation Mode is: C+A*B.
+DSP Report: operator p_1_out0 is absorbed into DSP p_1_out0.
+DSP Report: operator p_0_out is absorbed into DSP p_1_out0.
+DSP Report: Generating DSP p_1_out0, operation Mode is: C+A*B.
+DSP Report: operator p_1_out0 is absorbed into DSP p_1_out0.
+DSP Report: operator p_0_out is absorbed into DSP p_1_out0.
+DSP Report: Generating DSP new_mid_u_c5, operation Mode is: A*B.
+DSP Report: operator new_mid_u_c5 is absorbed into DSP new_mid_u_c5.
+DSP Report: operator new_mid_u_c5 is absorbed into DSP new_mid_u_c5.
+DSP Report: Generating DSP new_mid_u_c5, operation Mode is: (PCIN>>17)+A*B.
+DSP Report: operator new_mid_u_c5 is absorbed into DSP new_mid_u_c5.
+DSP Report: operator new_mid_u_c5 is absorbed into DSP new_mid_u_c5.
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:03:03 ; elapsed = 00:03:07 . Memory (MB): peak = 2407.160 ; gain = 856.703
+---------------------------------------------------------------------------------
+ Sort Area is market_sim__GCB0 new_mid_u_c5_9 : 0 0 : 3101 5754 : Used 1 time 0
+ Sort Area is market_sim__GCB0 new_mid_u_c5_9 : 0 1 : 2653 5754 : Used 1 time 0
+ Sort Area is market_noise_gen__GB0 p_1_out0_0 : 0 0 : 513 513 : Used 1 time 0
+ Sort Area is market_noise_gen__GB0 p_1_out0_2 : 0 0 : 513 513 : Used 1 time 0
+ Sort Area is market_noise_gen__GB0 p_1_out0_3 : 0 0 : 513 513 : Used 1 time 0
+ Sort Area is market_noise_gen__GB0 p_1_out0_4 : 0 0 : 513 513 : Used 1 time 0
+ Sort Area is market_noise_gen__GB0 p_1_out0_5 : 0 0 : 513 513 : Used 1 time 0
+ Sort Area is market_noise_gen__GB0 p_1_out0_6 : 0 0 : 513 513 : Used 1 time 0
+ Sort Area is market_noise_gen__GB0 p_1_out0_7 : 0 0 : 513 513 : Used 1 time 0
+ Sort Area is market_noise_gen__GB0 p_1_out0_8 : 0 0 : 513 513 : Used 1 time 0
+---------------------------------------------------------------------------------
+Start ROM, RAM, DSP, Shift Register and Retiming Reporting
+---------------------------------------------------------------------------------
+
+DSP: Preliminary Mapping Report (see note below. The ' indicates corresponding REG is set)
++------------------+----------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|Module Name       | DSP Mapping    | A Size | B Size | C Size | D Size | P Size | AREG | BREG | CREG | DREG | ADREG | MREG | PREG | 
++------------------+----------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|market_noise_gen  | C+A*B          | 11     | 6      | 32     | -      | 33     | 0    | 0    | 0    | -    | -     | 0    | 0    | 
+|market_noise_gen  | C+A*B          | 11     | 6      | 32     | -      | 33     | 0    | 0    | 0    | -    | -     | 0    | 0    | 
+|market_noise_gen  | C+A*B          | 11     | 6      | 32     | -      | 33     | 0    | 0    | 0    | -    | -     | 0    | 0    | 
+|market_noise_gen  | C+A*B          | 11     | 6      | 32     | -      | 33     | 0    | 0    | 0    | -    | -     | 0    | 0    | 
+|market_noise_gen  | C+A*B          | 11     | 6      | 32     | -      | 33     | 0    | 0    | 0    | -    | -     | 0    | 0    | 
+|market_noise_gen  | C+A*B          | 11     | 6      | 32     | -      | 33     | 0    | 0    | 0    | -    | -     | 0    | 0    | 
+|market_noise_gen  | C+A*B          | 11     | 6      | 32     | -      | 33     | 0    | 0    | 0    | -    | -     | 0    | 0    | 
+|market_noise_gen  | C+A*B          | 11     | 6      | 32     | -      | 33     | 0    | 0    | 0    | -    | -     | 0    | 0    | 
+|system_hft_core_0 | A*B            | 18     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|system_hft_core_0 | (PCIN>>17)+A*B | 18     | 15     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
++------------------+----------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+
+Note: The table above is a preliminary report that shows the DSPs inferred at the current stage of the synthesis flow. Some DSP may be reimplemented as non DSP primitives later in the synthesis flow. Multiple instantiated DSPs are reported only once.
+---------------------------------------------------------------------------------
+Finished ROM, RAM, DSP, Shift Register and Retiming Reporting
+---------------------------------------------------------------------------------
+No constraint files found.
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:03:06 ; elapsed = 00:03:10 . Memory (MB): peak = 2407.160 ; gain = 856.703
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:03:13 ; elapsed = 00:03:17 . Memory (MB): peak = 2407.160 ; gain = 856.703
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:03:21 ; elapsed = 00:03:25 . Memory (MB): peak = 2407.160 ; gain = 856.703
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:03:21 ; elapsed = 00:03:25 . Memory (MB): peak = 2407.160 ; gain = 856.703
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Rebuilding User Hierarchy
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:03:23 ; elapsed = 00:03:27 . Memory (MB): peak = 2407.160 ; gain = 856.703
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Ports
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Ports : Time (s): cpu = 00:03:23 ; elapsed = 00:03:27 . Memory (MB): peak = 2407.160 ; gain = 856.703
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:03:25 ; elapsed = 00:03:30 . Memory (MB): peak = 2407.160 ; gain = 856.703
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Nets
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Nets : Time (s): cpu = 00:03:25 ; elapsed = 00:03:30 . Memory (MB): peak = 2407.160 ; gain = 856.703
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+DSP Final Report (the ' indicates corresponding REG is set)
++------------------+--------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|Module Name       | DSP Mapping  | A Size | B Size | C Size | D Size | P Size | AREG | BREG | CREG | DREG | ADREG | MREG | PREG | 
++------------------+--------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|system_hft_core_0 | A*B          | 17     | 17     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|system_hft_core_0 | PCIN>>17+A*B | 17     | 18     | -      | -      | 48     | 0    | 0    | -    | -    | -     | 0    | 0    | 
+|market_noise_gen  | C+A*B        | 30     | 5      | 48     | -      | 33     | 0    | 0    | 0    | -    | -     | 0    | 0    | 
+|market_noise_gen  | C+A*B        | 30     | 5      | 48     | -      | 33     | 0    | 0    | 0    | -    | -     | 0    | 0    | 
+|market_noise_gen  | C+A*B        | 30     | 5      | 48     | -      | 33     | 0    | 0    | 0    | -    | -     | 0    | 0    | 
+|market_noise_gen  | C+A*B        | 30     | 5      | 48     | -      | 33     | 0    | 0    | 0    | -    | -     | 0    | 0    | 
+|market_noise_gen  | C+A*B        | 30     | 5      | 48     | -      | 33     | 0    | 0    | 0    | -    | -     | 0    | 0    | 
+|market_noise_gen  | C+A*B        | 30     | 5      | 48     | -      | 33     | 0    | 0    | 0    | -    | -     | 0    | 0    | 
+|market_noise_gen  | C+A*B        | 30     | 5      | 48     | -      | 33     | 0    | 0    | 0    | -    | -     | 0    | 0    | 
+|market_noise_gen  | C+A*B        | 30     | 5      | 48     | -      | 33     | 0    | 0    | 0    | -    | -     | 0    | 0    | 
++------------------+--------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+
+
+Report BlackBoxes: 
++-+--------------+----------+
+| |BlackBox name |Instances |
++-+--------------+----------+
++-+--------------+----------+
+
+Report Cell Usage: 
++------+--------+------+
+|      |Cell    |Count |
++------+--------+------+
+|1     |CARRY8  |   515|
+|2     |DSP48E2 |    10|
+|3     |LUT1    |    63|
+|4     |LUT2    |  4321|
+|5     |LUT3    |  1491|
+|6     |LUT4    |  1805|
+|7     |LUT5    |   799|
+|8     |LUT6    |  6770|
+|9     |MUXF7   |   810|
+|10    |MUXF8   |    42|
+|11    |FDCE    |  5728|
+|12    |FDPE    |   110|
+|13    |FDRE    |  5568|
++------+--------+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:03:26 ; elapsed = 00:03:30 . Memory (MB): peak = 2407.160 ; gain = 856.703
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 0 critical warnings and 0 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:03:02 ; elapsed = 00:03:21 . Memory (MB): peak = 2407.160 ; gain = 764.629
+Synthesis Optimization Complete : Time (s): cpu = 00:03:26 ; elapsed = 00:03:30 . Memory (MB): peak = 2407.160 ; gain = 856.703
+INFO: [Project 1-571] Translating synthesized netlist
+Netlist sorting complete. Time (s): cpu = 00:00:01 ; elapsed = 00:00:00.326 . Memory (MB): peak = 2407.160 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 1377 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.012 . Memory (MB): peak = 2452.082 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 10 instances were transformed.
+  DSP48E2 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 10 instances
+
+Synth Design complete | Checksum: 95b1e21d
+INFO: [Common 17-83] Releasing license: Synthesis
+160 Infos, 25 Warnings, 0 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:03:42 ; elapsed = 00:03:50 . Memory (MB): peak = 2452.082 ; gain = 1861.035
+INFO: [Coretcl 2-1174] Renamed 39 cell refs.
+Write ShapeDB Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.060 . Memory (MB): peak = 2452.082 ; gain = 0.000
+INFO: [Common 17-1381] The checkpoint 'C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/system_hft_core_0_synth_1/system_hft_core_0.dcp' has been generated.
+INFO: [Vivado 12-24828] Executing command : report_utilization -file system_hft_core_0_utilization_synth.rpt -pb system_hft_core_0_utilization_synth.pb
+INFO: [Common 17-206] Exiting Vivado at Thu Apr 16 07:25:38 2026...
