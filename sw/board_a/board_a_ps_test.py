@@ -417,11 +417,13 @@ if deltas:
 # ═══════════════════════════════════════════════════════════════════════════
 section("TEST 14: Unused address reads")
 
-# Addresses beyond the defined map should return 0 (default rd_data_mux)
-for test_addr in [0x04 + 1, 0xE0, 0xE4, 0xE8, 0xEC]:
+# Defined register map ends at 0xFC (ORDERS_RCVD).
+# Addresses 0x100 and above are unmapped; should return 0 (default rd_data_mux).
+# All offsets must be 4-byte aligned for AXI-Lite.
+for test_addr in [0x100, 0x200, 0x400, 0x800, 0xFFC]:
     val = mmio.read(test_addr)
-    print(f"  addr 0x{test_addr:02X} -> 0x{val:08X}")
-# No hard pass/fail — just observational
+    print(f"  addr 0x{test_addr:03X} -> 0x{val:08X}")
+    check(f"unused addr 0x{test_addr:03X} reads 0", val == 0, f"got 0x{val:08X}")
 
 
 # ═══════════════════════════════════════════════════════════════════════════
