@@ -1,3 +1,6 @@
 obj_*/
 __pycache__/
 *.pyc
+
+# Local bundle for copying sw/ to PYNQ (regenerate anytime)
+sw_pynq_upload.zip

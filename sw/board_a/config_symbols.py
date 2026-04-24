@@ -21,8 +21,6 @@ import random
 from collections import Counter
 from typing import Any, Dict, List, Optional
 
-from pynq import Overlay, MMIO
-
 from symbol_universe import (
     SYMBOL_DB,
     extract_sector_groups,
@@ -62,7 +60,7 @@ def q16_16(val: float) -> int:
     return int(val * 65536) & 0xFFFFFFFF
 
 
-def read_board_a_status(mmio: MMIO) -> Dict[str, Any]:
+def read_board_a_status(mmio: Any) -> Dict[str, Any]:
     """Read and decode Board A status registers (STATUS, QUOTES_SENT, ORDERS_RCVD)."""
     raw = mmio.read(STATUS)
     return {
@@ -76,7 +74,7 @@ def read_board_a_status(mmio: MMIO) -> Dict[str, Any]:
     }
 
 
-def print_board_a_status(mmio: MMIO) -> None:
+def print_board_a_status(mmio: Any) -> None:
     s = read_board_a_status(mmio)
     print(f"  running     : {s['running']}")
     print(f"  link_up     : {s['link_up']}")
@@ -324,7 +322,7 @@ def print_configuration_summary(loaded: List[dict[str, Any]], hw_slots: int) -> 
 
 
 def write_mmio_board_config(
-    mmio: MMIO,
+    mmio: Any,
     loaded: List[dict[str, Any]],
     hw_slots: int,
     *,
@@ -543,6 +541,8 @@ def load_symbols_from_file(path: str) -> List[str]:
 
 
 def main() -> None:
+    from pynq import MMIO, Overlay
+
     args = parse_args()
 
     if args.hw_slots < 1:

@@ -1,0 +1,12 @@
+# Board A dashboard — Python dependencies
+# Install (once):  pip install -r sw/board_a_dashboard/requirements-dashboard.txt
+#
+# Run (Jupyter): open sw/board_a_dashboard/Board_A_Dashboard.ipynb, run all cells,
+#   set USE_FPGA True on PYNQ if overlays/board_a.bit exists, then use Parse → Apply → Live poll.
+#
+# Run (Voilà):  cd sw/board_a_dashboard && voila Board_A_Dashboard.ipynb
+
+ipywidgets>=8.0
+anywidget>=0.9.0
+plotly>=5.18
+pynq>=3.0
