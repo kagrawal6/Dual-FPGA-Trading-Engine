@@ -1,0 +1,92 @@
+{
+  "avg_mtm": -449.35617446899414,
+  "min_mtm": -1873.773193359375,
+  "max_mtm": 50.201416015625,
+  "avg_hold_mtm": 0.0,
+  "avg_mean_reversion_mtm": -971.5883255004883,
+  "avg_excess_vs_hold": -449.35617446899414,
+  "avg_excess_vs_mean_reversion": 522.2321510314941,
+  "orders": 1825,
+  "fills": 898,
+  "risk_rejects": 3379,
+  "blocked": 0,
+  "action_mix": {
+    "HOLD": 0.7132624387018569,
+    "BUY": 0.10518485866989917,
+    "SELL": 0.18155270262824397
+  },
+  "per_regime": {
+    "CALM": {
+      "avg_mtm": -59.831809997558594,
+      "min_mtm": -121.91162109375,
+      "max_mtm": -17.49267578125,
+      "avg_hold_mtm": 0.0,
+      "avg_mean_reversion_mtm": 0.0,
+      "avg_excess_vs_hold": -59.831809997558594,
+      "avg_excess_vs_mean_reversion": -59.831809997558594,
+      "orders": 209,
+      "fills": 146,
+      "risk_rejects": 950,
+      "blocked": 0,
+      "action_counts": {
+        "0": 3625,
+        "1": 510,
+        "2": 649
+      }
+    },
+    "VOLATILE": {
+      "avg_mtm": -537.9796981811523,
+      "min_mtm": -1348.1582641601562,
+      "max_mtm": -13.3148193359375,
+      "avg_hold_mtm": 0.0,
+      "avg_mean_reversion_mtm": -904.1110992431641,
+      "avg_excess_vs_hold": -537.9796981811523,
+      "avg_excess_vs_mean_reversion": 366.1314010620117,
+      "orders": 508,
+      "fills": 239,
+      "risk_rejects": 1451,
+      "blocked": 0,
+      "action_counts": {
+        "0": 2527,
+        "1": 755,
+        "2": 1204
+      }
+    },
+    "BURST": {
+      "avg_mtm": -43.50395202636719,
+      "min_mtm": -93.83087158203125,
+      "max_mtm": -7.50732421875,
+      "avg_hold_mtm": 0.0,
+      "avg_mean_reversion_mtm": 0.0,
+      "avg_excess_vs_hold": -43.50395202636719,
+      "avg_excess_vs_mean_reversion": -43.50395202636719,
+      "orders": 129,
+      "fills": 109,
+      "risk_rejects": 222,
+      "blocked": 0,
+      "action_counts": {
+        "0": 4512,
+        "1": 148,
+        "2": 203
+      }
+    },
+    "ADVERSARIAL": {
+      "avg_mtm": -1156.1092376708984,
+      "min_mtm": -1873.773193359375,
+      "max_mtm": 50.201416015625,
+      "avg_hold_mtm": 0.0,
+      "avg_mean_reversion_mtm": -2982.242202758789,
+      "avg_excess_vs_hold": -1156.1092376708984,
+      "avg_excess_vs_mean_reversion": 1826.1329650878906,
+      "orders": 979,
+      "fills": 404,
+      "risk_rejects": 756,
+      "blocked": 0,
+      "action_counts": {
+        "0": 2281,
+        "1": 496,
+        "2": 1239
+      }
+    }
+  }
+}

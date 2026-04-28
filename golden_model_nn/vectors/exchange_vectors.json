@@ -1,0 +1,50 @@
+[
+  {
+    "description": "BUY at ask (fill)",
+    "order_hex": "200000B4080B00640000006400000000",
+    "fill_hex": "300000B4080B00640000006400000000",
+    "is_filled": true,
+    "fill_price_hex": "00B4080B",
+    "fill_qty": 100
+  },
+  {
+    "description": "BUY below ask (rej)",
+    "order_hex": "200000B4080A00320001006500000000",
+    "fill_hex": "30010000000000000001006500000000",
+    "is_filled": false,
+    "fill_price_hex": "00000000",
+    "fill_qty": 0
+  },
+  {
+    "description": "SELL at bid (fill)",
+    "order_hex": "201801A3F7F4004B0002006600000000",
+    "fill_hex": "301801A3F7F4004B0002006600000000",
+    "is_filled": true,
+    "fill_price_hex": "01A3F7F4",
+    "fill_qty": 75
+  },
+  {
+    "description": "SELL above bid (rej)",
+    "order_hex": "201801A3F7F500190003006700000000",
+    "fill_hex": "30190000000000000003006700000000",
+    "is_filled": false,
+    "fill_price_hex": "00000000",
+    "fill_qty": 0
+  },
+  {
+    "description": "OORange sym=4 (rej)",
+    "order_hex": "204000C80000000A0004006800000000",
+    "fill_hex": "30410000000000000004006800000000",
+    "is_filled": false,
+    "fill_price_hex": "00000000",
+    "fill_qty": 0
+  },
+  {
+    "description": "BUY sym=3 (fill)",
+    "order_hex": "20300074080F00C80005006900000000",
+    "fill_hex": "30300073080F00C80005006900000000",
+    "is_filled": true,
+    "fill_price_hex": "0073080F",
+    "fill_qty": 200
+  }
+]
