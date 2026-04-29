@@ -1,5 +1,4 @@
 """
-YOU UPLOAD THIS TO THE PYNQ BOARD AND RUN IT THERE
 pynq_server.py — Runs ON the PYNQ board.
 Reads Board A AXI registers and serves price data over HTTP.
 Also accepts regime change commands from live_prices.py.
@@ -32,6 +31,12 @@ ACTIVE_SYM_COUNT = 0xF0
 STATUS_REG       = 0xF4
 QUOTES_SENT      = 0xF8
 ORDERS_RCVD      = 0xFC
+FILLS_SENT       = 0x100
+REJECTS_SENT     = 0x104
+LINK_ERRORS      = 0x108
+LIVE_BID_BASE    = 0x110   # B3: live_bid[i] at 0x110 + 4*i
+LIVE_ASK_BASE    = 0x150   # B3: live_ask[i] at 0x150 + 4*i
+LIVE_MID_BASE    = 0x190   # B3: live_mid[i] at 0x190 + 4*i
 
 NUM_SYMBOLS = 16
 Q16 = 65536.0
@@ -98,30 +103,28 @@ def poll_registers():
 
                 prices = []
                 for i in range(NUM_SYMBOLS):
-                    mid_q16 = mmio_a.read(INIT_MID_BASE    + 4*i)
-                    spr_q16 = mmio_a.read(INIT_SPREAD_BASE + 4*i)
-                    noise_scale = {0: 0.0005, 1: 0.002, 2: 0.008, 3: 0.003}
-                    spread_mult = {0: 1.0,    1: 2.5,   2: 5.0,   3: 3.0}
-                    amp        = noise_scale.get(regime_val, 0.001)
-                    mult       = spread_mult.get(regime_val, 1.0)
-                    t          = time.time()
-                    drift      = math.sin(t * 0.3 + i * 0.7) * mid_q16 * amp * 3
-                    noise      = random.gauss(0, mid_q16 * amp)
-                    mid        = int(mid_q16 + drift + noise)
-                    scaled_spr = int(spr_q16 * mult)
-                    bid        = max(0, mid - scaled_spr // 2)
-                    ask        = max(0, mid + scaled_spr // 2)
+                    # Read true live prices from hardware registers (B3)
+                    bid_q16 = mmio_a.read(0x110 + 4*i)  # LIVE_BID[i]
+                    ask_q16 = mmio_a.read(0x150 + 4*i)  # LIVE_ASK[i]
+                    # Fallback to init_mid if live prices not yet valid
+                    if bid_q16 == 0 or ask_q16 == 0:
+                        mid_q16 = mmio_a.read(INIT_MID_BASE + 4*i)
+                        spr_q16 = mmio_a.read(INIT_SPREAD_BASE + 4*i)
+                        bid_q16 = max(0, mid_q16 - spr_q16 // 2)
+                        ask_q16 = mid_q16 + spr_q16 // 2
                     prices.append({
                         "ticker": SYMBOLS[i][0] if i < len(SYMBOLS) else f"SYM{i}",
-                        "bid": bid, "ask": ask, "regime": regime_val
+                        "bid":    bid_q16,
+                        "ask":    ask_q16,
+                        "regime": regime_val,
                     })
 
                 latest_data = {
                     "prices": prices,
                     "stats": {
                         "quotes_sent": quotes,
-                        "orders_sent": 0,
-                        "fills_rcvd":  0,
+                        "orders_sent": mmio_a.read(ORDERS_RCVD),
+                        "fills_rcvd":  mmio_a.read(FILLS_SENT),
                         "regime":      regime_val,
                         "running_a":   running_a,
                         "link_up":     link_up,
