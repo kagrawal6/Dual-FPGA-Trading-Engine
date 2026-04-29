@@ -1,0 +1,7 @@
+Running: xsim.dir/tb_exchange_lite_sim/xsimk.exe -simmode gui -wdb tb_exchange_lite_sim.wdb -simrunnum 0 -socket 61923
+Design successfully loaded
+Design Loading Memory Usage: 9952 KB (Peak: 9952 KB)
+Design Loading CPU Usage: 15 ms
+Simulation completed
+Simulation Memory Usage: 12200 KB (Peak: 12200 KB)
+Simulation CPU Usage: 61 ms

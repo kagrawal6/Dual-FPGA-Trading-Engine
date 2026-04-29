@@ -1,0 +1,1 @@
+--debug "typical" -L "unisims_ver" -L "secureip" "tb_board_b_top" -s "tb_board_b_top_sim" 

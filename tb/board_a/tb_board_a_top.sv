@@ -18,19 +18,25 @@ import hft_pkg::*;
 
 module tb_board_a_top;
 
-    localparam logic [7:0] ADDR_CTRL           = 8'h00;
-    localparam logic [7:0] ADDR_QUOTE_INT      = 8'h04;
-    localparam logic [7:0] ADDR_LFSR_SEED      = 8'h08;
-    localparam logic [7:0] ADDR_REGIME         = 8'h0C;
-    localparam logic [7:0] ADDR_INIT_MID_BASE  = 8'h10;
-    localparam logic [7:0] ADDR_INIT_SPR_BASE  = 8'h50;
-    localparam logic [7:0] ADDR_SECTOR_BASE    = 8'h90;
-    localparam logic [7:0] ADDR_ACTIVE_CNT     = 8'hF0;
-    localparam logic [7:0] ADDR_STATUS         = 8'hF4;
-    localparam logic [7:0] ADDR_QUOTES_SENT    = 8'hF8;
-    localparam logic [7:0] ADDR_ORDERS_RCVD    = 8'hFC;
+    // Address constants (9-bit address space — bumped 8→9 in B2 to expose
+    // FILLS_SENT (0x100), REJECTS_SENT (0x104) and LINK_ERRORS (0x108))
+    localparam logic [8:0] ADDR_CTRL           = 9'h000;
+    localparam logic [8:0] ADDR_QUOTE_INT      = 9'h004;
+    localparam logic [8:0] ADDR_LFSR_SEED      = 9'h008;
+    localparam logic [8:0] ADDR_REGIME         = 9'h00C;
+    localparam logic [8:0] ADDR_INIT_MID_BASE  = 9'h010;
+    localparam logic [8:0] ADDR_INIT_SPR_BASE  = 9'h050;
+    localparam logic [8:0] ADDR_SECTOR_BASE    = 9'h090;
+    localparam logic [8:0] ADDR_ACTIVE_CNT     = 9'h0F0;
+    localparam logic [8:0] ADDR_STATUS         = 9'h0F4;
+    localparam logic [8:0] ADDR_QUOTES_SENT    = 9'h0F8;
+    localparam logic [8:0] ADDR_ORDERS_RCVD    = 9'h0FC;
+    // B2 additions — read-only counters
+    localparam logic [8:0] ADDR_FILLS_SENT     = 9'h100;
+    localparam logic [8:0] ADDR_REJECTS_SENT   = 9'h104;
+    localparam logic [8:0] ADDR_LINK_ERRORS    = 9'h108;
 
-    localparam C_AW = 8;
+    localparam C_AW = 9;  // bumped 8→9 to match board_a_top default in B2
     localparam C_DW = 32;
     localparam LINK_W = LINK_DATA_W;
     localparam TB_NUM_SYM = 16;
@@ -203,48 +209,48 @@ module tb_board_a_top;
         end
     endtask
 
-    task automatic axi_write(input logic [7:0] addr, input logic [31:0] data);
-        @(posedge clk);
+    task automatic axi_write(input logic [C_AW-1:0] addr, input logic [31:0] data);
+        @(posedge clk); #1;
         s_axi_awaddr  = addr;
         s_axi_awvalid = 1'b1;
         s_axi_wdata   = data;
         s_axi_wstrb   = 4'hF;
         s_axi_wvalid  = 1'b1;
-        @(posedge clk);
-        while (!(s_axi_awready && s_axi_wready)) @(posedge clk);
+        @(posedge clk); #1;
+        while (!(s_axi_awready && s_axi_wready)) @(posedge clk); #1;
         s_axi_awvalid = 1'b0;
         s_axi_wvalid  = 1'b0;
         s_axi_bready  = 1'b1;
-        while (!s_axi_bvalid) @(posedge clk);
-        @(posedge clk);
+        while (!s_axi_bvalid) @(posedge clk); #1;
+        @(posedge clk); #1;
         s_axi_bready  = 1'b0;
     endtask
 
-    task automatic axi_read(input logic [7:0] addr, output logic [31:0] data);
-        @(posedge clk);
+    task automatic axi_read(input logic [C_AW-1:0] addr, output logic [31:0] data);
+        @(posedge clk); #1;
         s_axi_araddr  = addr;
         s_axi_arvalid = 1'b1;
-        @(posedge clk);
-        while (!s_axi_arready) @(posedge clk);
+        @(posedge clk); #1;
+        while (!s_axi_arready) @(posedge clk); #1;
         s_axi_arvalid = 1'b0;
         s_axi_rready  = 1'b1;
-        while (!s_axi_rvalid) @(posedge clk);
+        while (!s_axi_rvalid) @(posedge clk); #1;
         data = s_axi_rdata;
-        @(posedge clk);
+        @(posedge clk); #1;
         s_axi_rready  = 1'b0;
     endtask
 
     task automatic wait_tx_frame(output logic [127:0] f, input int timeout = 500);
         int cnt = 0;
         f = '0;
-        @(posedge clk);
+        @(posedge clk); #1;
         while (!tx_frame_valid && cnt < timeout) begin
-            @(posedge clk);
+            @(posedge clk); #1;
             cnt++;
         end
         if (tx_frame_valid) begin
             f = tx_captured_frame;
-            @(posedge clk);
+            @(posedge clk); #1;
         end
     endtask
 
@@ -259,8 +265,8 @@ module tb_board_a_top;
     );
         rx_inject_frame = {MSG_ORDER, sym, side, 3'b000, price, qty[15:0], oid[15:0], ts[15:0], 32'h0};
         rx_inject_valid = 1'b1;
-        while (!(rx_inject_ready && rx_inject_valid)) @(posedge clk);
-        @(posedge clk);
+        while (!(rx_inject_ready && rx_inject_valid)) @(posedge clk); #1;
+        @(posedge clk); #1;
         rx_inject_valid = 1'b0;
     endtask
 
@@ -287,9 +293,9 @@ module tb_board_a_top;
         s_axi_arvalid    = 1'b0;
         s_axi_rready     = 1'b0;
 
-        @(posedge clk);
+        @(posedge clk); #1;
         wait (rst_n === 1'b1);
-        repeat (20) @(posedge clk);
+        repeat (20) @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 1) AXI config: full 16-symbol universe
@@ -330,7 +336,7 @@ module tb_board_a_top;
         check("pre-start: running=0", (rd_val & 32'h1) == 0);
 
         axi_write(ADDR_CTRL, 32'd1);
-        repeat (4) @(posedge clk);
+        repeat (4) @(posedge clk); #1;
 
         axi_read(ADDR_STATUS, rd_val);
         check("post-start: running=1", (rd_val & 32'h1) == 1);
@@ -339,7 +345,7 @@ module tb_board_a_top;
         // 3) Quote generation with 16 symbols
         // ─────────────────────────────────────────────────────
         $display("--- test_quote_generation_16sym ---");
-        repeat (3000) @(posedge clk);
+        repeat (3000) @(posedge clk); #1;
 
         axi_read(ADDR_QUOTES_SENT, rd_val);
         check("quotes_sent > 0", rd_val > 0);
@@ -410,7 +416,7 @@ module tb_board_a_top;
             inject_order(cap_sym, 1'b0, cap_ask, 100, 1, 16'hBEEF);
         end
 
-        repeat (500) @(posedge clk);
+        repeat (500) @(posedge clk); #1;
         axi_read(ADDR_ORDERS_RCVD, rd_val);
         check("orders_rcvd > 0", rd_val > 0);
         $display("  orders_rcvd = %0d", rd_val);
@@ -429,7 +435,7 @@ module tb_board_a_top;
                 int sym_idx;
                 sym_idx = (i == 0) ? 1 : (i == 1) ? 5 : (i == 2) ? 10 : 15;
                 inject_order(sym_idx[7:0], 1'b0, gm_mid[sym_idx] + 32'h0001_0000, 50, 10+i, 16'h1000+i);
-                repeat (200) @(posedge clk);
+                repeat (200) @(posedge clk); #1;
             end
 
             axi_read(ADDR_ORDERS_RCVD, rd_val);
@@ -448,19 +454,19 @@ module tb_board_a_top;
 
             // VOLATILE
             axi_write(ADDR_REGIME, 32'd1);
-            repeat (1000) @(posedge clk);
+            repeat (1000) @(posedge clk); #1;
             axi_read(ADDR_STATUS, rd_val);
             check("regime=VOLATILE", rd_val[3:2] == 2'b01);
 
             // ADVERSARIAL
             axi_write(ADDR_REGIME, 32'd3);
-            repeat (1000) @(posedge clk);
+            repeat (1000) @(posedge clk); #1;
             axi_read(ADDR_STATUS, rd_val);
             check("regime=ADVERSARIAL", rd_val[3:2] == 2'b11);
 
             // Back to CALM
             axi_write(ADDR_REGIME, 32'd0);
-            repeat (500) @(posedge clk);
+            repeat (500) @(posedge clk); #1;
             axi_read(ADDR_STATUS, rd_val);
             check("regime=CALM again", rd_val[3:2] == 2'b00);
 
@@ -478,7 +484,7 @@ module tb_board_a_top;
             axi_write(ADDR_ACTIVE_CNT, 32'd4);
             axi_read(ADDR_ACTIVE_CNT, rd_val);
             check32("active=4", rd_val, 32'd4);
-            repeat (1000) @(posedge clk);
+            repeat (1000) @(posedge clk); #1;
 
             axi_write(ADDR_ACTIVE_CNT, 32'd16);
             axi_read(ADDR_ACTIVE_CNT, rd_val);
@@ -490,9 +496,9 @@ module tb_board_a_top;
         // ─────────────────────────────────────────────────────
         $display("--- test_fsm_stop ---");
         btn[1] = 1'b1;
-        repeat (70000) @(posedge clk);
+        repeat (70000) @(posedge clk); #1;
         btn[1] = 1'b0;
-        repeat (100) @(posedge clk);
+        repeat (100) @(posedge clk); #1;
         axi_read(ADDR_STATUS, rd_val);
         check("stopped: running=0", (rd_val & 32'h1) == 0);
 
@@ -504,7 +510,7 @@ module tb_board_a_top;
             logic [31:0] qbefore;
             axi_read(ADDR_QUOTES_SENT, qbefore);
             axi_write(ADDR_CTRL, 32'd1);
-            repeat (2000) @(posedge clk);
+            repeat (2000) @(posedge clk); #1;
             axi_read(ADDR_STATUS, rd_val);
             check("resume: running=1", (rd_val & 32'h1) == 1);
             axi_read(ADDR_QUOTES_SENT, rd_val);
@@ -516,7 +522,7 @@ module tb_board_a_top;
         // ─────────────────────────────────────────────────────
         $display("--- test_reset_clears ---");
         axi_write(ADDR_CTRL, 32'd2);
-        repeat (10) @(posedge clk);
+        repeat (10) @(posedge clk); #1;
         axi_read(ADDR_QUOTES_SENT, rd_val);
         check32("reset: quotes=0", rd_val, 0);
         axi_read(ADDR_ORDERS_RCVD, rd_val);
@@ -530,7 +536,7 @@ module tb_board_a_top;
         $display("--- test_restart_new_seed ---");
         axi_write(ADDR_LFSR_SEED, 32'hCAFE_BABE);
         axi_write(ADDR_CTRL, 32'd1);
-        repeat (1000) @(posedge clk);
+        repeat (1000) @(posedge clk); #1;
         axi_read(ADDR_QUOTES_SENT, rd_val);
         check("restart: quotes>0", rd_val > 0);
         $display("  quotes after restart = %0d", rd_val);
@@ -547,7 +553,7 @@ module tb_board_a_top;
             cap_bid = captured[111:80];
             cap_sym = captured[123:116];
             inject_order(cap_sym, 1'b1, cap_bid, 75, 50, 16'hDEAD);
-            repeat (300) @(posedge clk);
+            repeat (300) @(posedge clk); #1;
             axi_read(ADDR_ORDERS_RCVD, rd_val);
             check("sell order rcvd", rd_val > 0);
             $display("  SELL order for sym=%0d, orders_rcvd=%0d", cap_sym, rd_val);
@@ -558,10 +564,10 @@ module tb_board_a_top;
         // ─────────────────────────────────────────────────────
         $display("--- test_single_symbol ---");
         axi_write(ADDR_CTRL, 32'd2);  // reset
-        repeat (10) @(posedge clk);
+        repeat (10) @(posedge clk); #1;
         axi_write(ADDR_ACTIVE_CNT, 32'd1);
         axi_write(ADDR_CTRL, 32'd1);  // start
-        repeat (1000) @(posedge clk);
+        repeat (1000) @(posedge clk); #1;
 
         begin
             int sym0_count;
@@ -658,7 +664,7 @@ module tb_board_a_top;
         // ─────────────────────────────────────────────────────
         $display("--- test_burst_regime ---");
         axi_write(ADDR_REGIME, 32'd2);
-        repeat (500) @(posedge clk);
+        repeat (500) @(posedge clk); #1;
         axi_read(ADDR_STATUS, rd_val);
         check("regime=BURST", rd_val[3:2] == 2'b10);
         axi_write(ADDR_REGIME, 32'd0);
@@ -684,10 +690,10 @@ module tb_board_a_top;
         // ─────────────────────────────────────────────────────
         $display("--- test_slow_interval ---");
         axi_write(ADDR_CTRL, 32'd2);
-        repeat (10) @(posedge clk);
+        repeat (10) @(posedge clk); #1;
         axi_write(ADDR_QUOTE_INT, 32'd500);
         axi_write(ADDR_CTRL, 32'd1);
-        repeat (3000) @(posedge clk);
+        repeat (3000) @(posedge clk); #1;
         axi_read(ADDR_QUOTES_SENT, rd_val);
         $display("  With interval=500: quotes = %0d (expect ~5-6)", rd_val);
         check("slow interval: quotes in range", rd_val >= 32'd3 && rd_val <= 32'd20);
@@ -702,11 +708,11 @@ module tb_board_a_top;
         begin
             logic [31:0] ords_before;
             axi_write(ADDR_QUOTE_INT, 32'd5000);
-            repeat (200) @(posedge clk);
+            repeat (200) @(posedge clk); #1;
             axi_read(ADDR_ORDERS_RCVD, ords_before);
             for (int i = 0; i < 4; i++)
                 inject_order(i[7:0], 1'b0, gm_mid[i] + 32'h0005_0000, 25, 100+i, 16'h2000+i);
-            repeat (2000) @(posedge clk);
+            repeat (2000) @(posedge clk); #1;
             axi_read(ADDR_ORDERS_RCVD, rd_val);
             $display("  rapid orders: before=%0d after=%0d (expect +4)", ords_before, rd_val);
             check("rapid orders: rcvd>=+4", rd_val >= ords_before + 32'd4);
@@ -721,7 +727,7 @@ module tb_board_a_top;
         // ─────────────────────────────────────────────────────
         $display("--- test_led_stopped ---");
         axi_write(ADDR_CTRL, 32'd2);
-        repeat (5) @(posedge clk);
+        repeat (5) @(posedge clk); #1;
         check("stopped: LED[2]=0", led[2] == 1'b0);
 
         // ─────────────────────────────────────────────────────
@@ -729,22 +735,22 @@ module tb_board_a_top;
         // ─────────────────────────────────────────────────────
         $display("--- test_rgb0_regimes ---");
         axi_write(ADDR_CTRL, 32'd1);
-        repeat (4) @(posedge clk);
+        repeat (4) @(posedge clk); #1;
 
         axi_write(ADDR_REGIME, 32'd0);
-        repeat (2) @(posedge clk);
+        repeat (2) @(posedge clk); #1;
         check("rgb0 CALM=green", rgb0 == 3'b010);
 
         axi_write(ADDR_REGIME, 32'd1);
-        repeat (2) @(posedge clk);
+        repeat (2) @(posedge clk); #1;
         check("rgb0 VOL=yellow", rgb0 == 3'b110);
 
         axi_write(ADDR_REGIME, 32'd2);
-        repeat (2) @(posedge clk);
+        repeat (2) @(posedge clk); #1;
         check("rgb0 BURST=red", rgb0 == 3'b100);
 
         axi_write(ADDR_REGIME, 32'd3);
-        repeat (2) @(posedge clk);
+        repeat (2) @(posedge clk); #1;
         check("rgb0 ADV=magenta", rgb0 == 3'b101);
 
         axi_write(ADDR_REGIME, 32'd0);
@@ -755,6 +761,34 @@ module tb_board_a_top;
         $display("--- test_link_no_errors ---");
         check32("TX monitor: 0 errors", tx_error_count, 32'd0);
         check("TX monitor: link_up", tx_link_up == 1'b1);
+
+        // ─────────────────────────────────────────────────────
+        // 28) B2: read newly-exposed counters
+        //     FILLS_SENT @ 0x100, REJECTS_SENT @ 0x104, LINK_ERRORS @ 0x108
+        // ─────────────────────────────────────────────────────
+        $display("--- test_b2_extended_counters ---");
+        begin
+            logic [31:0] fills_sent_val, rejects_sent_val, link_err_val;
+            logic [31:0] orders_rcvd_val;
+
+            axi_read(ADDR_FILLS_SENT,   fills_sent_val);
+            axi_read(ADDR_REJECTS_SENT, rejects_sent_val);
+            axi_read(ADDR_LINK_ERRORS,  link_err_val);
+            axi_read(ADDR_ORDERS_RCVD,  orders_rcvd_val);
+
+            $display("  ORDERS_RCVD = %0d", orders_rcvd_val);
+            $display("  FILLS_SENT   = %0d", fills_sent_val);
+            $display("  REJECTS_SENT = %0d", rejects_sent_val);
+            $display("  LINK_ERRORS  = %0d", link_err_val);
+
+            // Invariant: orders_rcvd >= fills_sent + rejects_sent (some may be in-flight)
+            check("B2: orders >= fills+rejects",
+                  orders_rcvd_val >= (fills_sent_val + rejects_sent_val));
+            // After all the order injection in earlier phases, fills_sent should be > 0
+            check("B2: fills_sent > 0",  fills_sent_val > 32'd0);
+            // Link errors should be zero on a noise-free testbench
+            check32("B2: link_errors == 0", link_err_val, 32'd0);
+        end
 
         // ─────────────────────────────────────────────────────
         // Summary

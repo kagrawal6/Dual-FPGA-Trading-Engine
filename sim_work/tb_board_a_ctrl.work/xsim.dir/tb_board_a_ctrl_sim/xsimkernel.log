@@ -1,0 +1,7 @@
+Running: xsim.dir/tb_board_a_ctrl_sim/xsimk.exe -simmode gui -wdb tb_board_a_ctrl_sim.wdb -simrunnum 0 -socket 43349
+Design successfully loaded
+Design Loading Memory Usage: 9996 KB (Peak: 9996 KB)
+Design Loading CPU Usage: 15 ms
+Simulation completed
+Simulation Memory Usage: 12192 KB (Peak: 12192 KB)
+Simulation CPU Usage: 46 ms

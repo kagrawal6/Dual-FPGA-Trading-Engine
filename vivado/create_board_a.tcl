@@ -128,7 +128,15 @@ connect_bd_net [get_bd_pins hft_core/pmod_ja_valid] [get_bd_ports pmod_ja_valid]
 connect_bd_net [get_bd_pins hft_core/pmod_jb_ready] [get_bd_ports pmod_jb_ready]
 
 # ── 12. Assign AXI address ────────────────────────────────────────────────
+# Auto-allocate, then force the hft_core slave segment to 4 KiB to give us
+# headroom above the 9-bit register window (0x000–0x1FF) for future growth.
 assign_bd_address
+
+set hft_segs [get_bd_addr_segs -of_objects [get_bd_cells hft_core]]
+foreach seg $hft_segs {
+    set_property range 4K $seg
+    puts "  Set AXI segment range = 4K  (seg: $seg)"
+}
 
 # ── 13. Validate block design ─────────────────────────────────────────────
 regenerate_bd_layout
@@ -154,7 +162,11 @@ puts ""
 puts "============================================================"
 puts " Board A project created successfully!"
 puts ""
+puts " AXI map: 9-bit slave window (512 B used, 4 KiB allocated)"
+puts "   See docs/updated_design_specification.md Appendix D.1"
+puts ""
 puts " Next steps:"
-puts "   1. Open the Address Editor and note the AXI base address"
-puts "   2. source vivado/build.tcl   (to synthesise + bitstream)"
+puts "   1. (optional) Open the Address Editor to confirm hft_core range"
+puts "   2. source vivado/build.tcl       ; synth + impl + bitstream"
+puts "   3. source vivado/package_pynq.tcl ; copy .bit + .hwh into pynq/"
 puts "============================================================"

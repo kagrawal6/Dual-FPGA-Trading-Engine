@@ -51,6 +51,10 @@ TOKEN_BASE = 0xD0         # +4*(i//2), two 16-bit tokens packed per word
 STATUS      = 0xF4
 QUOTES_SENT = 0xF8
 ORDERS_RCVD = 0xFC
+# Extended counters (added — Board A AXI map bumped to 9-bit byte address)
+FILLS_SENT   = 0x100
+REJECTS_SENT = 0x104
+LINK_ERRORS  = 0x108
 
 DEFAULT_HW_SLOTS = 16
 
@@ -63,27 +67,33 @@ def q16_16(val: float) -> int:
 
 
 def read_board_a_status(mmio: MMIO) -> Dict[str, Any]:
-    """Read and decode Board A status registers (STATUS, QUOTES_SENT, ORDERS_RCVD)."""
+    """Read and decode Board A status registers."""
     raw = mmio.read(STATUS)
     return {
-        "running":     bool(raw & 0x01),
-        "link_up":     bool(raw & 0x02),
-        "regime":      (raw >> 2) & 0x03,
-        "regime_name": REGIME_NAMES.get((raw >> 2) & 0x03, "?"),
-        "fifo_fill":   (raw >> 9) & 0x7F,
-        "quotes_sent": mmio.read(QUOTES_SENT),
-        "orders_rcvd": mmio.read(ORDERS_RCVD),
+        "running":      bool(raw & 0x01),
+        "link_up":      bool(raw & 0x02),
+        "regime":       (raw >> 2) & 0x03,
+        "regime_name":  REGIME_NAMES.get((raw >> 2) & 0x03, "?"),
+        "fifo_fill":    (raw >> 9) & 0x7F,
+        "quotes_sent":  mmio.read(QUOTES_SENT),
+        "orders_rcvd":  mmio.read(ORDERS_RCVD),
+        "fills_sent":   mmio.read(FILLS_SENT),
+        "rejects_sent": mmio.read(REJECTS_SENT),
+        "link_errors":  mmio.read(LINK_ERRORS),
     }
 
 
 def print_board_a_status(mmio: MMIO) -> None:
     s = read_board_a_status(mmio)
-    print(f"  running     : {s['running']}")
-    print(f"  link_up     : {s['link_up']}")
-    print(f"  regime      : {s['regime']} ({s['regime_name']})")
-    print(f"  fifo_fill   : {s['fifo_fill']}")
-    print(f"  quotes_sent : {s['quotes_sent']}")
-    print(f"  orders_rcvd : {s['orders_rcvd']}")
+    print(f"  running      : {s['running']}")
+    print(f"  link_up      : {s['link_up']}")
+    print(f"  regime       : {s['regime']} ({s['regime_name']})")
+    print(f"  fifo_fill    : {s['fifo_fill']}")
+    print(f"  quotes_sent  : {s['quotes_sent']}")
+    print(f"  orders_rcvd  : {s['orders_rcvd']}")
+    print(f"  fills_sent   : {s['fills_sent']}")
+    print(f"  rejects_sent : {s['rejects_sent']}")
+    print(f"  link_errors  : {s['link_errors']}")
 
 
 def parse_company_picks(text: str) -> List[str]:

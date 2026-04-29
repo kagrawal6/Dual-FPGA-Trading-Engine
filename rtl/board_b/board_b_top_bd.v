@@ -1,7 +1,11 @@
 // Verilog wrapper for board_b_top — required because Vivado block design
 // does not support SystemVerilog modules as module references.
 // All ports mirror board_b_top.sv with hardcoded parameter defaults.
-// Note: Board B has 9-bit AXI address width and reversed PMOD directions.
+//
+// Note: Board B PMOD directions are reversed vs Board A (JA = RX, JB = TX).
+// AXI address width: 10 bits (1 KiB window) — bumped from 9 to expose
+// per-symbol arrays (BID/ASK/PNL_CASH/LAST_FILL/TRADES) used by the
+// laptop dashboard. See Appendix D.2 of the design spec.
 
 module board_b_top_bd (
     input  wire        clk,
@@ -21,7 +25,7 @@ module board_b_top_bd (
     output wire        pmod_jb_valid,
     input  wire        pmod_jb_ready,
 
-    input  wire [8:0]  s_axi_awaddr,
+    input  wire [9:0]  s_axi_awaddr,
     input  wire [2:0]  s_axi_awprot,
     input  wire        s_axi_awvalid,
     output wire        s_axi_awready,
@@ -32,7 +36,7 @@ module board_b_top_bd (
     output wire [1:0]  s_axi_bresp,
     output wire        s_axi_bvalid,
     input  wire        s_axi_bready,
-    input  wire [8:0]  s_axi_araddr,
+    input  wire [9:0]  s_axi_araddr,
     input  wire [2:0]  s_axi_arprot,
     input  wire        s_axi_arvalid,
     output wire        s_axi_arready,
@@ -45,7 +49,7 @@ module board_b_top_bd (
     board_b_top #(
         .NUM_SYM            (16),
         .LINK_W             (4),
-        .C_S_AXI_ADDR_WIDTH (9),
+        .C_S_AXI_ADDR_WIDTH (10),
         .C_S_AXI_DATA_WIDTH (32)
     ) u_core (
         .clk            (clk),

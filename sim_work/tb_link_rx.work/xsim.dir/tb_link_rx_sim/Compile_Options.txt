@@ -1,0 +1,1 @@
+--debug "typical" -L "unisims_ver" -L "secureip" "tb_link_rx" -s "tb_link_rx_sim" 

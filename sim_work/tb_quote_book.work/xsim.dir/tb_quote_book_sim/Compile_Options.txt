@@ -1,0 +1,1 @@
+--debug "typical" -L "unisims_ver" -L "secureip" "tb_quote_book" -s "tb_quote_book_sim" 

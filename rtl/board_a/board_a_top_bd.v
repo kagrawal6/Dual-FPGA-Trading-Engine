@@ -1,6 +1,10 @@
 // Verilog wrapper for board_a_top — required because Vivado block design
 // does not support SystemVerilog modules as module references.
 // All ports mirror board_a_top.sv with hardcoded parameter defaults.
+//
+// AXI address width: 9 bits (512 B window) — bumped from 8 to expose the
+// extended counter registers FILLS_SENT (0x100), REJECTS_SENT (0x104),
+// and LINK_ERRORS (0x108). See Appendix D.1 of the design spec.
 
 module board_a_top_bd (
     input  wire        clk,
@@ -20,7 +24,7 @@ module board_a_top_bd (
     input  wire        pmod_jb_valid,
     output wire        pmod_jb_ready,
 
-    input  wire [7:0]  s_axi_awaddr,
+    input  wire [8:0]  s_axi_awaddr,
     input  wire [2:0]  s_axi_awprot,
     input  wire        s_axi_awvalid,
     output wire        s_axi_awready,
@@ -31,7 +35,7 @@ module board_a_top_bd (
     output wire [1:0]  s_axi_bresp,
     output wire        s_axi_bvalid,
     input  wire        s_axi_bready,
-    input  wire [7:0]  s_axi_araddr,
+    input  wire [8:0]  s_axi_araddr,
     input  wire [2:0]  s_axi_arprot,
     input  wire        s_axi_arvalid,
     output wire        s_axi_arready,
@@ -44,7 +48,7 @@ module board_a_top_bd (
     board_a_top #(
         .NUM_SYM            (16),
         .LINK_W             (4),
-        .C_S_AXI_ADDR_WIDTH (8),
+        .C_S_AXI_ADDR_WIDTH (9),
         .C_S_AXI_DATA_WIDTH (32)
     ) u_core (
         .clk            (clk),

@@ -10,7 +10,7 @@ import hft_pkg::*;
 module tb_board_b_axi_regs;
 
     localparam int TB_NUM_SYM = 4;
-    localparam int ADDR_W = 9;
+    localparam int ADDR_W = 10;  // bumped 9→10 for B2 per-symbol AXI exposure
 
     logic clk, rst_n;
     logic [ADDR_W-1:0] awaddr, araddr;
@@ -41,6 +41,13 @@ module tb_board_b_axi_regs;
     logic [31:0]  hist_bins [HIST_BINS];
     logic [31:0]  lat_min, lat_max, lat_sum, lat_count;
 
+    // ── B2 per-symbol arrays driven into the DUT ────────────────
+    price_t       qb_best_bid       [TB_NUM_SYM];
+    price_t       qb_best_ask       [TB_NUM_SYM];
+    cash_t        pnl_cash_per_sym  [TB_NUM_SYM];
+    price_t       last_fill_price   [TB_NUM_SYM];
+    logic [15:0]  trades_per_sym    [TB_NUM_SYM];
+
     initial clk = 0;
     always #5 clk = ~clk;
 
@@ -67,7 +74,12 @@ module tb_board_b_axi_regs;
         .fills_rcvd(fills_rcvd), .risk_rejects(risk_rejects), .link_errors(link_errors),
         .position(position), .cash(cash),
         .hist_bins(hist_bins), .lat_min(lat_min), .lat_max(lat_max),
-        .lat_sum(lat_sum), .lat_count(lat_count)
+        .lat_sum(lat_sum), .lat_count(lat_count),
+        .qb_best_bid(qb_best_bid),
+        .qb_best_ask(qb_best_ask),
+        .pnl_cash_per_sym(pnl_cash_per_sym),
+        .last_fill_price (last_fill_price),
+        .trades_per_sym  (trades_per_sym)
     );
 
     integer pass_count = 0;
@@ -78,7 +90,7 @@ module tb_board_b_axi_regs;
         else begin fail_count++; $display("[FAIL] %0s at %0t", name, $time); end
     endtask
 
-    task automatic axi_write(input logic [8:0] addr, input logic [31:0] data);
+    task automatic axi_write(input logic [ADDR_W-1:0] addr, input logic [31:0] data);
         awaddr  = addr;
         awvalid = 1'b1;
         wdata   = data;
@@ -94,7 +106,7 @@ module tb_board_b_axi_regs;
         bready = 1'b0;
     endtask
 
-    task automatic axi_read(input logic [8:0] addr, output logic [31:0] data);
+    task automatic axi_read(input logic [ADDR_W-1:0] addr, output logic [31:0] data);
         araddr  = addr;
         arvalid = 1'b1;
         @(posedge clk);
@@ -122,6 +134,15 @@ module tb_board_b_axi_regs;
         cash = '0;
         for (int i = 0; i < HIST_BINS; i++) hist_bins[i] = '0;
         lat_min = 32'd5; lat_max = 32'd96; lat_sum = 32'd331; lat_count = 32'd8;
+
+        // Init B2 per-symbol arrays
+        for (int i = 0; i < TB_NUM_SYM; i++) begin
+            qb_best_bid[i]      = '0;
+            qb_best_ask[i]      = '0;
+            pnl_cash_per_sym[i] = '0;
+            last_fill_price[i]  = '0;
+            trades_per_sym[i]   = '0;
+        end
 
         @(posedge rst_n);
         repeat (2) @(posedge clk);
@@ -275,9 +296,69 @@ module tb_board_b_axi_regs;
 
         // ── T10: Reset pulse ─────────────────────────────────
         $display("\n=== T10: Reset pulse ===");
-        axi_write(9'h000, 32'h0000_0002);
+        axi_write(10'h000, 32'h0000_0002);
         @(posedge clk);
         check("T10: reset deasserts", axi_reset_pulse == 1'b0);
+
+        // ── T11: B2 — per-symbol BID/ASK readback (0x100/0x140 base) ─
+        $display("\n=== T11: B2 per-symbol BID/ASK arrays ===");
+        qb_best_bid[0] = 32'h00B3_F800;  qb_best_ask[0] = 32'h00B4_0800;
+        qb_best_bid[1] = 32'h01A3_F800;  qb_best_ask[1] = 32'h01A4_0800;
+        qb_best_bid[2] = 32'h0383_F800;  qb_best_ask[2] = 32'h0384_0800;
+        qb_best_bid[3] = 32'h0072_F800;  qb_best_ask[3] = 32'h0073_0800;
+        @(posedge clk);
+
+        for (int i = 0; i < TB_NUM_SYM; i++) begin
+            axi_read(10'(10'h100 + i*4), rd_val);
+            check($sformatf("T11: BID[%0d]", i),  rd_val == qb_best_bid[i]);
+            axi_read(10'(10'h140 + i*4), rd_val);
+            check($sformatf("T11: ASK[%0d]", i),  rd_val == qb_best_ask[i]);
+        end
+
+        // ── T12: B2 — per-symbol PNL_CASH 48-bit split readback (0x180/0x1C0) ─
+        $display("\n=== T12: B2 per-symbol PNL_CASH (LO/HI) ===");
+        // Use a positive and a negative cash value to verify sign-extension
+        pnl_cash_per_sym[0] =  48'h0000_5200_FFE2;   // positive
+        pnl_cash_per_sym[1] = -48'sd1000;            // negative
+        pnl_cash_per_sym[2] = -48'sh4654_FFB0;       // larger negative
+        pnl_cash_per_sym[3] =  48'h0000_0000_C8C8;
+        @(posedge clk);
+
+        for (int i = 0; i < TB_NUM_SYM; i++) begin
+            axi_read(10'(10'h180 + i*4), rd_val);
+            check($sformatf("T12: PNL_LO[%0d]", i), rd_val == pnl_cash_per_sym[i][31:0]);
+            axi_read(10'(10'h1C0 + i*4), rd_val);
+            check($sformatf("T12: PNL_HI[%0d] (sign-ext)", i),
+                  rd_val == {{16{pnl_cash_per_sym[i][47]}}, pnl_cash_per_sym[i][47:32]});
+        end
+
+        // ── T13: B2 — per-symbol LAST_FILL_PRICE readback (0x200) ─
+        $display("\n=== T13: B2 last_fill_price array ===");
+        last_fill_price[0] = 32'h00B4_0CCC;
+        last_fill_price[1] = 32'h01A4_1999;
+        last_fill_price[2] = 32'h0384_0816;
+        last_fill_price[3] = 32'h0073_080F;
+        @(posedge clk);
+        for (int i = 0; i < TB_NUM_SYM; i++) begin
+            axi_read(10'(10'h200 + i*4), rd_val);
+            check($sformatf("T13: LAST_FILL[%0d]", i), rd_val == last_fill_price[i]);
+        end
+
+        // ── T14: B2 — TRADES_PACK readback (2× 16b per word, base 0x240) ─
+        $display("\n=== T14: B2 trades_per_sym packed readback ===");
+        trades_per_sym[0] = 16'h0003;
+        trades_per_sym[1] = 16'h0001;
+        trades_per_sym[2] = 16'h0007;
+        trades_per_sym[3] = 16'h0000;
+        @(posedge clk);
+        // Pack0 word should hold {trades[1], trades[0]} = {16'h0001, 16'h0003}
+        axi_read(10'h240, rd_val);
+        check("T14a: TRADES_PACK[0]={trades[1],trades[0]}",
+              rd_val == {trades_per_sym[1], trades_per_sym[0]});
+        // Pack1 word should hold {trades[3], trades[2]} = {16'h0000, 16'h0007}
+        axi_read(10'h244, rd_val);
+        check("T14b: TRADES_PACK[1]={trades[3],trades[2]}",
+              rd_val == {trades_per_sym[3], trades_per_sym[2]});
 
         // ── Summary ─────────────────────────────────────────────
         repeat (3) @(posedge clk);

@@ -5,8 +5,16 @@
 // SELL adds price*qty, BUY subtracts price*qty.
 //
 // Only FILLED frames (status == 3'b000) update position/cash.
-// REJECTED frames are silently ignored.
+// REJECTED frames are silently ignored (but still notify risk for pending clear).
 // Also extracts ts_echo for latency measurement.
+//
+// Per-symbol P&L extension (added):
+//   - pnl_cash_per_sym[i]    : 48-bit signed Q32.16 cash flow per symbol.
+//                              Buy decrements, sell increments. Used by the
+//                              laptop dashboard to compute mark-to-market PnL
+//                              as: pnl_cash_per_sym[i] + position[i] * mid[i].
+//   - last_fill_price[i]     : 32-bit Q16.16 last execution price per symbol.
+//   - trades_per_sym[i]      : 16-bit count of FILLED executions per symbol.
 // ============================================================================
 
 `timescale 1ns / 1ps
@@ -36,7 +44,12 @@ module position_tracker
     output qty_t                fill_qty_out,
     output logic                fill_notify,
 
-    output logic [COUNTER_W-1:0] fills_rcvd
+    output logic [COUNTER_W-1:0] fills_rcvd,
+
+    // Per-symbol P&L accounting (exposed for laptop dashboard via AXI)
+    output cash_t               pnl_cash_per_sym [NUM_SYM],
+    output price_t              last_fill_price  [NUM_SYM],
+    output logic [15:0]         trades_per_sym   [NUM_SYM]
 );
 
     // ── Combinational frame decode ──────────────────────────────
@@ -77,15 +90,23 @@ module position_tracker
             fill_side_out  <= 1'b0;
             fill_qty_out   <= '0;
             fills_rcvd     <= '0;
-            for (int i = 0; i < NUM_SYM; i++)
-                position[i] <= '0;
+            for (int i = 0; i < NUM_SYM; i++) begin
+                position[i]          <= '0;
+                pnl_cash_per_sym[i]  <= '0;
+                last_fill_price[i]   <= '0;
+                trades_per_sym[i]    <= '0;
+            end
         end else if (clear) begin
             cash           <= '0;
             fill_processed <= 1'b0;
             fill_notify    <= 1'b0;
             fills_rcvd     <= '0;
-            for (int i = 0; i < NUM_SYM; i++)
-                position[i] <= '0;
+            for (int i = 0; i < NUM_SYM; i++) begin
+                position[i]          <= '0;
+                pnl_cash_per_sym[i]  <= '0;
+                last_fill_price[i]   <= '0;
+                trades_per_sym[i]    <= '0;
+            end
         end else begin
             fill_processed <= 1'b0;
             fill_notify    <= 1'b0;
@@ -97,18 +118,25 @@ module position_tracker
                 fill_notify     <= 1'b1;
 
                 if (is_filled && frame_symbol < NUM_SYM[7:0]) begin
-                    // Position update
+                    // ── Position + global cash + per-symbol P&L update ──
                     if (frame_side == 1'b0) begin
                         // BUY: position goes up, cash goes down
                         position[frame_symbol] <= position[frame_symbol]
                                                   + $signed({{(POSITION_W-QTY_W){1'b0}}, frame_qty});
                         cash <= cash - $signed(product);
+                        pnl_cash_per_sym[frame_symbol] <=
+                            pnl_cash_per_sym[frame_symbol] - $signed(product);
                     end else begin
                         // SELL: position goes down, cash goes up
                         position[frame_symbol] <= position[frame_symbol]
                                                   - $signed({{(POSITION_W-QTY_W){1'b0}}, frame_qty});
                         cash <= cash + $signed(product);
+                        pnl_cash_per_sym[frame_symbol] <=
+                            pnl_cash_per_sym[frame_symbol] + $signed(product);
                     end
+
+                    last_fill_price[frame_symbol] <= frame_price;
+                    trades_per_sym[frame_symbol]  <= trades_per_sym[frame_symbol] + 16'd1;
 
                     ts_echo        <= frame_ts_echo;
                     fill_processed <= 1'b1;

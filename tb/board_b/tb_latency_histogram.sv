@@ -63,9 +63,9 @@ module tb_latency_histogram;
         ts_echo        = ts;
         cycle_counter  = cyc;
         fill_processed = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         fill_processed = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
     endtask
 
     initial begin
@@ -75,7 +75,7 @@ module tb_latency_histogram;
         clear          = 1'b0;
 
         @(posedge rst_n);
-        repeat (2) @(posedge clk);
+        repeat (2) @(posedge clk); #1;
 
         // All test values from golden model latency_histogram_vectors.json:
         // (ts_echo, current_cycle) → latency, bin_idx, min, max, sum, count
@@ -150,9 +150,9 @@ module tb_latency_histogram;
         // ── T8: Clear ───────────────────────────────────────────
         $display("\n=== T8: Clear ===");
         clear = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         clear = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T8: lat_count==0", lat_count == 32'd0);
         check("T8: lat_sum==0",   lat_sum == 32'd0);
         check("T8: lat_max==0",   lat_max == 32'd0);
@@ -165,7 +165,7 @@ module tb_latency_histogram;
         fill_processed = 1'b0;
         cycle_counter  = 16'd999;
         ts_echo        = 16'd0;
-        repeat (3) @(posedge clk);
+        repeat (3) @(posedge clk); #1;
         check("T9: lat_count still 0", lat_count == 32'd0);
 
         // ── T10: Large latency → clamped to bin 15 ───────────
@@ -183,9 +183,9 @@ module tb_latency_histogram;
         // ── T11: 16-bit wrap-around (cycle < ts_echo) ────────
         $display("\n=== T11: 16-bit timestamp wrap ===");
         clear = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         clear = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ts_echo=65530, cycle=10 → latency = 10 - 65530 (mod 65536) = 16
         record_latency(16'd65530, 16'd10);
@@ -204,9 +204,9 @@ module tb_latency_histogram;
         // ── T12: Exact zero latency ──────────────────────────
         $display("\n=== T12: Zero latency ===");
         clear = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         clear = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         record_latency(16'd500, 16'd500);
         check("T12: lat==0",           lat_min == 32'd0);
@@ -214,7 +214,7 @@ module tb_latency_histogram;
         check("T12: lat_sum==0",        lat_sum == 32'd0);
 
         // ── Summary ─────────────────────────────────────────────
-        repeat (3) @(posedge clk);
+        repeat (3) @(posedge clk); #1;
         $display("\n══════════════════════════════════════════");
         $display("  latency_histogram testbench complete");
         $display("  PASSED: %0d", pass_count);

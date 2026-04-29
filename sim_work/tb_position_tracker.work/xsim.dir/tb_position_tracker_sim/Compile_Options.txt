@@ -1,0 +1,1 @@
+--debug "typical" -L "unisims_ver" -L "secureip" "tb_position_tracker" -s "tb_position_tracker_sim" 

@@ -72,6 +72,13 @@ module tb_board_b_pipeline;
     logic                     pt_fill_notify;
     logic [COUNTER_W-1:0]     fills_rcvd;
 
+    // ── New B2 per-symbol AXI-exposed signals ────────────────────
+    price_t                   qb_best_bid_arr  [NUM_SYMBOLS];
+    price_t                   qb_best_ask_arr  [NUM_SYMBOLS];
+    cash_t                    pnl_cash_per_sym [NUM_SYMBOLS];
+    price_t                   last_fill_price  [NUM_SYMBOLS];
+    logic [15:0]              trades_per_sym   [NUM_SYMBOLS];
+
     logic [ALPHA_W-1:0]       ema_alpha;
     price_t                   threshold;
     qty_t                     base_qty;
@@ -99,7 +106,9 @@ module tb_board_b_pipeline;
         .quote_frame(quote_frame), .quote_valid(quote_valid),
         .bid_price(qb_bid), .ask_price(qb_ask),
         .bid_size(qb_bid_size), .ask_size(qb_ask_size),
-        .symbol_id(qb_symbol), .regime(qb_regime), .book_valid(qb_valid)
+        .symbol_id(qb_symbol), .regime(qb_regime), .book_valid(qb_valid),
+        .best_bid_arr(qb_best_bid_arr),
+        .best_ask_arr(qb_best_ask_arr)
     );
 
     feature_compute u_feature_compute (
@@ -158,7 +167,10 @@ module tb_board_b_pipeline;
         .ts_echo(ts_echo), .fill_processed(fill_processed),
         .fill_symbol_out(pt_fill_symbol), .fill_side_out(pt_fill_side),
         .fill_qty_out(pt_fill_qty), .fill_notify(pt_fill_notify),
-        .fills_rcvd(fills_rcvd)
+        .fills_rcvd(fills_rcvd),
+        .pnl_cash_per_sym(pnl_cash_per_sym),
+        .last_fill_price (last_fill_price),
+        .trades_per_sym  (trades_per_sym)
     );
 
     // ── 16-symbol init_mid values (Q16.16, matches golden model) ──
@@ -218,7 +230,7 @@ module tb_board_b_pipeline;
     // ── ORDER frame monitor ───────────────────────────────────
     initial begin
         forever begin
-            @(posedge clk);
+            @(posedge clk); #1;
             if (order_valid && order_ready) begin
                 order_count_observed++;
                 if (order_frame[127:124] != MSG_ORDER)
@@ -231,13 +243,13 @@ module tb_board_b_pipeline;
     task automatic drive_quote(input logic [127:0] frame);
         quote_frame = frame;
         quote_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         quote_valid = 1'b0;
     endtask
 
     // ── Wait for pipeline to flush ────────────────────────────
     task automatic flush_pipeline(input int cycles = 20);
-        repeat (cycles) @(posedge clk);
+        repeat (cycles) @(posedge clk); #1;
     endtask
 
     // ── Main test sequence ────────────────────────────────────
@@ -258,7 +270,7 @@ module tb_board_b_pipeline;
         max_loss       = 32'h0064_0000;     // $100 Q16.16
 
         @(posedge rst_n);
-        repeat (2) @(posedge clk);
+        repeat (2) @(posedge clk); #1;
 
         // ──────────────────────────────────────────────────────
         // Phase 1: Seed EMA for all 16 symbols (first-sample init)
@@ -328,11 +340,11 @@ module tb_board_b_pipeline;
         for (int i = 0; i < 4; i++) begin
             fill_frame = build_fill(i, 1'b0, 3'b000, init_mid[i], 100, i, 42+i);
             fill_valid_in = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             fill_valid_in = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
         end
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check32("P4: fills_rcvd==4", fills_rcvd, 32'd4);
         check32("P4: pos[0]==100", position[0], 32'd100);
@@ -349,11 +361,11 @@ module tb_board_b_pipeline;
         for (int i = 0; i < 4; i++) begin
             fill_frame = build_fill(i, 1'b1, 3'b000, init_mid[i] + 32'h0001_0000, 50, i+4, 50+i);
             fill_valid_in = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             fill_valid_in = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
         end
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check32("P5: fills_rcvd==8", fills_rcvd, 32'd8);
         // After BUY 100 then SELL 50, pos should be 100-50=50
@@ -370,9 +382,9 @@ module tb_board_b_pipeline;
             pos5_before = position[5];
             fill_frame = build_fill(5, 1'b0, 3'b001, 32'h0, 0, 99, 60);
             fill_valid_in = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             fill_valid_in = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
             check32("P6: pos[5] unchanged", position[5], pos5_before);
         end
 
@@ -463,15 +475,15 @@ module tb_board_b_pipeline;
             // BUY 1000 shares of sym=10 at $480, then SELL 1000 at $1
             fill_frame = build_fill(10, 1'b0, 3'b000, 32'h01E0_0000, 1000, 200, 70);
             fill_valid_in = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             fill_valid_in = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
 
             fill_frame = build_fill(10, 1'b1, 3'b000, 32'h0001_0000, 1000, 201, 71);
             fill_valid_in = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             fill_valid_in = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
 
             $display("  total_pnl after loss = %0d", $signed(total_pnl));
             // cash = bought at $480*1000=-$480k, sold at $1*1000=+$1k → net ≈ -$479k
@@ -493,9 +505,9 @@ module tb_board_b_pipeline;
         $display("\n=== Phase 11: Clear and verify ===");
 
         clear = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         clear = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check32("P11: orders_sent cleared", orders_sent, 32'd0);
         check32("P11: fills_rcvd cleared", fills_rcvd, 32'd0);
@@ -544,11 +556,11 @@ module tb_board_b_pipeline;
         for (int i = 0; i < 16; i++) begin
             fill_frame = build_fill(i, 1'b0, 3'b000, init_mid[i], 10*(i+1), 300+i, 100+i);
             fill_valid_in = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             fill_valid_in = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
         end
-        @(posedge clk);
+        @(posedge clk); #1;
 
         begin
             int nonzero = 0;
@@ -572,7 +584,7 @@ module tb_board_b_pipeline;
         end // close order_count_at_clear scope
 
         // ── Summary ───────────────────────────────────────────
-        repeat (3) @(posedge clk);
+        repeat (3) @(posedge clk); #1;
         $display("\n══════════════════════════════════════════");
         $display("  board_b_pipeline testbench complete");
         $display("  PASSED: %0d", pass_count);

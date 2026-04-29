@@ -75,14 +75,14 @@ module tb_market_noise_gen;
 
     task automatic do_tick;
         tick = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         tick = 1'b0;
         @(posedge clk); #1;
     endtask
 
     task automatic pulse_lfsr_load;
         lfsr_load = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         lfsr_load = 1'b0;
         @(posedge clk); #1;
     endtask
@@ -131,7 +131,7 @@ module tb_market_noise_gen;
         sector_id[3] = SECTOR_ID_W'(1);
 
         wait (rst_n === 1'b1);
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 1) Post-reset: drift outputs zero
@@ -206,7 +206,7 @@ module tb_market_noise_gen;
             rst_n = 1'b0;
             #40;
             rst_n = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             enable = 1'b1;
             pulse_lfsr_load();
             for (int t = 0; t < NT; t++) begin
