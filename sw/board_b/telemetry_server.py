@@ -19,6 +19,8 @@ JSON schema (per line):
   "rej":        <risk_rejects cumulative>,
   "link_err":   <link_errors cumulative>,
 
+  "cash_lo":    int,           # raw CASH_LO register (for laptop dashboard)
+  "cash_hi":    int,           # raw CASH_HI register
   "cash":       <total cash float, dollars>,
   "total_pnl":  <total mark-to-market PnL float, dollars>,
   "port_value": <cash + Σ position[i]*mid[i], float dollars>,
@@ -38,7 +40,13 @@ JSON schema (per line):
   "lat_min":    int,
   "lat_max":    int,
   "lat_sum":    int,
-  "lat_cnt":    int
+  "lat_cnt":    int,
+
+  # Optional (dashboard): regime id/name and/or monotonic regime_changes — add
+  # in PS or a wrapper if you have them; not emitted by this script by default.
+  "regime":         int,        # optional, 0..3
+  "regime_name":    str,        # optional, e.g. CALM / VOLATILE / ...
+  "regime_changes": int         # optional edge counter; dashboard prefers this when present
 }
 
 See §5.1.2 of design spec.
@@ -63,8 +71,11 @@ from register_map import (
 
 FSM_NAMES = {0: "B_RESET", 1: "B_IDLE", 2: "B_ARMED", 3: "B_TRADING", 4: "B_HALTED"}
 STRATEGY_NAMES = {0: "MEAN_REV", 1: "MOMENTUM", 2: "NN", 3: "AUTO"}
-# Optional: when PL exposes regime in AXI, read those registers here and add
-# "regime", "regime_name", "regime_changes" (or equivalent) to each JSON line.
+# Optional JSON fields for the laptop dashboard (no RTL required): add
+# "regime", "regime_name", and/or monotonic "regime_changes" to each line from
+# any source you have (e.g. PS-side decode, wrapper script). The dashboard
+# infers regime edges from successive regime / regime_name when regime_changes
+# is absent.
 
 
 def decode_status(raw: int) -> dict:
@@ -104,6 +115,49 @@ def read_per_symbol(mmio: MMIO) -> dict:
         "pos": pos, "bid": bid, "ask": ask, "mid": mid, "spread": spread,
         "pnl_cash": pnl_cash, "pnl_mtm": pnl_mtm, "pos_value": pos_value,
         "last_fill": last_fill, "trades": trades,
+    }
+
+
+def read_telemetry_snapshot(mmio: MMIO) -> dict:
+    """One JSON-serializable telemetry sample from Board B AXI (no random data)."""
+    st = decode_status(mmio.read(STATUS))
+    cash_lo_raw = mmio.read(CASH_LO) & 0xFFFFFFFF
+    cash_hi_raw = mmio.read(CASH_HI) & 0xFFFFFFFF
+    cash = cash_q32_16(cash_lo_raw, cash_hi_raw)
+    psd = read_per_symbol(mmio)
+    total_pnl_mtm = sum(psd["pnl_mtm"])
+    port_value = cash + sum(psd["pos_value"])
+    return {
+        "ts": round(time.time(), 3),
+        "state": st["fsm_state"],
+        "link_up": st["link_up"],
+        "risk_halt": st["risk_halt"],
+        "strategy": st["strategy"],
+        "qps": mmio.read(QUOTES_RCVD),
+        "ops": mmio.read(ORDERS_SENT),
+        "fps": mmio.read(FILLS_RCVD),
+        "rej": mmio.read(RISK_REJECTS),
+        "link_err": mmio.read(LINK_ERRORS),
+        "cash_lo": int(cash_lo_raw),
+        "cash_hi": int(cash_hi_raw),
+        "cash": round(cash, 4),
+        "total_pnl": round(total_pnl_mtm, 4),
+        "port_value": round(port_value, 4),
+        "pos": psd["pos"],
+        "bid": [round(v, 4) for v in psd["bid"]],
+        "ask": [round(v, 4) for v in psd["ask"]],
+        "mid": [round(v, 4) for v in psd["mid"]],
+        "spread": [round(v, 4) for v in psd["spread"]],
+        "pnl_cash": [round(v, 4) for v in psd["pnl_cash"]],
+        "pnl_mtm": [round(v, 4) for v in psd["pnl_mtm"]],
+        "pos_value": [round(v, 4) for v in psd["pos_value"]],
+        "last_fill": [round(v, 4) for v in psd["last_fill"]],
+        "trades": psd["trades"],
+        "hist": [mmio.read(HIST_BASE + i * 4) for i in range(NUM_HIST_BINS)],
+        "lat_min": mmio.read(LAT_MIN),
+        "lat_max": mmio.read(LAT_MAX),
+        "lat_sum": mmio.read(LAT_SUM),
+        "lat_cnt": mmio.read(LAT_COUNT),
     }
 
 
@@ -219,47 +273,7 @@ def main():
 
     try:
         while True:
-            st = decode_status(mmio.read(STATUS))
-            cash = cash_q32_16(mmio.read(CASH_LO), mmio.read(CASH_HI))
-            psd  = read_per_symbol(mmio)
-            total_pnl_mtm = sum(psd["pnl_mtm"])
-            port_value    = cash + sum(psd["pos_value"])
-
-            data = {
-                "ts":         round(time.time(), 3),
-                "state":      st["fsm_state"],
-                "link_up":    st["link_up"],
-                "risk_halt":  st["risk_halt"],
-                "strategy":   st["strategy"],
-                "qps":        mmio.read(QUOTES_RCVD),
-                "ops":        mmio.read(ORDERS_SENT),
-                "fps":        mmio.read(FILLS_RCVD),
-                "rej":        mmio.read(RISK_REJECTS),
-                "link_err":   mmio.read(LINK_ERRORS),
-
-                "cash":       round(cash, 4),
-                "total_pnl":  round(total_pnl_mtm, 4),
-                "port_value": round(port_value, 4),
-
-                "pos":        psd["pos"],
-                "bid":        [round(v, 4) for v in psd["bid"]],
-                "ask":        [round(v, 4) for v in psd["ask"]],
-                "mid":        [round(v, 4) for v in psd["mid"]],
-                "spread":     [round(v, 4) for v in psd["spread"]],
-                "pnl_cash":   [round(v, 4) for v in psd["pnl_cash"]],
-                "pnl_mtm":    [round(v, 4) for v in psd["pnl_mtm"]],
-                "pos_value":  [round(v, 4) for v in psd["pos_value"]],
-                "last_fill":  [round(v, 4) for v in psd["last_fill"]],
-                "trades":     psd["trades"],
-
-                "hist":       [mmio.read(HIST_BASE + i * 4)
-                               for i in range(NUM_HIST_BINS)],
-                "lat_min":    mmio.read(LAT_MIN),
-                "lat_max":    mmio.read(LAT_MAX),
-                "lat_sum":    mmio.read(LAT_SUM),
-                "lat_cnt":    mmio.read(LAT_COUNT),
-            }
-            print(json.dumps(data), flush=True)
+            print(json.dumps(read_telemetry_snapshot(mmio)), flush=True)
             time.sleep(interval)
     except KeyboardInterrupt:
         print("\nTelemetry stopped.", flush=True)

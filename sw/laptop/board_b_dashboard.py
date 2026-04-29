@@ -55,21 +55,22 @@ SYMBOL_NAMES = [
 
 # Board A market regimes (set on Board A; label here so the audience sees what demo you run)
 REGIME_LABELS = ("CALM", "VOLATILE", "BURST", "ADVERSARIAL")
+# Regime banner colors — Robinhood-adjacent (green / amber / blue / red)
 REGIME_INFO: Dict[str, Tuple[str, str]] = {
     "CALM": (
-        "#238636",
+        "#00C805",
         "Quiet synthetic market — smaller moves. Use this when explaining the basics.",
     ),
     "VOLATILE": (
-        "#9e6a03",
+        "#FFB020",
         "Larger random swings — good for showing risk limits and wider spreads.",
     ),
     "BURST": (
-        "#0969da",
+        "#5AC8FA",
         "Bursty activity — highlights throughput and how the trader keeps up.",
     ),
     "ADVERSARIAL": (
-        "#cf222e",
+        "#FF331F",
         "Stress-style conditions — use when discussing halts, rejects, or worst case.",
     ),
 }
@@ -129,29 +130,41 @@ def compute_percentiles(hist_bins: List[int], bin_width_ns: float = BIN_WIDTH_NS
 
 
 def theme_colors(dark: bool) -> Dict[str, str]:
+    """Robinhood-inspired surfaces (dark-first) + their green/red accent language."""
     if dark:
         return {
-            "bg": "#0d1117",
-            "card": "#161b22",
-            "text": "#e6edf3",
-            "muted": "#8b949e",
-            "accent": "#58a6ff",
-            "good": "#3fb950",
-            "bad": "#f85149",
-            "warn": "#d29922",
-            "grid": "#30363d",
+            "bg": "#000000",
+            "card": "#1c1c1e",
+            "text": "#ffffff",
+            "muted": "#a1a1a6",
+            "accent": "#5ac8fa",
+            "good": "#00c805",
+            "bad": "#ff331f",
+            "warn": "#ffb020",
+            "grid": "#2c2c2e",
         }
     return {
-        "bg": "#f6f8fa",
-        "card": "#ffffff",
-        "text": "#1f2328",
-        "muted": "#656d76",
-        "accent": "#0969da",
-        "good": "#1a7f37",
-        "bad": "#cf222e",
-        "warn": "#9a6700",
-        "grid": "#d0d7de",
+        "bg": "#ffffff",
+        "card": "#f9f9f9",
+        "text": "#000000",
+        "muted": "#6b6b6b",
+        "accent": "#0066ff",
+        "good": "#00c805",
+        "bad": "#ff331f",
+        "warn": "#ffb020",
+        "grid": "#e5e5e5",
     }
+
+
+FONT_UI = "'DM Sans', 'Segoe UI', system-ui, sans-serif"
+FONT_PLOT = "DM Sans, sans-serif"
+
+
+def _plot_font(c: Dict[str, str], size: Optional[int] = None) -> Dict[str, Any]:
+    d: Dict[str, Any] = {"color": c["text"], "family": FONT_PLOT}
+    if size is not None:
+        d["size"] = size
+    return d
 
 
 def fig_blank(message: str, c: Dict[str, str]) -> go.Figure:
@@ -163,13 +176,14 @@ def fig_blank(message: str, c: Dict[str, str]) -> go.Figure:
         x=0.5,
         y=0.5,
         showarrow=False,
-        font=dict(size=14, color=c["muted"]),
+        font=_plot_font(c, 14) | {"color": c["muted"]},
     )
     fig.update_xaxes(visible=False)
     fig.update_yaxes(visible=False)
     fig.update_layout(
         paper_bgcolor=c["card"],
         plot_bgcolor=c["card"],
+        font=_plot_font(c),
         margin=dict(l=20, r=20, t=30, b=20),
     )
     return fig
@@ -199,6 +213,7 @@ class SerialTelemetryReader(threading.Thread):
 
         self._last_regime_name: str = ""
         self._last_regime_id: int = -1
+        self._last_regime_changes: Optional[int] = None
         self._regime_edge_pending: bool = False
 
         self._session_cash_start: Optional[float] = None
@@ -319,10 +334,24 @@ class SerialTelemetryReader(threading.Thread):
                 rid_i = int(rid_raw) & 3 if rid_raw is not None else -1
             except (TypeError, ValueError):
                 rid_i = -1
-            if self._last_regime_id >= 0 and rid_i >= 0 and rid_i != self._last_regime_id:
-                self._regime_edge_pending = True
-            elif self._last_regime_name and nm and nm != self._last_regime_name:
-                self._regime_edge_pending = True
+
+            # Regime UX edge: prefer optional monotonic regime_changes from JSON (any
+            # upstream); else infer from successive regime / regime_name (no FPGA change).
+            rc_raw = data.get("regime_changes")
+            use_rc = "regime_changes" in data and rc_raw is not None
+            if use_rc:
+                try:
+                    rc = int(rc_raw)
+                    if self._last_regime_changes is not None and rc != self._last_regime_changes:
+                        self._regime_edge_pending = True
+                    self._last_regime_changes = rc
+                except (TypeError, ValueError):
+                    use_rc = False
+            if not use_rc:
+                if self._last_regime_id >= 0 and rid_i >= 0 and rid_i != self._last_regime_id:
+                    self._regime_edge_pending = True
+                elif self._last_regime_name and nm and nm != self._last_regime_name:
+                    self._regime_edge_pending = True
             if nm:
                 self._last_regime_name = nm
             if rid_i >= 0:
@@ -383,10 +412,10 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         suppress_callback_exceptions=True,
         assets_folder=str(here / "assets"),
         external_stylesheets=[
-            "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600;700&display=swap",
+            "https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap",
         ],
     )
-    app.title = "Board B — Trading Engine"
+    app.title = "Board B"
 
     app.layout = html.Div(
         [
@@ -416,36 +445,33 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                     dcc.Input(
                         id="port-input",
                         type="text",
-                        placeholder="/dev/ttyUSB0 or COM5",
-                        style={"width": "220px", "marginRight": "8px"},
+                        placeholder="Serial port (e.g. /dev/cu.usbserial-*)",
+                        className="bb-toolbar-input",
+                        style={"width": "240px"},
                     ),
                     dcc.Input(
                         id="baud-input",
                         type="number",
                         value=115200,
-                        style={"width": "100px", "marginRight": "8px"},
+                        className="bb-toolbar-input bb-toolbar-input--narrow",
+                        style={"width": "100px"},
                     ),
-                    html.Button("Connect", id="btn-connect", n_clicks=0),
-                    html.Button("Pause display", id="btn-freeze", n_clicks=0),
-                    html.Button("Resume", id="btn-unfreeze", n_clicks=0),
+                    html.Button("Connect", id="btn-connect", n_clicks=0, className="bb-btn-primary"),
+                    html.Button("Pause", id="btn-freeze", n_clicks=0, className="bb-btn-ghost"),
+                    html.Button("Resume", id="btn-unfreeze", n_clicks=0, className="bb-btn-ghost"),
                     dcc.Download(id="download-csv"),
                     html.Button(
                         "Export CSV",
                         id="btn-export",
                         n_clicks=0,
-                        style={"marginLeft": "12px"},
+                        className="bb-btn-ghost",
                     ),
                 ],
-                style={
-                    "padding": "8px 16px",
-                    "display": "flex",
-                    "alignItems": "center",
-                    "flexWrap": "wrap",
-                    "gap": "6px",
-                },
+                className="bb-toolbar",
             ),
             dcc.Tabs(
                 id="main-tabs",
+                className="bb-main-tabs",
                 value="tab-overview",
                 persistence=True,
                 children=[
@@ -459,7 +485,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                         html.Div(
                                             [
                                                 html.Span(
-                                                    "Market regime (from Board A quotes, decoded on Board B)",
+                                                    "Market regime (from telemetry)",
                                                     className="bb-headline",
                                                 ),
                                                 html.Button(
@@ -479,7 +505,9 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                             },
                                         ),
                                         html.Div(
-                                            "Updates automatically when Board A changes REGIME — each QUOTE carries the regime field.",
+                                            "Updates from telemetry fields regime / regime_name. "
+                                            "Pulse, sound, and confetti use a one-shot edge when those values "
+                                            "change between JSON lines (or when optional regime_changes changes).",
                                             style={"fontSize": "13px", "opacity": 0.85, "marginBottom": "4px"},
                                         ),
                                         html.Div(id="regime-blurb"),
@@ -505,25 +533,19 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                 ),
                                 html.H3(
                                     "Activity & throughput",
+                                    className="bb-section-heading",
                                     style={
-                                        "marginTop": "24px",
-                                        "marginBottom": "8px",
-                                        "fontSize": "18px",
-                                        "fontWeight": "700",
-                                        "borderLeft": "5px solid #8b949e",
-                                        "paddingLeft": "12px",
+                                        "marginTop": "28px",
+                                        "marginBottom": "10px",
                                     },
                                 ),
                                 dcc.Graph(id="fig-thr", style={"maxWidth": "900px"}),
                                 html.H3(
                                     "Latency snapshot",
+                                    className="bb-section-heading",
                                     style={
-                                        "marginTop": "20px",
-                                        "marginBottom": "8px",
-                                        "fontSize": "18px",
-                                        "fontWeight": "700",
-                                        "borderLeft": "5px solid #8b949e",
-                                        "paddingLeft": "12px",
+                                        "marginTop": "24px",
+                                        "marginBottom": "10px",
                                     },
                                 ),
                                 html.Div(
@@ -549,7 +571,8 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                     style={"marginTop": "4px"},
                                 ),
                             ],
-                            style={"padding": "12px 16px"},
+                            className="bb-tab-page",
+                            style={"padding": "8px 16px 40px", "maxWidth": "1120px", "margin": "0 auto"},
                         ),
                     ),
                     dcc.Tab(
@@ -557,7 +580,8 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                         value="tab-latency",
                         children=html.Div(
                             dcc.Graph(id="fig-latency", style={"height": "520px"}),
-                            style={"padding": "12px 16px"},
+                            className="bb-tab-page",
+                            style={"padding": "16px 20px 40px", "maxWidth": "1120px", "margin": "0 auto"},
                         ),
                     ),
                     dcc.Tab(
@@ -618,7 +642,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                     id="set-sound",
                                     options=[
                                         {
-                                            "label": " Enable short chime when Board A regime changes",
+                                            "label": " Enable short chime on regime edge (telemetry)",
                                             "value": "s",
                                         }
                                     ],
@@ -650,12 +674,14 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                 ),
                                 html.P(
                                     "Port and baud are set in the bar above (Connect). "
-                                    "Regime comes from Board B telemetry (QUOTE field). "
+                                    "Regime display and regime-change effects follow regime / regime_name "
+                                    "in each telemetry JSON line (no RTL changes required here). "
                                     "This dashboard does not write FPGA parameters.",
                                     style={"maxWidth": "640px", "opacity": 0.85},
                                 ),
                             ],
-                            style={"padding": "16px"},
+                            className="bb-tab-page",
+                            style={"padding": "16px 20px 48px", "maxWidth": "720px", "margin": "0 auto"},
                         ),
                     ),
                 ],
@@ -680,6 +706,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             ),
         ],
         id="root",
+        className="bb-root bb-root--dark",
         style={"minHeight": "100vh"},
     )
 
@@ -783,14 +810,15 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                 },
             ),
             html.Div(
-                "Source: when telemetry includes regime / regime_name (from your Board B PL "
-                "register map), this banner tracks Board A’s QUOTE regime field. "
-                "Wire those fields in telemetry_server.py to match your friend’s AXI layout.",
+                "Source: JSON lines may include regime and regime_name (however your pipeline "
+                "fills them). Edges for motion and optional chime/confetti come from successive "
+                "samples, or from regime_changes if your publisher adds that counter.",
                 style={
                     "marginTop": "12px",
                     "fontSize": "12px",
                     "opacity": 0.88,
-                    "fontFamily": "'IBM Plex Mono', ui-monospace, monospace",
+                    "fontFamily": FONT_UI,
+                    "fontVariantNumeric": "tabular-nums",
                 },
             ),
         ]
@@ -799,18 +827,18 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             className="bb-regime-inner" + pulse_cls,
             style={
                 "marginTop": "14px",
-                "padding": "20px 22px",
-                "borderRadius": "10px",
+                "padding": "24px 26px",
+                "borderRadius": "20px",
                 "backgroundColor": bg,
                 "color": "#fff",
-                "boxShadow": "0 2px 12px rgba(0,0,0,0.25)",
+                "boxShadow": "0 8px 32px rgba(0,0,0,0.35)",
             },
         )
         strip_style = {
-            "padding": "16px 18px",
-            "marginBottom": "16px",
-            "borderRadius": "12px",
-            "border": f"2px solid {c['grid']}",
+            "padding": "8px 4px 0",
+            "marginBottom": "12px",
+            "borderRadius": "0",
+            "border": "none",
             "backgroundColor": c["card"],
             "color": c["text"],
         }
@@ -886,6 +914,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
     @callback(
         Output("header-bar", "children"),
         Output("root", "style"),
+        Output("root", "className"),
         Input("telemetry-store", "data"),
         Input("prefs-store", "data"),
         State("freeze-store", "data"),
@@ -918,54 +947,77 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             "minHeight": "100vh",
             "backgroundColor": c["bg"],
             "color": c["text"],
-            "fontFamily": "'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif",
+            "fontFamily": FONT_UI,
+        }
+
+        _banner_base = {
+            "padding": "12px 20px",
+            "fontWeight": "600",
+            "fontSize": "14px",
+            "letterSpacing": "0.01em",
+            "borderRadius": "12px",
+            "margin": "12px 16px 0",
+            "maxWidth": "1200px",
         }
 
         if paused:
             banner = html.Div(
-                "DISPLAY PAUSED — charts frozen; serial may still run in background",
+                "Paused — charts frozen; serial may still run in the background.",
                 style={
-                    "backgroundColor": c["accent"],
-                    "color": "#fff",
-                    "padding": "10px 16px",
-                    "fontWeight": "600",
+                    **_banner_base,
+                    "backgroundColor": c["card"],
+                    "color": c["text"],
+                    "border": f"1px solid {c['grid']}",
                 },
             )
         elif not connected:
             banner = html.Div(
-                "DISCONNECTED — enter port above and click Connect",
+                "Disconnected — enter serial port in the bar above, then Connect.",
                 style={
-                    "backgroundColor": c["bad"],
-                    "color": "#fff",
-                    "padding": "10px 16px",
-                    "fontWeight": "600",
+                    **_banner_base,
+                    "backgroundColor": c["card"],
+                    "color": c["text"],
+                    "border": f"1px solid {c['bad']}",
                 },
             )
         elif stale:
             banner = html.Div(
-                f"STALE DATA ({age_ms:.0f} ms since last JSON line)",
+                f"Stale data — {age_ms:.0f} ms since last JSON line.",
                 style={
-                    "backgroundColor": c["warn"],
-                    "color": "#111",
-                    "padding": "10px 16px",
-                    "fontWeight": "600",
+                    **_banner_base,
+                    "backgroundColor": c["card"],
+                    "color": c["warn"],
+                    "border": f"1px solid {c['grid']}",
                 },
             )
         else:
             ok = link_up and not risk_halt and link_err == 0
             banner = html.Div(
-                f"Live · Board A regime (from quotes): {regime_show} · {state} · {strat} · "
-                f"{'LINK UP' if link_up else 'LINK DOWN'} · "
-                f"{'RISK HALT' if risk_halt else 'Risk OK'} · "
-                f"link_err={link_err} · json_parse_err={pe}",
+                [
+                    html.Span(
+                        "Live",
+                        style={
+                            "color": c["good"] if ok else c["warn"],
+                            "fontWeight": "800",
+                            "marginRight": "10px",
+                        },
+                    ),
+                    html.Span(
+                        f"{regime_show} · {state} · {strat} · "
+                        f"{'Link up' if link_up else 'Link down'} · "
+                        f"{'Risk halt' if risk_halt else 'Risk OK'} · "
+                        f"errors link={link_err} json={pe}",
+                        style={"color": c["muted"], "fontWeight": "500"},
+                    ),
+                ],
                 style={
-                    "backgroundColor": c["good"] if ok else c["warn"],
-                    "color": "#111" if ok else "#fff",
-                    "padding": "10px 16px",
-                    "fontWeight": "600",
+                    **_banner_base,
+                    "backgroundColor": c["card"],
+                    "border": f"1px solid {c['grid']}",
                 },
             )
-        return banner, root_style
+        root_cls = "bb-root bb-root--dark" if dark else "bb-root bb-root--light"
+        return banner, root_style, root_cls
 
     @callback(
         Output("flow-strip", "children"),
@@ -1024,22 +1076,22 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                 )
             )
         pnl_title_style = {
-            "marginTop": "8px",
-            "marginBottom": "10px",
-            "fontSize": "22px",
-            "fontWeight": "800",
-            "borderLeft": f"6px solid {c['good']}",
-            "paddingLeft": "14px",
-            "color": c["text"],
+            "marginTop": "20px",
+            "marginBottom": "6px",
+            "fontSize": "13px",
+            "fontWeight": "600",
+            "letterSpacing": "0.06em",
+            "textTransform": "uppercase",
+            "color": c["muted"],
         }
         pos_title_style = {
-            "marginTop": "28px",
-            "marginBottom": "10px",
-            "fontSize": "20px",
-            "fontWeight": "800",
-            "borderLeft": f"6px solid {c['accent']}",
-            "paddingLeft": "14px",
-            "color": c["text"],
+            "marginTop": "32px",
+            "marginBottom": "6px",
+            "fontSize": "13px",
+            "fontWeight": "600",
+            "letterSpacing": "0.06em",
+            "textTransform": "uppercase",
+            "color": c["muted"],
         }
 
         flow = html.Div(
@@ -1097,9 +1149,10 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             ],
             style={
                 "backgroundColor": c["card"],
-                "padding": "14px 18px",
-                "borderRadius": "8px",
-                "marginBottom": "12px",
+                "padding": "18px 20px",
+                "borderRadius": "16px",
+                "marginBottom": "16px",
+                "border": f"1px solid {c['grid']}",
             },
         )
 
@@ -1231,10 +1284,10 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                         "flexWrap": "wrap",
                         "gap": "18px",
                         "alignItems": "flex-start",
-                        "padding": "22px 24px",
-                        "borderRadius": "12px",
+                        "padding": "28px 28px",
+                        "borderRadius": "20px",
                         "backgroundColor": c["card"],
-                        "border": f"2px solid {c['grid']}",
+                        "border": f"1px solid {c['grid']}",
                     },
                 ),
                 html.Div(
@@ -1263,7 +1316,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                     x=t_rel,
                     y=cash_h,
                     mode="lines",
-                    line=dict(color=c["accent"], width=2),
+                    line=dict(color=c["good"], width=2.5),
                     name="Realized cash",
                     hovertemplate="t=%{x:.2f}s<br>$%{y:.2f}<extra></extra>",
                 )
@@ -1274,21 +1327,29 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                     x=[0],
                     y=cash_h,
                     mode="markers",
-                    marker=dict(size=10, color=c["accent"]),
+                    marker=dict(size=10, color=c["good"]),
                     hovertemplate="$%{y:.2f}<extra></extra>",
                 )
             )
         else:
             fig_pnl = fig_blank("Waiting for telemetry…", c)
         fig_pnl.update_layout(
-            title="Cash over time (same numbers as the cards above)",
+            title=dict(
+                text="Cash over time",
+                font=_plot_font(c, 13),
+            ),
             paper_bgcolor=chart_paper,
             plot_bgcolor=chart_plot,
-            font=dict(color=c["text"]),
-            height=280,
-            margin=dict(l=50, r=20, t=48, b=44),
-            xaxis=dict(showgrid=True, gridcolor=c["grid"], title="window (s)"),
-            yaxis=dict(showgrid=True, gridcolor=c["grid"], title="USD"),
+            font=_plot_font(c),
+            height=300,
+            margin=dict(l=50, r=20, t=44, b=44),
+            xaxis=dict(
+                showgrid=True,
+                gridcolor=c["grid"],
+                title="window (s)",
+                zeroline=False,
+            ),
+            yaxis=dict(showgrid=True, gridcolor=c["grid"], title="USD", zeroline=False),
         )
 
         bars_x: List[float] = []
@@ -1317,12 +1378,12 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             )
         )
         fig_thr.update_layout(
-            title="Throughput (Δcounters / Δtime on laptop)",
+            title=dict(text="Throughput", font=_plot_font(c, 13)),
             paper_bgcolor=chart_paper,
             plot_bgcolor=chart_plot,
-            font=dict(color=c["text"]),
-            height=220,
-            margin=dict(l=100, r=20, t=44, b=30),
+            font=_plot_font(c),
+            height=240,
+            margin=dict(l=100, r=20, t=40, b=30),
             xaxis=dict(showgrid=True, gridcolor=c["grid"]),
             yaxis=dict(showgrid=False),
         )
@@ -1338,11 +1399,11 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             )
         )
         fig_mini.update_layout(
-            title="Latency histogram (compact)",
+            title=dict(text="Latency histogram", font=_plot_font(c, 13)),
             paper_bgcolor=chart_paper,
             plot_bgcolor=chart_plot,
-            font=dict(color=c["text"], size=11),
-            height=220,
+            font=_plot_font(c, 11),
+            height=240,
             margin=dict(l=50, r=12, t=40, b=40),
             xaxis=dict(title="bin start (cycles)"),
             yaxis=dict(title="fills"),
@@ -1397,10 +1458,13 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             )
         )
         fig_lat.update_layout(
-            title="Round-trip latency (PL histogram, 32 cycles / bin, 10 ns/cycle)",
+            title=dict(
+                text="Round-trip latency",
+                font=_plot_font(c, 13),
+            ),
             paper_bgcolor=chart_paper,
             plot_bgcolor=chart_plot,
-            font=dict(color=c["text"]),
+            font=_plot_font(c),
             xaxis=dict(
                 title="bin center (ns)",
                 showgrid=True,
@@ -1424,7 +1488,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                         f"max {int(latest.get('lat_max', 0)) * NS_PER_CYCLE} ns · "
                         f"n={lat_cnt}\n{lat_cap}"
                     ),
-                    font=dict(color=c["text"], size=12),
+                    font=_plot_font(c, 12),
                 )
             ],
         )
@@ -1450,10 +1514,10 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             )
         )
         fig_pos.update_layout(
-            title="Long = right (green) · Short = left (red) · flat at center",
+            title=dict(text="Positions", font=_plot_font(c, 13)),
             paper_bgcolor=chart_paper,
             plot_bgcolor=chart_plot,
-            font=dict(color=c["text"], size=12),
+            font=_plot_font(c, 12),
             xaxis=dict(
                 title="shares (signed)",
                 showgrid=True,
@@ -1578,7 +1642,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                 style={"marginTop": "0", "color": c["text"]},
             ),
             html.P(
-                "Keys 1–4 highlight a row; Esc closes. Regime on the wire comes from Board A QUOTE frames.",
+                "Keys 1–4 highlight a row; Esc closes. Regime labels follow regime / regime_name in telemetry.",
                 style={"fontSize": "13px", "color": c["muted"], "marginBottom": "14px"},
             ),
             *rows,
@@ -1635,7 +1699,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             if (prefs.enable_confetti) {
                 var root = document.getElementById('confetti-root');
                 if (root) {
-                    var colors = ['#238636', '#d29922', '#58a6ff', '#f85149'];
+                    var colors = ['#00C805', '#FFB020', '#5AC8FA', '#FF331F'];
                     for (var i = 0; i < 48; i++) {
                         var p = document.createElement('div');
                         p.className = 'bb-confetti-piece';
@@ -1713,10 +1777,17 @@ def main() -> None:
     import sys
 
     args = parse_args()
-    port = args.port or ("/dev/ttyUSB0" if sys.platform != "win32" else "COM5")
+    if args.port:
+        port = args.port
+    elif sys.platform == "win32":
+        port = "COM5"
+    elif sys.platform == "darwin":
+        port = ""  # Mac: use --port /dev/cu.* or set device in the UI bar
+    else:
+        port = "/dev/ttyUSB0"
     reader = SerialTelemetryReader(port, args.baud)
     READER = reader
-    if not args.no_open:
+    if not args.no_open and port:
         reader.open_serial()
     reader.start()
 
@@ -1726,7 +1797,10 @@ def main() -> None:
     print(f"Dashboard web UI (open in a browser): {url}")
     if args.host == "0.0.0.0":
         print("  (bound on all interfaces — use this machine's LAN IP from other devices)")
-    print(f"UART serial device: {port} @ {args.baud} baud")
+    print(
+        f"UART serial device: {port or '(none — enter /dev/cu.* in UI and Connect)'} "
+        f"@ {args.baud} baud"
+    )
     print("Press Ctrl+C in this terminal to stop the server.")
 
     if args.browser:
