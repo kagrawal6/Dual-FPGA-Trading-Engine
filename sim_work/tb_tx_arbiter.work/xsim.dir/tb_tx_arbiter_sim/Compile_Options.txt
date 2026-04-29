@@ -1,0 +1,1 @@
+--debug "typical" -L "unisims_ver" -L "secureip" "tb_tx_arbiter" -s "tb_tx_arbiter_sim" 

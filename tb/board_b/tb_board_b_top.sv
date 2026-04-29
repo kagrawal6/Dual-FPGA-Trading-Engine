@@ -34,7 +34,7 @@ module tb_board_b_top;
     logic [LINK_W-1:0] pmod_jb;
     logic        pmod_jb_valid, pmod_jb_ready;
 
-    logic [8:0]  awaddr, araddr;
+    logic [9:0]  awaddr, araddr;  // bumped 9→10 bits for B2 per-symbol AXI exposure
     logic [2:0]  awprot, arprot;
     logic        awvalid, arvalid, awready, arready;
     logic [31:0] wdata, rdata;
@@ -90,7 +90,7 @@ module tb_board_b_top;
     endtask
 
     // ── AXI-Lite write ────────────────────────────────────────────
-    task automatic axi_write(input logic [8:0] addr, input logic [31:0] data_val);
+    task automatic axi_write(input logic [9:0] addr, input logic [31:0] data_val);
         @(posedge clk);
         awaddr  = addr;
         awvalid = 1'b1;
@@ -108,7 +108,7 @@ module tb_board_b_top;
 
     // ── AXI-Lite read ─────────────────────────────────────────────
     logic [31:0] axi_rd_data;
-    task automatic axi_read(input logic [8:0] addr);
+    task automatic axi_read(input logic [9:0] addr);
         @(posedge clk);
         araddr  = addr;
         arvalid = 1'b1;
@@ -643,6 +643,53 @@ module tb_board_b_top;
         check32("P23: alpha", axi_rd_data, 32'd6554);
         axi_read(9'h018);
         check32("P23: max_order_rate", axi_rd_data, 32'd100_000);
+
+        // ══════════════════════════════════════════════════════════
+        // Phase 24: B2 — per-symbol AXI exposure (BID/ASK/PNL/LAST_FILL/TRADES)
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 24: B2 per-symbol AXI exposure ===");
+
+        // Push fresh quotes so quote_book.best_bid_arr / best_ask_arr update
+        for (int i = 0; i < 4; i++)
+            send_link_frame(build_quote(i, init_mid[i] - 32'h1000, init_mid[i] + 32'h1000, 0, 200+i));
+        repeat (10) @(posedge clk);
+
+        // Read BID[0..3] (base 0x100) and ASK[0..3] (base 0x140)
+        for (int i = 0; i < 4; i++) begin
+            axi_read(10'h100 + i*4);
+            $display("  BID[%0d]  = 0x%08X (expect 0x%08X)", i, axi_rd_data, init_mid[i] - 32'h1000);
+            check32($sformatf("P24: BID[%0d]", i),
+                    axi_rd_data, init_mid[i] - 32'h1000);
+            axi_read(10'h140 + i*4);
+            $display("  ASK[%0d]  = 0x%08X (expect 0x%08X)", i, axi_rd_data, init_mid[i] + 32'h1000);
+            check32($sformatf("P24: ASK[%0d]", i),
+                    axi_rd_data, init_mid[i] + 32'h1000);
+        end
+
+        // Inject a clean BUY fill for symbol 0 and verify LAST_FILL + TRADES + PNL_LO
+        send_link_frame(build_fill(0, 1'b0, 3'b000, init_mid[0], 50, 555, 700));
+        repeat (10) @(posedge clk);
+
+        axi_read(10'h200);  // LAST_FILL_PRICE[0]
+        $display("  LAST_FILL[0] = 0x%08X (expect 0x%08X)", axi_rd_data, init_mid[0]);
+        check32("P24: LAST_FILL[0]", axi_rd_data, init_mid[0]);
+
+        axi_read(10'h240);  // TRADES_PACK[0] = {trades[1],trades[0]}
+        $display("  TRADES_PACK[0] = 0x%08X (low=trades[0], high=trades[1])", axi_rd_data);
+        check("P24: trades[0] >= 1", axi_rd_data[15:0] >= 16'd1);
+
+        // Verify PNL_HI sign-extends correctly when cumulative cash on sym 0 is negative
+        axi_read(10'h180);  // PNL_LO[0]
+        begin : pnl_check
+            logic [31:0] pnl_lo, pnl_hi;
+            pnl_lo = axi_rd_data;
+            axi_read(10'h1C0);  // PNL_HI[0]
+            pnl_hi = axi_rd_data;
+            $display("  PNL[0] = HI:0x%08X LO:0x%08X (signed 48b)", pnl_hi, pnl_lo);
+            // Sign-ext check: upper 16 bits of HI must equal sign of bit15 of HI
+            check("P24: PNL_HI[0] sign-ext valid",
+                  pnl_hi[31:16] == {16{pnl_hi[15]}});
+        end
 
         // ══════════════════════════════════════════════════════════
         // Summary

@@ -98,9 +98,9 @@ module tb_feature_compute;
         ask_price  = ask;
         symbol_id  = sym;
         book_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         book_valid = 1'b0;
-        repeat (PIPELINE_DELAY - 1) @(posedge clk);
+        repeat (PIPELINE_DELAY - 1) @(posedge clk); #1;
     endtask
 
     // ── Golden model vectors (feature_compute_vectors.json) ───
@@ -149,7 +149,7 @@ module tb_feature_compute;
         ema_alpha  = 16'd6554;
 
         @(posedge rst_n);
-        repeat (2) @(posedge clk);
+        repeat (2) @(posedge clk); #1;
 
         // ──────────────────────────────────────────────────────
         // TEST 1: First sample for each symbol (EMA = mid, deviation = 0)
@@ -157,7 +157,7 @@ module tb_feature_compute;
         $display("\n=== TEST 1: First-sample initialization (cycles 0-3) ===");
         for (int i = 0; i < 4; i++) begin
             send_quote(GM_BID[i], GM_ASK[i], 8'(i));
-            @(posedge clk);
+            @(posedge clk); #1;
             check($sformatf("T1.%0d: feature_valid", i),  feature_valid == 1'b1);
             check32($sformatf("T1.%0d: mid", i),          mid, GM_MID[i]);
             check32($sformatf("T1.%0d: ema==mid", i),     ema, GM_EMA[i]);
@@ -173,7 +173,7 @@ module tb_feature_compute;
         $display("\n=== TEST 2: EMA computation (cycles 4-7) ===");
         for (int i = 4; i < 8; i++) begin
             send_quote(GM_BID[i], GM_ASK[i], 8'(i % 4));
-            @(posedge clk);
+            @(posedge clk); #1;
             check($sformatf("T2.%0d: feature_valid", i),  feature_valid == 1'b1);
             check32($sformatf("T2.%0d: mid", i),          mid, GM_MID[i]);
             check32($sformatf("T2.%0d: ema", i),          ema, GM_EMA[i]);
@@ -186,7 +186,7 @@ module tb_feature_compute;
         $display("\n=== TEST 3: Third round EMA (cycles 8-11) ===");
         for (int i = 8; i < 12; i++) begin
             send_quote(GM_BID[i], GM_ASK[i], 8'(i % 4));
-            @(posedge clk);
+            @(posedge clk); #1;
             check32($sformatf("T3.%0d: mid", i),       mid, GM_MID[i]);
             check32($sformatf("T3.%0d: ema", i),       ema, GM_EMA[i]);
             check32($sformatf("T3.%0d: deviation", i), deviation, GM_DEV[i]);
@@ -198,7 +198,7 @@ module tb_feature_compute;
         $display("\n=== TEST 4: Fourth round EMA (cycles 12-15) ===");
         for (int i = 12; i < 16; i++) begin
             send_quote(GM_BID[i], GM_ASK[i], 8'(i % 4));
-            @(posedge clk);
+            @(posedge clk); #1;
             check32($sformatf("T4.%0d: mid", i),       mid, GM_MID[i]);
             check32($sformatf("T4.%0d: ema", i),       ema, GM_EMA[i]);
             check32($sformatf("T4.%0d: deviation", i), deviation, GM_DEV[i]);
@@ -209,19 +209,19 @@ module tb_feature_compute;
         // ──────────────────────────────────────────────────────
         $display("\n=== TEST 5: Clear resets EMA state ===");
         clear = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         clear = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         send_quote(32'h00B3F81A, 32'h00B4081A, 8'd0);
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T5: feature_valid",        feature_valid == 1'b1);
         check32("T5: ema re-seeded",      ema, 32'h00B4001A);
         check32("T5: deviation==0",       deviation, 32'h00000000);
 
         // Second quote for same symbol after clear → EMA should update
         send_quote(32'h00B3F831, 32'h00B40831, 8'd0);
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T5b: feature_valid",       feature_valid == 1'b1);
         check32("T5b: mid",               mid, 32'h00B40031);
         // EMA should move from seed (0x00B4001A) toward 0x00B40031
@@ -234,28 +234,28 @@ module tb_feature_compute;
         // ──────────────────────────────────────────────────────
         $display("\n=== TEST 6: ema_alpha=0 (EMA frozen) ===");
         clear = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         clear = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         ema_alpha = 16'd0;
 
         // Seed sym=0 with mid=0x00B4001E
         send_quote(32'h00B3F81E, 32'h00B4081E, 8'd0);
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("T6a: seed ema",          ema, 32'h00B4001E);
         check32("T6a: seed deviation",    deviation, 32'h00000000);
 
         // Second quote — different bid/ask but EMA should stay at seed
         send_quote(32'h00B3F831, 32'h00B40831, 8'd0);
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("T6b: mid changed",       mid, 32'h00B40031);
         check32("T6b: ema FROZEN",        ema, 32'h00B4001E);
         check32("T6b: deviation=mid-ema", deviation, 32'h00000013);
 
         // Third quote — EMA still frozen
         send_quote(32'h00B3F81A, 32'h00B4081A, 8'd0);
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("T6c: ema still frozen",  ema, 32'h00B4001E);
 
         // ──────────────────────────────────────────────────────
@@ -264,21 +264,21 @@ module tb_feature_compute;
         // ──────────────────────────────────────────────────────
         $display("\n=== TEST 7: ema_alpha=65535 (EMA tracks mid) ===");
         clear = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         clear = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         ema_alpha = 16'd65535;
 
         // Seed
         send_quote(32'h00640000, 32'h00648000, 8'd0);
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("T7a: seed mid",          mid, 32'h00644000);
         check32("T7a: seed ema==mid",     ema, 32'h00644000);
 
         // Second quote with very different price
         send_quote(32'h00C80000, 32'h00C88000, 8'd0);
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("T7b: new mid",           mid, 32'h00C84000);
         // ema ≈ (65535/65536)*mid + (1/65536)*old ≈ mid
         // Exact: (65535*0x00C84000 + 1*0x00644000) >> 16
@@ -308,13 +308,13 @@ module tb_feature_compute;
         // ──────────────────────────────────────────────────────
         $display("\n=== TEST 8: Spread computation ===");
         clear = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         clear = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // bid=0x00B3F81E, ask=0x00B4081E → spread = 0x00001000
         send_quote(32'h00B3F81E, 32'h00B4081E, 8'd1);
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("T8: spread",             spread, 32'h00001000);
 
         // ──────────────────────────────────────────────────────
@@ -322,28 +322,28 @@ module tb_feature_compute;
         // ──────────────────────────────────────────────────────
         $display("\n=== TEST 9: Multi-symbol EMA independence ===");
         clear = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         clear = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // Seed sym=0 with mid=0x00640000 and sym=1 with mid=0x00C80000
         send_quote(32'h0063C000, 32'h00644000, 8'd0);
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("T9a: sym0 seed",         ema, 32'h00640000);
 
         send_quote(32'h00C7C000, 32'h00C84000, 8'd1);
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("T9b: sym1 seed",         ema, 32'h00C80000);
 
         // Update sym=0 with big move — sym=1 EMA should be unaffected
         send_quote(32'h006FC000, 32'h00704000, 8'd0);
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T9c: sym0 ema moved",      ema != 32'h00640000);
         sym0_ema_after = ema;
 
         // Re-read sym=1 — EMA should still be at its seed
         send_quote(32'h00C7C000, 32'h00C84000, 8'd1);
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T9d: sym1 moved from seed", ema != 32'h00C80000 || deviation == 32'h00000000);
 
         // ──────────────────────────────────────────────────────
@@ -351,7 +351,7 @@ module tb_feature_compute;
         // ──────────────────────────────────────────────────────
         $display("\n=== TEST 10: Idle ===");
         book_valid = 1'b0;
-        repeat (5) @(posedge clk);
+        repeat (5) @(posedge clk); #1;
         check("T10: feature_valid==0",    feature_valid == 1'b0);
 
         // ──────────────────────────────────────────────────────
@@ -359,41 +359,41 @@ module tb_feature_compute;
         // ──────────────────────────────────────────────────────
         $display("\n=== TEST 11: Back-to-back quotes ===");
         clear = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         clear = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // Send 4 quotes on consecutive cycles (sym 0,1,2,3)
         bid_price  = GM_BID[0]; ask_price = GM_ASK[0]; symbol_id = 8'd0;
         book_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         bid_price  = GM_BID[1]; ask_price = GM_ASK[1]; symbol_id = 8'd1;
-        @(posedge clk);
+        @(posedge clk); #1;
         bid_price  = GM_BID[2]; ask_price = GM_ASK[2]; symbol_id = 8'd2;
-        @(posedge clk);
+        @(posedge clk); #1;
         bid_price  = GM_BID[3]; ask_price = GM_ASK[3]; symbol_id = 8'd3;
-        @(posedge clk);
+        @(posedge clk); #1;
         book_valid = 1'b0;
 
         // Check outputs arrive in order (first output already visible)
         check("T11a: valid for sym0",     feature_valid == 1'b1);
         check32("T11a: mid sym0",         mid, GM_MID[0]);
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T11b: valid for sym1",     feature_valid == 1'b1);
         check32("T11b: mid sym1",         mid, GM_MID[1]);
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T11c: valid for sym2",     feature_valid == 1'b1);
         check32("T11c: mid sym2",         mid, GM_MID[2]);
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T11d: valid for sym3",     feature_valid == 1'b1);
         check32("T11d: mid sym3",         mid, GM_MID[3]);
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T11e: deasserts",          feature_valid == 1'b0);
 
         // ──────────────────────────────────────────────────────
         // SUMMARY
         // ──────────────────────────────────────────────────────
-        repeat (3) @(posedge clk);
+        repeat (3) @(posedge clk); #1;
         $display("\n══════════════════════════════════════════");
         $display("  feature_compute testbench complete");
         $display("  PASSED: %0d", pass_count);

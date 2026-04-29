@@ -86,9 +86,9 @@ module tb_strategy_engine;
         ask_price     = ask;
         symbol_id     = sym;
         feature_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         feature_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
     endtask
 
     // Golden model vectors from strategy_vectors.json
@@ -128,7 +128,7 @@ module tb_strategy_engine;
         base_qty      = 16'd100;
 
         @(posedge rst_n);
-        repeat (2) @(posedge clk);
+        repeat (2) @(posedge clk); #1;
 
         // ──────────────────────────────────────────────────────
         // TEST 1-9: All 9 golden model vectors
@@ -178,12 +178,12 @@ module tb_strategy_engine;
         ask_price     = 32'h00B41999;
         symbol_id     = 8'd0;
         feature_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // Immediately next: zero deviation → no trade
         deviation     = 32'h00000000;
         symbol_id     = 8'd1;
-        @(posedge clk);
+        @(posedge clk); #1;
         feature_valid = 1'b0;
 
         // Check first output: SELL sym=0
@@ -191,7 +191,7 @@ module tb_strategy_engine;
         check("T12a: side==SELL",       signal_side == 1'b1);
         check("T12a: sym==0",           signal_symbol == 8'd0);
 
-        @(posedge clk);
+        @(posedge clk); #1;
         // Check second output: no trade sym=1
         check("T12b: no trade",         signal_valid == 1'b0);
 
@@ -220,12 +220,12 @@ module tb_strategy_engine;
         $display("\n=== T14: Idle ===");
         deviation     = 32'h00010000;
         feature_valid = 1'b0;
-        @(posedge clk);
-        @(posedge clk);
+        @(posedge clk); #1;
+        @(posedge clk); #1;
         check("T14: no spurious valid",  signal_valid == 1'b0);
 
         // ── Summary ───────────────────────────────────────────
-        repeat (3) @(posedge clk);
+        repeat (3) @(posedge clk); #1;
         $display("\n══════════════════════════════════════════");
         $display("  strategy_engine testbench complete");
         $display("  PASSED: %0d", pass_count);

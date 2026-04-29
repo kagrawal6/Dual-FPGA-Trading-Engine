@@ -4,7 +4,20 @@
 
 **Project**: ECE 554 Capstone  
 **Platform**: 2x AMD AUP-ZU3 (Zynq UltraScale+ XCZU3EG-2SFVC784E)  
-**Revision**: B1 -- March 2026
+**Revision**: B2 -- April 2026
+
+> **Changes since B1** (dashboard demo enablement):
+> - **Board A AXI** (Appendix D.1): bumped address width 8→9 bits; added read-only `FILLS_SENT` (0x100), `REJECTS_SENT` (0x104), `LINK_ERRORS` (0x108) — closes the previous read-back gap noted in §4.6.4.
+> - **Board B AXI** (Appendix D.2): bumped address width 9→10 bits; added per-symbol arrays for the laptop dashboard:
+>   - `BID[16]` (0x100) and `ASK[16]` (0x140) — Board B's view of the BBO (one link delay behind Board A).
+>   - `PNL_CASH_LO[16]` (0x180) + `PNL_CASH_HI[16]` (0x1C0) — per-symbol Q32.16 cash-flow accumulator.
+>   - `LAST_FILL_PRICE[16]` (0x200) — last execution price per symbol.
+>   - `TRADES_PACK[8]` (0x240) — per-symbol fill counters (2 packed/word).
+> - **`quote_book.sv`** (§4.6.5): exposes `best_bid_arr` / `best_ask_arr` as outputs.
+> - **`position_tracker.sv`** (§4.6.5): now maintains per-symbol `pnl_cash`, `last_fill_price`, and `trades` state alongside the global cash accumulator.
+> - **`telemetry_server.py`** (§5.1.2 / §5.3): JSON schema extended with `bid[]`, `ask[]`, `mid[]`, `spread[]`, `pnl_cash[]`, `pnl_mtm[]`, `pos_value[]`, `last_fill[]`, `trades[]`, plus computed `total_pnl` and `port_value`.
+> - **`dashboard.py`** (§5.4): full Plotly Dash implementation — Robinhood-style header bar, sector filter pills, per-symbol cards with sparklines, latency widget, activity panel; supports `--port` (UART), `--stdin` (pipe), and `--demo` (synthetic) input modes.
+> - **Vivado BD wrappers** (`rtl/board_a/board_a_top_bd.v`, `rtl/board_b/board_b_top_bd.v`): AXI port widths bumped (Board A 8→9 bits, Board B 9→10 bits) and `C_S_AXI_ADDR_WIDTH` parameter raised to match. The BD `create_board_*.tcl` scripts now also `set_property range 4K` on the `hft_core` AXI segment for headroom. To rebuild from a clean state run `vivado -mode batch -source vivado/rebuild_all.tcl` from the repo root.
 
 ---
 
@@ -1922,7 +1935,7 @@ Transfer when:    out_valid && out_ready (both high on same rising edge)
 | 8 | Data | `exchange_lite.sv` | Minimal order matching engine. Single-slot pipeline: accepts one ORDER frame when the stage-1 register and output register are both free. Extracts `symbol_id`, `side`, `limit_price`, `qty`, `order_id`, `timestamp`. Compares against live bid/ask from `market_sim`: BUY fills at `ask_price` if `limit_price >= ask_price`; SELL fills at `bid_price` if `limit_price <= bid_price`; out-of-range `symbol_id` → reject. Builds 128-bit FILL frame with echoed `order_id` and `ts_echo`. `fill_valid` is held until `fill_ready` — no response is dropped under backpressure. Disabled when `enable` is low. `counter_clr` resets all counters and pipeline registers. | `enable`, `counter_clr`, `best_bid[0:N-1]`, `best_ask[0:N-1]`, `order_frame[127:0]`, `order_valid` → `fill_frame[127:0]`, `fill_valid`; ← `fill_ready`; → `orders_rcvd[31:0]`, `fills_sent[31:0]`, `rejects_sent[31:0]` | ~300 LUTs |
 | 8a | Data | `exchange_plus.sv` | **Optional** upgraded exchange (not instantiated in `board_a_top` — available for future use). Adds: one-entry input queue (`ENABLE_INPUT_QUEUE`), partial fills (`ENABLE_PARTIAL_FILL`), visible liquidity depletion (`ENABLE_SIZE_DEPLETION`), and one resting-order slot per symbol (`ENABLE_RESTING_ORDER`). Each feature is independently controlled by a `parameter bit`. Additional status: `PARTIAL` and `RESTING_ACCEPTED` fill statuses. Resting orders are scanned combinationally and executed when market prices become favorable. Orders are intentionally dropped if both stage-1 and queue are full. | Same as `exchange_lite` plus: `best_bid_qty[0:N-1]`, `best_ask_qty[0:N-1]`, `market_refresh` → `partials_sent[31:0]`, `resting_accepted[31:0]` | ~600 LUTs |
 | 9 | Data | `tx_arbiter.sv` | Strict-priority 2:1 frame mux with one-entry output buffer. Two input ports: fill (high priority) and quote (low priority). `fill_ready = !tx_buf_valid`; `quote_ready = !tx_buf_valid && !fill_valid` — fills always win. Once the output buffer is consumed by `tx_ready`, a 1-cycle bubble occurs before the next frame can be accepted. No frame dropping under backpressure. No preemption of in-progress frames (the buffer holds a complete frame, not a partial one). | `fill_frame[127:0]`, `fill_valid` → `fill_ready`; `quote_frame[127:0]`, `quote_valid` → `quote_ready`; → `tx_frame[127:0]`, `tx_valid`; ← `tx_ready` | ~100 LUTs |
-| 10 | Control | `board_a_axi_regs.sv` | AXI-Lite slave interface (8-bit address space). **Config registers** (R/W): `CTRL` (start/reset pulses), `QUOTE_INTERVAL`, `LFSR_SEED`, `REGIME`, per-symbol `INIT_MID` (window at 0x10), `INIT_SPREAD` (0x50), `SECTOR_ID` (0x90), `COMPANY_TOKEN` (0xD0, packed 2×16b per word), `ACTIVE_SYM_COUNT` (0xF0). **Status registers** (R): `STATUS` at 0xF4 packing `{fifo_fill[6:0], active_regime[1:0], link_up, running}`, `QUOTES_SENT` (0xF8), `ORDERS_RCVD` (0xFC). Generates 1-cycle pulses on CTRL write. Accepts `fills_sent`, `rejects_sent`, `link_errors` as inputs but **these are not mapped to read addresses** in the current implementation (readable only via STATUS packing or debug). See Appendix D.1 for the full register map. | AXI-Lite bus → `axi_start_pulse`, `axi_reset_pulse`, `regime_from_ps`, `quote_interval`, `lfsr_seed`, `sym_init_mid[0:N-1]`, `sym_init_spread[0:N-1]`, `sym_sector_id[0:N-1]`, `sym_company_token[0:N-1]`, `active_sym_count`; ← status inputs | ~400 LUTs |
+| 10 | Control | `board_a_axi_regs.sv` | AXI-Lite slave interface (**9-bit address space**, 512 B). **Config registers** (R/W): `CTRL` (start/reset pulses), `QUOTE_INTERVAL`, `LFSR_SEED`, `REGIME`, per-symbol `INIT_MID` (window at 0x010), `INIT_SPREAD` (0x050), `SECTOR_ID` (0x090), `COMPANY_TOKEN` (0x0D0, packed 2×16b per word), `ACTIVE_SYM_COUNT` (0x0F0). **Status registers** (R): `STATUS` at 0x0F4 packing `{fifo_fill[6:0], active_regime[1:0], link_up, running}`, `QUOTES_SENT` (0x0F8), `ORDERS_RCVD` (0x0FC), `FILLS_SENT` (0x100), `REJECTS_SENT` (0x104), `LINK_ERRORS` (0x108). Generates 1-cycle pulses on CTRL write. See Appendix D.1 for the full register map. | AXI-Lite bus → `axi_start_pulse`, `axi_reset_pulse`, `regime_from_ps`, `quote_interval`, `lfsr_seed`, `sym_init_mid[0:N-1]`, `sym_init_spread[0:N-1]`, `sym_sector_id[0:N-1]`, `sym_company_token[0:N-1]`, `active_sym_count`; ← status inputs | ~400 LUTs |
 | 11 | Control | `board_a_ctrl.sv` | Physical I/O manager. Instantiates 4× `debounce` with `COUNTER_W=BTN_DEB_W` (default 16). Generates single-cycle pulses: `ctrl_start_pulse` (BTN[0]), `ctrl_stop_pulse` (BTN[1]), `ctrl_reset_pulse` (BTN[2]). BTN[3] is debounced but unused. Samples `sw[1:0]` → `regime_sw`, `sw[2]` → `sw_override`. Drives LEDs: `[1:0]=active_regime` (binary), `[2]=running`, `[3]=running AND blink` (25-bit free-running counter bit 24), `[4]=link_up`, `[5]=link_error` (boolean: `link_errors != 0`), `[7:6]=0`. RGB0 = regime color: CALM=green, VOLATILE=yellow, BURST=red, ADVERSARIAL=purple. RGB1 = link health: no link=red, link with errors=yellow, healthy=green. | `btn[3:0]`, `sw[7:0]`, `running`, `active_regime`, `link_up`, `link_error` (1-bit) → `ctrl_start_pulse`, `ctrl_stop_pulse`, `ctrl_reset_pulse`, `regime_sw`, `sw_override`, `led[7:0]`, `rgb0[2:0]`, `rgb1[2:0]` | ~150 LUTs |
 | 12 | Top | `board_a_top.sv` | Structural wiring: instantiates all Board A modules. Contains the 4-state Moore FSM (`a_state_e`: `A_RESET→A_IDLE→A_RUNNING→A_STOPPED`). Derives control signals: `running = (state == A_RUNNING)`, `counter_clr = (state == A_RESET)`, `fifo_flush = (state == A_RESET)`, `lfsr_load = (state == A_IDLE && next == A_RUNNING)`. Combines button + AXI trigger signals via OR: `start_combined = axi_start_pulse OR ctrl_start_pulse`, `stop_combined = ctrl_stop_pulse`, `reset_combined = axi_reset_pulse OR ctrl_reset_pulse`. Routes `active_regime = sw_override ? regime_sw : regime_from_ps`. Exchange is only enabled when `running` (frozen market = no matching while stopped). ORDER frames from `link_rx` are filtered by `msg_type == MSG_ORDER` before routing to `exchange_lite`. | Top-level FPGA ports: PMOD JA (out), PMOD JB (in), `btn[3:0]`, `sw[7:0]`, `led[7:0]`, `rgb0[2:0]`, `rgb1[2:0]`, AXI-Lite bus | — (structural) |
 
@@ -1931,7 +1944,7 @@ Transfer when:    out_valid && out_ready (both high on same rising edge)
 1. **3-tier noise model**: The original spec described a single-LFSR price step. The implemented RTL uses `market_noise_gen` with `NUM_SYM + NUM_SECTORS + 1` LFSRs and drift accumulators for correlated sector-aware noise. This is the definitive implementation.
 2. **Ornstein-Uhlenbeck pull-back**: Added to `market_sim` to create bounded, mean-reverting price dynamics. Without this, prices drift unboundedly and the Board B mean-reversion strategy cannot profit.
 3. **Windowed AXI register map**: Expanded from the original 4-symbol interleaved layout to support 16 symbols using base+offset windowed addressing. Sector IDs and company tokens are also configurable via AXI.
-4. **AXI read-back gap**: `fills_sent`, `rejects_sent`, and `link_errors` counters are wired into `board_a_axi_regs` but have no read-back addresses assigned. A future revision should map them to unused offsets (e.g., `0x100`–`0x10C` if the address space is widened to 9 bits).
+4. **AXI read-back gap closed**: `fills_sent`, `rejects_sent`, and `link_errors` counters are now mapped to `0x100`, `0x104`, `0x108` respectively. The AXI address width was bumped from 8 → 9 bits (256 B → 512 B window) to make room. The PS reads these via `read_board_a_status()` in `config_symbols.py` for the laptop dashboard.
 5. **`exchange_plus.sv`**: A feature-rich optional exchange module exists in `rtl/board_a/` but is **not instantiated** by `board_a_top`. It can be swapped in by changing one instantiation if partial fills, liquidity depletion, or resting orders are desired.
 6. **`debounce.sv` comment reference**: The module header says "Default matches `hft_pkg::DEBOUNCE_COUNTER_W`" but this constant does not exist in `hft_pkg`. The comment is aspirational; `debounce` uses its own parameter default of `COUNTER_W=20`, and `board_a_ctrl` overrides it to 16.
 7. **Bid/ask sizes**: Currently hardcoded to 1000 per quote in `market_sim`. A future improvement could make this regime-dependent or symbol-dependent.
@@ -1942,14 +1955,14 @@ Transfer when:    out_valid && out_ready (both high on same rising edge)
 | # | Category | Module | Description | Key I/O (beyond clk/rst) | Est. Resources |
 |---|----------|--------|-------------|--------------------------|---------------|
 | 13 | Data | `msg_demux.sv` | Frame router. Reads `msg_type` field `[127:124]` from incoming frames. Routes QUOTE (4'h1) to quote path, FILL (4'h3) to fill path. Discards unknown types and increments `demux_errors`. | `frame_in[127:0]`, `frame_in_valid` → `quote_frame`, `quote_valid`, `fill_frame`, `fill_valid`, `demux_errors[31:0]`, `quotes_rcvd[31:0]` | ~50 LUTs |
-| 14 | Data | `quote_book.sv` | Per-symbol register file. Stores latest `bid_price`, `ask_price`, `bid_size`, `ask_size` for each of `NUM_SYMBOLS` instruments. Updated by incoming QUOTE frames. Outputs current values for the symbol being processed. | `quote_frame[127:0]`, `quote_valid` → `bid_price[31:0]`, `ask_price[31:0]`, `bid_size[15:0]`, `ask_size[15:0]`, `symbol_id[7:0]`, `book_valid` | ~NUM_SYMBOLS × 96 FFs |
+| 14 | Data | `quote_book.sv` | Per-symbol register file. Stores latest `bid_price`, `ask_price`, `bid_size`, `ask_size` for each of `NUM_SYMBOLS` instruments. Updated by incoming QUOTE frames. Outputs current values for the symbol being processed, **plus full per-symbol arrays `best_bid_arr[NUM_SYM]` / `best_ask_arr[NUM_SYM]`** that are exposed via AXI to the laptop dashboard (Board B's view of the BBO — one link delay behind Board A). | `quote_frame[127:0]`, `quote_valid` → `bid_price[31:0]`, `ask_price[31:0]`, `bid_size[15:0]`, `ask_size[15:0]`, `symbol_id[7:0]`, `book_valid`, `best_bid_arr[0:N-1]`, `best_ask_arr[0:N-1]` | ~NUM_SYMBOLS × 96 FFs |
 | 15 | Data | `feature_compute.sv` | Computes mid price, spread, and EMA for each symbol. `mid = (bid + ask) >> 1`, `spread = ask - bid`. EMA uses DSP48E2 multiply-accumulate: `ema_new = (α × mid + (65536−α) × ema_old) >> 16`. Maintains `ema[NUM_SYMBOLS]` state array. | `bid_price`, `ask_price`, `symbol_id`, `book_valid`, `ema_alpha[15:0]` → `mid[31:0]`, `spread[31:0]`, `ema[31:0]`, `deviation[31:0]` (signed), `feature_valid` | ~400 LUTs, 2 DSP48E2, ~NUM_SYMBOLS × 32 FFs |
 | 16 | Data | `strategy_engine.sv` | Mean-reversion strategy (core). Compares `deviation` against configurable `threshold`. If `deviation > +threshold`: SELL at bid (price reverts down). If `deviation < -threshold`: BUY at ask (price reverts up). Else: no trade. Outputs `signal_valid`, `signal_side`, `signal_price`, `signal_qty`. | `deviation[31:0]`, `mid[31:0]`, `bid_price[31:0]`, `ask_price[31:0]`, `feature_valid`, `threshold[31:0]`, `base_qty[15:0]` → `signal_valid`, `signal_side`, `signal_price[31:0]`, `signal_qty[15:0]`, `signal_symbol[7:0]` | ~200 LUTs |
 | 17 | Data | `risk_manager.sv` | Three parallel limit checks executed in 1 cycle (10 ns). (1) Position limit: `abs(position[symbol]) < max_position`. (2) Order rate: `orders_this_window < max_order_rate` (sliding window counter). (3) Max loss: `total_pnl > -max_loss`. Final gate: `approved = pass_1 & pass_2 & pass_3 & order_enable`. Latches `risk_halt` when check 3 fails (cleared by `counter_clr`). | `signal_valid`, `signal_side`, `signal_price`, `signal_qty`, `signal_symbol`, `position[0:N-1]`, `total_pnl`, `order_enable`, `max_position`, `max_order_rate`, `max_loss` → `approved_valid`, pass-through order fields, `risk_rejects[31:0]`, `risk_halt` | ~300 LUTs |
 | 18 | Data | `order_manager.sv` | Builds 128-bit ORDER frames when `approved_valid` is high. Assigns `order_id` from a 16-bit wrapping counter (increments per order). Captures `timestamp = cycle_counter[15:0]`. Packs all fields into the ORDER frame format. | `approved_valid`, order fields (side, price, qty, symbol) → `order_frame[127:0]`, `order_valid`, `orders_sent[31:0]` | ~200 LUTs |
-| 19 | Data | `position_tracker.sv` | Processes FILL frames. Updates signed `position[NUM_SYMBOLS]`: BUY adds qty, SELL subtracts qty. Updates 48-bit signed cash accumulator (Q32.16): SELL adds `price × qty`, BUY subtracts `price × qty`. The multiplication uses 1 DSP48E2. Exposes position array and cash for risk manager readback and AXI telemetry. | `fill_frame[127:0]`, `fill_valid`, `counter_clr`, `position_clr` → `position[0:N-1]`, `cash[47:0]`, `total_pnl[31:0]`, `fills_rcvd[31:0]` | ~300 LUTs, 1 DSP48E2, ~NUM_SYMBOLS × 48 FFs |
+| 19 | Data | `position_tracker.sv` | Processes FILL frames. Updates signed `position[NUM_SYMBOLS]`: BUY adds qty, SELL subtracts qty. Updates global 48-bit signed cash accumulator (Q32.16): SELL adds `price × qty`, BUY subtracts `price × qty`. The multiplication uses 1 DSP48E2. **Per-symbol P&L extension**: maintains `pnl_cash_per_sym[NUM_SYM]` (48-bit Q32.16 each, mirroring global cash but split by symbol), `last_fill_price[NUM_SYM]` (Q16.16), and `trades_per_sym[NUM_SYM]` (16-bit fill counters). All updated in the same cycle as the global cash. The laptop dashboard computes per-symbol mark-to-market P&L as `pnl_cash[i] + position[i] × mid[i]`. | `fill_frame[127:0]`, `fill_valid`, `counter_clr` → `position[0:N-1]`, `cash[47:0]`, `total_pnl[31:0]`, `fills_rcvd[31:0]`, `pnl_cash_per_sym[0:N-1]`, `last_fill_price[0:N-1]`, `trades_per_sym[0:N-1]` | ~600 LUTs, 1 DSP48E2, ~NUM_SYMBOLS × 96 FFs (added per-sym P&L state) |
 | 20 | Measurement | `latency_histogram.sv` | Hardware latency measurement. On each FILL, computes `latency = cycle_counter[15:0] - ts_echo` (wrapping subtraction). Maps to bin: `bin = latency >> BIN_SHIFT`. Increments `hist_bins[bin]` (16 bins × 32-bit). Updates scalar stats: `lat_min`, `lat_max`, `lat_sum`, `lat_count`. All readable via AXI-Lite. | `fill_valid`, `ts_echo[15:0]`, `hist_clr` → `hist_bins[0:15]`, `lat_min`, `lat_max`, `lat_sum`, `lat_count` | ~300 LUTs, 16 × 32 FFs (bins) |
-| 21 | Control | `board_b_axi_regs.sv` | AXI-Lite slave. Config registers: CTRL (start/reset), STRATEGY_SEL, THRESHOLD, EMA_ALPHA, BASE_QTY, MAX_POSITION, MAX_ORDER_RATE, MAX_LOSS. Status registers (read-only): STATUS (state, link_up, risk_halt, active_strategy), counters (orders_sent, risk_rejects, quotes_rcvd, fills_rcvd, link_errors), per-symbol positions, cash, histogram bins, latency stats. | AXI-Lite bus → config outputs, ← status inputs | ~500 LUTs |
+| 21 | Control | `board_b_axi_regs.sv` | AXI-Lite slave (**10-bit address space**, 1 KiB). Config registers: CTRL (start/reset), STRATEGY_SEL, THRESHOLD, EMA_ALPHA, BASE_QTY, MAX_POSITION, MAX_ORDER_RATE, MAX_LOSS. Status registers (read-only): STATUS (state, link_up, risk_halt, active_strategy), counters (orders_sent, risk_rejects, quotes_rcvd, fills_rcvd, link_errors), per-symbol positions, cash, histogram bins, latency stats. **Extended per-symbol arrays for the laptop dashboard** (offsets 0x100–0x25C): per-symbol bid/ask snapshot from `quote_book`, per-symbol cash flow accumulator (lo/hi pair), per-symbol last fill price, and per-symbol fill count (packed 2/word). | AXI-Lite bus → config outputs, ← status inputs (incl. `qb_best_bid[]`, `qb_best_ask[]`, `pnl_cash_per_sym[]`, `last_fill_price[]`, `trades_per_sym[]`) | ~700 LUTs (added per-sym mux fan-in) |
 | 22 | Control | `board_b_ctrl.sv` | Physical I/O manager. Instantiates 4× `debounce`. Generates `btn_pulse[0..2]` (start/stop/reset). Samples `sw[0]` as `trading_enable`, `sw[2:1]` as `strategy_sw` (reserved in core), `sw[3]` as `sw_strategy_override` (reserved in core). Drives LEDs: [3:0]=order activity (flash per order), [7:4]=fill activity (flash per fill). RGB0=PnL indicator (green/red/off). RGB1=risk status (green/yellow/red). | `btn[3:0]`, `sw[7:0]`, `order_enable`, `risk_halt`, `link_up`, `total_pnl`, `position` → `btn_pulse[2:0]`, `trading_enable`, `strategy_sw[1:0]`, `sw_strategy_override`, `led[7:0]`, `rgb0[2:0]`, `rgb1[2:0]` | ~150 LUTs |
 | 23 | Top | `board_b_top.sv` | Structural wiring: instantiates all Board B modules. Contains the 5-state FSM (RESET/IDLE/ARMED/TRADING/HALTED). Combines button + AXI trigger signals. Routes config from AXI regs to pipeline modules. Routes status from pipeline back to AXI regs and ctrl. In core build, wires `strategy_engine` directly to `risk_manager`. In stretch build, inserts `strategy_selector`. | Top-level FPGA ports: PMOD_A, PMOD_B, btn, sw, led, rgb, AXI-Lite bus | — (structural) |
 
@@ -2445,85 +2458,102 @@ These fields are only present when the corresponding stretch modules exist in th
 
 #### 5.4.1 Architecture
 
-The dashboard is a single Python script using **Plotly Dash** [6], a web framework that renders interactive charts in a browser. It runs locally — no internet connection needed.
+The dashboard is a single Python script using **Plotly Dash** [6] — a web framework that renders interactive charts in a browser. It runs locally (no internet) and is styled as a **Robinhood-style portfolio monitor**: a header bar showing total portfolio value and P&L, sector-color filter pills, and a grid of per-symbol cards each with a sparkline, current price, % change vs initial mid, position chip, and mark-to-market P&L.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
 │  dashboard.py                                                         │
 │                                                                       │
 │  ┌────────────────────┐     ┌─────────────────────────────────────┐  │
-│  │  SerialReader       │     │  Dash App (localhost:8050)          │  │
+│  │  TelemetrySource    │     │  Dash App (localhost:8050)          │  │
 │  │  (background thread)│     │                                     │  │
-│  │                     │     │  ┌───────┐ ┌───────┐ ┌───────┐    │  │
-│  │  1. Open COM port   │     │  │ Thru- │ │Latency│ │Posit- │    │  │
-│  │     at 115200 baud  │     │  │ put   │ │ Hist  │ │ ion   │    │  │
-│  │  2. readline()      │────►│  │Gauges │ │ Chart │ │ Bars  │    │  │
-│  │  3. json.loads()    │     │  └───────┘ └───────┘ └───────┘    │  │
-│  │  4. Store in shared │     │  ┌───────┐ ┌───────┐ ┌───────┐    │  │
-│  │     dict (latest)   │     │  │  PnL  │ │Regime │ │ Risk  │    │  │
-│  │  5. Compute deltas  │     │  │ Line  │ │ Ind.  │ │Reject │    │  │
-│  │     for rates       │     │  └───────┘ └───────┘ └───────┘    │  │
-│  └────────────────────┘     │  ┌───────┐ ┌───────┐               │  │
-│                              │  │ Link  │ │Scalar │               │  │
-│                              │  │Health │ │ Stats │               │  │
-│                              │  └───────┘ └───────┘               │  │
-│                              └─────────────────────────────────────┘  │
+│  │                     │     │  ┌──────────────────────────────┐  │  │
+│  │  Mode A: serial     │     │  │ Header (port value + P&L)    │  │  │
+│  │    Open COM port    │     │  ├──────────────────────────────┤  │  │
+│  │    readline()       │     │  │ Sector filter pills          │  │  │
+│  │    json.loads()     │────►│  ├────────┬─────────┬──────────┤  │  │
+│  │                     │     │  │  Port  │Activity │ Latency  │  │  │
+│  │  Mode B: stdin      │     │  │  chart │ counts  │ + hist   │  │  │
+│  │    pipe from        │     │  ├────────┴─────────┴──────────┤  │  │
+│  │    telemetry_server │     │  │   Per-symbol card grid       │  │  │
+│  │                     │     │  │   (16 Robinhood-style tiles  │  │  │
+│  │  Mode C: --demo     │     │  │    with sparklines + P&L)    │  │  │
+│  │    synthetic data   │     │  └──────────────────────────────┘  │  │
+│  └────────────────────┘     └─────────────────────────────────────┘  │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-**Threading model**: A background thread handles serial I/O (blocking `readline()`). The main thread runs the Dash server. Communication is via a shared `dict` protected by a lock. The Dash callback reads the latest data every 50 ms (interval timer).
+**Threading model**: A background `TelemetrySource` thread handles input (serial / stdin / demo). The main thread runs the Dash server. The latest snapshot plus a `deque` of recent `(ts, mid_per_symbol)` tuples (for sparklines and the portfolio chart) live behind a lock. A `dcc.Interval` fires the layout callback at the configured `--poll-hz` (default 5 Hz, smooth without thrashing the browser).
 
-#### 5.4.2 Dashboard Panels (8 total)
+**Three input modes** make the dashboard self-contained for debugging:
+- `--port COM5 --baud 115200` — live UART from Board B (production demo)
+- `--stdin` — pipe `telemetry_server.py | dashboard.py --stdin` for SSH-tunneled or recorded streams
+- `--demo` — synthetic Board B telemetry generator (no FPGA needed; useful for laptop-side dashboard development)
 
-| # | Panel | Type | Data Source | Description |
-|---|-------|------|-------------|-------------|
-| 1 | **Throughput** | 3 gauge dials | `qps`, `ops`, `fps` deltas | Quotes/sec, Orders/sec, Fills/sec (computed from counter deltas). Red zone at > 80% link capacity. |
-| 2 | **Latency Histogram** | Bar chart | `hist[0:15]` | 16 bins, x-axis in nanoseconds (bin × 32 cycles × 10 ns), y-axis = count. p50/p99/max annotated as vertical lines. |
-| 3 | **Position** | Grouped bar | `pos[0:N]` | Per-symbol signed position. Green = long, Red = short, Gray = flat. Auto-scales to `NUM_SYMBOLS`. |
-| 4 | **PnL** | Rolling line chart | `cash_lo`, `cash_hi` | Running profit/loss in dollars. Green when positive, red when negative. Last 5 minutes of history. |
-| 5 | **Regime** | Status indicator | `state`, Board A status | Current stress mode label + color badge. Shows FSM state name. |
-| 6 | **Risk Rejects** | Counter + sparkline | `rej` delta | Reject rate over time. Spikes visible when position/rate/loss limits are hit. |
-| 7 | **Link Health** | Status badge | `link_err`, `state` | Green = OK (0 errors), Yellow = errors detected, Red = link down. Shows error count. |
-| 8 | **Scalar Stats** | Text table | `lat_min`, `lat_max`, `lat_sum`, `lat_cnt`, `strat` | Min/mean/max latency in nanoseconds, active strategy name, FSM state name. |
+#### 5.4.2 Dashboard Panels
 
-**p50/p99 computation from histogram**:
+| Region | Type | Data Source | Description |
+|--------|------|-------------|-------------|
+| **Header** | KPI strip | `port_value`, `total_pnl`, `cash`, `state`, `strategy`, `link_up`, `risk_halt` | Big-number portfolio value, P&L $/% (color-coded), cash, FSM/strategy/link/risk pills. Total P&L % is computed against `port_value − total_pnl` (cost basis). |
+| **Risk halt banner** | Conditional banner | `risk_halt` | Red banner pinned at top when risk halt fires. |
+| **Sector pills** | Filter buttons | `sector_ids` (config) | Click-to-filter the symbol grid by sector. Each pill is colored per the GICS-bucket palette (Tech=blue, Energy=amber, Health=green, …). |
+| **Portfolio chart** | Area line | `_history` deque + `pos`, `cash` | Portfolio value over the last ~12 s. Color flips green/red based on net change. |
+| **Activity panel** | Stats table | `qps`, `ops`, `fps`, `rej`, `link_err` | Quote/order/fill/reject counts + computed fill rate / reject rate / link errors. |
+| **Latency panel** | KPI + bar chart | `lat_min/avg/max/cnt`, `hist[0:15]` | Min/avg/max in nanoseconds (cycles × 10 ns) plus 16-bin histogram with color-graded bars (green ≤ 64 cy, cyan ≤ 160 cy, amber ≤ 320 cy, red > 320 cy). |
+| **Per-symbol card grid** | Robinhood tiles | `bid`, `ask`, `mid`, `spread`, `pos`, `pos_value`, `pnl_mtm`, `last_fill`, `trades`, init_mid (from config) | One card per active symbol, sector-colored top border. Each card shows ticker + sector chip, current mid with % change vs init_mid (green/red), sparkline of recent mids, position chip (LONG/SHORT/FLAT), position value, mark-to-market P&L (green/red), bid/ask + spread micro-row, last fill price + trade count. Filterable by sector pill. |
+| **Footer** | Text strip | `ts` | Last update time + age in ms — visible staleness indicator. |
 
-```python
-def compute_percentiles(hist_bins, bin_width_ns=320):
-    total = sum(hist_bins)
-    if total == 0:
-        return 0, 0
-    cumulative = 0
-    p50 = p99 = 0
-    for i, count in enumerate(hist_bins):
-        cumulative += count
-        if cumulative >= total * 0.50 and p50 == 0:
-            p50 = i * bin_width_ns
-        if cumulative >= total * 0.99 and p99 == 0:
-            p99 = i * bin_width_ns
-            break
-    return p50, p99
-```
+The dashboard handles gracefully:
+- **No telemetry yet**: every panel shows "Waiting for telemetry…" placeholder.
+- **Stale data**: footer shows the snapshot age in ms; the operator sees freezes immediately.
+- **JSON parse errors**: silently skipped (telemetry server is the source of truth).
+- **Risk halt**: red banner appears above the header until `CTRL[1]` reset is pulsed on Board B.
 
 #### 5.4.3 Dashboard Startup Sequence
 
 ```bash
-# On the laptop:
-python dashboard.py --port COM3 --baud 115200
+# Live demo (production):
+# Board B PYNQ:   python sw/board_b/telemetry_server.py --strategy 0 > /dev/ttyUSB0
+# Laptop:         python sw/laptop/dashboard.py --port COM5 --baud 115200
+# → open http://127.0.0.1:8050
 
-# dashboard.py:
-# 1. Opens COM3 at 115200 baud
-# 2. Starts background SerialReader thread
-# 3. Launches Dash server at http://localhost:8050
-# 4. Opens browser automatically
-# 5. Callbacks fire every 50 ms, pulling latest data from SerialReader
+# SSH-tunneled / recorded:
+ssh xilinx@boardb 'python sw/board_b/telemetry_server.py' \
+    | python sw/laptop/dashboard.py --stdin
+
+# Offline laptop development (no FPGA):
+python sw/laptop/dashboard.py --demo
+
+# Custom symbol mix (must match the order written by config_symbols.py):
+python sw/laptop/dashboard.py --port COM5 --symbols-config sw/laptop/symbols_default.json
 ```
 
-The dashboard handles gracefully:
-- **No serial data yet**: shows "Waiting for data..." placeholder
-- **Stale data** (> 500 ms since last update): shows yellow "STALE" warning
-- **JSON parse errors**: skips malformed lines, increments error counter
-- **COM port disconnect**: shows red "DISCONNECTED" banner, auto-reconnects
+The `--symbols-config` JSON contains three arrays — `tickers[]`, `sector_ids[]`, `init_mid[]` — that the dashboard uses for ticker labels, sector colors, and % change calculations. The default file `sw/laptop/symbols_default.json` matches the 16-stock golden loadout from `symbol_universe.py`.
+
+**P&L computation** (server-side in `telemetry_server.py`, client just renders):
+
+```python
+mid_i        = (bid[i] + ask[i]) / 2
+pnl_mtm[i]   = pnl_cash[i] + position[i] * mid_i        # dollars (per symbol)
+total_pnl    = sum(pnl_mtm)                              # full mark-to-market
+port_value   = cash + sum(position[i] * mid_i)           # cash + open exposure
+```
+
+This decomposes naturally:
+- When `position[i] == 0`, `pnl_mtm[i] == pnl_cash[i]` is the **realized** P&L on that symbol.
+- When `position[i] != 0`, the difference is the **unrealized** mark-to-market component.
+
+#### 5.4.4 Dashboard requirements
+
+The laptop needs:
+
+```
+dash >= 2.16
+plotly >= 5.19
+pyserial >= 3.5
+```
+
+See `sw/laptop/requirements.txt`. Install with `pip install -r sw/laptop/requirements.txt`. No browser plugins required — Dash uses standard React + Plotly bundles served from the local Flask server.
 
 ### 5.5 Complete Software File Inventory
 
@@ -2548,41 +2578,46 @@ The dashboard handles gracefully:
 
 **Usage**: SSH into Board B, run `python3 telemetry_server.py`. Script runs indefinitely (Ctrl+C to stop). The UART output is captured by the laptop dashboard.
 
-**`register_map.py` — why a separate file**: Both `telemetry_server.py` and any debug/test scripts need to know register offsets. Keeping them in one place avoids drift:
+**`register_map.py` — why a separate file**: `telemetry_server.py`, `live_monitor.py`, and any debug/test scripts need to know register offsets. Keeping them in one place avoids drift. Offsets reflect the **10-bit Board B AXI map** (see Appendix D.2):
 
 ```python
-# register_map.py
-CTRL           = 0x00
-STRATEGY_SEL   = 0x04
-THRESHOLD      = 0x08
-EMA_ALPHA      = 0x0C
-BASE_QTY       = 0x10
-MAX_POSITION   = 0x14
-MAX_ORDER_RATE = 0x18
-MAX_LOSS       = 0x1C
-STATUS         = 0x40
-QUOTES_RCVD    = 0x44
-ORDERS_SENT    = 0x48
-FILLS_RCVD     = 0x4C
-RISK_REJECTS   = 0x50
-LINK_ERRORS    = 0x54
-POS_SYM0       = 0x58
-CASH_LO        = 0x68
-CASH_HI        = 0x6C
-HIST_BIN0      = 0x80
-LAT_MIN        = 0xC0
-LAT_MAX        = 0xC4
-LAT_SUM        = 0xC8
-LAT_COUNT      = 0xCC
+# register_map.py — abridged (see source for full set + helpers)
+CTRL              = 0x000
+STRATEGY_SEL      = 0x004
+THRESHOLD         = 0x008
+EMA_ALPHA         = 0x00C
+BASE_QTY          = 0x010
+MAX_POSITION      = 0x014
+MAX_ORDER_RATE    = 0x018
+MAX_LOSS          = 0x01C
+STATUS            = 0x040
+QUOTES_RCVD       = 0x044
+ORDERS_SENT       = 0x048
+FILLS_RCVD        = 0x04C
+RISK_REJECTS      = 0x050
+LINK_ERRORS       = 0x054
+POS_BASE          = 0x058   # +4*i
+CASH_LO           = 0x098
+CASH_HI           = 0x09C
+HIST_BASE         = 0x0A0   # +4*i
+LAT_MIN           = 0x0E0
+LAT_MAX           = 0x0E4
+LAT_SUM           = 0x0E8
+LAT_COUNT         = 0x0EC
+# Per-symbol arrays added for the laptop dashboard:
+BID_BASE          = 0x100   # +4*i
+ASK_BASE          = 0x140   # +4*i
+PNL_CASH_LO_BASE  = 0x180   # +4*i
+PNL_CASH_HI_BASE  = 0x1C0   # +4*i
+LAST_FILL_BASE    = 0x200   # +4*i
+TRADES_PACK_BASE  = 0x240   # +4*j (2 syms per word)
 
-def q16_16(val):
-    """Convert float to Q16.16 integer."""
-    return int(val * 65536) & 0xFFFFFFFF
-
-def from_q16_16(raw):
-    """Convert Q16.16 integer to float (signed)."""
-    if raw & 0x80000000:
-        raw -= 0x100000000
+def q16_16(val):  return int(val * 65536) & 0xFFFFFFFF
+def from_q16_16(raw):  return raw / 65536.0
+def signed32(raw):  return raw - 0x100000000 if raw >= 0x80000000 else raw
+def cash_q32_16(lo, hi):
+    raw = ((hi & 0xFFFF) << 32) | (lo & 0xFFFFFFFF)
+    if raw & (1 << 47): raw -= 1 << 48
     return raw / 65536.0
 ```
 
@@ -2590,19 +2625,21 @@ def from_q16_16(raw):
 
 | File | Location | Description |
 |------|----------|-------------|
-| `dashboard.py` | `sw/laptop/` | Main dashboard application (Plotly Dash + pyserial) |
-| `serial_reader.py` | `sw/laptop/` | Background thread: reads COM port, parses JSON, computes rates |
+| `dashboard.py` | `sw/laptop/` | Main dashboard application (Plotly Dash + pyserial) — Robinhood-style portfolio monitor with header bar, sector pills, per-symbol cards, latency widget, activity panel. Supports `--port` / `--stdin` / `--demo` modes. |
+| `symbols_default.json` | `sw/laptop/` | Default 16-symbol layout (`tickers[]`, `sector_ids[]`, `init_mid[]`) used by the dashboard for labels, sector colors, and % change. Override with `--symbols-config`. |
 | `requirements.txt` | `sw/laptop/` | Python dependency list |
 
 **`requirements.txt`**:
 
 ```
+dash>=2.16
+plotly>=5.19
 pyserial>=3.5
-dash>=2.14
-plotly>=5.18
 ```
 
-**Installation**: `pip install -r requirements.txt`
+**Installation**: `pip install -r sw/laptop/requirements.txt`
+
+The dashboard's `TelemetrySource` thread is integrated directly in `dashboard.py` (no separate `serial_reader.py`) — it has three drivers (`serial_reader`, `stdin_reader`, `demo_reader`) selected by CLI flag.
 
 #### 5.5.4 Stretch Goal: Board A PS Telemetry
 
@@ -3488,72 +3525,98 @@ All three frame types in a single reference, 128 bits each, MSB serialized first
 
 #### D.1 Board A Register Map
 
-Base address: auto-assigned by Vivado block design (read from `.hwh` via PYNQ). Address space: 8-bit (256 bytes).
+Base address: auto-assigned by Vivado block design (read from `.hwh` via PYNQ). Address space: **9-bit (512 bytes)** — bumped from 8-bit to expose extended counters.
 
 The register map uses **windowed addressing** to support up to `NUM_SYMBOLS=16` symbols. Per-symbol arrays are laid out at fixed base offsets with `+4×i` indexing.
 
 | Offset | Name | Width | R/W | Default | Description |
 |--------|------|-------|-----|---------|-------------|
-| `0x00` | `CTRL` | 32 | W | 0 | Bit 0: `start_pulse`, Bit 1: `reset_pulse`. Writing generates 1-cycle pulses. |
-| `0x04` | `QUOTE_INTERVAL` | 32 | R/W | 1000 | Clock cycles between consecutive quote rounds (per-symbol). 0 = every cycle (fastest). |
-| `0x08` | `LFSR_SEED` | 32 | R/W | `0xDEADBEEF` | Initial seed for the noise generator LFSRs. Loaded on IDLE→RUNNING transition. Zero seed is remapped to 1 internally. |
-| `0x0C` | `REGIME` | 32 | R/W | 0 | Bits [1:0]: regime (00=CALM, 01=VOLATILE, 10=BURST, 11=ADVERSARIAL). Effective only when `sw_override` (SW[2]) is low. |
-| `0x10`–`0x4F` | `INIT_MID[i]` | 32 | R/W | 0 | Per-symbol initial mid price (Q16.16). `offset = 0x10 + 4×i` for `i = 0..15`. Written by PS via `config_symbols.py`. |
-| `0x50`–`0x8F` | `INIT_SPREAD[i]` | 32 | R/W | 1 | Per-symbol initial spread (Q16.16). `offset = 0x50 + 4×i`. Zero spread is clamped to 1 internally. |
-| `0x90`–`0xCF` | `SECTOR_ID[i]` | 32 | R/W | 0 | Per-symbol sector assignment. `offset = 0x90 + 4×i`. Only bits `[SECTOR_ID_W-1:0]` are used (3 bits for 8 sectors). |
-| `0xD0`–`0xEF` | `TOKEN[j]` | 32 | R/W | identity | Packed company tokens: two 16-bit tokens per 32-bit word. `offset = 0xD0 + 4×j` stores `{token[2j+1], token[2j]}`. 8 words cover 16 symbols. Default: `token[i] = i`. |
-| `0xF0` | `ACTIVE_SYM_COUNT` | 32 | R/W | NUM_SYM | Bits [7:0]: number of active symbols (1–16). 0 is clamped to 1; values > NUM_SYM are clamped to NUM_SYM. Controls how many symbols participate in round-robin quoting and noise generation. |
-| `0xF4` | `STATUS` | 32 | R | — | Packed read-only status: bit [0]=`running`, [1]=`link_up`, [3:2]=`active_regime`, [8:4]=reserved (zero), [15:9]=`fifo_fill[6:0]` (quote FIFO level, 0–64), [31:16]=reserved. |
-| `0xF8` | `QUOTES_SENT` | 32 | R | 0 | Monotonic counter: total QUOTE frames generated by `market_sim`. |
-| `0xFC` | `ORDERS_RCVD` | 32 | R | 0 | Monotonic counter: total ORDER frames received by `exchange_lite`. |
+| `0x000` | `CTRL` | 32 | W | 0 | Bit 0: `start_pulse`, Bit 1: `reset_pulse`. Writing generates 1-cycle pulses. |
+| `0x004` | `QUOTE_INTERVAL` | 32 | R/W | 1000 | Clock cycles between consecutive quote rounds (per-symbol). 0 = every cycle (fastest). |
+| `0x008` | `LFSR_SEED` | 32 | R/W | `0xDEADBEEF` | Initial seed for the noise generator LFSRs. Loaded on IDLE→RUNNING transition. Zero seed is remapped to 1 internally. |
+| `0x00C` | `REGIME` | 32 | R/W | 0 | Bits [1:0]: regime (00=CALM, 01=VOLATILE, 10=BURST, 11=ADVERSARIAL). Effective only when `sw_override` (SW[2]) is low. |
+| `0x010`–`0x04C` | `INIT_MID[i]` | 32 | R/W | 0 | Per-symbol initial mid price (Q16.16). `offset = 0x010 + 4×i` for `i = 0..15`. Written by PS via `config_symbols.py`. |
+| `0x050`–`0x08C` | `INIT_SPREAD[i]` | 32 | R/W | 1 | Per-symbol initial spread (Q16.16). `offset = 0x050 + 4×i`. Zero spread is clamped to 1 internally. |
+| `0x090`–`0x0CC` | `SECTOR_ID[i]` | 32 | R/W | 0 | Per-symbol sector assignment. `offset = 0x090 + 4×i`. Only bits `[SECTOR_ID_W-1:0]` are used (3 bits for 8 sectors). |
+| `0x0D0`–`0x0EC` | `TOKEN[j]` | 32 | R/W | identity | Packed company tokens: two 16-bit tokens per 32-bit word. `offset = 0x0D0 + 4×j` stores `{token[2j+1], token[2j]}`. 8 words cover 16 symbols. Default: `token[i] = i`. |
+| `0x0F0` | `ACTIVE_SYM_COUNT` | 32 | R/W | NUM_SYM | Bits [7:0]: number of active symbols (1–16). 0 is clamped to 1; values > NUM_SYM are clamped to NUM_SYM. Controls how many symbols participate in round-robin quoting and noise generation. |
+| `0x0F4` | `STATUS` | 32 | R | — | Packed read-only status: bit [0]=`running`, [1]=`link_up`, [3:2]=`active_regime`, [8:4]=reserved (zero), [15:9]=`fifo_fill[6:0]` (quote FIFO level, 0–64), [31:16]=reserved. |
+| `0x0F8` | `QUOTES_SENT` | 32 | R | 0 | Monotonic counter: total QUOTE frames generated by `market_sim`. |
+| `0x0FC` | `ORDERS_RCVD` | 32 | R | 0 | Monotonic counter: total ORDER frames received by `exchange_lite`. |
+| `0x100` | `FILLS_SENT` | 32 | R | 0 | **(added)** Monotonic counter: total FILL frames sent by `exchange_lite`. |
+| `0x104` | `REJECTS_SENT` | 32 | R | 0 | **(added)** Monotonic counter: total REJECT (status≠OK) FILL frames sent. |
+| `0x108` | `LINK_ERRORS` | 32 | R | 0 | **(added)** Cumulative `link_rx` framing/sync error count. |
 
 **Implementation notes**:
-- `fills_sent`, `rejects_sent`, and `link_errors` are wired as inputs to the AXI register module but **do not have dedicated read-back addresses** in the current implementation. They are available for debug via ILA probes. A future revision could map them to unused addresses.
+- `FILLS_SENT`, `REJECTS_SENT`, and `LINK_ERRORS` were previously wired as module inputs without read addresses. They are now mapped at `0x100`–`0x108` to enable laptop dashboard verification.
 - `fifo_fill` is packed inside the `STATUS` register at bits [15:9] rather than having a separate address.
 - The AXI handshake uses `write_fire = awvalid && wvalid && !bvalid` (no `wstrb` byte-lane decoding — full-word writes only). Read: `read_fire = arvalid && !rvalid`.
+- Vivado block design must be re-packaged with `C_S_AXI_ADDR_WIDTH = 9` and the address editor entry widened to ≥ 0x200 bytes after this change.
 
 #### D.2 Board B Register Map
 
+Address space: **10-bit (1 KiB)** — bumped from 9-bit to expose per-symbol arrays for the laptop dashboard.
+
+**Config registers (R/W):**
+
 | Offset | Name | Width | R/W | Default | Description |
 |--------|------|-------|-----|---------|-------------|
-| `0x00` | `CTRL` | 32 | W | 0 | Bit 0: start pulse, Bit 1: reset pulse. 1-cycle pulses. |
-| `0x04` | `STRATEGY_SEL` | 32 | R/W | 0 | Bits 1:0: strategy (0=mean-rev, 1=momentum, 2=NN, 3=auto). Core build: hardwired 0. |
-| `0x08` | `THRESHOLD` | 32 | R/W | `0x0001_0000` | Mean-reversion deviation threshold (Q16.16). $1.00 |
-| `0x0C` | `EMA_ALPHA` | 32 | R/W | 6554 | EMA smoothing factor (Q0.16). ~0.1 |
-| `0x10` | `BASE_QTY` | 32 | R/W | 100 | Shares per order |
-| `0x14` | `MAX_POSITION` | 32 | R/W | 500 | Max absolute position per symbol (shares) |
-| `0x18` | `MAX_ORDER_RATE` | 32 | R/W | 1000 | Max orders per rate-limit window |
-| `0x1C` | `MAX_LOSS` | 32 | R/W | `0x0064_0000` | Max cumulative loss before halt (Q16.16). $100.00 |
-| | | | | | |
-| `0x40` | `STATUS` | 32 | R | — | Bits 2:0: FSM state, Bit 3: `link_up`, Bit 4: `risk_halt`, Bits 6:5: `active_strategy` |
-| `0x44` | `QUOTES_RCVD` | 32 | R | 0 | Total QUOTE frames received |
-| `0x48` | `ORDERS_SENT` | 32 | R | 0 | Total ORDER frames sent |
-| `0x4C` | `FILLS_RCVD` | 32 | R | 0 | Total FILL frames received |
-| `0x50` | `RISK_REJECTS` | 32 | R | 0 | Total orders rejected by risk manager |
-| `0x54` | `LINK_ERRORS` | 32 | R | 0 | Link RX framing error count |
-| `0x58` | `POS_SYM0` | 32 | R | 0 | Symbol 0 position (signed int32) |
-| `0x5C` | `POS_SYM1` | 32 | R | 0 | Symbol 1 position |
-| `0x60` | `POS_SYM2` | 32 | R | 0 | Symbol 2 position |
-| `0x64` | `POS_SYM3` | 32 | R | 0 | Symbol 3 position |
-| `0x68` | `CASH_LO` | 32 | R | 0 | Cash accumulator bits [31:0] |
-| `0x6C` | `CASH_HI` | 32 | R | 0 | Cash accumulator bits [47:32] (signed) |
-| `0x80` | `HIST_BIN0` | 32 | R | 0 | Latency histogram bin 0 count (0–31 cycles) |
-| `0x84` | `HIST_BIN1` | 32 | R | 0 | Bin 1 (32–63 cycles) |
-| … | … | … | … | … | … |
-| `0xBC` | `HIST_BIN15` | 32 | R | 0 | Bin 15 (≥480 cycles, overflow bucket) |
-| `0xC0` | `LAT_MIN` | 32 | R | `0xFFFF` | Minimum observed latency (cycles) |
-| `0xC4` | `LAT_MAX` | 32 | R | 0 | Maximum observed latency (cycles) |
-| `0xC8` | `LAT_SUM` | 32 | R | 0 | Sum of all latencies (for mean) |
-| `0xCC` | `LAT_COUNT` | 32 | R | 0 | Number of latency samples (= fills measured) |
+| `0x000` | `CTRL` | 32 | W | 0 | Bit 0: start pulse, Bit 1: reset pulse. 1-cycle pulses. |
+| `0x004` | `STRATEGY_SEL` | 32 | R/W | 0 | Bits 1:0: strategy (0=mean-rev, 1=momentum, 2=NN, 3=auto). Core build: only mean-rev is implemented. |
+| `0x008` | `THRESHOLD` | 32 | R/W | `0x0001_0000` | Mean-reversion deviation threshold (Q16.16). $1.00 |
+| `0x00C` | `EMA_ALPHA` | 32 | R/W | 6554 | EMA smoothing factor (Q0.16). ~0.1 |
+| `0x010` | `BASE_QTY` | 32 | R/W | 100 | Shares per order |
+| `0x014` | `MAX_POSITION` | 32 | R/W | 500 | Max absolute position per symbol (shares) |
+| `0x018` | `MAX_ORDER_RATE` | 32 | R/W | 1000 | Max orders per rate-limit window |
+| `0x01C` | `MAX_LOSS` | 32 | R/W | 100 | Max cumulative loss before halt. **Raw integer dollars** (compared against `total_pnl = cash[47:16]`, which is the integer-dollar portion of the Q32.16 cash accumulator). |
 
-**Stretch goal additions** (appended when modules exist):
+**Status registers (R-only):**
+
+| Offset | Name | Width | R/W | Default | Description |
+|--------|------|-------|-----|---------|-------------|
+| `0x040` | `STATUS` | 32 | R | — | `{25'b0, risk_halt[6], link_up[5], fsm_state[4:2], active_strategy[1:0]}` |
+| `0x044` | `QUOTES_RCVD` | 32 | R | 0 | Total QUOTE frames received |
+| `0x048` | `ORDERS_SENT` | 32 | R | 0 | Total ORDER frames sent |
+| `0x04C` | `FILLS_RCVD` | 32 | R | 0 | Total FILL frames received (filled only) |
+| `0x050` | `RISK_REJECTS` | 32 | R | 0 | Total orders rejected by risk manager |
+| `0x054` | `LINK_ERRORS` | 32 | R | 0 | Link RX framing error count |
+| `0x058`–`0x094` | `POS_SYM[i]` | 32 | R | 0 | Symbol `i` signed position (int32). `offset = 0x058 + 4×i` for `i = 0..15`. |
+| `0x098` | `CASH_LO` | 32 | R | 0 | Global cash accumulator bits [31:0] (Q32.16) |
+| `0x09C` | `CASH_HI` | 32 | R | 0 | Global cash accumulator bits [47:32], **sign-extended to 32 bits** |
+| `0x0A0`–`0x0DC` | `HIST_BIN[i]` | 32 | R | 0 | Latency histogram bin `i` count. Bin `i` covers latencies `[i×32, (i+1)×32)` cycles. Bin 15 is the saturating overflow bucket (≥ 480 cy). `offset = 0x0A0 + 4×i`. |
+| `0x0E0` | `LAT_MIN` | 32 | R | `0xFFFF` | Minimum observed round-trip latency (cycles) |
+| `0x0E4` | `LAT_MAX` | 32 | R | 0 | Maximum observed latency (cycles) |
+| `0x0E8` | `LAT_SUM` | 32 | R | 0 | Cumulative sum of latencies (for mean) |
+| `0x0EC` | `LAT_COUNT` | 32 | R | 0 | Number of latency samples (= fills measured) |
+
+**Extended per-symbol arrays for laptop dashboard (added):**
+
+| Offset | Name | Width | R/W | Default | Description |
+|--------|------|-------|-----|---------|-------------|
+| `0x100`–`0x13C` | `BID[i]` | 32 | R | 0 | Board B's view of best bid per symbol (Q16.16, from `quote_book`). Lags Board A by ≤ 1 link delay. |
+| `0x140`–`0x17C` | `ASK[i]` | 32 | R | 0 | Board B's view of best ask per symbol (Q16.16). |
+| `0x180`–`0x1BC` | `PNL_CASH_LO[i]` | 32 | R | 0 | Per-symbol cash flow accumulator bits [31:0] (Q32.16). Buy decrements by `price×qty`, sell increments. |
+| `0x1C0`–`0x1FC` | `PNL_CASH_HI[i]` | 32 | R | 0 | Per-symbol cash flow accumulator bits [47:32], **sign-extended to 32 bits**. |
+| `0x200`–`0x23C` | `LAST_FILL_PRICE[i]` | 32 | R | 0 | Last execution price per symbol (Q16.16). 0 until first fill. |
+| `0x240`–`0x25C` | `TRADES_PACK[j]` | 32 | R | 0 | Per-symbol fill counts. Packed 2× 16-bit values per word: `{trades[2j+1], trades[2j]}`. 8 words cover 16 symbols. |
+
+**Computing per-symbol mark-to-market P&L** (in PS Python, see `sw/board_b/telemetry_server.py`):
+
+```python
+mid_i      = (bid[i] + ask[i]) / 2
+pnl_mtm[i] = pnl_cash[i] + position[i] * mid_i      # dollars
+pos_value  = sum(position[i] * mid[i] for i in range(NUM_SYM))
+port_value = cash + pos_value                        # total portfolio $
+```
+
+**Stretch goal additions** (appended when stretch modules exist; offsets begin at `0x300` to leave a 64-byte gap above the per-symbol arrays for future extensions):
 
 | Offset | Name | R/W | Description |
 |--------|------|-----|-------------|
-| `0xD0` | `EMA_LONG_ALPHA` | R/W | Momentum: slow EMA alpha (Q0.16) |
-| `0xD4` | `MOMENTUM_THRESH` | R/W | Momentum: trend threshold (Q16.16) |
-| `0xD8`–`0xF4` | `NN_WEIGHT_0..66` | R/W | Neural network: 67 × 16-bit weights (Q8.8), packed 2 per 32-bit register |
-| `0x100`–`0x10C` | `VOL_HAT_SYM0..3` | R | Volatility estimates per symbol (Q16.16) |
+| `0x300` | `EMA_LONG_ALPHA` | R/W | Momentum: slow EMA alpha (Q0.16) |
+| `0x304` | `MOMENTUM_THRESH` | R/W | Momentum: trend threshold (Q16.16) |
+| `0x308`–`0x38C` | `NN_WEIGHT[k]` | R/W | Neural network: 67 × 16-bit weights (Q8.8), packed 2 per 32-bit register |
+| `0x390`–`0x3CC` | `VOL_HAT[i]` | R | Per-symbol volatility estimates (Q16.16) |
 
 ### Appendix E — Market Simulator and LFSR Detail
 

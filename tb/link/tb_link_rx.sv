@@ -78,21 +78,21 @@ module tb_link_rx;
     );
         pmod_valid = 1'b0;
         pmod_data  = '0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         for (int i = 0; i < beats_to_send; i++) begin
             pmod_data  = nibble_at(frame, i);
             pmod_valid = 1'b1;
-            @(posedge clk);
-            @(posedge clk);
+            @(posedge clk); #1;
+            @(posedge clk); #1;
         end
 
         if (pad_after > 0)
-            repeat (pad_after) @(posedge clk);
+            repeat (pad_after) @(posedge clk); #1;
 
         pmod_valid = 1'b0;
         pmod_data  = '0;
-        @(posedge clk);
+        @(posedge clk); #1;
     endtask
 
     // Wait for frame_out_valid or timeout
@@ -129,9 +129,9 @@ module tb_link_rx;
         pmod_valid  = 1'b0;
         counter_clr = 1'b0;
 
-        @(posedge clk);
+        @(posedge clk); #1;
         wait (rst_n === 1'b1);
-        repeat (4) @(posedge clk);
+        repeat (4) @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 1) Idle state: no frames, link_up=0
@@ -206,7 +206,7 @@ module tb_link_rx;
         @(posedge clk); #1;
         check("pre-clr: link_up=1", link_up == 1'b1);
         counter_clr = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         counter_clr = 1'b0;
         @(posedge clk); #1;
         check("counter_clr: link_up=0", link_up == 1'b0);

@@ -1,0 +1,26 @@
+Vivado Simulator v2025.2
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+Running: C:\AMDDesignTools\2025.2\Vivado\bin\unwrapped\win64.o\xelab.exe --debug typical -L unisims_ver -L secureip tb_board_a_top -s tb_board_a_top_sim 
+Multi-threading is on. Using 6 slave threads.
+Starting static elaboration
+Pass Through NonSizing Optimizer
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling package work.hft_pkg
+Compiling module work.board_a_axi_regs(NUM_SYM=16)
+Compiling module work.debounce(COUNTER_W=16)
+Compiling module work.board_a_ctrl
+Compiling module work.lfsr32
+Compiling module work.market_noise_gen(NUM_SYM=16,NUM_...
+Compiling module work.market_sim(NUM_SYM=16)
+Compiling module work.sync_fifo(ALMOST_FULL_THRESH=60)
+Compiling module work.exchange_lite(NUM_SYM=16)
+Compiling module work.tx_arbiter
+Compiling module work.link_tx_default
+Compiling module work.link_rx_default
+Compiling module work.board_a_top(NUM_SYM=16)
+Compiling module work.tb_board_a_top
+Built simulation snapshot tb_board_a_top_sim

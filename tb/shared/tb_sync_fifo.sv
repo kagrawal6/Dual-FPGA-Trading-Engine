@@ -96,7 +96,7 @@ module tb_sync_fifo;
         sm_flush = 0; sm_wr_en = 0; sm_rd_en = 0; sm_wr_data = '0;
         #100;
         rst_n = 1;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 1) Post-reset state
@@ -113,10 +113,10 @@ module tb_sync_fifo;
         for (int i = 1; i <= 10; i++) begin
             wr_data = 128'(i);
             wr_en = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
         end
         wr_en = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("count after 10 writes", count, 10);
         check("!empty after writes", empty == 1'b0);
 
@@ -126,7 +126,7 @@ module tb_sync_fifo;
             @(posedge clk); #1;
         end
         rd_en = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("empty after drain", empty == 1'b1);
 
         // ─────────────────────────────────────────────────────
@@ -137,10 +137,10 @@ module tb_sync_fifo;
         for (int i = 0; i < 32; i++) begin
             wr_data = 128'(i + 100);
             wr_en = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
         end
         wr_en = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("count==32 before concurrent", count, 32);
 
         // Simultaneous rd+wr for 20 cycles
@@ -148,20 +148,20 @@ module tb_sync_fifo;
             wr_data = 128'(i + 200);
             wr_en = 1'b1;
             rd_en = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             check32($sformatf("concurrent[%0d] count stable", i), count, 32);
         end
         wr_en = 1'b0;
         rd_en = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("count still 32 after concurrent", count, 32);
         // Drain and verify ordering: first 12 should be [112..131], then [200..219]
         rd_en = 1'b1;
         for (int i = 0; i < 32; i++) begin
-            @(posedge clk);
+            @(posedge clk); #1;
         end
         rd_en = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("empty after full drain", empty == 1'b1);
 
         // ─────────────────────────────────────────────────────
@@ -171,20 +171,20 @@ module tb_sync_fifo;
         for (int i = 0; i < 64; i++) begin
             wr_data = 128'(i);
             wr_en = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
         end
         wr_en = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("full at 64", full == 1'b1);
         check32("count==64", count, 64);
 
         // Write while full — should not corrupt
         wr_data = 128'hDEAD;
         wr_en = 1'b1;
-        @(posedge clk);
-        @(posedge clk);
+        @(posedge clk); #1;
+        @(posedge clk); #1;
         wr_en = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("count still 64 after overflow attempt", count, 64);
         check("still full", full == 1'b1);
         // First element should still be 0 (not DEAD)
@@ -192,9 +192,9 @@ module tb_sync_fifo;
 
         // Flush for next test
         flush = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         flush = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("flush empties FIFO", empty == 1'b1);
 
         // ─────────────────────────────────────────────────────
@@ -203,23 +203,23 @@ module tb_sync_fifo;
         $display("--- test_underflow ---");
         check("empty before underflow test", empty == 1'b1);
         rd_en = 1'b1;
-        @(posedge clk);
-        @(posedge clk);
+        @(posedge clk); #1;
+        @(posedge clk); #1;
         rd_en = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("count still 0 after underflow", count, 0);
         check("still empty after underflow", empty == 1'b1);
         // Verify FIFO still works after underflow
         wr_data = 128'hBEEF;
         wr_en = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         wr_en = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("FIFO works after underflow", rd_data === 128'hBEEF);
         rd_en = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         rd_en = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 6) Flush during write
@@ -228,10 +228,10 @@ module tb_sync_fifo;
         wr_data = 128'hAAAA;
         wr_en = 1'b1;
         flush = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         wr_en = 1'b0;
         flush = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("flush during write: empty", empty == 1'b1);
         check32("flush during write: count==0", count, 0);
 
@@ -242,26 +242,26 @@ module tb_sync_fifo;
         for (int i = 0; i < 59; i++) begin
             wr_data = 128'(i);
             wr_en = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
         end
         wr_en = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("count==59", count, 59);
         check("almost_full=0 at 59", almost_full == 1'b0);
 
         wr_data = 128'd59;
         wr_en = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         wr_en = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("count==60", count, 60);
         check("almost_full=1 at 60", almost_full == 1'b1);
         check("not full at 60", full == 1'b0);
 
         flush = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         flush = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 8) Small FIFO (DEPTH=4) corner cases
@@ -273,10 +273,10 @@ module tb_sync_fifo;
         for (int i = 0; i < 4; i++) begin
             sm_wr_data = 128'(i + 1000);
             sm_wr_en = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
         end
         sm_wr_en = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("small: full at 4", sm_full == 1'b1);
         check32("small: count==4", sm_count, 4);
         check("small: almost_full at 4", sm_af == 1'b1);
@@ -288,29 +288,29 @@ module tb_sync_fifo;
             @(posedge clk); #1;
         end
         sm_rd_en = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("small: empty after drain", sm_empty == 1'b1);
 
         // Concurrent rd+wr on small FIFO
         sm_wr_data = 128'h5555;
         sm_wr_en = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         sm_wr_en = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         // Now simultaneous rd+wr
         sm_wr_data = 128'h6666;
         sm_wr_en = 1'b1;
         sm_rd_en = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         sm_wr_en = 1'b0;
         sm_rd_en = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check32("small: concurrent count==1", sm_count, 1);
         check("small: concurrent rd_data", sm_rd_data === 128'h6666);
         sm_rd_en = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         sm_rd_en = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // Summary

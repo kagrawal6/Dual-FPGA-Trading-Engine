@@ -104,7 +104,7 @@ module tb_msg_demux;
         clear          = 1'b0;
 
         @(posedge rst_n);
-        repeat (2) @(posedge clk);
+        repeat (2) @(posedge clk); #1;
 
         // ────────────────────────────────────────────────────────────────
         // TEST 1: Single QUOTE frame routing
@@ -114,9 +114,9 @@ module tb_msg_demux;
                                     16'd1000, 16'd1000, 16'd0);
         frame_in       = expected_quote;
         frame_in_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         frame_in_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check("T1: quote_valid asserted",   quote_valid == 1'b1);
         check("T1: fill_valid deasserted",   fill_valid == 1'b0);
@@ -124,7 +124,7 @@ module tb_msg_demux;
         check("T1: quotes_rcvd == 1",        quotes_rcvd == 32'd1);
         check("T1: demux_errors == 0",       demux_errors == 32'd0);
 
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T1: quote_valid deasserts",   quote_valid == 1'b0);
 
         // ────────────────────────────────────────────────────────────────
@@ -135,9 +135,9 @@ module tb_msg_demux;
                                   16'd100, 16'd1, 16'hA5A5);
         frame_in       = expected_fill;
         frame_in_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         frame_in_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check("T2: fill_valid asserted",     fill_valid == 1'b1);
         check("T2: quote_valid deasserted",  quote_valid == 1'b0);
@@ -145,7 +145,7 @@ module tb_msg_demux;
         check("T2: quotes_rcvd unchanged",   quotes_rcvd == 32'd1);
         check("T2: demux_errors == 0",       demux_errors == 32'd0);
 
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T2: fill_valid deasserts",    fill_valid == 1'b0);
 
         // ────────────────────────────────────────────────────────────────
@@ -154,9 +154,9 @@ module tb_msg_demux;
         $display("\n=== TEST 3: Unknown msg_type ===");
         frame_in       = make_raw(4'h0);
         frame_in_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         frame_in_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check("T3: quote_valid == 0",        quote_valid == 1'b0);
         check("T3: fill_valid == 0",         fill_valid == 1'b0);
@@ -165,9 +165,9 @@ module tb_msg_demux;
         // Try another unknown type (MSG_ORDER = 4'h2 should NOT be routed on Board B)
         frame_in       = make_raw(4'h2);
         frame_in_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         frame_in_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check("T3b: ORDER on Board B → error", demux_errors == 32'd2);
         check("T3b: quote_valid == 0",       quote_valid == 1'b0);
@@ -177,9 +177,9 @@ module tb_msg_demux;
         for (int mt = 4; mt < 16; mt++) begin
             frame_in       = make_raw(4'(mt));
             frame_in_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             frame_in_valid = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
         end
         check("T3c: all invalid types counted", demux_errors == 32'd14);
 
@@ -196,24 +196,24 @@ module tb_msg_demux;
             // Send 3 consecutive frames with no gap
             frame_in       = q0;
             frame_in_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
 
             frame_in = q1;
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T4: q0 routed",           quote_valid == 1'b1);
             check("T4: q0 frame",            quote_frame == q0);
 
             frame_in = q2;
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T4: q1 routed",           quote_valid == 1'b1);
             check("T4: q1 frame",            quote_frame == q1);
 
             frame_in_valid = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T4: q2 routed",           quote_valid == 1'b1);
             check("T4: q2 frame",            quote_frame == q2);
 
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T4: valid deasserts",     quote_valid == 1'b0);
             // 1 (T1) + 3 (T4) = 4 total quotes
             check("T4: quotes_rcvd == 4",    quotes_rcvd == 32'd4);
@@ -231,16 +231,16 @@ module tb_msg_demux;
 
             frame_in       = q;
             frame_in_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
 
             frame_in = f;
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T5: quote routed",        quote_valid == 1'b1);
             check("T5: fill not yet",        fill_valid == 1'b0);
             check("T5: quote_frame",         quote_frame == q);
 
             frame_in_valid = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T5: fill routed",         fill_valid == 1'b1);
             check("T5: quote deasserted",    quote_valid == 1'b0);
             check("T5: fill_frame",          fill_frame == f);
@@ -250,14 +250,14 @@ module tb_msg_demux;
         // TEST 6: Clear resets counters but not outputs
         // ────────────────────────────────────────────────────────────────
         $display("\n=== TEST 6: Counter clear ===");
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T6: pre-clear quotes_rcvd > 0", quotes_rcvd > 0);
         check("T6: pre-clear errors > 0",      demux_errors > 0);
 
         clear = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         clear = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check("T6: quotes_rcvd cleared",    quotes_rcvd == 32'd0);
         check("T6: demux_errors cleared",   demux_errors == 32'd0);
@@ -271,8 +271,8 @@ module tb_msg_demux;
         frame_in       = make_quote(8'd0, REGIME_CALM, 32'h1000_0000, 32'h1000_8000,
                                     16'd100, 16'd100, 16'd99);
         frame_in_valid = 1'b0;
-        @(posedge clk);
-        @(posedge clk);
+        @(posedge clk); #1;
+        @(posedge clk); #1;
         check("T7: no quote_valid",         quote_valid == 1'b0);
         check("T7: no fill_valid",          fill_valid == 1'b0);
         check("T7: quotes_rcvd == 0",       quotes_rcvd == 32'd0);
@@ -284,9 +284,9 @@ module tb_msg_demux;
         expected_fill = make_fill(8'd2, 1'b0, 3'b001, 32'h0, 16'd0, 16'd42, 16'hBEEF);
         frame_in       = expected_fill;
         frame_in_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         frame_in_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check("T8: fill_valid asserted",    fill_valid == 1'b1);
         check("T8: fill_frame matches",     fill_frame == expected_fill);
@@ -302,9 +302,9 @@ module tb_msg_demux;
             gm_quote = 128'h100000B3F81E00B4081E03E803E80000;
             frame_in       = gm_quote;
             frame_in_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             frame_in_valid = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T9a: GM quote routed",    quote_valid == 1'b1);
             check("T9a: GM quote frame",     quote_frame == gm_quote);
             check("T9a: GM symbol==0",       quote_frame[123:116] == 8'd0);
@@ -313,27 +313,27 @@ module tb_msg_demux;
             gm_quote = 128'h101001A3F82101A4082103E803E80000;
             frame_in       = gm_quote;
             frame_in_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             frame_in_valid = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T9b: GM sym1 routed",     quote_valid == 1'b1);
             check("T9b: GM sym1 frame",      quote_frame == gm_quote);
 
             gm_quote = 128'h10200383F8160384081603E803E80000;
             frame_in       = gm_quote;
             frame_in_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             frame_in_valid = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T9c: GM sym2 routed",     quote_valid == 1'b1);
             check("T9c: GM sym2 frame",      quote_frame == gm_quote);
 
             gm_fill = 128'h300000B4081500640001002A00000000;
             frame_in       = gm_fill;
             frame_in_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             frame_in_valid = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T9d: GM fill routed",     fill_valid == 1'b1);
             check("T9d: GM fill frame",      fill_frame == gm_fill);
             check("T9d: GM fill sym==0",     fill_frame[123:116] == 8'd0);
@@ -342,9 +342,9 @@ module tb_msg_demux;
 
             frame_in       = 128'h00000000DEADBEEFCAFE1234567890AB;
             frame_in_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             frame_in_valid = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T9e: GM invalid→error",   quote_valid == 1'b0 && fill_valid == 1'b0);
         end
 
@@ -354,9 +354,9 @@ module tb_msg_demux;
         $display("\n=== TEST 10: 10-frame back-to-back stress ===");
         begin
             clear = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             clear = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
 
             for (int i = 0; i < 10; i++) begin
                 frame_in = make_quote(8'(i % 4), REGIME_CALM,
@@ -364,12 +364,12 @@ module tb_msg_demux;
                     32'h00648000 + 32'(i * 32'h1000),
                     16'd100, 16'd100, 16'(i));
                 frame_in_valid = 1'b1;
-                @(posedge clk);
+                @(posedge clk); #1;
             end
             frame_in_valid = 1'b0;
 
             // Wait for pipeline to drain
-            repeat (2) @(posedge clk);
+            repeat (2) @(posedge clk); #1;
             check("T10: quotes_rcvd==10", quotes_rcvd == 32'd10);
             check("T10: no errors",       demux_errors == 32'd0);
         end
@@ -383,16 +383,16 @@ module tb_msg_demux;
             frame_in = make_quote(8'd0, REGIME_CALM, 32'h00640000, 32'h00648000,
                                   16'd100, 16'd100, 16'd99);
             frame_in_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             frame_in_valid = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
 
             check("T11a: quotes > 0",    quotes_rcvd > 0);
 
             clear = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             clear = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
 
             check("T11b: counters reset", quotes_rcvd == 32'd0);
             check("T11b: errors reset",   demux_errors == 32'd0);
@@ -413,19 +413,19 @@ module tb_msg_demux;
 
             frame_in = qf[0];
             frame_in_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             #1;
             frame_in = qf[1];
             check("T12a: quote first",    quote_valid == 1'b1);
-            @(posedge clk);
+            @(posedge clk); #1;
             #1;
             frame_in = qf[2];
             check("T12b: fill second",    fill_valid == 1'b1);
-            @(posedge clk);
+            @(posedge clk); #1;
             #1;
             frame_in = qf[3];
             check("T12c: quote third",    quote_valid == 1'b1);
-            @(posedge clk);
+            @(posedge clk); #1;
             #1;
             frame_in_valid = 1'b0;
             check("T12d: fill fourth",    fill_valid == 1'b1);
@@ -434,7 +434,7 @@ module tb_msg_demux;
         // ────────────────────────────────────────────────────────────────
         // SUMMARY
         // ────────────────────────────────────────────────────────────────
-        repeat (3) @(posedge clk);
+        repeat (3) @(posedge clk); #1;
         $display("\n══════════════════════════════════════════");
         $display("  msg_demux testbench complete");
         $display("  PASSED: %0d", pass_count);

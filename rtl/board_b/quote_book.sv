@@ -29,7 +29,13 @@ module quote_book
     output qty_t                ask_size,
     output symbol_t             symbol_id,
     output regime_e             regime,
-    output logic                book_valid
+    output logic                book_valid,
+
+    // Per-symbol book snapshot exposed to AXI for laptop telemetry
+    // (latest bid/ask seen by this trader per symbol; one link delay
+    //  behind Board A's market_sim, which is the realistic trader's view)
+    output price_t              best_bid_arr [NUM_SYM],
+    output price_t              best_ask_arr [NUM_SYM]
 );
 
     // ── Register file ───────────────────────────────────────────
@@ -37,6 +43,10 @@ module quote_book
     price_t  best_ask [NUM_SYM];
     qty_t    best_bid_sz [NUM_SYM];
     qty_t    best_ask_sz [NUM_SYM];
+
+    // Expose per-symbol arrays
+    assign best_bid_arr = best_bid;
+    assign best_ask_arr = best_ask;
 
     // ── Combinational frame decode ──────────────────────────────
     logic [7:0]  frame_symbol;

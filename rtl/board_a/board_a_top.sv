@@ -13,7 +13,7 @@ module board_a_top
 #(
     parameter NUM_SYM            = NUM_SYMBOLS,
     parameter LINK_W             = LINK_DATA_W,
-    parameter C_S_AXI_ADDR_WIDTH = 8,
+    parameter C_S_AXI_ADDR_WIDTH = 9,   // bumped 8→9 for extended counter regs (FILLS_SENT, REJECTS_SENT, LINK_ERRORS)
     parameter C_S_AXI_DATA_WIDTH = 32
 )(
     input  logic        clk,

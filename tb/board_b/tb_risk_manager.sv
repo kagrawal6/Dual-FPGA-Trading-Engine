@@ -100,9 +100,9 @@ module tb_risk_manager;
         signal_price  = price;
         signal_qty    = qty;
         signal_symbol = sym;
-        @(posedge clk);
+        @(posedge clk); #1;
         signal_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
     endtask
 
     task automatic send_fill(
@@ -114,15 +114,15 @@ module tb_risk_manager;
         fill_symbol = sym;
         fill_side   = side;
         fill_qty    = qty;
-        @(posedge clk);
+        @(posedge clk); #1;
         fill_valid = 1'b0;
     endtask
 
     task automatic do_clear();
         clear = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         clear = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
     endtask
 
     initial begin
@@ -145,7 +145,7 @@ module tb_risk_manager;
         for (int i = 0; i < TB_NUM_SYM; i++) position[i] = '0;
 
         @(posedge rst_n);
-        repeat (2) @(posedge clk);
+        repeat (2) @(posedge clk); #1;
 
         // ── T1: Basic approval (all checks pass) ─────────────
         $display("\n=== T1: Basic approval ===");
@@ -269,10 +269,10 @@ module tb_risk_manager;
         fill_symbol   = 8'd0;
         fill_side     = 1'b0;  // BUY
         fill_qty      = 16'd100;
-        @(posedge clk);
+        @(posedge clk); #1;
         signal_valid = 1'b0;
         fill_valid   = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check("T7: simultaneous approved", approved_valid == 1'b1);
         // pending_buy[0] should be: 100 (old) + 50 (new signal) - 100 (fill) = 50
@@ -300,10 +300,10 @@ module tb_risk_manager;
         fill_symbol   = 8'd1;
         fill_side     = 1'b1;  // SELL sym=1
         fill_qty      = 16'd200;
-        @(posedge clk);
+        @(posedge clk); #1;
         signal_valid = 1'b0;
         fill_valid   = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check("T8: approved",              approved_valid == 1'b1);
         check("T8: pending_buy[0]=100",    dut.pending_buy[0] == 16'd100);
@@ -320,7 +320,7 @@ module tb_risk_manager;
 
         // Fill with qty=100 (more than pending) — should clamp to 0
         send_fill(8'd2, 1'b0, 16'd100);
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T9: pending clamped to 0", dut.pending_buy[2] == 16'd0);
 
         // ──────────────────────────────────────────────────────
@@ -344,12 +344,12 @@ module tb_risk_manager;
         // ── T11: No valid → no output ─────────────────────────
         $display("\n=== T11: Idle ===");
         signal_valid = 1'b0;
-        @(posedge clk);
-        @(posedge clk);
+        @(posedge clk); #1;
+        @(posedge clk); #1;
         check("T11: no output", approved_valid == 1'b0);
 
         // ── Summary ───────────────────────────────────────────
-        repeat (3) @(posedge clk);
+        repeat (3) @(posedge clk); #1;
         $display("\n══════════════════════════════════════════");
         $display("  risk_manager testbench complete");
         $display("  PASSED: %0d", pass_count);

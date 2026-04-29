@@ -2,8 +2,45 @@
 """
 Board B PS Script — telemetry_server.py
 Configures the trader pipeline, then enters a 20 Hz telemetry loop
-that reads all status registers and prints JSON lines to stdout.
+that reads all status registers (including per-symbol BBO and per-symbol
+P&L arrays) and prints JSON lines to stdout.
 Stdout is routed through UART → FTDI → USB to the laptop dashboard.
+
+JSON schema (per line):
+{
+  "ts":         <unix epoch sec>,
+  "state":      "B_TRADING" | ...,
+  "link_up":    bool,
+  "risk_halt":  bool,
+  "strategy":   "MEAN_REV" | ...,
+  "qps":        <quotes_rcvd cumulative>,
+  "ops":        <orders_sent cumulative>,
+  "fps":        <fills_rcvd cumulative>,
+  "rej":        <risk_rejects cumulative>,
+  "link_err":   <link_errors cumulative>,
+
+  "cash":       <total cash float, dollars>,
+  "total_pnl":  <total mark-to-market PnL float, dollars>,
+  "port_value": <cash + Σ position[i]*mid[i], float dollars>,
+
+  "pos":        [int, ...]      # signed position per symbol (NUM_SYMBOLS)
+  "bid":        [float, ...]    # Board B's view of best bid per symbol
+  "ask":        [float, ...]    # Board B's view of best ask per symbol
+  "mid":        [float, ...]    # (bid+ask)/2
+  "spread":     [float, ...]
+  "pnl_cash":   [float, ...]    # per-symbol cash flow accumulator (Q32.16 → float)
+  "pnl_mtm":    [float, ...]    # per-symbol mark-to-market PnL = pnl_cash + pos*mid
+  "pos_value":  [float, ...]    # per-symbol position value = pos*mid
+  "last_fill":  [float, ...]    # last execution price per symbol
+  "trades":     [int, ...]      # per-symbol fill count
+
+  "hist":       [int, ...]      # 16 latency bins
+  "lat_min":    int,
+  "lat_max":    int,
+  "lat_sum":    int,
+  "lat_cnt":    int
+}
+
 See §5.1.2 of design spec.
 """
 
@@ -11,7 +48,18 @@ import argparse
 import json
 import time
 from pynq import Overlay, MMIO
-from register_map import *
+from register_map import (
+    CTRL, STRATEGY_SEL, THRESHOLD, EMA_ALPHA, BASE_QTY,
+    MAX_POSITION, MAX_ORDER_RATE, MAX_LOSS,
+    STATUS, QUOTES_RCVD, ORDERS_SENT, FILLS_RCVD, RISK_REJECTS, LINK_ERRORS,
+    POS_BASE, CASH_LO, CASH_HI,
+    HIST_BASE, LAT_MIN, LAT_MAX, LAT_SUM, LAT_COUNT,
+    BID_BASE, ASK_BASE,
+    PNL_CASH_LO_BASE, PNL_CASH_HI_BASE,
+    LAST_FILL_BASE, TRADES_PACK_BASE,
+    NUM_SYMBOLS, NUM_HIST_BINS,
+    q16_16, from_q16_16, signed32, cash_q32_16, read_trades_pack,
+)
 
 FSM_NAMES = {0: "B_RESET", 1: "B_IDLE", 2: "B_ARMED", 3: "B_TRADING", 4: "B_HALTED"}
 STRATEGY_NAMES = {0: "MEAN_REV", 1: "MOMENTUM", 2: "NN", 3: "AUTO"}
@@ -29,25 +77,60 @@ def decode_status(raw: int) -> dict:
     }
 
 
+def read_per_symbol(mmio: MMIO) -> dict:
+    """Read all per-symbol arrays in one pass and compute derived dashboards."""
+    pos       = [signed32(mmio.read(POS_BASE + i * 4))      for i in range(NUM_SYMBOLS)]
+    bid       = [from_q16_16(mmio.read(BID_BASE + i * 4))   for i in range(NUM_SYMBOLS)]
+    ask       = [from_q16_16(mmio.read(ASK_BASE + i * 4))   for i in range(NUM_SYMBOLS)]
+    last_fill = [from_q16_16(mmio.read(LAST_FILL_BASE + i * 4)) for i in range(NUM_SYMBOLS)]
+
+    pnl_cash = [
+        cash_q32_16(
+            mmio.read(PNL_CASH_LO_BASE + i * 4),
+            mmio.read(PNL_CASH_HI_BASE + i * 4),
+        )
+        for i in range(NUM_SYMBOLS)
+    ]
+
+    trades = [read_trades_pack(mmio, i) for i in range(NUM_SYMBOLS)]
+
+    # Derived per-symbol quantities
+    mid = [(b + a) * 0.5 if (a > 0 or b > 0) else 0.0 for b, a in zip(bid, ask)]
+    spread    = [(a - b) if (a > 0 and b > 0) else 0.0 for b, a in zip(bid, ask)]
+    pos_value = [p * m for p, m in zip(pos, mid)]
+    pnl_mtm   = [pc + p * m for pc, p, m in zip(pnl_cash, pos, mid)]
+
+    return {
+        "pos": pos, "bid": bid, "ask": ask, "mid": mid, "spread": spread,
+        "pnl_cash": pnl_cash, "pnl_mtm": pnl_mtm, "pos_value": pos_value,
+        "last_fill": last_fill, "trades": trades,
+    }
+
+
 def print_status(mmio: MMIO) -> None:
-    """Read and display all Board B status registers."""
+    """Read and display all Board B status registers (human-readable)."""
     st = decode_status(mmio.read(STATUS))
-    print(f"  fsm_state   : {st['fsm_state']}")
-    print(f"  link_up     : {st['link_up']}")
-    print(f"  risk_halt   : {st['risk_halt']}")
-    print(f"  strategy    : {st['strategy']}")
-    print(f"  quotes_rcvd : {mmio.read(QUOTES_RCVD)}")
-    print(f"  orders_sent : {mmio.read(ORDERS_SENT)}")
-    print(f"  fills_rcvd  : {mmio.read(FILLS_RCVD)}")
-    print(f"  risk_rejects: {mmio.read(RISK_REJECTS)}")
-    print(f"  link_errors : {mmio.read(LINK_ERRORS)}")
-    cash_lo = mmio.read(CASH_LO)
-    cash_hi = signed32(mmio.read(CASH_HI))
-    cash_q32_16 = (cash_hi << 32) | cash_lo
-    print(f"  cash (Q32.16): 0x{cash_q32_16 & 0xFFFFFFFFFFFF:012X}  (${cash_q32_16 / 65536:.2f})")
+    print(f"  fsm_state    : {st['fsm_state']}")
+    print(f"  link_up      : {st['link_up']}")
+    print(f"  risk_halt    : {st['risk_halt']}")
+    print(f"  strategy     : {st['strategy']}")
+    print(f"  quotes_rcvd  : {mmio.read(QUOTES_RCVD)}")
+    print(f"  orders_sent  : {mmio.read(ORDERS_SENT)}")
+    print(f"  fills_rcvd   : {mmio.read(FILLS_RCVD)}")
+    print(f"  risk_rejects : {mmio.read(RISK_REJECTS)}")
+    print(f"  link_errors  : {mmio.read(LINK_ERRORS)}")
+    cash = cash_q32_16(mmio.read(CASH_LO), mmio.read(CASH_HI))
+    print(f"  cash         : ${cash:+,.2f}")
+    psd = read_per_symbol(mmio)
+    total_mtm = sum(psd["pnl_mtm"])
+    port_val  = cash + sum(psd["pos_value"])
+    print(f"  total_pnl_mtm: ${total_mtm:+,.2f}")
+    print(f"  port_value   : ${port_val:+,.2f}")
     for i in range(min(4, NUM_SYMBOLS)):
-        pos = signed32(mmio.read(POS_BASE + i * 4))
-        print(f"  pos[{i}]      : {pos}")
+        print(f"  sym[{i:2}]: pos={psd['pos'][i]:>+5}  "
+              f"mid=${psd['mid'][i]:>8.2f}  "
+              f"pnl_mtm=${psd['pnl_mtm'][i]:+,.2f}  "
+              f"trades={psd['trades'][i]}")
 
 
 def parse_args() -> argparse.Namespace:
@@ -137,27 +220,44 @@ def main():
     try:
         while True:
             st = decode_status(mmio.read(STATUS))
+            cash = cash_q32_16(mmio.read(CASH_LO), mmio.read(CASH_HI))
+            psd  = read_per_symbol(mmio)
+            total_pnl_mtm = sum(psd["pnl_mtm"])
+            port_value    = cash + sum(psd["pos_value"])
+
             data = {
-                "ts":        round(time.time(), 3),
-                "state":     st["fsm_state"],
-                "link_up":   st["link_up"],
-                "risk_halt": st["risk_halt"],
-                "strategy":  st["strategy"],
-                "qps":       mmio.read(QUOTES_RCVD),
-                "ops":       mmio.read(ORDERS_SENT),
-                "fps":       mmio.read(FILLS_RCVD),
-                "rej":       mmio.read(RISK_REJECTS),
-                "pos":       [signed32(mmio.read(POS_BASE + i * 4))
-                              for i in range(NUM_SYMBOLS)],
-                "cash_lo":   mmio.read(CASH_LO),
-                "cash_hi":   mmio.read(CASH_HI),
-                "hist":      [mmio.read(HIST_BASE + i * 4)
-                              for i in range(NUM_HIST_BINS)],
-                "lat_min":   mmio.read(LAT_MIN),
-                "lat_max":   mmio.read(LAT_MAX),
-                "lat_sum":   mmio.read(LAT_SUM),
-                "lat_cnt":   mmio.read(LAT_COUNT),
-                "link_err":  mmio.read(LINK_ERRORS),
+                "ts":         round(time.time(), 3),
+                "state":      st["fsm_state"],
+                "link_up":    st["link_up"],
+                "risk_halt":  st["risk_halt"],
+                "strategy":   st["strategy"],
+                "qps":        mmio.read(QUOTES_RCVD),
+                "ops":        mmio.read(ORDERS_SENT),
+                "fps":        mmio.read(FILLS_RCVD),
+                "rej":        mmio.read(RISK_REJECTS),
+                "link_err":   mmio.read(LINK_ERRORS),
+
+                "cash":       round(cash, 4),
+                "total_pnl":  round(total_pnl_mtm, 4),
+                "port_value": round(port_value, 4),
+
+                "pos":        psd["pos"],
+                "bid":        [round(v, 4) for v in psd["bid"]],
+                "ask":        [round(v, 4) for v in psd["ask"]],
+                "mid":        [round(v, 4) for v in psd["mid"]],
+                "spread":     [round(v, 4) for v in psd["spread"]],
+                "pnl_cash":   [round(v, 4) for v in psd["pnl_cash"]],
+                "pnl_mtm":    [round(v, 4) for v in psd["pnl_mtm"]],
+                "pos_value":  [round(v, 4) for v in psd["pos_value"]],
+                "last_fill":  [round(v, 4) for v in psd["last_fill"]],
+                "trades":     psd["trades"],
+
+                "hist":       [mmio.read(HIST_BASE + i * 4)
+                               for i in range(NUM_HIST_BINS)],
+                "lat_min":    mmio.read(LAT_MIN),
+                "lat_max":    mmio.read(LAT_MAX),
+                "lat_sum":    mmio.read(LAT_SUM),
+                "lat_cnt":    mmio.read(LAT_COUNT),
             }
             print(json.dumps(data), flush=True)
             time.sleep(interval)

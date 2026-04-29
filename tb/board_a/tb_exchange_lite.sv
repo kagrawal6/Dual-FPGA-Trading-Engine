@@ -96,7 +96,7 @@ module tb_exchange_lite;
     task automatic send_order(input logic [127:0] frame);
         order_frame = frame;
         order_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         order_valid = 1'b0;
     endtask
 
@@ -143,9 +143,9 @@ module tb_exchange_lite;
             best_ask[s] = G_ASK[s];
         end
 
-        @(posedge clk);
+        @(posedge clk); #1;
         wait (rst_n === 1'b1);
-        @(posedge clk);
+        @(posedge clk); #1;
         enable = 1'b1;
 
         // ─────────────────────────────────────────────────────
@@ -155,37 +155,37 @@ module tb_exchange_lite;
         send_order(128'h200000B4080B00640000006400000000);
         wait_fill(10, "BUY@ask");
         check128("BUY@ask golden fill", fill_frame, GF_BUY_AT_ASK);
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // 2) BUY below ask → REJECTED
         send_order(128'h200000B4080A00320001006500000000);
         wait_fill(10, "BUY<ask");
         check128("BUY<ask golden fill", fill_frame, GF_BUY_BELOW);
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // 3) SELL at bid → FILLED
         send_order(128'h201801A3F7F4004B0002006600000000);
         wait_fill(10, "SELL@bid");
         check128("SELL@bid golden fill", fill_frame, GF_SELL_AT_BID);
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // 4) SELL above bid → REJECTED
         send_order(128'h201801A3F7F500190003006700000000);
         wait_fill(10, "SELL>bid");
         check128("SELL>bid golden fill", fill_frame, GF_SELL_ABOVE);
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // 5) Out-of-range symbol → REJECTED
         send_order(128'h204000C80000000A0004006800000000);
         wait_fill(10, "OOR sym");
         check128("OOR golden fill", fill_frame, GF_OOR_SYM4);
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // 6) BUY sym=3 above ask → FILLED at ask
         send_order(128'h20300074080F00C80005006900000000);
         wait_fill(10, "BUY sym3");
         check128("BUY sym3 golden fill", fill_frame, GF_BUY_SYM3);
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // Verify counters
         check32("orders_rcvd=6", orders_rcvd, 6);
@@ -201,33 +201,33 @@ module tb_exchange_lite;
         wait_fill(10, "exact ask");
         check("exact ask: FILLED", fill_frame[114:112] == 3'b000);
         check32("exact ask: price=ask", fill_frame[111:80], G_ASK[0]);
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // One tick below ask = REJECT
         send_order(build_order(8'd0, 1'b0, G_ASK[0]-1, 16'd10, 16'd11, 16'h2222));
         wait_fill(10, "below ask");
         check("below ask: REJECTED", fill_frame[114:112] == 3'b001);
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // SELL exactly at bid = FILL
         send_order(build_order(8'd0, 1'b1, G_BID[0], 16'd10, 16'd12, 16'h3333));
         wait_fill(10, "exact bid");
         check("exact bid: FILLED", fill_frame[114:112] == 3'b000);
         check32("exact bid: price=bid", fill_frame[111:80], G_BID[0]);
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // One tick above bid = REJECT
         send_order(build_order(8'd0, 1'b1, G_BID[0]+1, 16'd10, 16'd13, 16'h4444));
         wait_fill(10, "above bid");
         check("above bid: REJECTED", fill_frame[114:112] == 3'b001);
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 8) counter_clr: all counters reset
         // ─────────────────────────────────────────────────────
         $display("--- test_counter_clr ---");
         counter_clr_sig = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         counter_clr_sig = 1'b0;
         @(posedge clk); #1;
         check32("clr: orders_rcvd=0", orders_rcvd, 0);
@@ -244,7 +244,7 @@ module tb_exchange_lite;
         no_fill_for(5, "enable=0");
         check32("enable=0: orders_rcvd still 0", orders_rcvd, 0);
         enable = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 10) Fill backpressure: fill_ready=0
@@ -271,7 +271,7 @@ module tb_exchange_lite;
             ord_before = orders_rcvd;
             order_frame = {4'h1, 124'hAAAA_BBBB_CCCC_DDDD_EEEE_FFFF_0000_000};
             order_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             order_valid = 1'b0;
             no_fill_for(5, "wrong msg");
             check("wrong msg: orders_rcvd unchanged", orders_rcvd == ord_before);
@@ -284,11 +284,11 @@ module tb_exchange_lite;
         send_order(build_order(8'd0, 1'b0, G_ASK[0], 16'd1, 16'd40, 16'hB001));
         wait_fill(10, "b2b first");
         check("b2b first: oid=40", fill_frame[63:48] == 16'd40);
-        @(posedge clk);
+        @(posedge clk); #1;
         send_order(build_order(8'd1, 1'b1, G_BID[1], 16'd2, 16'd41, 16'hB002));
         wait_fill(10, "b2b second");
         check("b2b second: oid=41", fill_frame[63:48] == 16'd41);
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 13) Symbol routing: sym=3
@@ -298,7 +298,7 @@ module tb_exchange_lite;
         wait_fill(10, "sym3");
         check("sym3: fill_price=ask[3]", fill_frame[111:80] == G_ASK[3]);
         check("sym3: FILLED", fill_frame[114:112] == 3'b000);
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // Summary

@@ -29,6 +29,11 @@ module tb_position_tracker;
     logic        fill_notify;
     logic [COUNTER_W-1:0] fills_rcvd;
 
+    // New B2 outputs: per-symbol P&L accounting exposed via AXI
+    cash_t        pnl_cash_per_sym [TB_NUM_SYM];
+    price_t       last_fill_price  [TB_NUM_SYM];
+    logic [15:0]  trades_per_sym   [TB_NUM_SYM];
+
     initial clk = 0;
     always #5 clk = ~clk;
 
@@ -53,7 +58,10 @@ module tb_position_tracker;
         .fill_side_out   (fill_side_out),
         .fill_qty_out    (fill_qty_out),
         .fill_notify     (fill_notify),
-        .fills_rcvd      (fills_rcvd)
+        .fills_rcvd      (fills_rcvd),
+        .pnl_cash_per_sym(pnl_cash_per_sym),
+        .last_fill_price (last_fill_price),
+        .trades_per_sym  (trades_per_sym)
     );
 
     integer pass_count = 0;
@@ -94,99 +102,142 @@ module tb_position_tracker;
         clear      = 1'b0;
 
         @(posedge rst_n);
-        repeat (2) @(posedge clk);
+        repeat (2) @(posedge clk); #1;
 
         // ── GM Step 0: BUY sym=0, price=0x00B40CCC, qty=100 ────
         // Expected: position[0]=0x64, cash=0xFFFFB9AB0050, pnl=-18005
         $display("\n=== GM Step 0: BUY sym=0 ===");
         fill_frame = 128'h300000B40CCC00640000000A00000000;
         fill_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         fill_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check("S0: fill_processed",        fill_processed == 1'b1);
         check32("S0: position[0]=0x64",     position[0], 32'h00000064);
         check48("S0: cash",                 cash, 48'hFFFFB9AB0050);
         check32("S0: total_pnl",            total_pnl, 32'hFFFFB9AB);
         check("S0: fills_rcvd==1",          fills_rcvd == 32'd1);
+        // B2: per-symbol PnL — first fill on sym=0 ⇒ pnl_cash_per_sym[0] == cash
+        check48("S0: pnl_cash_per_sym[0]",  pnl_cash_per_sym[0], 48'hFFFFB9AB0050);
+        check32("S0: last_fill_price[0]",   last_fill_price[0], 32'h00B40CCC);
+        check("S0: trades_per_sym[0]==1",   trades_per_sym[0] == 16'd1);
+        check("S0: trades_per_sym[1]==0",   trades_per_sym[1] == 16'd0);
 
         // ── GM Step 1: SELL sym=1, price=0x01A41999, qty=50 ─────
         // Expected: position[1]=0xFFFFFFCE (-50), cash=0x00000BB80032, pnl=3000
         $display("\n=== GM Step 1: SELL sym=1 ===");
         fill_frame = 128'h301801A4199900320001001400000000;
         fill_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         fill_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check("S1: fill_processed",        fill_processed == 1'b1);
         check32("S1: position[1]=0xFFFFFFCE", position[1], 32'hFFFFFFCE);
         check48("S1: cash",                 cash, 48'h00000BB80032);
         check("S1: fills_rcvd==2",          fills_rcvd == 32'd2);
+        // B2: invariant — sum of per-symbol PnL equals global cash
+        begin
+            logic signed [47:0] sum_pnl;
+            sum_pnl = '0;
+            for (int s = 0; s < TB_NUM_SYM; s++)
+                sum_pnl += pnl_cash_per_sym[s];
+            check48("S1: Σpnl_cash_per_sym == cash", sum_pnl, cash);
+        end
+        check("S1: trades[1]==1",           trades_per_sym[1] == 16'd1);
+        check32("S1: last_fill[1]",         last_fill_price[1], 32'h01A41999);
 
         // ── GM Step 2: SELL sym=0, price=0x00B50000, qty=100 ────
         // Expected: position[0]=0x00000000 (back to 0), cash=0x0000526C0032, pnl=21100
         $display("\n=== GM Step 2: SELL sym=0 ===");
         fill_frame = 128'h300800B5000000640002001E00000000;
         fill_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         fill_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check("S2: fill_processed",        fill_processed == 1'b1);
         check32("S2: position[0]=0",        position[0], 32'h00000000);
         check48("S2: cash",                 cash, 48'h0000526C0032);
         check("S2: fills_rcvd==3",          fills_rcvd == 32'd3);
+        check("S2: trades[0]==2",           trades_per_sym[0] == 16'd2);
+        check32("S2: last_fill[0]",         last_fill_price[0], 32'h00B50000);
+        // Invariant after S2
+        begin
+            logic signed [47:0] sum_pnl;
+            sum_pnl = '0;
+            for (int s = 0; s < TB_NUM_SYM; s++)
+                sum_pnl += pnl_cash_per_sym[s];
+            check48("S2: Σpnl_cash_per_sym == cash", sum_pnl, cash);
+        end
 
         // ── GM Step 3: REJECTED BUY sym=2 — no position/cash change ──
         $display("\n=== GM Step 3: REJECTED ===");
         fill_frame = 128'h30210000000000000003002800000000;
         fill_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         fill_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check("S3: NOT processed (reject)", fill_processed == 1'b0);
         check("S3: fill_notify (pending clear)", fill_notify == 1'b1);
         check32("S3: position[2] unchanged", position[2], 32'h00000000);
         check48("S3: cash unchanged",       cash, 48'h0000526C0032);
         check("S3: fills_rcvd still 3",     fills_rcvd == 32'd3);
+        check("S3: trades[2] still 0",      trades_per_sym[2] == 16'd0);
+        check48("S3: pnl[2] still 0",       pnl_cash_per_sym[2], 48'h0);
 
         // ── GM Step 4: BUY sym=0, price=0x00B38000, qty=200 ─────
         // Expected: position[0]=0xC8 (200), cash=0xFFFFC6300032, pnl=-14800
         $display("\n=== GM Step 4: BUY sym=0, qty=200 ===");
         fill_frame = 128'h300000B3800000C80004003200000000;
         fill_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         fill_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check("S4: fill_processed",        fill_processed == 1'b1);
         check32("S4: position[0]=0xC8",     position[0], 32'h000000C8);
         check48("S4: cash",                 cash, 48'hFFFFC6300032);
         check("S4: fills_rcvd==4",          fills_rcvd == 32'd4);
+        check("S4: trades[0]==3",           trades_per_sym[0] == 16'd3);
+        check32("S4: last_fill[0]",         last_fill_price[0], 32'h00B38000);
+        // Invariant after S4: Σ per-symbol PnL == global cash
+        begin
+            logic signed [47:0] sum_pnl;
+            sum_pnl = '0;
+            for (int s = 0; s < TB_NUM_SYM; s++)
+                sum_pnl += pnl_cash_per_sym[s];
+            check48("S4: Σpnl_cash_per_sym == cash", sum_pnl, cash);
+        end
 
         // ── T5: Clear resets everything ─────────────────────────
         $display("\n=== T5: Clear ===");
         clear = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         clear = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check32("T5: position[0] cleared",  position[0], 32'h0);
         check32("T5: position[1] cleared",  position[1], 32'h0);
         check48("T5: cash cleared",         cash, 48'h0);
         check("T5: fills_rcvd cleared",     fills_rcvd == 32'd0);
+        // B2: per-symbol arrays must also clear
+        check48("T5: pnl[0] cleared",       pnl_cash_per_sym[0], 48'h0);
+        check48("T5: pnl[1] cleared",       pnl_cash_per_sym[1], 48'h0);
+        check32("T5: last_fill[0] cleared", last_fill_price[0], 32'h0);
+        check("T5: trades[0] cleared",      trades_per_sym[0] == 16'd0);
+        check("T5: trades[1] cleared",      trades_per_sym[1] == 16'd0);
 
         // ── T6: ts_echo extraction ──────────────────────────────
         $display("\n=== T6: ts_echo extraction ===");
         fill_frame = {4'h3, 8'd0, 1'b0, 3'b000,
                       32'h00B4_0000, 16'd50, 16'd99, 16'h00AA, 32'h0};
         fill_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         fill_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         check("T6: ts_echo==0x00AA",       ts_echo == 16'h00AA);
         check("T6: fill_processed",        fill_processed == 1'b1);
@@ -201,9 +252,9 @@ module tb_position_tracker;
             fill_frame = {4'h3, 8'd99, 1'b0, 3'b000,
                           32'h00B4_0000, 16'd100, 16'd200, 16'h0050, 32'h0};
             fill_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             fill_valid = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
 
             check("T7: no crash",             1'b1);
             check32("T7: pos[0] unchanged",   position[0], pos0_before);
@@ -214,24 +265,24 @@ module tb_position_tracker;
         begin
             // Clear first
             clear = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             clear = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
 
             // Two fills on consecutive cycles: BUY sym=0 qty=50, then SELL sym=1 qty=30
             fill_frame = {4'h3, 8'd0, 1'b0, 3'b000,
                           32'h00640000, 16'd50, 16'd1, 16'h0010, 32'h0};
             fill_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
 
             fill_frame = {4'h3, 8'd1, 1'b1, 3'b000,
                           32'h00C80000, 16'd30, 16'd2, 16'h0020, 32'h0};
-            @(posedge clk);
+            @(posedge clk); #1;
             fill_valid = 1'b0;
 
             // Wait for processing
-            @(posedge clk);
-            @(posedge clk);
+            @(posedge clk); #1;
+            @(posedge clk); #1;
 
             check32("T8: pos[0]==50",     position[0], 32'h00000032);
             check32("T8: pos[1]==-30",    position[1], 32'hFFFFFFE2);
@@ -242,26 +293,44 @@ module tb_position_tracker;
         $display("\n=== T9: Accumulating fills ===");
         begin
             clear = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             clear = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
 
             // 3 BUY fills for sym=0: qty=10, 20, 30 → position=60
             for (int i = 0; i < 3; i++) begin
                 fill_frame = {4'h3, 8'd0, 1'b0, 3'b000,
                               32'h00640000, 16'(10 + i * 10), 16'(i), 16'h0050, 32'h0};
                 fill_valid = 1'b1;
-                @(posedge clk);
+                @(posedge clk); #1;
                 fill_valid = 1'b0;
-                @(posedge clk);
+                @(posedge clk); #1;
             end
 
             check32("T9: pos[0]==60",     position[0], 32'h0000003C);
             check("T9: fills_rcvd==3",    fills_rcvd == 32'd3);
+            // B2: per-symbol trades[0] should accumulate to 3
+            check("T9: trades[0]==3",     trades_per_sym[0] == 16'd3);
+            // Invariant: Σ trades_per_sym == fills_rcvd
+            begin
+                int trades_sum;
+                trades_sum = 0;
+                for (int s = 0; s < TB_NUM_SYM; s++)
+                    trades_sum += trades_per_sym[s];
+                check("T9: Σtrades == fills_rcvd", trades_sum == fills_rcvd);
+            end
+            // Invariant: Σ pnl_cash_per_sym == cash
+            begin
+                logic signed [47:0] sum_pnl;
+                sum_pnl = '0;
+                for (int s = 0; s < TB_NUM_SYM; s++)
+                    sum_pnl += pnl_cash_per_sym[s];
+                check48("T9: Σpnl_cash == cash", sum_pnl, cash);
+            end
         end
 
         // ── Summary ─────────────────────────────────────────────
-        repeat (3) @(posedge clk);
+        repeat (3) @(posedge clk); #1;
         $display("\n══════════════════════════════════════════");
         $display("  position_tracker testbench complete");
         $display("  PASSED: %0d", pass_count);

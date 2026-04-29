@@ -1,0 +1,1 @@
+--debug "typical" -L "unisims_ver" -L "secureip" "tb_sync_fifo" -s "tb_sync_fifo_sim" 

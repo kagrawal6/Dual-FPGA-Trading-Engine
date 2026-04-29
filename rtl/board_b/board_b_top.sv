@@ -13,7 +13,7 @@ module board_b_top
 #(
     parameter NUM_SYM            = NUM_SYMBOLS,
     parameter LINK_W             = LINK_DATA_W,
-    parameter C_S_AXI_ADDR_WIDTH = 9,
+    parameter C_S_AXI_ADDR_WIDTH = 10,  // bumped 9→10 for per-symbol arrays
     parameter C_S_AXI_DATA_WIDTH = 32
 )(
     input  logic        clk,
@@ -106,6 +106,9 @@ module board_b_top
     symbol_t qb_symbol;
     regime_e qb_regime;
     logic    qb_valid;
+    // Per-symbol BBO snapshot (exposed to AXI for laptop dashboard)
+    price_t  qb_best_bid_arr [NUM_SYM];
+    price_t  qb_best_ask_arr [NUM_SYM];
 
     // Feature compute
     price_t  fc_mid, fc_spread, fc_ema;
@@ -146,6 +149,10 @@ module board_b_top
     timestamp_t  ts_echo;
     logic        fill_processed;
     logic [COUNTER_W-1:0] fills_rcvd;
+    // Per-symbol P&L state (exposed to AXI for laptop dashboard)
+    cash_t       pnl_cash_per_sym [NUM_SYM];
+    price_t      last_fill_price  [NUM_SYM];
+    logic [15:0] trades_per_sym   [NUM_SYM];
 
     // Latency histogram
     logic [HIST_BIN_W-1:0] hist_bins [HIST_BINS];
@@ -213,7 +220,12 @@ module board_b_top
         .fills_rcvd(fills_rcvd), .risk_rejects(risk_rejects), .link_errors(link_errors),
         .position(position), .cash(cash),
         .hist_bins(hist_bins), .lat_min(lat_min), .lat_max(lat_max),
-        .lat_sum(lat_sum), .lat_count(lat_count)
+        .lat_sum(lat_sum), .lat_count(lat_count),
+        // Per-symbol arrays for laptop dashboard
+        .qb_best_bid(qb_best_bid_arr), .qb_best_ask(qb_best_ask_arr),
+        .pnl_cash_per_sym(pnl_cash_per_sym),
+        .last_fill_price(last_fill_price),
+        .trades_per_sym(trades_per_sym)
     );
 
     // ── Physical I/O Controller ─────────────────────────────────
@@ -258,7 +270,8 @@ module board_b_top
         .quote_frame(quote_frame_demux), .quote_valid(quote_valid_demux),
         .bid_price(qb_bid), .ask_price(qb_ask),
         .bid_size(qb_bid_size), .ask_size(qb_ask_size),
-        .symbol_id(qb_symbol), .regime(qb_regime), .book_valid(qb_valid)
+        .symbol_id(qb_symbol), .regime(qb_regime), .book_valid(qb_valid),
+        .best_bid_arr(qb_best_bid_arr), .best_ask_arr(qb_best_ask_arr)
     );
 
     // ── Feature Compute ─────────────────────────────────────────
@@ -334,7 +347,10 @@ module board_b_top
         .ts_echo(ts_echo), .fill_processed(fill_processed),
         .fill_symbol_out(pt_fill_symbol), .fill_side_out(pt_fill_side),
         .fill_qty_out(pt_fill_qty), .fill_notify(pt_fill_notify),
-        .fills_rcvd(fills_rcvd)
+        .fills_rcvd(fills_rcvd),
+        .pnl_cash_per_sym(pnl_cash_per_sym),
+        .last_fill_price(last_fill_price),
+        .trades_per_sym(trades_per_sym)
     );
 
     // ── Latency Histogram ───────────────────────────────────────

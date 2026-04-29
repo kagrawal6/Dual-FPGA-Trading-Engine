@@ -1,0 +1,137 @@
+#-----------------------------------------------------------
+# xsim v2025.2 (64-bit)
+# SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+# IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+# SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+# Start of session at: Tue Apr 28 22:21:18 2026
+# Process ID         : 40840
+# Current directory  : C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/sim_work/tb_lfsr32.work
+# Command line       : xsim.exe -mode tcl -source {xsim.dir/tb_lfsr32_sim/xsim_script.tcl}
+# Log file           : C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/sim_work/tb_lfsr32.work/xsim.log
+# Journal file       : C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/sim_work/tb_lfsr32.work\xsim.jou
+# Running On         : Kushal2009
+# Platform           : Windows Server 2016 or Windows 10
+# Operating System   : 26200
+# Processor Detail   : 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz
+# CPU Frequency      : 2803 MHz
+# CPU Physical cores : 4
+# CPU Logical cores  : 8
+# Host memory        : 16889 MB
+# Swap memory        : 19987 MB
+# Total Virtual      : 36877 MB
+# Available Virtual  : 8704 MB
+#-----------------------------------------------------------
+source xsim.dir/tb_lfsr32_sim/xsim_script.tcl
+# xsim {tb_lfsr32_sim} -autoloadwcfg -tclbatch {_runner.tcl}
+Time resolution is 1 ps
+source _runner.tcl
+## run 50ms
+--- test_reset ---
+--- test_load_hold ---
+--- test_golden_deadbeef ---
+Error: FAIL: DEADBEEF step[0] — got 378b6fb8, exp 6f16df70
+Time: 146 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: DEADBEEF step[1] — got 1bc5b7dc, exp 378b6fb8
+Time: 156 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: DEADBEEF step[2] — got 0de2dbee, exp 1bc5b7dc
+Time: 166 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: DEADBEEF step[3] — got 06f16df7, exp 0de2dbee
+Time: 176 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: DEADBEEF step[4] — got 0338b6fc, exp 06f16df7
+Time: 186 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: DEADBEEF step[5] — got 019c5b7e, exp 0338b6fc
+Time: 196 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: DEADBEEF step[6] — got 00ce2dbf, exp 019c5b7e
+Time: 206 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: DEADBEEF step[7] — got 002716d8, exp 00ce2dbf
+Time: 216 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: DEADBEEF step[8] — got 00138b6c, exp 002716d8
+Time: 226 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: DEADBEEF step[9] — got 0009c5b6, exp 00138b6c
+Time: 236 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: DEADBEEF step[10] — got 0004e2db, exp 0009c5b6
+Time: 246 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: DEADBEEF step[11] — got 0042716a, exp 0004e2db
+Time: 256 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: DEADBEEF step[12] — got 002138b5, exp 0042716a
+Time: 266 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: DEADBEEF step[13] — got 00509c5d, exp 002138b5
+Time: 276 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: DEADBEEF step[14] — got 00684e29, exp 00509c5d
+Time: 286 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: DEADBEEF step[15] — got 00742713, exp 00684e29
+Time: 296 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+--- test_golden_seed1 ---
+Error: FAIL: SEED1 step[0] — got 003d09c7, exp 00400007
+Time: 326 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: SEED1 step[1] — got 005e84e4, exp 00600004
+Time: 336 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: SEED1 step[2] — got 002f4272, exp 00300002
+Time: 346 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: SEED1 step[3] — got 0017a139, exp 00180001
+Time: 356 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: SEED1 step[4] — got 004bd09b, exp 004c0007
+Time: 366 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: SEED1 step[5] — got 0065e84a, exp 00660004
+Time: 376 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: SEED1 step[6] — got 0032f425, exp 00330002
+Time: 386 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: SEED1 step[7] — got 00597a15, exp 00198001
+Time: 396 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: SEED1 step[8] — got 006cbd0d, exp 004cc007
+Time: 406 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: SEED1 step[9] — got 00765e81, exp 00666004
+Time: 416 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: SEED1 step[10] — got 007b2f47, exp 00333002
+Time: 426 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: SEED1 step[11] — got 007d97a4, exp 00199801
+Time: 436 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: SEED1 step[12] — got 003ecbd2, exp 004ccc07
+Time: 446 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: SEED1 step[13] — got 001f65e9, exp 00666604
+Time: 456 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: SEED1 step[14] — got 004fb2f3, exp 00333302
+Time: 466 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: SEED1 step[15] — got 0067d97e, exp 00199981
+Time: 476 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+--- test_zero_seed_remap ---
+Error: FAIL: Zero seed remapped to 1 — got 0067d97e, exp 00000001
+Time: 495 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: Zero remap step[0] — got 0059f658, exp 00400007
+Time: 506 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: Zero remap step[1] — got 002cfb2c, exp 00600004
+Time: 516 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: Zero remap step[2] — got 00167d96, exp 00300002
+Time: 526 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: Zero remap step[3] — got 000b3ecb, exp 00180001
+Time: 536 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: Zero remap step[4] — got 00459f62, exp 004c0007
+Time: 546 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: Zero remap step[5] — got 0022cfb1, exp 00660004
+Time: 556 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: Zero remap step[6] — got 005167df, exp 00330002
+Time: 566 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: Zero remap step[7] — got 0068b3e8, exp 00198001
+Time: 576 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+--- test_all_ones_seed ---
+Error: FAIL: All-ones seed loaded — got 0068b3e8, exp ffffffff
+Time: 595 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+--- test_load_during_enable ---
+Error: FAIL: Load during enable: seed 1 loaded — got 00400007, exp 00000001
+Time: 1675 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+Error: FAIL: Load during enable: first step matches seed1 — got 00600004, exp 00400007
+Time: 1685 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+--- test_simultaneous_load_enable ---
+Error: FAIL: Simultaneous load+enable: load wins — got 52d2ad2d, exp a5a55a5a
+Time: 1705 ns  Iteration: 0  Process: /tb_lfsr32/check32  Scope: tb_lfsr32.check32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 47
+--- test_rapid_toggle ---
+--- test_determinism ---
+--- test_never_zero ---
+
+===================================
+tb_lfsr32: FAIL (1135 passed, 45 failed)
+Fatal: 
+Time: 12335 ns  Iteration: 0  Process: /tb_lfsr32/Initial264_12  Scope: tb_lfsr32  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/shared/tb_lfsr32.sv Line: 283
+$finish called at time : 12335 ns
+## quit
+INFO: [Common 17-206] Exiting xsim at Tue Apr 28 22:21:21 2026...

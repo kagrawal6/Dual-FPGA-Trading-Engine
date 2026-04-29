@@ -4,6 +4,8 @@
 // and constants used across the HFT dual-FPGA design.
 // ============================================================================
 
+`timescale 1ns / 1ps
+
 package hft_pkg;
 
     // ── Frame dimensions ────────────────────────────────────────────────────
