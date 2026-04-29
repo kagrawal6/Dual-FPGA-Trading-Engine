@@ -1,1 +1,0 @@
---debug "typical" -L "unisims_ver" -L "secureip" "tb_exchange_lite" -s "tb_exchange_lite_sim" 

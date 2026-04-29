@@ -1,7 +1,0 @@
-Running: xsim.dir/tb_market_noise_gen_sim/xsimk.exe -simmode gui -wdb tb_market_noise_gen_sim.wdb -simrunnum 0 -socket 61897
-Design successfully loaded
-Design Loading Memory Usage: 9996 KB (Peak: 9996 KB)
-Design Loading CPU Usage: 62 ms
-Simulation completed
-Simulation Memory Usage: 12348 KB (Peak: 12348 KB)
-Simulation CPU Usage: 483 ms

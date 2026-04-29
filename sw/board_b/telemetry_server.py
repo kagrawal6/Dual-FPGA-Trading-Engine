@@ -38,7 +38,12 @@ JSON schema (per line):
   "lat_min":    int,
   "lat_max":    int,
   "lat_sum":    int,
-  "lat_cnt":    int
+  "lat_cnt":    int,
+  "lat_last":   int,            # B3: most recent single latency sample (cycles)
+
+  "ema":         [float, ...]   # B3: per-symbol EMA snapshot (Q16.16 → float)
+  "last_signal": [int, ...]     # B3: per-symbol classification 0=NONE 1=BUY 2=SELL 3=RISK_BLOCKED
+  "last_signal_label": [str, ...]
 }
 
 See §5.1.2 of design spec.
@@ -57,8 +62,10 @@ from register_map import (
     BID_BASE, ASK_BASE,
     PNL_CASH_LO_BASE, PNL_CASH_HI_BASE,
     LAST_FILL_BASE, TRADES_PACK_BASE,
+    EMA_BASE, LAST_SIGNAL_PACK_BASE, LAST_LATENCY,
     NUM_SYMBOLS, NUM_HIST_BINS,
     q16_16, from_q16_16, signed32, cash_q32_16, read_trades_pack,
+    read_last_signal, last_signal_label,
 )
 
 FSM_NAMES = {0: "B_RESET", 1: "B_IDLE", 2: "B_ARMED", 3: "B_TRADING", 4: "B_HALTED"}
@@ -81,6 +88,8 @@ def read_per_symbol(mmio: MMIO) -> dict:
     bid       = [from_q16_16(mmio.read(BID_BASE + i * 4))   for i in range(NUM_SYMBOLS)]
     ask       = [from_q16_16(mmio.read(ASK_BASE + i * 4))   for i in range(NUM_SYMBOLS)]
     last_fill = [from_q16_16(mmio.read(LAST_FILL_BASE + i * 4)) for i in range(NUM_SYMBOLS)]
+    # B3: per-symbol EMA snapshot from feature_compute
+    ema       = [from_q16_16(mmio.read(EMA_BASE + i * 4))   for i in range(NUM_SYMBOLS)]
 
     pnl_cash = [
         cash_q32_16(
@@ -91,6 +100,9 @@ def read_per_symbol(mmio: MMIO) -> dict:
     ]
 
     trades = [read_trades_pack(mmio, i) for i in range(NUM_SYMBOLS)]
+    # B3: per-symbol last-signal classification (0..3) packed 8 syms/word
+    last_sig_codes  = [read_last_signal(mmio, i) for i in range(NUM_SYMBOLS)]
+    last_sig_labels = [last_signal_label(c) for c in last_sig_codes]
 
     # Derived per-symbol quantities
     mid = [(b + a) * 0.5 if (a > 0 or b > 0) else 0.0 for b, a in zip(bid, ask)]
@@ -102,6 +114,8 @@ def read_per_symbol(mmio: MMIO) -> dict:
         "pos": pos, "bid": bid, "ask": ask, "mid": mid, "spread": spread,
         "pnl_cash": pnl_cash, "pnl_mtm": pnl_mtm, "pos_value": pos_value,
         "last_fill": last_fill, "trades": trades,
+        "ema": ema,
+        "last_signal": last_sig_codes, "last_signal_label": last_sig_labels,
     }
 
 
@@ -250,12 +264,17 @@ def main():
                 "last_fill":  [round(v, 4) for v in psd["last_fill"]],
                 "trades":     psd["trades"],
 
+                "ema":               [round(v, 4) for v in psd["ema"]],
+                "last_signal":       psd["last_signal"],
+                "last_signal_label": psd["last_signal_label"],
+
                 "hist":       [mmio.read(HIST_BASE + i * 4)
                                for i in range(NUM_HIST_BINS)],
                 "lat_min":    mmio.read(LAT_MIN),
                 "lat_max":    mmio.read(LAT_MAX),
                 "lat_sum":    mmio.read(LAT_SUM),
                 "lat_cnt":    mmio.read(LAT_COUNT),
+                "lat_last":   mmio.read(LAST_LATENCY),
             }
             print(json.dumps(data), flush=True)
             time.sleep(interval)

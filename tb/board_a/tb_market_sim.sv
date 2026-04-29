@@ -30,6 +30,7 @@ module tb_market_sim;
     logic                     quote_ready;
     price_t                   best_bid    [TB_NUM_SYM];
     price_t                   best_ask    [TB_NUM_SYM];
+    price_t                   cur_mid     [TB_NUM_SYM];   // B3: live per-symbol mid (not asserted on, just wired to silence TFMPC warning)
     logic [COUNTER_W-1:0]     quotes_generated;
 
     int pass_count = 0;
@@ -62,6 +63,7 @@ module tb_market_sim;
         .quote_ready      (quote_ready),
         .best_bid         (best_bid),
         .best_ask         (best_ask),
+        .cur_mid          (cur_mid),                  // B3
         .quotes_generated (quotes_generated)
     );
 
@@ -237,7 +239,14 @@ module tb_market_sim;
         quote_interval = 32'd0;
         pulse_lfsr_load();
         enable = 1'b1;
-        repeat (10) begin wait_quote(); @(posedge clk); #1; end
+        // FIX: With quote_interval=0, market_sim emits one quote per cycle as
+        // soon as enable=1 is sampled. The first iteration's wait_quote()
+        // advances 1 edge to observe the first quote (count=1), then the
+        // trailing @(posedge clk) advances another edge (count=2). Each
+        // subsequent iteration advances exactly 1 edge (wait_quote returns
+        // immediately because quote_valid is still high). So N iterations
+        // produce N+1 quotes. Use repeat (9) to land on exactly 10.
+        repeat (9) begin wait_quote(); @(posedge clk); #1; end
         check32("interval0: 10 quotes", quotes_generated, 10);
         enable = 1'b0;
         @(posedge clk); #1;

@@ -1,7 +1,0 @@
-Running: xsim.dir/tb_position_tracker_sim/xsimk.exe -simmode gui -wdb tb_position_tracker_sim.wdb -simrunnum 0 -socket 51065
-Design successfully loaded
-Design Loading Memory Usage: 9956 KB (Peak: 9956 KB)
-Design Loading CPU Usage: 31 ms
-Simulation completed
-Simulation Memory Usage: 11892 KB (Peak: 11892 KB)
-Simulation CPU Usage: 62 ms

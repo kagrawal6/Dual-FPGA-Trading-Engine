@@ -78,6 +78,10 @@ module tb_board_b_pipeline;
     cash_t                    pnl_cash_per_sym [NUM_SYMBOLS];
     price_t                   last_fill_price  [NUM_SYMBOLS];
     logic [15:0]              trades_per_sym   [NUM_SYMBOLS];
+    // B3: per-symbol exposures from feature_compute and risk_manager
+    // (wired to silence TFMPC warnings; not asserted on in this TB).
+    price_t                   fc_ema_value     [NUM_SYMBOLS];
+    logic [2:0]               rm_last_signal   [NUM_SYMBOLS];
 
     logic [ALPHA_W-1:0]       ema_alpha;
     price_t                   threshold;
@@ -119,7 +123,8 @@ module tb_board_b_pipeline;
         .mid(fc_mid), .spread(fc_spread), .ema(fc_ema),
         .deviation(fc_deviation),
         .bid_out(fc_bid_out), .ask_out(fc_ask_out),
-        .symbol_out(fc_symbol_out), .feature_valid(fc_valid)
+        .symbol_out(fc_symbol_out), .feature_valid(fc_valid),
+        .ema_value(fc_ema_value)                   // B3
     );
 
     strategy_engine u_strategy_engine (
@@ -146,7 +151,8 @@ module tb_board_b_pipeline;
         .approved_symbol(rm_symbol),
         .fill_valid(pt_fill_notify), .fill_symbol(pt_fill_symbol),
         .fill_side(pt_fill_side), .fill_qty(pt_fill_qty),
-        .risk_halt(risk_halt), .risk_rejects(risk_rejects)
+        .risk_halt(risk_halt), .risk_rejects(risk_rejects),
+        .last_signal(rm_last_signal)                // B3
     );
 
     order_manager u_order_manager (

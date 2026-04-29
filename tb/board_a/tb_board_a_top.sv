@@ -35,6 +35,10 @@ module tb_board_a_top;
     localparam logic [8:0] ADDR_FILLS_SENT     = 9'h100;
     localparam logic [8:0] ADDR_REJECTS_SENT   = 9'h104;
     localparam logic [8:0] ADDR_LINK_ERRORS    = 9'h108;
+    // B3 additions — per-symbol live price snapshots from market_sim
+    localparam logic [8:0] ADDR_LIVE_BID_BASE  = 9'h110;
+    localparam logic [8:0] ADDR_LIVE_ASK_BASE  = 9'h150;
+    localparam logic [8:0] ADDR_LIVE_MID_BASE  = 9'h190;
 
     localparam C_AW = 9;  // bumped 8→9 to match board_a_top default in B2
     localparam C_DW = 32;
@@ -209,6 +213,13 @@ module tb_board_a_top;
         end
     endtask
 
+    // FIX: board_a_axi_regs uses combinational awready/wready (= !bvalid).
+    // On the edge that latches the write, bvalid<=1, so awready/wready go LOW
+    // on the SAME edge. The previous loop `while (!(awready && wready))`
+    // deadlocked because it never saw both high again until bready cleared
+    // bvalid — which only happened later. Restructure as a deterministic
+    // single-edge addr/data handshake followed by an explicit B-channel
+    // handshake.
     task automatic axi_write(input logic [C_AW-1:0] addr, input logic [31:0] data);
         @(posedge clk); #1;
         s_axi_awaddr  = addr;
@@ -216,13 +227,15 @@ module tb_board_a_top;
         s_axi_wdata   = data;
         s_axi_wstrb   = 4'hF;
         s_axi_wvalid  = 1'b1;
+        // awready=wready=1 at this point (bvalid is 0 going into the edge),
+        // so this single edge completes addr+data acceptance and asserts bvalid.
         @(posedge clk); #1;
-        while (!(s_axi_awready && s_axi_wready)) @(posedge clk); #1;
         s_axi_awvalid = 1'b0;
         s_axi_wvalid  = 1'b0;
         s_axi_bready  = 1'b1;
+        // bvalid is high right after the latching edge.
         while (!s_axi_bvalid) @(posedge clk); #1;
-        @(posedge clk); #1;
+        @(posedge clk); #1;     // consume bvalid (bready=1 above clears it)
         s_axi_bready  = 1'b0;
     endtask
 
@@ -230,13 +243,15 @@ module tb_board_a_top;
         @(posedge clk); #1;
         s_axi_araddr  = addr;
         s_axi_arvalid = 1'b1;
+        // FIX: arready=!rvalid is combinational. The next edge accepts the
+        // address and asserts rvalid; arready then goes LOW. Don't wait for
+        // arready post-edge — it already did its job.
         @(posedge clk); #1;
-        while (!s_axi_arready) @(posedge clk); #1;
         s_axi_arvalid = 1'b0;
         s_axi_rready  = 1'b1;
         while (!s_axi_rvalid) @(posedge clk); #1;
         data = s_axi_rdata;
-        @(posedge clk); #1;
+        @(posedge clk); #1;     // consume rvalid
         s_axi_rready  = 1'b0;
     endtask
 
@@ -771,12 +786,26 @@ module tb_board_a_top;
             logic [31:0] fills_sent_val, rejects_sent_val, link_err_val;
             logic [31:0] orders_rcvd_val;
 
+            // The earlier `test_rgb0_regimes` phase issued CTRL=1 (start),
+            // which triggers the FSM IDLE→RUNNING transition and pulses
+            // counter_clr — wiping ORDERS_RCVD / FILLS_SENT / REJECTS_SENT /
+            // LINK_ERRORS to 0. So we must inject a fresh batch of orders
+            // here and wait for the matching fills before reading the
+            // newly-exposed counters.
+            for (int i = 0; i < 4; i++)
+                inject_order(i[7:0], 1'b0,
+                             gm_mid[i] + 32'h0005_0000, 25,
+                             16'h0200 + i, 16'h3000 + i);
+            // Allow enough time for orders to be received, matched, and
+            // for fills to propagate back across the link to update counters.
+            repeat (3000) @(posedge clk); #1;
+
             axi_read(ADDR_FILLS_SENT,   fills_sent_val);
             axi_read(ADDR_REJECTS_SENT, rejects_sent_val);
             axi_read(ADDR_LINK_ERRORS,  link_err_val);
             axi_read(ADDR_ORDERS_RCVD,  orders_rcvd_val);
 
-            $display("  ORDERS_RCVD = %0d", orders_rcvd_val);
+            $display("  ORDERS_RCVD  = %0d", orders_rcvd_val);
             $display("  FILLS_SENT   = %0d", fills_sent_val);
             $display("  REJECTS_SENT = %0d", rejects_sent_val);
             $display("  LINK_ERRORS  = %0d", link_err_val);
@@ -784,10 +813,63 @@ module tb_board_a_top;
             // Invariant: orders_rcvd >= fills_sent + rejects_sent (some may be in-flight)
             check("B2: orders >= fills+rejects",
                   orders_rcvd_val >= (fills_sent_val + rejects_sent_val));
-            // After all the order injection in earlier phases, fills_sent should be > 0
+            // After the fresh injection above, at least some fills must have come back.
             check("B2: fills_sent > 0",  fills_sent_val > 32'd0);
             // Link errors should be zero on a noise-free testbench
             check32("B2: link_errors == 0", link_err_val, 32'd0);
+        end
+
+        // ─────────────────────────────────────────────────────
+        // 29) B3: read newly-exposed live per-symbol prices
+        //     LIVE_BID @ 0x110, LIVE_ASK @ 0x150, LIVE_MID @ 0x190
+        // ─────────────────────────────────────────────────────
+        $display("--- test_b3_live_prices ---");
+        begin
+            logic [31:0] bid_v, ask_v, mid_v;
+            int          nonzero_count;
+            int          half_spread, mid_minus_bid, ask_minus_mid;
+            nonzero_count = 0;
+
+            // Freeze quote generation so the three AXI reads per symbol
+            // (LIVE_BID, LIVE_ASK, LIVE_MID) form an atomic snapshot.
+            // Otherwise — with QUOTE_INT=0 and a quote committing every
+            // cycle — market_sim could update mid_price[i]/best_bid[i]/
+            // best_ask[i] in the gap between two reads, and the captured
+            // values would be from different cycles. That breaks the
+            // |MID − (BID+ASK)/2| ≤ 2 LSB invariant.
+            axi_write(ADDR_QUOTE_INT, 32'h0010_0000); // ~1M cycles ≫ this phase
+            // Drain any quote that started before the interval change.
+            repeat (16) @(posedge clk); #1;
+
+            // The simulation has been running long enough that several quotes
+            // have been emitted, so init_mid[i] != 0 → live prices should be > 0.
+            for (int i = 0; i < 4; i++) begin
+                axi_read(ADDR_LIVE_BID_BASE + i*4, bid_v);
+                axi_read(ADDR_LIVE_ASK_BASE + i*4, ask_v);
+                axi_read(ADDR_LIVE_MID_BASE + i*4, mid_v);
+
+                $display("  sym[%0d]: BID=0x%08h  ASK=0x%08h  MID=0x%08h",
+                         i, bid_v, ask_v, mid_v);
+
+                // Invariant 1: ASK >= BID
+                check($sformatf("B3: sym[%0d] ASK >= BID", i), ask_v >= bid_v);
+
+                // Invariant 2: MID is approximately mid-spread.
+                // market_sim picks BID = MID - spread/2, ASK = MID + spread/2,
+                // so MID - BID == ASK - MID (within rounding of >>>1).
+                mid_minus_bid = int'(mid_v) - int'(bid_v);
+                ask_minus_mid = int'(ask_v) - int'(mid_v);
+                half_spread   = mid_minus_bid;  // reference for asymmetry tolerance
+                check($sformatf("B3: sym[%0d] |MID centered| <= 2 LSB (rounding)", i),
+                      ((mid_minus_bid - ask_minus_mid >= -2) &&
+                       (mid_minus_bid - ask_minus_mid <=  2)));
+
+                if (mid_v != 32'h0) nonzero_count++;
+            end
+
+            // After the long run earlier in the test, at least 1 symbol must
+            // have been quoted (mid_price[] holds the latest committed mid).
+            check("B3: at least one LIVE_MID != 0", nonzero_count > 0);
         end
 
         // ─────────────────────────────────────────────────────

@@ -30,6 +30,8 @@ module tb_latency_histogram;
         rst_n = 1;
     end
 
+    logic [COUNTER_W-1:0] last_latency;   // B3: most-recent sample (wired to silence TFMPC warning)
+
     latency_histogram dut (
         .clk            (clk),
         .rst_n          (rst_n),
@@ -41,7 +43,8 @@ module tb_latency_histogram;
         .lat_min        (lat_min),
         .lat_max        (lat_max),
         .lat_sum        (lat_sum),
-        .lat_count      (lat_count)
+        .lat_count      (lat_count),
+        .last_latency   (last_latency)               // B3
     );
 
     integer pass_count = 0;

@@ -34,6 +34,7 @@ module tb_feature_compute;
     price_t                 ask_out;
     symbol_t                symbol_out;
     logic                   feature_valid;
+    price_t                 ema_value [TB_NUM_SYM];   // B3: per-symbol EMA snapshot (wired to silence TFMPC warning)
 
     initial clk = 0;
     always #5 clk = ~clk;
@@ -62,7 +63,8 @@ module tb_feature_compute;
         .bid_out      (bid_out),
         .ask_out      (ask_out),
         .symbol_out   (symbol_out),
-        .feature_valid(feature_valid)
+        .feature_valid(feature_valid),
+        .ema_value    (ema_value)                   // B3
     );
 
     // ── Check tasks ───────────────────────────────────────────
@@ -89,6 +91,12 @@ module tb_feature_compute;
     endtask
 
     // ── Helper: send one quote and wait for output ────────────
+    // FIX: feature_compute is a 3-stage pipeline. Each test phase already
+    // appends an extra `@(posedge clk); #1;` before checking the registered
+    // outputs. Therefore send_quote only needs to advance PIPELINE_DELAY-1
+    // edges itself; the test's own edge is the final stage-3 latch edge.
+    // (Previous code did PIPELINE_DELAY edges total, overshooting by one,
+    // which deasserted feature_valid before the check.)
     task automatic send_quote(
         input price_t  bid,
         input price_t  ask,
@@ -100,7 +108,7 @@ module tb_feature_compute;
         book_valid = 1'b1;
         @(posedge clk); #1;
         book_valid = 1'b0;
-        repeat (PIPELINE_DELAY - 1) @(posedge clk); #1;
+        repeat (PIPELINE_DELAY - 2) @(posedge clk); #1;
     endtask
 
     // ── Golden model vectors (feature_compute_vectors.json) ───
@@ -363,31 +371,36 @@ module tb_feature_compute;
         clear = 1'b0;
         @(posedge clk); #1;
 
+        // FIX: 3-stage pipeline → first sym0 output appears 3 edges after
+        // sym0 was driven on the input. Drive 4 syms back-to-back, then
+        // observe outputs starting with sym0 emerging 3 edges after sym0
+        // entered the pipeline.
         // Send 4 quotes on consecutive cycles (sym 0,1,2,3)
         bid_price  = GM_BID[0]; ask_price = GM_ASK[0]; symbol_id = 8'd0;
         book_valid = 1'b1;
-        @(posedge clk); #1;
+        @(posedge clk); #1;     // edge 1: s1 latches sym0
         bid_price  = GM_BID[1]; ask_price = GM_ASK[1]; symbol_id = 8'd1;
-        @(posedge clk); #1;
+        @(posedge clk); #1;     // edge 2: s2 latches sym0; s1 latches sym1
         bid_price  = GM_BID[2]; ask_price = GM_ASK[2]; symbol_id = 8'd2;
-        @(posedge clk); #1;
-        bid_price  = GM_BID[3]; ask_price = GM_ASK[3]; symbol_id = 8'd3;
-        @(posedge clk); #1;
-        book_valid = 1'b0;
-
-        // Check outputs arrive in order (first output already visible)
+        @(posedge clk); #1;     // edge 3: stage-3 emits sym0; s2 sym1; s1 sym2
         check("T11a: valid for sym0",     feature_valid == 1'b1);
         check32("T11a: mid sym0",         mid, GM_MID[0]);
-        @(posedge clk); #1;
+
+        bid_price  = GM_BID[3]; ask_price = GM_ASK[3]; symbol_id = 8'd3;
+        @(posedge clk); #1;     // edge 4: emits sym1; s2 sym2; s1 sym3
         check("T11b: valid for sym1",     feature_valid == 1'b1);
         check32("T11b: mid sym1",         mid, GM_MID[1]);
-        @(posedge clk); #1;
+
+        book_valid = 1'b0;
+        @(posedge clk); #1;     // edge 5: emits sym2; s2 sym3; s1 idle
         check("T11c: valid for sym2",     feature_valid == 1'b1);
         check32("T11c: mid sym2",         mid, GM_MID[2]);
-        @(posedge clk); #1;
+
+        @(posedge clk); #1;     // edge 6: emits sym3; s2 idle
         check("T11d: valid for sym3",     feature_valid == 1'b1);
         check32("T11d: mid sym3",         mid, GM_MID[3]);
-        @(posedge clk); #1;
+
+        @(posedge clk); #1;     // edge 7: pipeline drained
         check("T11e: deasserts",          feature_valid == 1'b0);
 
         // ──────────────────────────────────────────────────────

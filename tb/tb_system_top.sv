@@ -968,6 +968,77 @@ module tb_system_top;
         end
 
         // ══════════════════════════════════════════════════════════
+        // Phase 28: B3 — cross-board live-price + EMA + signal + latency
+        //   Board A:  LIVE_BID  @ 0x110, LIVE_ASK  @ 0x150, LIVE_MID  @ 0x190
+        //   Board B:  EMA       @ 0x260, LAST_SIGNAL_PACK @ 0x2A0, LAST_LATENCY @ 0x2A8
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 28: B3 Cross-Board AXI Exposure ===");
+
+        // ── A-side: LIVE_BID/ASK/MID sanity (ASK >= BID, MID centered) ──
+        begin
+            logic [31:0] a_bid, a_ask, a_mid;
+            int          a_nonzero;
+            int          mb, am;
+            a_nonzero = 0;
+            for (int i = 0; i < 4; i++) begin
+                axi_read_a(9'h110 + i*4);  a_bid = axi_rd_a;
+                axi_read_a(9'h150 + i*4);  a_ask = axi_rd_a;
+                axi_read_a(9'h190 + i*4);  a_mid = axi_rd_a;
+                $display("  A.sym[%0d]: BID=0x%08X ASK=0x%08X MID=0x%08X",
+                         i, a_bid, a_ask, a_mid);
+                check($sformatf("P28a: A.sym[%0d] ASK>=BID", i), a_ask >= a_bid);
+                mb = int'(a_mid) - int'(a_bid);
+                am = int'(a_ask) - int'(a_mid);
+                check($sformatf("P28a: A.sym[%0d] MID centered ±2", i),
+                      ((mb - am) >= -2) && ((mb - am) <= 2));
+                if (a_mid != 32'h0) a_nonzero++;
+            end
+            check("P28a: at least one A.LIVE_MID != 0", a_nonzero > 0);
+        end
+
+        // ── B-side: EMA snapshot (some symbols must be nonzero) ──
+        begin
+            logic [31:0] ema_v;
+            int          ema_nz;
+            ema_nz = 0;
+            for (int i = 0; i < 8; i++) begin
+                axi_read_b(10'h260 + i*4);
+                ema_v = axi_rd_b;
+                if (ema_v != 32'h0) ema_nz++;
+            end
+            check("P28b: at least 4 B.EMA[i] are nonzero", ema_nz >= 4);
+        end
+
+        // ── B-side: LAST_SIGNAL_PACK encoding sanity ──
+        begin
+            logic [31:0] sp0, sp1;
+            logic [3:0]  nib;
+            axi_read_b(10'h2A0);  sp0 = axi_rd_b;
+            axi_read_b(10'h2A4);  sp1 = axi_rd_b;
+            $display("  B.LAST_SIGNAL_PACK = {0x%08X, 0x%08X}", sp1, sp0);
+            for (int k = 0; k < 8; k++) begin
+                nib = sp0[4*k +: 4];
+                check($sformatf("P28c: pack0[%0d] valid (0..3)", k), nib <= 4'd3);
+                nib = sp1[4*k +: 4];
+                check($sformatf("P28c: pack1[%0d] valid (0..3)", k), nib <= 4'd3);
+            end
+            // After all order traffic in earlier phases, at least one nibble
+            // should be non-zero somewhere across the 16 syms.
+            check("P28c: at least one signal recorded across all syms",
+                  (sp0 != 32'h0) || (sp1 != 32'h0));
+        end
+
+        // ── B-side: LAST_LATENCY > 0 and within 16-bit range ──
+        begin
+            logic [31:0] last_lat_v;
+            axi_read_b(10'h2A8);
+            last_lat_v = axi_rd_b;
+            $display("  B.LAST_LATENCY = %0d cycles", last_lat_v);
+            check("P28d: B.last_latency > 0",     last_lat_v >  32'd0);
+            check("P28d: B.last_latency < 65536", last_lat_v <  32'h0001_0000);
+        end
+
+        // ══════════════════════════════════════════════════════════
         // Summary
         // ══════════════════════════════════════════════════════════
         repeat (5) @(posedge clk);

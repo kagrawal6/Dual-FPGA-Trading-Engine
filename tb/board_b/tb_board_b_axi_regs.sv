@@ -48,6 +48,11 @@ module tb_board_b_axi_regs;
     price_t       last_fill_price   [TB_NUM_SYM];
     logic [15:0]  trades_per_sym    [TB_NUM_SYM];
 
+    // ── B3 per-symbol arrays + scalar driven into the DUT ───────
+    price_t       ema_value         [TB_NUM_SYM];
+    logic [2:0]   last_signal       [TB_NUM_SYM];
+    logic [31:0]  last_latency;
+
     initial clk = 0;
     always #5 clk = ~clk;
 
@@ -79,7 +84,11 @@ module tb_board_b_axi_regs;
         .qb_best_ask(qb_best_ask),
         .pnl_cash_per_sym(pnl_cash_per_sym),
         .last_fill_price (last_fill_price),
-        .trades_per_sym  (trades_per_sym)
+        .trades_per_sym  (trades_per_sym),
+        // B3
+        .ema_value       (ema_value),
+        .last_signal     (last_signal),
+        .last_latency    (last_latency)
     );
 
     integer pass_count = 0;
@@ -143,6 +152,13 @@ module tb_board_b_axi_regs;
             last_fill_price[i]  = '0;
             trades_per_sym[i]   = '0;
         end
+
+        // Init B3 per-symbol arrays + scalar
+        for (int i = 0; i < TB_NUM_SYM; i++) begin
+            ema_value[i]   = '0;
+            last_signal[i] = 3'd0;  // NONE
+        end
+        last_latency = 32'd0;
 
         @(posedge rst_n);
         repeat (2) @(posedge clk);
@@ -359,6 +375,47 @@ module tb_board_b_axi_regs;
         axi_read(10'h244, rd_val);
         check("T14b: TRADES_PACK[1]={trades[3],trades[2]}",
               rd_val == {trades_per_sym[3], trades_per_sym[2]});
+
+        // ── T15: B3 — per-symbol EMA readback (0x260 base) ──────
+        $display("\n=== T15: B3 EMA per-symbol readback ===");
+        ema_value[0] = 32'h00B3_A000;
+        ema_value[1] = 32'h01A4_5000;
+        ema_value[2] = 32'h0384_1234;
+        ema_value[3] = 32'h0072_F000;
+        @(posedge clk);
+        for (int i = 0; i < TB_NUM_SYM; i++) begin
+            axi_read(10'(10'h260 + i*4), rd_val);
+            check($sformatf("T15: EMA[%0d]", i), rd_val == ema_value[i]);
+        end
+
+        // ── T16: B3 — LAST_SIGNAL_PACK readback (4 bits/sym, 8 syms/word) ─
+        // For TB_NUM_SYM=4, only word j=0 is used; bits [15:0] cover syms 0..3.
+        $display("\n=== T16: B3 LAST_SIGNAL_PACK readback ===");
+        last_signal[0] = 3'd1;  // BUY
+        last_signal[1] = 3'd2;  // SELL
+        last_signal[2] = 3'd3;  // RISK_BLOCKED
+        last_signal[3] = 3'd0;  // NONE
+        @(posedge clk);
+        axi_read(10'h2A0, rd_val);
+        // Expected packing: nibble k = {1'b0, last_signal[k]} for k in 0..7;
+        // syms 4..7 unused (return 0). For k=0..3 the nibbles are 1,2,3,0.
+        check("T16a: pack[0] nibble 0 (sym0=BUY)",          (rd_val[3:0]   == 4'h1));
+        check("T16b: pack[0] nibble 1 (sym1=SELL)",         (rd_val[7:4]   == 4'h2));
+        check("T16c: pack[0] nibble 2 (sym2=RISK_BLOCKED)", (rd_val[11:8]  == 4'h3));
+        check("T16d: pack[0] nibble 3 (sym3=NONE)",         (rd_val[15:12] == 4'h0));
+        check("T16e: pack[0] upper unused syms == 0",       (rd_val[31:16] == 16'h0000));
+
+        // ── T17: B3 — LAST_LATENCY readback (0x2A8) ─────────────
+        $display("\n=== T17: B3 LAST_LATENCY readback ===");
+        last_latency = 32'd137;
+        @(posedge clk);
+        axi_read(10'h2A8, rd_val);
+        check("T17a: last_latency==137", rd_val == 32'd137);
+
+        last_latency = 32'h0000_BEEF;
+        @(posedge clk);
+        axi_read(10'h2A8, rd_val);
+        check("T17b: last_latency==0xBEEF", rd_val == 32'h0000_BEEF);
 
         // ── Summary ─────────────────────────────────────────────
         repeat (3) @(posedge clk);

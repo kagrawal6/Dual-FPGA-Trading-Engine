@@ -34,8 +34,12 @@ proc run_group {group_name tb_list} {
         puts " \[$idx/$total\] $group_name — $tb"
         puts "==========================================="
 
-        set ::_tb_break 0
-        onbreak {set ::_tb_break 1; resume}
+        # NOTE: do NOT use `onbreak` as a failure indicator — ModelSim Intel
+        # FPGA Edition fires onbreak on every $finish (clean test exit prints
+        # "Break in Module ... line N"), so it would mark every TB as FAIL.
+        # We rely solely on transcript scanning for explicit PASS/FAIL markers
+        # printed by the testbenches themselves.
+        onbreak {resume}
 
         set fsize 0
         if {[file exists transcript]} {
@@ -53,23 +57,43 @@ proc run_group {group_name tb_list} {
             continue
         }
 
-        set had_fatal $::_tb_break
-
-        if {!$had_fatal && [file exists transcript]} {
+        # Scan the new transcript region produced by THIS testbench only.
+        set had_fatal 0
+        set saw_pass  0
+        if {[file exists transcript]} {
             after 200
             set fp [open transcript r]
             seek $fp $fsize
             set new_content [read $fp]
             close $fp
-            foreach pat {"** Fatal:" "** Error: FAIL:" "FAIL (" "TESTBENCH FAILED"} {
+
+            # Hard-failure markers (genuine ModelSim or testbench errors).
+            # We deliberately do NOT match "FAIL" alone or "Errors: N" because
+            # ModelSim's "Errors: 0" line and Tcl's own ">>> FAIL:" output
+            # would otherwise give false positives.
+            foreach pat {"** Fatal:" "TESTBENCH FAILED" "Assertion error"} {
                 if {[string first $pat $new_content] >= 0} {
                     set had_fatal 1
                     break
                 }
             }
+
+            # If we did not see a hard fail, check for a positive PASS marker.
+            # Each TB ends with one of:
+            #   "<tb>: PASS (N checks passed)"          ← simple TBs
+            #   "ALL TESTS PASSED"                       ← legacy TBs
+            #   "PASSED: N\n#   FAILED: 0"               ← group-style TBs
+            if {!$had_fatal} {
+                if {[string first ": PASS ("        $new_content] >= 0 ||
+                    [string first "ALL TESTS PASSED" $new_content] >= 0 ||
+                    ([string first "FAILED: 0" $new_content] >= 0 &&
+                     [string first "PASSED:"   $new_content] >= 0)} {
+                    set saw_pass 1
+                }
+            }
         }
 
-        if {$had_fatal} {
+        if {$had_fatal || !$saw_pass} {
             puts ">>> FAIL: $tb"
             lappend all_fail $tb
         } else {

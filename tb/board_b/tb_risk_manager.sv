@@ -39,6 +39,7 @@ module tb_risk_manager;
 
     logic        risk_halt;
     logic [COUNTER_W-1:0] risk_rejects;
+    logic [2:0]  last_signal [TB_NUM_SYM];          // B3: per-symbol last signal (wired to silence TFMPC warning)
 
     initial clk = 0;
     always #5 clk = ~clk;
@@ -74,7 +75,8 @@ module tb_risk_manager;
         .fill_side       (fill_side),
         .fill_qty        (fill_qty),
         .risk_halt       (risk_halt),
-        .risk_rejects    (risk_rejects)
+        .risk_rejects    (risk_rejects),
+        .last_signal     (last_signal)              // B3
     );
 
     integer pass_count = 0;
@@ -89,6 +91,9 @@ module tb_risk_manager;
         end
     endtask
 
+    // FIX: risk_manager is 1-cycle registered. After the first edge
+    // approved_valid is high; a second edge with signal_valid=0 would deassert
+    // it before the caller can check. Drop the trailing edge.
     task automatic send_signal(
         input logic        side,
         input price_t      price,
@@ -102,7 +107,6 @@ module tb_risk_manager;
         signal_symbol = sym;
         @(posedge clk); #1;
         signal_valid = 1'b0;
-        @(posedge clk); #1;
     endtask
 
     task automatic send_fill(
@@ -259,6 +263,8 @@ module tb_risk_manager;
         check("T7-setup: approved", approved_valid == 1'b1);
         // Now pending_buy[0] = 100
 
+        // FIX: 1-cycle registered. Check approved_valid right after the edge
+        // that latched it, before the next edge with signal_valid=0 deasserts.
         // On the same cycle: approve BUY sym=0 qty=50 AND fill BUY sym=0 qty=100
         signal_valid  = 1'b1;
         signal_side   = 1'b0;  // BUY
@@ -272,7 +278,6 @@ module tb_risk_manager;
         @(posedge clk); #1;
         signal_valid = 1'b0;
         fill_valid   = 1'b0;
-        @(posedge clk); #1;
 
         check("T7: simultaneous approved", approved_valid == 1'b1);
         // pending_buy[0] should be: 100 (old) + 50 (new signal) - 100 (fill) = 50
@@ -290,6 +295,8 @@ module tb_risk_manager;
         send_signal(1'b1, 32'h01A4_0000, 16'd200, 8'd1);
         check("T8-setup: approved", approved_valid == 1'b1);
 
+        // FIX: same as T7 — drop the trailing edge so approved_valid is
+        // still high when checked.
         // Simultaneously: approve BUY sym=0 qty=100 AND fill SELL sym=1 qty=200
         signal_valid  = 1'b1;
         signal_side   = 1'b0;  // BUY sym=0
@@ -303,7 +310,6 @@ module tb_risk_manager;
         @(posedge clk); #1;
         signal_valid = 1'b0;
         fill_valid   = 1'b0;
-        @(posedge clk); #1;
 
         check("T8: approved",              approved_valid == 1'b1);
         check("T8: pending_buy[0]=100",    dut.pending_buy[0] == 16'd100);

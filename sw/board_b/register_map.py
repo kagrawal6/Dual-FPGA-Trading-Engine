@@ -53,6 +53,33 @@ LAST_FILL_BASE    = 0x200   # +4*i, 16 → 0x200..0x23C
 # Word j → trades[2*j] in [15:0], trades[2*j+1] in [31:16]
 TRADES_PACK_BASE  = 0x240   # +4*j, 8 words → 0x240..0x25C
 
+# ── B3 extensions ──────────────────────────────────────────────
+# Per-symbol EMA snapshot from feature_compute (Q16.16). Tracks the strategy's
+# fair-value estimate — useful for plotting alongside bid/ask to visualize
+# mean-reversion in real time.
+EMA_BASE          = 0x260   # +4*i, 16 → 0x260..0x29C
+
+# Per-symbol last-signal classification, packed 8 symbols per 32-bit word.
+# Word j: bits [4*k +: 4] = signal_code for symbol (8*j + k).
+# Encoding: 0=NONE, 1=BUY, 2=SELL, 3=RISK_BLOCKED, others=reserved.
+LAST_SIGNAL_PACK_BASE = 0x2A0  # +4*j, 2 words → 0x2A0, 0x2A4
+
+# Most recent single latency sample (cycles), latched on each fill_processed.
+# Distinct from LAT_MIN/MAX/SUM/COUNT which are aggregates.
+LAST_LATENCY      = 0x2A8
+
+# Last-signal encoding (used by laptop/dashboard.py)
+LAST_SIGNAL_NONE          = 0
+LAST_SIGNAL_BUY           = 1
+LAST_SIGNAL_SELL          = 2
+LAST_SIGNAL_RISK_BLOCKED  = 3
+LAST_SIGNAL_LABELS = {
+    LAST_SIGNAL_NONE:         "NONE",
+    LAST_SIGNAL_BUY:          "BUY",
+    LAST_SIGNAL_SELL:         "SELL",
+    LAST_SIGNAL_RISK_BLOCKED: "RISK_BLOCKED",
+}
+
 NUM_SYMBOLS    = 16
 NUM_HIST_BINS  = 16
 
@@ -92,3 +119,15 @@ def read_trades_pack(mmio, sym_idx: int) -> int:
     """Unpack the per-symbol trade counter from the packed 32-bit register."""
     word = mmio.read(TRADES_PACK_BASE + 4 * (sym_idx // 2))
     return (word & 0xFFFF) if (sym_idx % 2 == 0) else ((word >> 16) & 0xFFFF)
+
+
+def read_last_signal(mmio, sym_idx: int) -> int:
+    """Unpack the per-symbol last-signal code (0..3) from the packed 32-bit
+    register. Layout: word j packs 8 symbols × 4 bits."""
+    word = mmio.read(LAST_SIGNAL_PACK_BASE + 4 * (sym_idx // 8))
+    return (word >> (4 * (sym_idx % 8))) & 0xF
+
+
+def last_signal_label(code: int) -> str:
+    """Return a human-readable label for a last-signal code."""
+    return LAST_SIGNAL_LABELS.get(code & 0xF, "RESERVED")

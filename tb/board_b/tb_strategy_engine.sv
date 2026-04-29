@@ -75,6 +75,10 @@ module tb_strategy_engine;
         end
     endtask
 
+    // FIX: strategy_engine is 1-cycle registered. After the first edge
+    // signal_valid is high; the second edge would deassert it. Drop the
+    // trailing edge so the caller can check signal_valid before it goes back
+    // to 0 on the next clock.
     task automatic send_and_wait(
         input sprice_t dev,
         input price_t  bid,
@@ -88,7 +92,6 @@ module tb_strategy_engine;
         feature_valid = 1'b1;
         @(posedge clk); #1;
         feature_valid = 1'b0;
-        @(posedge clk); #1;
     endtask
 
     // Golden model vectors from strategy_vectors.json
@@ -172,6 +175,8 @@ module tb_strategy_engine;
         // TEST 12: Back-to-back feature_valid pulses
         // ──────────────────────────────────────────────────────
         $display("\n=== T12: Back-to-back feature_valid ===");
+        // FIX: 1-cycle registered output. Check sym=0 SELL right after the
+        // edge that latched it, BEFORE the next edge re-evaluates with sym=1.
         // Two consecutive valid inputs: first should SELL, second should not trade
         deviation     = 32'h00010000;  // big positive → SELL
         bid_price     = 32'h00B40000;
@@ -179,19 +184,16 @@ module tb_strategy_engine;
         symbol_id     = 8'd0;
         feature_valid = 1'b1;
         @(posedge clk); #1;
-
-        // Immediately next: zero deviation → no trade
-        deviation     = 32'h00000000;
-        symbol_id     = 8'd1;
-        @(posedge clk); #1;
-        feature_valid = 1'b0;
-
-        // Check first output: SELL sym=0
+        // Check first output: SELL sym=0 (visible now, before next edge)
         check("T12a: valid SELL",       signal_valid == 1'b1);
         check("T12a: side==SELL",       signal_side == 1'b1);
         check("T12a: sym==0",           signal_symbol == 8'd0);
 
+        // Immediately next cycle: zero deviation → no trade
+        deviation     = 32'h00000000;
+        symbol_id     = 8'd1;
         @(posedge clk); #1;
+        feature_valid = 1'b0;
         // Check second output: no trade sym=1
         check("T12b: no trade",         signal_valid == 1'b0);
 

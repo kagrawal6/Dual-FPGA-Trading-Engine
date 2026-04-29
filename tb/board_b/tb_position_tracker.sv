@@ -110,8 +110,9 @@ module tb_position_tracker;
         fill_frame = 128'h300000B40CCC00640000000A00000000;
         fill_valid = 1'b1;
         @(posedge clk); #1;
+        // FIX: position_tracker is 1-cycle registered; fill_processed pulses
+        // for one cycle. Check before the next edge deasserts it.
         fill_valid = 1'b0;
-        @(posedge clk); #1;
 
         check("S0: fill_processed",        fill_processed == 1'b1);
         check32("S0: position[0]=0x64",     position[0], 32'h00000064);
@@ -130,8 +131,8 @@ module tb_position_tracker;
         fill_frame = 128'h301801A4199900320001001400000000;
         fill_valid = 1'b1;
         @(posedge clk); #1;
+        // FIX: check fill_processed pulse before next edge clears it
         fill_valid = 1'b0;
-        @(posedge clk); #1;
 
         check("S1: fill_processed",        fill_processed == 1'b1);
         check32("S1: position[1]=0xFFFFFFCE", position[1], 32'hFFFFFFCE);
@@ -154,8 +155,8 @@ module tb_position_tracker;
         fill_frame = 128'h300800B5000000640002001E00000000;
         fill_valid = 1'b1;
         @(posedge clk); #1;
+        // FIX: check pulse before next edge clears it
         fill_valid = 1'b0;
-        @(posedge clk); #1;
 
         check("S2: fill_processed",        fill_processed == 1'b1);
         check32("S2: position[0]=0",        position[0], 32'h00000000);
@@ -177,8 +178,9 @@ module tb_position_tracker;
         fill_frame = 128'h30210000000000000003002800000000;
         fill_valid = 1'b1;
         @(posedge clk); #1;
+        // FIX: fill_notify pulses for one cycle (default-deasserted register),
+        // same as fill_processed. Check before the next edge clears it.
         fill_valid = 1'b0;
-        @(posedge clk); #1;
 
         check("S3: NOT processed (reject)", fill_processed == 1'b0);
         check("S3: fill_notify (pending clear)", fill_notify == 1'b1);
@@ -194,8 +196,8 @@ module tb_position_tracker;
         fill_frame = 128'h300000B3800000C80004003200000000;
         fill_valid = 1'b1;
         @(posedge clk); #1;
+        // FIX: check pulse before next edge clears it
         fill_valid = 1'b0;
-        @(posedge clk); #1;
 
         check("S4: fill_processed",        fill_processed == 1'b1);
         check32("S4: position[0]=0xC8",     position[0], 32'h000000C8);
@@ -236,8 +238,8 @@ module tb_position_tracker;
                       32'h00B4_0000, 16'd50, 16'd99, 16'h00AA, 32'h0};
         fill_valid = 1'b1;
         @(posedge clk); #1;
+        // FIX: check pulse before next edge clears it
         fill_valid = 1'b0;
-        @(posedge clk); #1;
 
         check("T6: ts_echo==0x00AA",       ts_echo == 16'h00AA);
         check("T6: fill_processed",        fill_processed == 1'b1);

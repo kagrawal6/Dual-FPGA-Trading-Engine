@@ -1,1 +1,0 @@
---debug "typical" -L "unisims_ver" -L "secureip" "tb_market_noise_gen" -s "tb_market_noise_gen_sim" 

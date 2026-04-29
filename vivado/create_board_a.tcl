@@ -134,8 +134,8 @@ assign_bd_address
 
 set hft_segs [get_bd_addr_segs -of_objects [get_bd_cells hft_core]]
 foreach seg $hft_segs {
-    set_property range 4K $seg
-    puts "  Set AXI segment range = 4K  (seg: $seg)"
+    set seg_range [get_property range $seg]
+    puts "  AXI segment '$seg' has range = $seg_range  (auto-assigned by Vivado)"
 }
 
 # ── 13. Validate block design ─────────────────────────────────────────────

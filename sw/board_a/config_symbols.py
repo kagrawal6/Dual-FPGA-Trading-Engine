@@ -56,6 +56,11 @@ FILLS_SENT   = 0x100
 REJECTS_SENT = 0x104
 LINK_ERRORS  = 0x108
 
+# B3: per-symbol live price snapshots from market_sim (Q16.16, 4 bytes each, 16 syms)
+LIVE_BID_BASE = 0x110
+LIVE_ASK_BASE = 0x150
+LIVE_MID_BASE = 0x190
+
 DEFAULT_HW_SLOTS = 16
 
 REGIME_NAMES = {0: "CALM", 1: "VOLATILE", 2: "BURST", 3: "ADVERSARIAL"}
@@ -64,6 +69,27 @@ REGIME_NAMES = {0: "CALM", 1: "VOLATILE", 2: "BURST", 3: "ADVERSARIAL"}
 def q16_16(val: float) -> int:
     """Convert float to unsigned Q16.16 integer."""
     return int(val * 65536) & 0xFFFFFFFF
+
+
+def from_q16_16(raw: int) -> float:
+    """Convert unsigned Q16.16 integer to float dollars."""
+    return (raw & 0xFFFFFFFF) / 65536.0
+
+
+def read_live_prices(mmio: MMIO, num_syms: int = DEFAULT_HW_SLOTS) -> List[Dict[str, float]]:
+    """Snapshot Board A's live BBO + mid for each symbol (Q16.16 → float).
+
+    Returns a list of length num_syms; each entry has 'bid', 'ask', 'mid', 'spread'.
+    'spread' is computed in Python (ask - bid) — there's no dedicated AXI
+    register because it's free to derive.
+    """
+    out: List[Dict[str, float]] = []
+    for i in range(num_syms):
+        bid = from_q16_16(mmio.read(LIVE_BID_BASE + 4 * i))
+        ask = from_q16_16(mmio.read(LIVE_ASK_BASE + 4 * i))
+        mid = from_q16_16(mmio.read(LIVE_MID_BASE + 4 * i))
+        out.append({"bid": bid, "ask": ask, "mid": mid, "spread": max(0.0, ask - bid)})
+    return out
 
 
 def read_board_a_status(mmio: MMIO) -> Dict[str, Any]:

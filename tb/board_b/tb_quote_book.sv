@@ -97,12 +97,14 @@ module tb_quote_book;
         // ────────────────────────────────────────────────────────
         $display("\n=== TEST 1: First round (cycles 0-3) ===");
 
+        // FIX: quote_book is 1-cycle registered. After the latching edge,
+        // book_valid is high. The next clock edge with quote_valid=0 deasserts
+        // it. So check BEFORE that next edge.
         // Cycle 0: sym=0
         quote_frame = 128'h100000B3F81E00B4081E03E803E80000;
         quote_valid = 1'b1;
         @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk); #1;
         check("T1.0: book_valid",        book_valid == 1'b1);
         check("T1.0: symbol_id==0",      symbol_id == 8'd0);
         check("T1.0: regime==CALM",      regime == REGIME_CALM);
@@ -119,33 +121,33 @@ module tb_quote_book;
         quote_valid = 1'b1;
         @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk); #1;
         check("T1.1: book_valid",        book_valid == 1'b1);
         check("T1.1: symbol_id==1",      symbol_id == 8'd1);
         check("T1.1: bid==0x01A3F821",   bid_price == 32'h01A3F821);
         check("T1.1: ask==0x01A40821",   ask_price == 32'h01A40821);
+        @(posedge clk); #1;
 
         // Cycle 2: sym=2
         quote_frame = 128'h10200383F8160384081603E803E80000;
         quote_valid = 1'b1;
         @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk); #1;
         check("T1.2: book_valid",        book_valid == 1'b1);
         check("T1.2: symbol_id==2",      symbol_id == 8'd2);
         check("T1.2: bid==0x0383F816",   bid_price == 32'h0383F816);
         check("T1.2: ask==0x03840816",   ask_price == 32'h03840816);
+        @(posedge clk); #1;
 
         // Cycle 3: sym=3
         quote_frame = 128'h10300072F81D0073081D03E803E80000;
         quote_valid = 1'b1;
         @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk); #1;
         check("T1.3: book_valid",        book_valid == 1'b1);
         check("T1.3: symbol_id==3",      symbol_id == 8'd3);
         check("T1.3: bid==0x0072F81D",   bid_price == 32'h0072F81D);
         check("T1.3: ask==0x0073081D",   ask_price == 32'h0073081D);
+        @(posedge clk); #1;
 
         // ────────────────────────────────────────────────────────
         // TEST 2: Second round (cycles 4-7) — overwrites previous
@@ -194,22 +196,23 @@ module tb_quote_book;
         // ────────────────────────────────────────────────────────
         $display("\n=== TEST 3: Back-to-back (no gap) ===");
         begin
+            // FIX: quote_book is 1-cycle registered. Each edge latches the
+            // input present BEFORE that edge. So we check sym0 right after
+            // the first edge, sym1 after the second, etc.
             // Cycle 8: sym=0, then cycle 9: sym=1 (consecutive)
             quote_frame = 128'h100000B3F81A00B4081A03E803E80002;
             quote_valid = 1'b1;
             @(posedge clk); #1;
+            check("T3a: sym0 output",       bid_price == 32'h00B3F81A);
+            check("T3a: sym0 valid",        book_valid == 1'b1);
 
             // Immediately send next frame
             quote_frame = 128'h101001A3F81801A4081803E803E80002;
             @(posedge clk); #1;
-            check("T3a: sym0 output",       bid_price == 32'h00B3F81A);
-            check("T3a: sym0 valid",        book_valid == 1'b1);
-
-            quote_valid = 1'b0;
-            @(posedge clk); #1;
             check("T3b: sym1 output",       bid_price == 32'h01A3F818);
             check("T3b: sym1 valid",        book_valid == 1'b1);
 
+            quote_valid = 1'b0;
             @(posedge clk); #1;
             check("T3c: valid deasserts",   book_valid == 1'b0);
         end

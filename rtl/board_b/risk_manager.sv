@@ -56,7 +56,15 @@ module risk_manager
 
     // Status
     output logic                  risk_halt,
-    output logic [COUNTER_W-1:0] risk_rejects
+    output logic [COUNTER_W-1:0] risk_rejects,
+
+    // B3: per-symbol last-signal classification for AXI/dashboard
+    //   0 = NONE (no signal observed yet)
+    //   1 = BUY  (approved BUY by risk)
+    //   2 = SELL (approved SELL by risk)
+    //   3 = RISK_BLOCKED (signal asserted but rejected by risk)
+    //   4..7 = reserved
+    output logic [2:0]            last_signal [NUM_SYM]
 );
 
     // ── In-flight pending tracking ──────────────────────────────
@@ -123,6 +131,7 @@ module risk_manager
             for (int i = 0; i < NUM_SYM; i++) begin
                 pending_buy[i]  <= '0;
                 pending_sell[i] <= '0;
+                last_signal[i]  <= 3'd0;  // B3: NONE
             end
         end else if (clear) begin
             approved_valid  <= 1'b0;
@@ -132,11 +141,22 @@ module risk_manager
             for (int i = 0; i < NUM_SYM; i++) begin
                 pending_buy[i]  <= '0;
                 pending_sell[i] <= '0;
+                last_signal[i]  <= 3'd0;  // B3: NONE
             end
         end else begin
             approved_valid <= 1'b0;
 
             if (signal_valid) begin
+                // B3: classify the signal even if it doesn't lead to an approved order.
+                // Done first so the !approved branches below can override / be overridden uniformly.
+                if (signal_symbol < NUM_SYM[7:0]) begin
+                    if (approved_comb) begin
+                        last_signal[signal_symbol] <= (signal_side == 1'b0) ? 3'd1 : 3'd2; // BUY / SELL
+                    end else begin
+                        last_signal[signal_symbol] <= 3'd3; // RISK_BLOCKED
+                    end
+                end
+
                 if (!order_enable || risk_halt) begin
                     risk_rejects <= risk_rejects + 1'b1;
                 end else if (approved_comb) begin

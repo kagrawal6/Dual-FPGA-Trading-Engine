@@ -115,8 +115,10 @@ module tb_msg_demux;
         frame_in       = expected_quote;
         frame_in_valid = 1'b1;
         @(posedge clk); #1;
+        // FIX: msg_demux is 1-cycle registered. After this edge, outputs are
+        // already valid. Deassert the input but DO NOT advance another clock
+        // before checking — otherwise the registered output deasserts.
         frame_in_valid = 1'b0;
-        @(posedge clk); #1;
 
         check("T1: quote_valid asserted",   quote_valid == 1'b1);
         check("T1: fill_valid deasserted",   fill_valid == 1'b0);
@@ -136,8 +138,8 @@ module tb_msg_demux;
         frame_in       = expected_fill;
         frame_in_valid = 1'b1;
         @(posedge clk); #1;
+        // FIX: check before next edge (registered 1-cycle output)
         frame_in_valid = 1'b0;
-        @(posedge clk); #1;
 
         check("T2: fill_valid asserted",     fill_valid == 1'b1);
         check("T2: quote_valid deasserted",  quote_valid == 1'b0);
@@ -193,26 +195,27 @@ module tb_msg_demux;
             q1 = make_quote(8'd1, REGIME_VOLATILE,  32'h00C8_0000, 32'h00C8_4000, 16'd200, 16'd200, 16'd11);
             q2 = make_quote(8'd2, REGIME_BURST,     32'h012C_0000, 32'h012C_2000, 16'd300, 16'd300, 16'd12);
 
-            // Send 3 consecutive frames with no gap
+            // FIX: msg_demux is 1-cycle registered, NOT 2-stage. Check the
+            // output immediately after the edge that latched the frame, BEFORE
+            // driving the next one (otherwise the next frame overwrites the
+            // registered output before we check it).
             frame_in       = q0;
             frame_in_valid = 1'b1;
-            @(posedge clk); #1;
-
-            frame_in = q1;
             @(posedge clk); #1;
             check("T4: q0 routed",           quote_valid == 1'b1);
             check("T4: q0 frame",            quote_frame == q0);
 
-            frame_in = q2;
+            frame_in = q1;
             @(posedge clk); #1;
             check("T4: q1 routed",           quote_valid == 1'b1);
             check("T4: q1 frame",            quote_frame == q1);
 
-            frame_in_valid = 1'b0;
+            frame_in = q2;
             @(posedge clk); #1;
             check("T4: q2 routed",           quote_valid == 1'b1);
             check("T4: q2 frame",            quote_frame == q2);
 
+            frame_in_valid = 1'b0;
             @(posedge clk); #1;
             check("T4: valid deasserts",     quote_valid == 1'b0);
             // 1 (T1) + 3 (T4) = 4 total quotes
@@ -229,21 +232,22 @@ module tb_msg_demux;
                            16'd100, 16'd100, 16'd20);
             f = make_fill(8'd7, 1'b1, 3'b000, 32'h01F4_0000, 16'd100, 16'd5, 16'h1234);
 
+            // FIX: 1-cycle registered, check immediately after each latch edge.
             frame_in       = q;
             frame_in_valid = 1'b1;
-            @(posedge clk); #1;
-
-            frame_in = f;
             @(posedge clk); #1;
             check("T5: quote routed",        quote_valid == 1'b1);
             check("T5: fill not yet",        fill_valid == 1'b0);
             check("T5: quote_frame",         quote_frame == q);
 
-            frame_in_valid = 1'b0;
+            frame_in = f;
             @(posedge clk); #1;
             check("T5: fill routed",         fill_valid == 1'b1);
             check("T5: quote deasserted",    quote_valid == 1'b0);
             check("T5: fill_frame",          fill_frame == f);
+
+            frame_in_valid = 1'b0;
+            @(posedge clk); #1;
         end
 
         // ────────────────────────────────────────────────────────────────
@@ -285,8 +289,8 @@ module tb_msg_demux;
         frame_in       = expected_fill;
         frame_in_valid = 1'b1;
         @(posedge clk); #1;
+        // FIX: check before next edge
         frame_in_valid = 1'b0;
-        @(posedge clk); #1;
 
         check("T8: fill_valid asserted",    fill_valid == 1'b1);
         check("T8: fill_frame matches",     fill_frame == expected_fill);
@@ -299,46 +303,48 @@ module tb_msg_demux;
         begin
             logic [FRAME_W-1:0] gm_quote, gm_fill;
 
+            // FIX: 1-cycle registered output — check immediately after the
+            // latching edge, BEFORE the next edge clears the registered valid.
             gm_quote = 128'h100000B3F81E00B4081E03E803E80000;
             frame_in       = gm_quote;
             frame_in_valid = 1'b1;
             @(posedge clk); #1;
             frame_in_valid = 1'b0;
-            @(posedge clk); #1;
             check("T9a: GM quote routed",    quote_valid == 1'b1);
             check("T9a: GM quote frame",     quote_frame == gm_quote);
             check("T9a: GM symbol==0",       quote_frame[123:116] == 8'd0);
             check("T9a: GM regime==CALM",    quote_frame[115:114] == 2'b00);
+            @(posedge clk); #1;
 
             gm_quote = 128'h101001A3F82101A4082103E803E80000;
             frame_in       = gm_quote;
             frame_in_valid = 1'b1;
             @(posedge clk); #1;
             frame_in_valid = 1'b0;
-            @(posedge clk); #1;
             check("T9b: GM sym1 routed",     quote_valid == 1'b1);
             check("T9b: GM sym1 frame",      quote_frame == gm_quote);
+            @(posedge clk); #1;
 
             gm_quote = 128'h10200383F8160384081603E803E80000;
             frame_in       = gm_quote;
             frame_in_valid = 1'b1;
             @(posedge clk); #1;
             frame_in_valid = 1'b0;
-            @(posedge clk); #1;
             check("T9c: GM sym2 routed",     quote_valid == 1'b1);
             check("T9c: GM sym2 frame",      quote_frame == gm_quote);
+            @(posedge clk); #1;
 
             gm_fill = 128'h300000B4081500640001002A00000000;
             frame_in       = gm_fill;
             frame_in_valid = 1'b1;
             @(posedge clk); #1;
             frame_in_valid = 1'b0;
-            @(posedge clk); #1;
             check("T9d: GM fill routed",     fill_valid == 1'b1);
             check("T9d: GM fill frame",      fill_frame == gm_fill);
             check("T9d: GM fill sym==0",     fill_frame[123:116] == 8'd0);
             check("T9d: GM fill side==BUY",  fill_frame[115] == 1'b0);
             check("T9d: GM fill FILLED",     fill_frame[114:112] == 3'b000);
+            @(posedge clk); #1;
 
             frame_in       = 128'h00000000DEADBEEFCAFE1234567890AB;
             frame_in_valid = 1'b1;

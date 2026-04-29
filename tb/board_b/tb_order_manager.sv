@@ -104,7 +104,9 @@ module tb_order_manager;
         // ── T1: Basic BUY order packing ───────────────────────
         $display("\n=== T1: BUY order frame packing ===");
         approve_order(1'b0, 32'h00B4_1999, 16'd100, 8'd0, 16'h002A);
-        @(posedge clk); #1;
+        // FIX: order_manager is 1-cycle registered. After approve_order's
+        // edge, order_valid is high. With order_ready=1 (default), the next
+        // clock edge would CONSUME it (order_valid<=0). Check immediately.
 
         check("T1: order_valid",         order_valid == 1'b1);
         check("T1: msg_type==ORDER",     order_frame[127:124] == MSG_ORDER);
@@ -143,8 +145,9 @@ module tb_order_manager;
         check("T3: holding==1",          dut.holding == 1'b1);
 
         // Release backpressure → held frame appears
+        // FIX: one edge moves held → output. A second edge would consume the
+        // freshly placed frame (order_ready stays 1), so check after one edge.
         order_ready = 1'b1;
-        @(posedge clk); #1;
         @(posedge clk); #1;
         check("T3b: held frame out",     order_valid == 1'b1);
         check("T3b: symbol==1",          order_frame[123:116] == 8'd1);
@@ -185,8 +188,9 @@ module tb_order_manager;
         @(posedge clk); #1;
         approved_valid = 1'b0;
 
-        // After this cycle: held B should be in output, new C should be in holding
-        @(posedge clk); #1;
+        // FIX: After this single edge: held B has been promoted to output and
+        // new C has been latched into holding. A second edge with order_ready
+        // still high would already consume B and pull C out, so check NOW.
         check("T4: B now in output",     order_valid == 1'b1);
         check("T4: B symbol==1",         order_frame[123:116] == 8'd1);
         check("T4: C in holding",        dut.holding == 1'b1);

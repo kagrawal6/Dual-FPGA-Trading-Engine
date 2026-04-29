@@ -1,7 +1,0 @@
-Running: xsim.dir/tb_market_sim_sim/xsimk.exe -simmode gui -wdb tb_market_sim_sim.wdb -simrunnum 0 -socket 61913
-Design successfully loaded
-Design Loading Memory Usage: 10064 KB (Peak: 10064 KB)
-Design Loading CPU Usage: 61 ms
-Simulation completed
-Simulation Memory Usage: 12460 KB (Peak: 12460 KB)
-Simulation CPU Usage: 171 ms

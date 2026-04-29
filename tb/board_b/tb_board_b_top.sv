@@ -692,6 +692,63 @@ module tb_board_b_top;
         end
 
         // ══════════════════════════════════════════════════════════
+        // Phase 25: B3 — EMA / LAST_SIGNAL_PACK / LAST_LATENCY exposure
+        //   EMA[i]               at 0x260 + 4*i      (Q16.16)
+        //   LAST_SIGNAL_PACK[j]  at 0x2A0 + 4*j      (4b/sym, 8 syms/word)
+        //   LAST_LATENCY         at 0x2A8           (cycles, latched on fill)
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 25: B3 EMA / LAST_SIGNAL / LAST_LATENCY ===");
+        begin
+            logic [31:0] ema_v, sigpack0, sigpack1, last_lat_v;
+            logic [3:0]  nibble;
+            int          ema_nonzero_count;
+            ema_nonzero_count = 0;
+
+            // EMAs are populated by feature_compute when quotes arrive.
+            // After all the quote/fill traffic above, several syms must have
+            // a non-zero EMA snapshot.
+            for (int i = 0; i < 8; i++) begin
+                axi_read(10'h260 + i*4);
+                ema_v = axi_rd_data;
+                $display("  EMA[%0d] = 0x%08X", i, ema_v);
+                if (ema_v != 32'h0) ema_nonzero_count++;
+            end
+            check("P25: at least 4 syms have nonzero EMA", ema_nonzero_count >= 4);
+
+            // LAST_SIGNAL_PACK: read both packed words. Note that this register
+            // can legitimately be all-zero at this point — earlier phases issue
+            // counter_clr (Phase 12 etc.) which resets last_signal[] in
+            // risk_manager, and the test's stimulus may not produce a fresh
+            // strategy signal between the last clear and Phase 25. The
+            // exhaustive last_signal verification is done in tb_board_b_axi_regs
+            // (T16) and tb_system_top (Phase 28) where the timing is controlled.
+            // Here we only require the readback path to work and the nibble
+            // encoding to be structurally valid.
+            axi_read(10'h2A0);
+            sigpack0 = axi_rd_data;
+            axi_read(10'h2A4);
+            sigpack1 = axi_rd_data;
+            $display("  LAST_SIGNAL_PACK = {0x%08X, 0x%08X} (informational)",
+                     sigpack1, sigpack0);
+
+            // LAST_LATENCY: must be > 0 (we processed fills above) and within
+            // a reasonable bound (16-bit wrapping latency, sane upper bound).
+            axi_read(10'h2A8);
+            last_lat_v = axi_rd_data;
+            $display("  LAST_LATENCY = %0d cycles", last_lat_v);
+            check("P25: last_latency > 0",       last_lat_v >  32'd0);
+            check("P25: last_latency < 65536",   last_lat_v <  32'h0001_0000);
+
+            // Spot-check: each non-zero nibble in pack0 must be a valid
+            // encoding (0..3); reserved values (4..7) should not appear.
+            for (int k = 0; k < 8; k++) begin
+                nibble = sigpack0[4*k +: 4];
+                check($sformatf("P25: pack0 nibble[%0d] is valid 0..3", k),
+                      nibble <= 4'd3);
+            end
+        end
+
+        // ══════════════════════════════════════════════════════════
         // Summary
         // ══════════════════════════════════════════════════════════
         repeat (5) @(posedge clk);
