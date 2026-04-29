@@ -2,3 +2,5 @@ obj_*/
 __pycache__/
 *.pyc
 .venv/
+vivado/
+sw_pynq_upload.zip

@@ -1841,6 +1841,15 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                     c["good"] if total_pnl >= 0 else c["bad"],
                     "MTM aggregate",
                 ),
+                _kpi_card(
+                    "PROFIT SIGNAL",
+                    ("PROFIT" if total_pnl > 0 else ("LOSS" if total_pnl < 0 else "FLAT")),
+                    (c["good"] if total_pnl > 0 else (c["bad"] if total_pnl < 0 else c["muted"])),
+                    "Sign(total PnL)",
+                    tooltip=(
+                        "Hardware-side profit indicator: green if total PnL > 0, red if total PnL < 0, off if 0."
+                    ),
+                ),
                 _kpi_card("PORT VALUE", f"${port_value:,.2f}", c["accent"], "Cash + Σ pos·mid"),
                 _kpi_card("QUOTES RX", f"{qps:,}", c["muted"], "Board A → B"),
                 _kpi_card("ORDERS TX", f"{ops:,}", c["muted"], "B → Board A"),
