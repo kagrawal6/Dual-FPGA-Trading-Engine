@@ -1,0 +1,104 @@
+[
+  {
+    "description": "no deviation \u2192 no trade",
+    "deviation_hex": "00000000",
+    "deviation_signed": 0,
+    "bid_hex": "00B40000",
+    "ask_hex": "00B41999",
+    "threshold_hex": "00008000",
+    "base_qty": 100,
+    "signal_valid": false
+  },
+  {
+    "description": "small positive \u2192 no trade",
+    "deviation_hex": "00004CCC",
+    "deviation_signed": 19660,
+    "bid_hex": "00B40000",
+    "ask_hex": "00B41999",
+    "threshold_hex": "00008000",
+    "base_qty": 100,
+    "signal_valid": false
+  },
+  {
+    "description": "above threshold \u2192 SELL at bid",
+    "deviation_hex": "0000828F",
+    "deviation_signed": 33423,
+    "bid_hex": "00B40000",
+    "ask_hex": "00B41999",
+    "threshold_hex": "00008000",
+    "base_qty": 100,
+    "signal_valid": true,
+    "signal_side": "SELL",
+    "signal_price_hex": "00B40000",
+    "signal_qty": 100
+  },
+  {
+    "description": "large positive \u2192 SELL at bid",
+    "deviation_hex": "00010000",
+    "deviation_signed": 65536,
+    "bid_hex": "00B40000",
+    "ask_hex": "00B41999",
+    "threshold_hex": "00008000",
+    "base_qty": 100,
+    "signal_valid": true,
+    "signal_side": "SELL",
+    "signal_price_hex": "00B40000",
+    "signal_qty": 100
+  },
+  {
+    "description": "small negative \u2192 no trade",
+    "deviation_hex": "FFFFB334",
+    "deviation_signed": -19660,
+    "bid_hex": "00B40000",
+    "ask_hex": "00B41999",
+    "threshold_hex": "00008000",
+    "base_qty": 100,
+    "signal_valid": false
+  },
+  {
+    "description": "below -threshold \u2192 BUY at ask",
+    "deviation_hex": "FFFF7D71",
+    "deviation_signed": -33423,
+    "bid_hex": "00B40000",
+    "ask_hex": "00B41999",
+    "threshold_hex": "00008000",
+    "base_qty": 100,
+    "signal_valid": true,
+    "signal_side": "BUY",
+    "signal_price_hex": "00B41999",
+    "signal_qty": 100
+  },
+  {
+    "description": "large negative \u2192 BUY at ask",
+    "deviation_hex": "FFFE0000",
+    "deviation_signed": -131072,
+    "bid_hex": "00B40000",
+    "ask_hex": "00B41999",
+    "threshold_hex": "00008000",
+    "base_qty": 100,
+    "signal_valid": true,
+    "signal_side": "BUY",
+    "signal_price_hex": "00B41999",
+    "signal_qty": 100
+  },
+  {
+    "description": "exactly at threshold \u2192 no trade",
+    "deviation_hex": "00008000",
+    "deviation_signed": 32768,
+    "bid_hex": "00B40000",
+    "ask_hex": "00B41999",
+    "threshold_hex": "00008000",
+    "base_qty": 100,
+    "signal_valid": false
+  },
+  {
+    "description": "exactly at -threshold \u2192 no trade",
+    "deviation_hex": "FFFF8000",
+    "deviation_signed": -32768,
+    "bid_hex": "00B40000",
+    "ask_hex": "00B41999",
+    "threshold_hex": "00008000",
+    "base_qty": 100,
+    "signal_valid": false
+  }
+]

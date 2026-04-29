@@ -1,0 +1,92 @@
+[
+  {
+    "step": 0,
+    "fill_frame_hex": "300000B40CCC00640000000A00000000",
+    "symbol": 0,
+    "side": "BUY",
+    "status": "FILLED",
+    "fill_price_hex": "00B40CCC",
+    "fill_qty": 100,
+    "positions": [
+      "00000064",
+      "00000000",
+      "00000000",
+      "00000000"
+    ],
+    "cash_hex": "FFFFB9AB0050",
+    "total_pnl": -18005,
+    "fills_rcvd": 1
+  },
+  {
+    "step": 1,
+    "fill_frame_hex": "301801A4199900320001001400000000",
+    "symbol": 1,
+    "side": "SELL",
+    "status": "FILLED",
+    "fill_price_hex": "01A41999",
+    "fill_qty": 50,
+    "positions": [
+      "00000064",
+      "FFFFFFCE",
+      "00000000",
+      "00000000"
+    ],
+    "cash_hex": "00000BB80032",
+    "total_pnl": 3000,
+    "fills_rcvd": 2
+  },
+  {
+    "step": 2,
+    "fill_frame_hex": "300800B5000000640002001E00000000",
+    "symbol": 0,
+    "side": "SELL",
+    "status": "FILLED",
+    "fill_price_hex": "00B50000",
+    "fill_qty": 100,
+    "positions": [
+      "00000000",
+      "FFFFFFCE",
+      "00000000",
+      "00000000"
+    ],
+    "cash_hex": "0000526C0032",
+    "total_pnl": 21100,
+    "fills_rcvd": 3
+  },
+  {
+    "step": 3,
+    "fill_frame_hex": "30210000000000000003002800000000",
+    "symbol": 2,
+    "side": "BUY",
+    "status": "REJECTED",
+    "fill_price_hex": "00000000",
+    "fill_qty": 0,
+    "positions": [
+      "00000000",
+      "FFFFFFCE",
+      "00000000",
+      "00000000"
+    ],
+    "cash_hex": "0000526C0032",
+    "total_pnl": 21100,
+    "fills_rcvd": 3
+  },
+  {
+    "step": 4,
+    "fill_frame_hex": "300000B3800000C80004003200000000",
+    "symbol": 0,
+    "side": "BUY",
+    "status": "FILLED",
+    "fill_price_hex": "00B38000",
+    "fill_qty": 200,
+    "positions": [
+      "000000C8",
+      "FFFFFFCE",
+      "00000000",
+      "00000000"
+    ],
+    "cash_hex": "FFFFC6300032",
+    "total_pnl": -14800,
+    "fills_rcvd": 4
+  }
+]
