@@ -224,41 +224,152 @@ module tb_board_b_top_nn();   // CHANGED: module name
             err_cnt = err_cnt + 1;
         end
 
-        // ── NEW Test 10: NN pipeline produces orders ─────────────
-        // Send many alternating quotes to build up EMA deviation,
-        // wait for NN to fire at least one order through the pipeline.
-        // active_strategy must be STRAT_NN (sw override or AXI).
-        $display("Test 10: NN inference produces at least one order");
-        // Make sure we are in TRADING with generous limits
+        // ── Test 10: NN fires BUY after large price drop ────────
+        // Strategy: warm up EMA at $180, then crash price to $160.
+        // Deviation = mid - EMA becomes large negative → BUY signal.
+        //
+        // Quote format: {MSG_QUOTE[127:124], sym[123:116], regime[115:114],
+        //                seq[113:112], bid[111:80], ask[79:48],
+        //                bid_size[47:32], ask_size[31:16], pad[15:0]}
+        //
+        // QUOTE_BASE: bid=0x00B4_0000 ($180.00), ask=0x00B4_8000 ($180.50)
+        // QUOTE_LOW:  bid=0x00A0_0000 ($160.00), ask=0x00A0_8000 ($160.50)
+        // regime=01 (VOLATILE) in bits [115:114] to match training distribution
+        $display("Test 10: NN BUY signal after large price drop");
+
+        // Generous limits — don't halt during this test
         @(posedge clk); awaddr=9'h01C; awvalid=1; wdata=32'd100_000_000; wstrb=4'hF; wvalid=1; bready=1;
         @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
-        // Select NN via switch override: sw[3]=1 override, sw[2:1]=10 STRAT_NN
-        sw = 8'b0000_1101;  // sw[3]=1 override, sw[2:1]=10, sw[0]=1 trading_enable
+
+        // Select NN via switch override: sw[3]=1 override, sw[2:1]=10, sw[0]=1
+        sw = 8'b0000_1101;
         @(posedge clk);
-        // Send 50 alternating quotes to build deviation signal
-        repeat (50) begin
-            tx_frame = QUOTE_0; tx_valid = 1;
+
+        // Phase 1: warm up EMA at $180 base price (10 quotes)
+        // msg=1, sym=0, regime=01(volatile), bid=0x00B40000, ask=0x00B48000
+        repeat (10) begin
+            tx_frame = 128'h1004_00B4_0000_00B4_8000_03E8_03E8_0000;
+            tx_valid = 1;
             @(posedge clk); tx_valid = 0;
-            repeat (60) @(posedge clk);
-            tx_frame = QUOTE_1; tx_valid = 1;
-            @(posedge clk); tx_valid = 0;
-            repeat (60) @(posedge clk);
+            repeat (80) @(posedge clk);
         end
-        // Allow pipeline to drain (4 cycle NN latency + link TX)
-        repeat (200) @(posedge clk);
-        // Read orders_sent counter
+
+        // Phase 2: crash price to $160 — big negative deviation → BUY
+        repeat (20) begin
+            tx_frame = 128'h1004_00A0_0000_00A0_8000_03E8_03E8_0000;
+            tx_valid = 1;
+            @(posedge clk); tx_valid = 0;
+            repeat (80) @(posedge clk);
+        end
+
+        // Phase 3: spike price to $200 — big positive deviation → SELL
+        repeat (20) begin
+            tx_frame = 128'h1004_00C8_0000_00C8_8000_03E8_03E8_0000;
+            tx_valid = 1;
+            @(posedge clk); tx_valid = 0;
+            repeat (80) @(posedge clk);
+        end
+
+        // Allow pipeline to fully drain
+        repeat (300) @(posedge clk);
+
+        // Read orders_sent
         @(posedge clk); araddr=9'h048; arvalid=1; rready=1;
         @(posedge clk); arvalid=0; while(!rvalid) @(posedge clk);
         if (rdata > 0)
             $display("  PASS: NN produced orders_sent = %0d", rdata);
         else begin
-            // NN may legitimately HOLD on this quote pattern — not a hard fail
-            // but worth noting. Check nn_valid internal signal in waveform.
-            $display("  INFO: orders_sent = 0 (NN chose HOLD for this quote pattern)");
-            $display("        Check u_nn.signal_valid in waveform to confirm NN fired.");
+            $display("  FAIL: orders_sent = 0 after large price swing");
+            $display("        Check u_nn.signal_valid and u_nn.action_comb in waveform");
+            err_cnt = err_cnt + 1;
         end
         @(posedge clk); rready=0;
-        // ── End Test 10 ─────────────────────────────────────────
+
+        // Also read fills_rcvd to confirm end-to-end path
+        @(posedge clk); araddr=9'h04C; arvalid=1; rready=1;
+        @(posedge clk); arvalid=0; while(!rvalid) @(posedge clk);
+        $display("  INFO: fills_rcvd = %0d", rdata);
+        @(posedge clk); rready=0;
+        // ── End Test 10 ──────────────────────────────────────────
+
+        // ── Test 11: Mean-reversion still works after NN test ────
+        // Reset, switch to STRAT_MEAN_REV, send large price swing,
+        // confirm orders_sent increments — proves the mux works in
+        // both directions and original strategy is unaffected.
+        $display("Test 11: Mean-reversion strategy still works");
+
+        // AXI reset
+        @(posedge clk); awaddr=9'h000; awvalid=1; wdata=32'h2; wstrb=4'hF; wvalid=1; bready=1;
+        @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
+        repeat (5) @(posedge clk);
+
+        // Switch to MEAN_REV via AXI: strategy_sel = 0
+        @(posedge clk); awaddr=9'h004; awvalid=1; wdata=32'd0; wstrb=4'hF; wvalid=1; bready=1;
+        @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
+
+        // Low threshold so mean-reversion triggers easily
+        @(posedge clk); awaddr=9'h008; awvalid=1; wdata=32'd1; wstrb=4'hF; wvalid=1; bready=1;
+        @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
+
+        // Generous max_loss
+        @(posedge clk); awaddr=9'h01C; awvalid=1; wdata=32'd100_000_000; wstrb=4'hF; wvalid=1; bready=1;
+        @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
+
+        // Clear switch override — use AXI strategy
+        sw = 8'b0000_0001;  // sw[3]=0 no override, sw[0]=1 trading_enable
+        @(posedge clk);
+
+        // Send quote to get link_up
+        tx_frame = QUOTE_0; tx_valid = 1;
+        @(posedge clk); tx_valid = 0;
+        repeat (80) @(posedge clk);
+
+        // IDLE -> ARMED
+        @(posedge clk); awaddr=9'h000; awvalid=1; wdata=32'h1; wstrb=4'hF; wvalid=1; bready=1;
+        @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
+        repeat (3) @(posedge clk);
+
+        // ARMED -> TRADING
+        @(posedge clk); awaddr=9'h000; awvalid=1; wdata=32'h1; wstrb=4'hF; wvalid=1; bready=1;
+        @(posedge clk); awvalid=0; wvalid=0; while(!bvalid) @(posedge clk); bready=0;
+        repeat (3) @(posedge clk);
+
+        // Warm up EMA then send big price swing
+        repeat (5) begin
+            tx_frame = QUOTE_0; tx_valid = 1;
+            @(posedge clk); tx_valid = 0;
+            repeat (80) @(posedge clk);
+        end
+        repeat (10) begin
+            tx_frame = QUOTE_0; tx_valid = 1;
+            @(posedge clk); tx_valid = 0;
+            repeat (80) @(posedge clk);
+            tx_frame = QUOTE_1; tx_valid = 1;
+            @(posedge clk); tx_valid = 0;
+            repeat (80) @(posedge clk);
+        end
+        repeat (300) @(posedge clk);
+
+        // Read orders_sent — should be > 0 for mean-reversion
+        @(posedge clk); araddr=9'h048; arvalid=1; rready=1;
+        @(posedge clk); arvalid=0; while(!rvalid) @(posedge clk);
+        if (rdata > 0)
+            $display("  PASS: mean-reversion produced orders_sent = %0d", rdata);
+        else begin
+            $display("  FAIL: mean-reversion orders_sent = 0 — mux or strategy broken");
+            err_cnt = err_cnt + 1;
+        end
+        @(posedge clk); rready=0;
+
+        // Confirm active_strategy is MEAN_REV not NN
+        if (dut.active_strategy == STRAT_MEAN_REV)
+            $display("  PASS: active_strategy = STRAT_MEAN_REV");
+        else begin
+            $display("  FAIL: active_strategy = %0d, expected STRAT_MEAN_REV",
+                     dut.active_strategy);
+            err_cnt = err_cnt + 1;
+        end
+        // ── End Test 11 ──────────────────────────────────────────
 
         if (err_cnt == 0) $display("ALL TESTS PASSED");
         else $display("FAILED: %0d errors", err_cnt);

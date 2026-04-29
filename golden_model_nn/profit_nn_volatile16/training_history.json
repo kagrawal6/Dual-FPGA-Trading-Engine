@@ -1,0 +1,5952 @@
+[
+  {
+    "episode": 1,
+    "regime": "VOLATILE",
+    "seed": 813848339,
+    "final_mtm": -1401.9668579101562,
+    "avg_reward": -0.035099916447753905,
+    "orders_sent": 243,
+    "fills_rcvd": 124,
+    "risk_rejects": 14,
+    "blocked": 0,
+    "loss": -0.015335402141014734,
+    "action_counts": {
+      "0": 125,
+      "1": 126,
+      "2": 131
+    }
+  },
+  {
+    "episode": 2,
+    "regime": "VOLATILE",
+    "seed": 43470773,
+    "final_mtm": -2077.3117065429688,
+    "avg_reward": -0.05210461766357422,
+    "orders_sent": 254,
+    "fills_rcvd": 123,
+    "risk_rejects": 25,
+    "blocked": 0,
+    "loss": -0.010858374337355295,
+    "action_counts": {
+      "0": 92,
+      "1": 138,
+      "2": 141
+    }
+  },
+  {
+    "episode": 3,
+    "regime": "VOLATILE",
+    "seed": 548978048,
+    "final_mtm": -187.1246337890625,
+    "avg_reward": -0.004485480844726562,
+    "orders_sent": 14,
+    "fills_rcvd": 14,
+    "risk_rejects": 422,
+    "blocked": 0,
+    "loss": -0.007119439914822579,
+    "action_counts": {
+      "0": 174,
+      "1": 212,
+      "2": 224
+    }
+  },
+  {
+    "episode": 4,
+    "regime": "VOLATILE",
+    "seed": 985947604,
+    "final_mtm": -351.13372802734375,
+    "avg_reward": -0.008704503200683594,
+    "orders_sent": 36,
+    "fills_rcvd": 25,
+    "risk_rejects": 354,
+    "blocked": 0,
+    "loss": -0.022288586711511016,
+    "action_counts": {
+      "0": 198,
+      "1": 174,
+      "2": 216
+    }
+  },
+  {
+    "episode": 5,
+    "regime": "VOLATILE",
+    "seed": 325680554,
+    "final_mtm": -992.3171997070312,
+    "avg_reward": -0.02498314499267578,
+    "orders_sent": 164,
+    "fills_rcvd": 94,
+    "risk_rejects": 161,
+    "blocked": 0,
+    "loss": -0.04040445823920891,
+    "action_counts": {
+      "0": 135,
+      "1": 158,
+      "2": 167
+    }
+  },
+  {
+    "episode": 6,
+    "regime": "VOLATILE",
+    "seed": 384453587,
+    "final_mtm": -95.45135498046875,
+    "avg_reward": -0.0021793188745117186,
+    "orders_sent": 11,
+    "fills_rcvd": 11,
+    "risk_rejects": 422,
+    "blocked": 0,
+    "loss": -0.012279926612973214,
+    "action_counts": {
+      "0": 180,
+      "1": 213,
+      "2": 220
+    }
+  },
+  {
+    "episode": 7,
+    "regime": "VOLATILE",
+    "seed": 975079788,
+    "final_mtm": -917.39501953125,
+    "avg_reward": -0.02292152548828125,
+    "orders_sent": 53,
+    "fills_rcvd": 36,
+    "risk_rejects": 310,
+    "blocked": 0,
+    "loss": -0.014014016629921066,
+    "action_counts": {
+      "0": 208,
+      "1": 171,
+      "2": 192
+    }
+  },
+  {
+    "episode": 8,
+    "regime": "VOLATILE",
+    "seed": 149545006,
+    "final_mtm": -183.75396728515625,
+    "avg_reward": -0.004465669182128907,
+    "orders_sent": 9,
+    "fills_rcvd": 9,
+    "risk_rejects": 387,
+    "blocked": 0,
+    "loss": -0.012570697767660021,
+    "action_counts": {
+      "0": 219,
+      "1": 171,
+      "2": 225
+    }
+  },
+  {
+    "episode": 9,
+    "regime": "VOLATILE",
+    "seed": 811539590,
+    "final_mtm": -8.831787109375,
+    "avg_reward": -0.00010932967773437514,
+    "orders_sent": 5,
+    "fills_rcvd": 5,
+    "risk_rejects": 394,
+    "blocked": 0,
+    "loss": -0.017315556481480598,
+    "action_counts": {
+      "0": 220,
+      "1": 169,
+      "2": 230
+    }
+  },
+  {
+    "episode": 10,
+    "regime": "VOLATILE",
+    "seed": 858352976,
+    "final_mtm": -147.91259765625,
+    "avg_reward": -0.0038425399414062497,
+    "orders_sent": 4,
+    "fills_rcvd": 4,
+    "risk_rejects": 400,
+    "blocked": 0,
+    "loss": -0.010938464105129242,
+    "action_counts": {
+      "0": 216,
+      "1": 135,
+      "2": 269
+    }
+  },
+  {
+    "episode": 11,
+    "regime": "VOLATILE",
+    "seed": 976833602,
+    "final_mtm": -1472.5921630859375,
+    "avg_reward": -0.03682807907714843,
+    "orders_sent": 151,
+    "fills_rcvd": 67,
+    "risk_rejects": 172,
+    "blocked": 0,
+    "loss": -0.013578298036009073,
+    "action_counts": {
+      "0": 150,
+      "1": 113,
+      "2": 210
+    }
+  },
+  {
+    "episode": 12,
+    "regime": "VOLATILE",
+    "seed": 757173936,
+    "final_mtm": -1147.9049682617188,
+    "avg_reward": -0.028730179206542972,
+    "orders_sent": 244,
+    "fills_rcvd": 115,
+    "risk_rejects": 20,
+    "blocked": 0,
+    "loss": -0.01633033948019147,
+    "action_counts": {
+      "0": 116,
+      "1": 90,
+      "2": 174
+    }
+  },
+  {
+    "episode": 13,
+    "regime": "VOLATILE",
+    "seed": 968694314,
+    "final_mtm": -1598.0270385742188,
+    "avg_reward": -0.03998374096435547,
+    "orders_sent": 245,
+    "fills_rcvd": 117,
+    "risk_rejects": 29,
+    "blocked": 0,
+    "loss": -0.011108224590619406,
+    "action_counts": {
+      "0": 107,
+      "1": 121,
+      "2": 153
+    }
+  },
+  {
+    "episode": 14,
+    "regime": "VOLATILE",
+    "seed": 106047331,
+    "final_mtm": -1395.6405639648438,
+    "avg_reward": -0.03494858909912109,
+    "orders_sent": 246,
+    "fills_rcvd": 125,
+    "risk_rejects": 24,
+    "blocked": 0,
+    "loss": -0.01112727572520574,
+    "action_counts": {
+      "0": 109,
+      "1": 104,
+      "2": 166
+    }
+  },
+  {
+    "episode": 15,
+    "regime": "VOLATILE",
+    "seed": 965121263,
+    "final_mtm": -372.021484375,
+    "avg_reward": -0.009261012109375,
+    "orders_sent": 75,
+    "fills_rcvd": 37,
+    "risk_rejects": 322,
+    "blocked": 0,
+    "loss": -0.00711006008916431,
+    "action_counts": {
+      "0": 152,
+      "1": 163,
+      "2": 234
+    }
+  },
+  {
+    "episode": 16,
+    "regime": "VOLATILE",
+    "seed": 354547567,
+    "final_mtm": -1879.0328979492188,
+    "avg_reward": -0.04728146744873047,
+    "orders_sent": 168,
+    "fills_rcvd": 83,
+    "risk_rejects": 175,
+    "blocked": 0,
+    "loss": 0.02152150310575962,
+    "action_counts": {
+      "0": 113,
+      "1": 160,
+      "2": 183
+    }
+  },
+  {
+    "episode": 17,
+    "regime": "VOLATILE",
+    "seed": 108128101,
+    "final_mtm": -105.889892578125,
+    "avg_reward": -0.002819377314453125,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 389,
+    "blocked": 0,
+    "loss": -0.00841400194913149,
+    "action_counts": {
+      "0": 231,
+      "1": 183,
+      "2": 208
+    }
+  },
+  {
+    "episode": 18,
+    "regime": "VOLATILE",
+    "seed": 339514621,
+    "final_mtm": -164.4683837890625,
+    "avg_reward": -0.003694164594726562,
+    "orders_sent": 41,
+    "fills_rcvd": 30,
+    "risk_rejects": 335,
+    "blocked": 0,
+    "loss": -0.05387949366122484,
+    "action_counts": {
+      "0": 207,
+      "1": 177,
+      "2": 199
+    }
+  },
+  {
+    "episode": 19,
+    "regime": "VOLATILE",
+    "seed": 980339159,
+    "final_mtm": -218.49822998046875,
+    "avg_reward": -0.005317310749511718,
+    "orders_sent": 25,
+    "fills_rcvd": 19,
+    "risk_rejects": 344,
+    "blocked": 0,
+    "loss": 0.008669089246541261,
+    "action_counts": {
+      "0": 230,
+      "1": 173,
+      "2": 196
+    }
+  },
+  {
+    "episode": 20,
+    "regime": "VOLATILE",
+    "seed": 593268777,
+    "final_mtm": -1438.5147094726562,
+    "avg_reward": -0.036016042736816405,
+    "orders_sent": 237,
+    "fills_rcvd": 117,
+    "risk_rejects": 11,
+    "blocked": 0,
+    "loss": -0.06260200130886265,
+    "action_counts": {
+      "0": 140,
+      "1": 106,
+      "2": 142
+    }
+  },
+  {
+    "episode": 21,
+    "regime": "VOLATILE",
+    "seed": 929120463,
+    "final_mtm": 19.091796875,
+    "avg_reward": 0.0006067399218750002,
+    "orders_sent": 6,
+    "fills_rcvd": 6,
+    "risk_rejects": 394,
+    "blocked": 0,
+    "loss": -0.01448845062404871,
+    "action_counts": {
+      "0": 218,
+      "1": 168,
+      "2": 232
+    }
+  },
+  {
+    "episode": 22,
+    "regime": "VOLATILE",
+    "seed": 66873192,
+    "final_mtm": -2319.4442749023438,
+    "avg_reward": -0.05810217687255859,
+    "orders_sent": 236,
+    "fills_rcvd": 109,
+    "risk_rejects": 30,
+    "blocked": 0,
+    "loss": -0.026955963245459964,
+    "action_counts": {
+      "0": 122,
+      "1": 104,
+      "2": 162
+    }
+  },
+  {
+    "episode": 23,
+    "regime": "VOLATILE",
+    "seed": 589162385,
+    "final_mtm": -533.0642700195312,
+    "avg_reward": -0.01329912175048828,
+    "orders_sent": 61,
+    "fills_rcvd": 35,
+    "risk_rejects": 324,
+    "blocked": 0,
+    "loss": -0.012471931469109323,
+    "action_counts": {
+      "0": 178,
+      "1": 147,
+      "2": 238
+    }
+  },
+  {
+    "episode": 24,
+    "regime": "VOLATILE",
+    "seed": 100150903,
+    "final_mtm": -1758.4869384765625,
+    "avg_reward": -0.044081488461914065,
+    "orders_sent": 230,
+    "fills_rcvd": 118,
+    "risk_rejects": 34,
+    "blocked": 0,
+    "loss": 0.0005782060325145721,
+    "action_counts": {
+      "0": 130,
+      "1": 97,
+      "2": 167
+    }
+  },
+  {
+    "episode": 25,
+    "regime": "VOLATILE",
+    "seed": 428234516,
+    "final_mtm": -1324.8153686523438,
+    "avg_reward": -0.033105009216308594,
+    "orders_sent": 245,
+    "fills_rcvd": 120,
+    "risk_rejects": 21,
+    "blocked": 0,
+    "loss": -0.021078584094842274,
+    "action_counts": {
+      "0": 114,
+      "1": 100,
+      "2": 166
+    }
+  },
+  {
+    "episode": 26,
+    "regime": "VOLATILE",
+    "seed": 842939612,
+    "final_mtm": -1833.7371826171875,
+    "avg_reward": -0.04589421956542969,
+    "orders_sent": 228,
+    "fills_rcvd": 109,
+    "risk_rejects": 48,
+    "blocked": 0,
+    "loss": -0.053027259052864144,
+    "action_counts": {
+      "0": 120,
+      "1": 87,
+      "2": 189
+    }
+  },
+  {
+    "episode": 27,
+    "regime": "VOLATILE",
+    "seed": 1228089,
+    "final_mtm": -527.1087646484375,
+    "avg_reward": -0.013195794116210937,
+    "orders_sent": 58,
+    "fills_rcvd": 40,
+    "risk_rejects": 319,
+    "blocked": 0,
+    "loss": -0.014610851597454812,
+    "action_counts": {
+      "0": 189,
+      "1": 153,
+      "2": 224
+    }
+  },
+  {
+    "episode": 28,
+    "regime": "VOLATILE",
+    "seed": 889127174,
+    "final_mtm": -1636.3998413085938,
+    "avg_reward": -0.04105309603271484,
+    "orders_sent": 240,
+    "fills_rcvd": 122,
+    "risk_rejects": 18,
+    "blocked": 0,
+    "loss": -0.1745156508737377,
+    "action_counts": {
+      "0": 127,
+      "1": 113,
+      "2": 145
+    }
+  },
+  {
+    "episode": 29,
+    "regime": "VOLATILE",
+    "seed": 261898306,
+    "final_mtm": -969.757080078125,
+    "avg_reward": -0.024371527001953122,
+    "orders_sent": 38,
+    "fills_rcvd": 25,
+    "risk_rejects": 369,
+    "blocked": 0,
+    "loss": -0.019552034279331564,
+    "action_counts": {
+      "0": 179,
+      "1": 191,
+      "2": 216
+    }
+  },
+  {
+    "episode": 30,
+    "regime": "VOLATILE",
+    "seed": 755531426,
+    "final_mtm": -1013.58642578125,
+    "avg_reward": -0.025232430644531248,
+    "orders_sent": 65,
+    "fills_rcvd": 43,
+    "risk_rejects": 318,
+    "blocked": 0,
+    "loss": -0.012729479206932915,
+    "action_counts": {
+      "0": 176,
+      "1": 168,
+      "2": 215
+    }
+  },
+  {
+    "episode": 31,
+    "regime": "VOLATILE",
+    "seed": 205157723,
+    "final_mtm": -255.4534912109375,
+    "avg_reward": -0.006190802280273437,
+    "orders_sent": 28,
+    "fills_rcvd": 23,
+    "risk_rejects": 376,
+    "blocked": 0,
+    "loss": -0.01797935594804585,
+    "action_counts": {
+      "0": 192,
+      "1": 186,
+      "2": 218
+    }
+  },
+  {
+    "episode": 32,
+    "regime": "VOLATILE",
+    "seed": 238053747,
+    "final_mtm": -69.53277587890625,
+    "avg_reward": -0.0013133493969726545,
+    "orders_sent": 46,
+    "fills_rcvd": 29,
+    "risk_rejects": 296,
+    "blocked": 0,
+    "loss": -0.004375833319500089,
+    "action_counts": {
+      "0": 236,
+      "1": 176,
+      "2": 166
+    }
+  },
+  {
+    "episode": 33,
+    "regime": "VOLATILE",
+    "seed": 153003188,
+    "final_mtm": -5.38177490234375,
+    "avg_reward": -0.0002226743725585937,
+    "orders_sent": 3,
+    "fills_rcvd": 3,
+    "risk_rejects": 354,
+    "blocked": 0,
+    "loss": -0.020921344915404917,
+    "action_counts": {
+      "0": 264,
+      "1": 162,
+      "2": 195
+    }
+  },
+  {
+    "episode": 34,
+    "regime": "VOLATILE",
+    "seed": 481004665,
+    "final_mtm": -198.15673828125,
+    "avg_reward": -0.00498276845703125,
+    "orders_sent": 5,
+    "fills_rcvd": 5,
+    "risk_rejects": 341,
+    "blocked": 0,
+    "loss": -0.02093771742656827,
+    "action_counts": {
+      "0": 273,
+      "1": 162,
+      "2": 184
+    }
+  },
+  {
+    "episode": 35,
+    "regime": "VOLATILE",
+    "seed": 343657008,
+    "final_mtm": -452.2125244140625,
+    "avg_reward": -0.011071223110351563,
+    "orders_sent": 51,
+    "fills_rcvd": 31,
+    "risk_rejects": 302,
+    "blocked": 0,
+    "loss": -0.019767117272648547,
+    "action_counts": {
+      "0": 220,
+      "1": 152,
+      "2": 201
+    }
+  },
+  {
+    "episode": 36,
+    "regime": "VOLATILE",
+    "seed": 525368680,
+    "final_mtm": -1236.1221313476562,
+    "avg_reward": -0.030884478283691407,
+    "orders_sent": 226,
+    "fills_rcvd": 116,
+    "risk_rejects": 14,
+    "blocked": 0,
+    "loss": -0.001595342199185065,
+    "action_counts": {
+      "0": 159,
+      "1": 104,
+      "2": 136
+    }
+  },
+  {
+    "episode": 37,
+    "regime": "VOLATILE",
+    "seed": 591919701,
+    "final_mtm": -94.482421875,
+    "avg_reward": -0.0022180705468749996,
+    "orders_sent": 7,
+    "fills_rcvd": 7,
+    "risk_rejects": 340,
+    "blocked": 0,
+    "loss": 0.003556559234857559,
+    "action_counts": {
+      "0": 270,
+      "1": 165,
+      "2": 182
+    }
+  },
+  {
+    "episode": 38,
+    "regime": "VOLATILE",
+    "seed": 134015482,
+    "final_mtm": -134.20562744140625,
+    "avg_reward": -0.003250860686035156,
+    "orders_sent": 9,
+    "fills_rcvd": 9,
+    "risk_rejects": 358,
+    "blocked": 0,
+    "loss": -0.016584333777427674,
+    "action_counts": {
+      "0": 248,
+      "1": 174,
+      "2": 193
+    }
+  },
+  {
+    "episode": 39,
+    "regime": "VOLATILE",
+    "seed": 874528131,
+    "final_mtm": -1375.3433227539062,
+    "avg_reward": -0.03440968806884766,
+    "orders_sent": 241,
+    "fills_rcvd": 121,
+    "risk_rejects": 13,
+    "blocked": 0,
+    "loss": -0.05517085056219782,
+    "action_counts": {
+      "0": 131,
+      "1": 121,
+      "2": 133
+    }
+  },
+  {
+    "episode": 40,
+    "regime": "VOLATILE",
+    "seed": 218187327,
+    "final_mtm": -962.8158569335938,
+    "avg_reward": -0.024093686423339845,
+    "orders_sent": 242,
+    "fills_rcvd": 122,
+    "risk_rejects": 21,
+    "blocked": 0,
+    "loss": -0.01103304016093413,
+    "action_counts": {
+      "0": 119,
+      "1": 105,
+      "2": 158
+    }
+  },
+  {
+    "episode": 41,
+    "regime": "VOLATILE",
+    "seed": 647666636,
+    "final_mtm": -90.5609130859375,
+    "avg_reward": -0.002276952827148437,
+    "orders_sent": 7,
+    "fills_rcvd": 7,
+    "risk_rejects": 417,
+    "blocked": 0,
+    "loss": -0.006298321112990379,
+    "action_counts": {
+      "0": 193,
+      "1": 184,
+      "2": 240
+    }
+  },
+  {
+    "episode": 42,
+    "regime": "VOLATILE",
+    "seed": 308870635,
+    "final_mtm": -886.19384765625,
+    "avg_reward": -0.02218584119140625,
+    "orders_sent": 81,
+    "fills_rcvd": 52,
+    "risk_rejects": 287,
+    "blocked": 0,
+    "loss": -0.001737208002143436,
+    "action_counts": {
+      "0": 175,
+      "1": 163,
+      "2": 205
+    }
+  },
+  {
+    "episode": 43,
+    "regime": "VOLATILE",
+    "seed": 640259139,
+    "final_mtm": -7.086181640625,
+    "avg_reward": -0.00019305954101562491,
+    "orders_sent": 4,
+    "fills_rcvd": 4,
+    "risk_rejects": 365,
+    "blocked": 0,
+    "loss": -0.013516792189329862,
+    "action_counts": {
+      "0": 251,
+      "1": 167,
+      "2": 202
+    }
+  },
+  {
+    "episode": 44,
+    "regime": "VOLATILE",
+    "seed": 340427463,
+    "final_mtm": -77.92816162109375,
+    "avg_reward": -0.0016684590405273436,
+    "orders_sent": 15,
+    "fills_rcvd": 15,
+    "risk_rejects": 372,
+    "blocked": 0,
+    "loss": -0.03243101527914405,
+    "action_counts": {
+      "0": 222,
+      "1": 175,
+      "2": 212
+    }
+  },
+  {
+    "episode": 45,
+    "regime": "VOLATILE",
+    "seed": 311739931,
+    "final_mtm": 19.384765625,
+    "avg_reward": 0.000517139140625,
+    "orders_sent": 4,
+    "fills_rcvd": 4,
+    "risk_rejects": 349,
+    "blocked": 0,
+    "loss": -0.019421391189098358,
+    "action_counts": {
+      "0": 267,
+      "1": 171,
+      "2": 182
+    }
+  },
+  {
+    "episode": 46,
+    "regime": "VOLATILE",
+    "seed": 882044705,
+    "final_mtm": -1013.8031005859375,
+    "avg_reward": -0.025353697514648436,
+    "orders_sent": 108,
+    "fills_rcvd": 62,
+    "risk_rejects": 181,
+    "blocked": 0,
+    "loss": 0.010715617694788508,
+    "action_counts": {
+      "0": 227,
+      "1": 144,
+      "2": 145
+    }
+  },
+  {
+    "episode": 47,
+    "regime": "VOLATILE",
+    "seed": 657961185,
+    "final_mtm": -1474.1256713867188,
+    "avg_reward": -0.03693122678466797,
+    "orders_sent": 225,
+    "fills_rcvd": 118,
+    "risk_rejects": 19,
+    "blocked": 0,
+    "loss": 0.010397562158427067,
+    "action_counts": {
+      "0": 156,
+      "1": 123,
+      "2": 121
+    }
+  },
+  {
+    "episode": 48,
+    "regime": "VOLATILE",
+    "seed": 279234228,
+    "final_mtm": -17.034912109375,
+    "avg_reward": -0.00020575280273437538,
+    "orders_sent": 11,
+    "fills_rcvd": 11,
+    "risk_rejects": 357,
+    "blocked": 0,
+    "loss": -0.01638359660282731,
+    "action_counts": {
+      "0": 245,
+      "1": 184,
+      "2": 184
+    }
+  },
+  {
+    "episode": 49,
+    "regime": "VOLATILE",
+    "seed": 96449168,
+    "final_mtm": -625.7431030273438,
+    "avg_reward": -0.015582897575683591,
+    "orders_sent": 70,
+    "fills_rcvd": 43,
+    "risk_rejects": 254,
+    "blocked": 0,
+    "loss": -0.02027203266819318,
+    "action_counts": {
+      "0": 230,
+      "1": 158,
+      "2": 166
+    }
+  },
+  {
+    "episode": 50,
+    "regime": "VOLATILE",
+    "seed": 139828434,
+    "final_mtm": -1806.89697265625,
+    "avg_reward": -0.04528502431640625,
+    "orders_sent": 102,
+    "fills_rcvd": 68,
+    "risk_rejects": 212,
+    "blocked": 0,
+    "loss": -0.0005402353902657827,
+    "action_counts": {
+      "0": 208,
+      "1": 163,
+      "2": 151
+    }
+  },
+  {
+    "episode": 51,
+    "regime": "VOLATILE",
+    "seed": 991473818,
+    "final_mtm": -2214.6469116210938,
+    "avg_reward": -0.05549440779052734,
+    "orders_sent": 210,
+    "fills_rcvd": 98,
+    "risk_rejects": 31,
+    "blocked": 0,
+    "loss": -0.017500474649880613,
+    "action_counts": {
+      "0": 174,
+      "1": 127,
+      "2": 114
+    }
+  },
+  {
+    "episode": 52,
+    "regime": "VOLATILE",
+    "seed": 86166974,
+    "final_mtm": -1608.1100463867188,
+    "avg_reward": -0.04016325615966797,
+    "orders_sent": 195,
+    "fills_rcvd": 109,
+    "risk_rejects": 14,
+    "blocked": 0,
+    "loss": -0.03195580148271152,
+    "action_counts": {
+      "0": 221,
+      "1": 94,
+      "2": 115
+    }
+  },
+  {
+    "episode": 53,
+    "regime": "VOLATILE",
+    "seed": 991153222,
+    "final_mtm": -799.3698120117188,
+    "avg_reward": -0.019942365300292968,
+    "orders_sent": 84,
+    "fills_rcvd": 54,
+    "risk_rejects": 242,
+    "blocked": 0,
+    "loss": -0.022064148189706936,
+    "action_counts": {
+      "0": 214,
+      "1": 166,
+      "2": 160
+    }
+  },
+  {
+    "episode": 54,
+    "regime": "VOLATILE",
+    "seed": 733901802,
+    "final_mtm": -220.90301513671875,
+    "avg_reward": -0.0053421253784179685,
+    "orders_sent": 20,
+    "fills_rcvd": 17,
+    "risk_rejects": 337,
+    "blocked": 0,
+    "loss": -0.01959279626607895,
+    "action_counts": {
+      "0": 247,
+      "1": 185,
+      "2": 172
+    }
+  },
+  {
+    "episode": 55,
+    "regime": "VOLATILE",
+    "seed": 757293284,
+    "final_mtm": -665.1748657226562,
+    "avg_reward": -0.016440456643066405,
+    "orders_sent": 54,
+    "fills_rcvd": 37,
+    "risk_rejects": 288,
+    "blocked": 0,
+    "loss": -0.014059855292240778,
+    "action_counts": {
+      "0": 228,
+      "1": 172,
+      "2": 170
+    }
+  },
+  {
+    "episode": 56,
+    "regime": "VOLATILE",
+    "seed": 560268849,
+    "final_mtm": -415.91796875,
+    "avg_reward": -0.010267379218749999,
+    "orders_sent": 56,
+    "fills_rcvd": 34,
+    "risk_rejects": 262,
+    "blocked": 0,
+    "loss": -0.015499969116515584,
+    "action_counts": {
+      "0": 250,
+      "1": 158,
+      "2": 160
+    }
+  },
+  {
+    "episode": 57,
+    "regime": "VOLATILE",
+    "seed": 912129612,
+    "final_mtm": -6.5338134765625,
+    "avg_reward": -0.00030923533691406256,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 314,
+    "blocked": 0,
+    "loss": -0.01712148655205965,
+    "action_counts": {
+      "0": 306,
+      "1": 154,
+      "2": 162
+    }
+  },
+  {
+    "episode": 58,
+    "regime": "VOLATILE",
+    "seed": 729581033,
+    "final_mtm": -1196.5057373046875,
+    "avg_reward": -0.029856848432617187,
+    "orders_sent": 216,
+    "fills_rcvd": 110,
+    "risk_rejects": 9,
+    "blocked": 0,
+    "loss": -0.03117504975359355,
+    "action_counts": {
+      "0": 185,
+      "1": 111,
+      "2": 114
+    }
+  },
+  {
+    "episode": 59,
+    "regime": "VOLATILE",
+    "seed": 450353272,
+    "final_mtm": -191.14837646484375,
+    "avg_reward": -0.004847144411621093,
+    "orders_sent": 4,
+    "fills_rcvd": 4,
+    "risk_rejects": 341,
+    "blocked": 0,
+    "loss": -0.01775907687842846,
+    "action_counts": {
+      "0": 275,
+      "1": 186,
+      "2": 159
+    }
+  },
+  {
+    "episode": 60,
+    "regime": "VOLATILE",
+    "seed": 483789448,
+    "final_mtm": -1630.9661865234375,
+    "avg_reward": -0.04085083966308593,
+    "orders_sent": 204,
+    "fills_rcvd": 110,
+    "risk_rejects": 27,
+    "blocked": 0,
+    "loss": -0.022992135624268224,
+    "action_counts": {
+      "0": 190,
+      "1": 110,
+      "2": 121
+    }
+  },
+  {
+    "episode": 61,
+    "regime": "VOLATILE",
+    "seed": 688480846,
+    "final_mtm": -770.1995849609375,
+    "avg_reward": -0.01910092462402344,
+    "orders_sent": 39,
+    "fills_rcvd": 27,
+    "risk_rejects": 278,
+    "blocked": 0,
+    "loss": -0.03338744658976793,
+    "action_counts": {
+      "0": 268,
+      "1": 180,
+      "2": 137
+    }
+  },
+  {
+    "episode": 62,
+    "regime": "VOLATILE",
+    "seed": 984559132,
+    "final_mtm": -110.63690185546875,
+    "avg_reward": -0.002624972546386719,
+    "orders_sent": 9,
+    "fills_rcvd": 9,
+    "risk_rejects": 325,
+    "blocked": 0,
+    "loss": -0.010596505925059318,
+    "action_counts": {
+      "0": 281,
+      "1": 174,
+      "2": 160
+    }
+  },
+  {
+    "episode": 63,
+    "regime": "VOLATILE",
+    "seed": 383721486,
+    "final_mtm": -115.2374267578125,
+    "avg_reward": -0.0028483006689453126,
+    "orders_sent": 5,
+    "fills_rcvd": 5,
+    "risk_rejects": 316,
+    "blocked": 0,
+    "loss": -0.016369190672412513,
+    "action_counts": {
+      "0": 298,
+      "1": 176,
+      "2": 145
+    }
+  },
+  {
+    "episode": 64,
+    "regime": "VOLATILE",
+    "seed": 657971849,
+    "final_mtm": -406.6741943359375,
+    "avg_reward": -0.010105369858398437,
+    "orders_sent": 30,
+    "fills_rcvd": 26,
+    "risk_rejects": 309,
+    "blocked": 0,
+    "loss": 0.027926974557340146,
+    "action_counts": {
+      "0": 255,
+      "1": 182,
+      "2": 157
+    }
+  },
+  {
+    "episode": 65,
+    "regime": "VOLATILE",
+    "seed": 630367659,
+    "final_mtm": -95.4742431640625,
+    "avg_reward": -0.0024638460791015625,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 321,
+    "blocked": 0,
+    "loss": -0.005450994707643986,
+    "action_counts": {
+      "0": 299,
+      "1": 161,
+      "2": 162
+    }
+  },
+  {
+    "episode": 66,
+    "regime": "VOLATILE",
+    "seed": 907396136,
+    "final_mtm": -109.149169921875,
+    "avg_reward": -0.002874234248046875,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 330,
+    "blocked": 0,
+    "loss": -0.014538637921214103,
+    "action_counts": {
+      "0": 290,
+      "1": 155,
+      "2": 177
+    }
+  },
+  {
+    "episode": 67,
+    "regime": "VOLATILE",
+    "seed": 17405311,
+    "final_mtm": -1469.3145751953125,
+    "avg_reward": -0.03689486937988281,
+    "orders_sent": 224,
+    "fills_rcvd": 118,
+    "risk_rejects": 12,
+    "blocked": 0,
+    "loss": -0.0459234355283635,
+    "action_counts": {
+      "0": 165,
+      "1": 113,
+      "2": 123
+    }
+  },
+  {
+    "episode": 68,
+    "regime": "VOLATILE",
+    "seed": 125772988,
+    "final_mtm": -923.73046875,
+    "avg_reward": -0.02297469671875,
+    "orders_sent": 67,
+    "fills_rcvd": 42,
+    "risk_rejects": 284,
+    "blocked": 0,
+    "loss": -0.022164032691054873,
+    "action_counts": {
+      "0": 206,
+      "1": 208,
+      "2": 143
+    }
+  },
+  {
+    "episode": 69,
+    "regime": "VOLATILE",
+    "seed": 399497590,
+    "final_mtm": -331.0791015625,
+    "avg_reward": -0.0081103125390625,
+    "orders_sent": 15,
+    "fills_rcvd": 15,
+    "risk_rejects": 329,
+    "blocked": 0,
+    "loss": 0.003149416297674179,
+    "action_counts": {
+      "0": 265,
+      "1": 190,
+      "2": 154
+    }
+  },
+  {
+    "episode": 70,
+    "regime": "VOLATILE",
+    "seed": 357058975,
+    "final_mtm": -1740.692138671875,
+    "avg_reward": -0.043601948466796873,
+    "orders_sent": 133,
+    "fills_rcvd": 78,
+    "risk_rejects": 147,
+    "blocked": 0,
+    "loss": -0.020457184524275362,
+    "action_counts": {
+      "0": 211,
+      "1": 158,
+      "2": 122
+    }
+  },
+  {
+    "episode": 71,
+    "regime": "VOLATILE",
+    "seed": 66779641,
+    "final_mtm": -162.7899169921875,
+    "avg_reward": -0.003744902924804687,
+    "orders_sent": 31,
+    "fills_rcvd": 22,
+    "risk_rejects": 310,
+    "blocked": 0,
+    "loss": -0.07014792240224779,
+    "action_counts": {
+      "0": 252,
+      "1": 211,
+      "2": 130
+    }
+  },
+  {
+    "episode": 72,
+    "regime": "VOLATILE",
+    "seed": 157152230,
+    "final_mtm": -1019.0765380859375,
+    "avg_reward": -0.025535743452148436,
+    "orders_sent": 109,
+    "fills_rcvd": 64,
+    "risk_rejects": 212,
+    "blocked": 0,
+    "loss": 0.0397353447559807,
+    "action_counts": {
+      "0": 194,
+      "1": 201,
+      "2": 120
+    }
+  },
+  {
+    "episode": 73,
+    "regime": "VOLATILE",
+    "seed": 234907321,
+    "final_mtm": -991.8487548828125,
+    "avg_reward": -0.024767888872070314,
+    "orders_sent": 148,
+    "fills_rcvd": 75,
+    "risk_rejects": 122,
+    "blocked": 0,
+    "loss": -0.013658100098837167,
+    "action_counts": {
+      "0": 206,
+      "1": 152,
+      "2": 118
+    }
+  },
+  {
+    "episode": 74,
+    "regime": "VOLATILE",
+    "seed": 616184962,
+    "final_mtm": -958.953857421875,
+    "avg_reward": -0.024000596435546872,
+    "orders_sent": 123,
+    "fills_rcvd": 71,
+    "risk_rejects": 151,
+    "blocked": 0,
+    "loss": -0.015940954443067312,
+    "action_counts": {
+      "0": 227,
+      "1": 142,
+      "2": 132
+    }
+  },
+  {
+    "episode": 75,
+    "regime": "VOLATILE",
+    "seed": 573591699,
+    "final_mtm": -1823.0545043945312,
+    "avg_reward": -0.04567861760986328,
+    "orders_sent": 141,
+    "fills_rcvd": 84,
+    "risk_rejects": 120,
+    "blocked": 0,
+    "loss": -0.017594128381460905,
+    "action_counts": {
+      "0": 222,
+      "1": 136,
+      "2": 125
+    }
+  },
+  {
+    "episode": 76,
+    "regime": "VOLATILE",
+    "seed": 79454567,
+    "final_mtm": -1405.5801391601562,
+    "avg_reward": -0.035193823479003905,
+    "orders_sent": 96,
+    "fills_rcvd": 61,
+    "risk_rejects": 207,
+    "blocked": 0,
+    "loss": -0.024674663475404184,
+    "action_counts": {
+      "0": 225,
+      "1": 165,
+      "2": 138
+    }
+  },
+  {
+    "episode": 77,
+    "regime": "VOLATILE",
+    "seed": 681826964,
+    "final_mtm": 14.2852783203125,
+    "avg_reward": 0.000627231958007813,
+    "orders_sent": 19,
+    "fills_rcvd": 19,
+    "risk_rejects": 303,
+    "blocked": 0,
+    "loss": -0.017292095348238945,
+    "action_counts": {
+      "0": 283,
+      "1": 167,
+      "2": 155
+    }
+  },
+  {
+    "episode": 78,
+    "regime": "VOLATILE",
+    "seed": 891299199,
+    "final_mtm": -89.5904541015625,
+    "avg_reward": -0.0018202013525390622,
+    "orders_sent": 27,
+    "fills_rcvd": 23,
+    "risk_rejects": 288,
+    "blocked": 0,
+    "loss": -0.022238509729504585,
+    "action_counts": {
+      "0": 282,
+      "1": 165,
+      "2": 150
+    }
+  },
+  {
+    "episode": 79,
+    "regime": "VOLATILE",
+    "seed": 420058909,
+    "final_mtm": -1352.5497436523438,
+    "avg_reward": -0.033858378591308594,
+    "orders_sent": 207,
+    "fills_rcvd": 102,
+    "risk_rejects": 14,
+    "blocked": 0,
+    "loss": -0.03590634438608374,
+    "action_counts": {
+      "0": 197,
+      "1": 106,
+      "2": 115
+    }
+  },
+  {
+    "episode": 80,
+    "regime": "VOLATILE",
+    "seed": 895334637,
+    "final_mtm": 18.17779541015625,
+    "avg_reward": 0.0005043998852539061,
+    "orders_sent": 3,
+    "fills_rcvd": 3,
+    "risk_rejects": 268,
+    "blocked": 0,
+    "loss": -0.01396199050359428,
+    "action_counts": {
+      "0": 350,
+      "1": 137,
+      "2": 134
+    }
+  },
+  {
+    "episode": 81,
+    "regime": "VOLATILE",
+    "seed": 39076652,
+    "final_mtm": -1782.2723388671875,
+    "avg_reward": -0.04461509347167969,
+    "orders_sent": 222,
+    "fills_rcvd": 109,
+    "risk_rejects": 16,
+    "blocked": 0,
+    "loss": -0.0406070774687188,
+    "action_counts": {
+      "0": 164,
+      "1": 122,
+      "2": 116
+    }
+  },
+  {
+    "episode": 82,
+    "regime": "VOLATILE",
+    "seed": 208941441,
+    "final_mtm": -1297.8561401367188,
+    "avg_reward": -0.032387873503417965,
+    "orders_sent": 221,
+    "fills_rcvd": 117,
+    "risk_rejects": 8,
+    "blocked": 0,
+    "loss": -0.013639009424618312,
+    "action_counts": {
+      "0": 175,
+      "1": 113,
+      "2": 116
+    }
+  },
+  {
+    "episode": 83,
+    "regime": "VOLATILE",
+    "seed": 198613106,
+    "final_mtm": -1039.3875122070312,
+    "avg_reward": -0.02597615780517578,
+    "orders_sent": 98,
+    "fills_rcvd": 56,
+    "risk_rejects": 230,
+    "blocked": 0,
+    "loss": -0.026078120287921693,
+    "action_counts": {
+      "0": 198,
+      "1": 187,
+      "2": 141
+    }
+  },
+  {
+    "episode": 84,
+    "regime": "VOLATILE",
+    "seed": 514574218,
+    "final_mtm": -78.10211181640625,
+    "avg_reward": -0.0017062977954101562,
+    "orders_sent": 8,
+    "fills_rcvd": 8,
+    "risk_rejects": 374,
+    "blocked": 0,
+    "loss": -0.020782117359340192,
+    "action_counts": {
+      "0": 234,
+      "1": 223,
+      "2": 159
+    }
+  },
+  {
+    "episode": 85,
+    "regime": "VOLATILE",
+    "seed": 859796110,
+    "final_mtm": -52.7923583984375,
+    "avg_reward": -0.0014238039599609375,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 338,
+    "blocked": 0,
+    "loss": -0.006151673384010792,
+    "action_counts": {
+      "0": 282,
+      "1": 191,
+      "2": 149
+    }
+  },
+  {
+    "episode": 86,
+    "regime": "VOLATILE",
+    "seed": 729444501,
+    "final_mtm": -78.6529541015625,
+    "avg_reward": -0.0018872638525390623,
+    "orders_sent": 5,
+    "fills_rcvd": 5,
+    "risk_rejects": 330,
+    "blocked": 0,
+    "loss": -0.01470420453697443,
+    "action_counts": {
+      "0": 284,
+      "1": 180,
+      "2": 155
+    }
+  },
+  {
+    "episode": 87,
+    "regime": "VOLATILE",
+    "seed": 457005741,
+    "final_mtm": -2251.5106201171875,
+    "avg_reward": -0.05636574550292969,
+    "orders_sent": 215,
+    "fills_rcvd": 102,
+    "risk_rejects": 24,
+    "blocked": 0,
+    "loss": -0.055408193596771786,
+    "action_counts": {
+      "0": 171,
+      "1": 124,
+      "2": 115
+    }
+  },
+  {
+    "episode": 88,
+    "regime": "VOLATILE",
+    "seed": 897544642,
+    "final_mtm": -622.8439331054688,
+    "avg_reward": -0.01558085832763672,
+    "orders_sent": 49,
+    "fills_rcvd": 30,
+    "risk_rejects": 299,
+    "blocked": 0,
+    "loss": -0.01438455811391274,
+    "action_counts": {
+      "0": 227,
+      "1": 174,
+      "2": 174
+    }
+  },
+  {
+    "episode": 89,
+    "regime": "VOLATILE",
+    "seed": 237114630,
+    "final_mtm": 2.26287841796875,
+    "avg_reward": 0.0001165019604492187,
+    "orders_sent": 3,
+    "fills_rcvd": 3,
+    "risk_rejects": 333,
+    "blocked": 0,
+    "loss": -0.03261333554983139,
+    "action_counts": {
+      "0": 285,
+      "1": 167,
+      "2": 169
+    }
+  },
+  {
+    "episode": 90,
+    "regime": "VOLATILE",
+    "seed": 323263367,
+    "final_mtm": -9.53826904296875,
+    "avg_reward": -0.0003140367260742187,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 343,
+    "blocked": 0,
+    "loss": -0.01584230656735599,
+    "action_counts": {
+      "0": 277,
+      "1": 131,
+      "2": 214
+    }
+  },
+  {
+    "episode": 91,
+    "regime": "VOLATILE",
+    "seed": 193615873,
+    "final_mtm": -114.35394287109375,
+    "avg_reward": -0.0029646585717773436,
+    "orders_sent": 5,
+    "fills_rcvd": 5,
+    "risk_rejects": 369,
+    "blocked": 0,
+    "loss": 0.002864561416208744,
+    "action_counts": {
+      "0": 245,
+      "1": 152,
+      "2": 222
+    }
+  },
+  {
+    "episode": 92,
+    "regime": "VOLATILE",
+    "seed": 501579337,
+    "final_mtm": -1140.020751953125,
+    "avg_reward": -0.028353998798828127,
+    "orders_sent": 229,
+    "fills_rcvd": 96,
+    "risk_rejects": 8,
+    "blocked": 0,
+    "loss": -0.0169342776893505,
+    "action_counts": {
+      "0": 159,
+      "1": 105,
+      "2": 132
+    }
+  },
+  {
+    "episode": 93,
+    "regime": "VOLATILE",
+    "seed": 108364356,
+    "final_mtm": -106.55364990234375,
+    "avg_reward": -0.0027769412475585936,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 399,
+    "blocked": 0,
+    "loss": -0.02176835760474205,
+    "action_counts": {
+      "0": 221,
+      "1": 137,
+      "2": 264
+    }
+  },
+  {
+    "episode": 94,
+    "regime": "VOLATILE",
+    "seed": 420130618,
+    "final_mtm": -1514.752197265625,
+    "avg_reward": -0.03781954493164063,
+    "orders_sent": 233,
+    "fills_rcvd": 117,
+    "risk_rejects": 38,
+    "blocked": 0,
+    "loss": -0.05633417457076056,
+    "action_counts": {
+      "0": 121,
+      "1": 83,
+      "2": 188
+    }
+  },
+  {
+    "episode": 95,
+    "regime": "VOLATILE",
+    "seed": 384996823,
+    "final_mtm": -1120.2880859375,
+    "avg_reward": -0.0279194221484375,
+    "orders_sent": 255,
+    "fills_rcvd": 108,
+    "risk_rejects": 19,
+    "blocked": 0,
+    "loss": -0.016349274665117264,
+    "action_counts": {
+      "0": 96,
+      "1": 101,
+      "2": 173
+    }
+  },
+  {
+    "episode": 96,
+    "regime": "VOLATILE",
+    "seed": 504891752,
+    "final_mtm": -1951.422119140625,
+    "avg_reward": -0.04896678797851562,
+    "orders_sent": 245,
+    "fills_rcvd": 118,
+    "risk_rejects": 33,
+    "blocked": 0,
+    "loss": -0.009724227711558342,
+    "action_counts": {
+      "0": 102,
+      "1": 111,
+      "2": 167
+    }
+  },
+  {
+    "episode": 97,
+    "regime": "VOLATILE",
+    "seed": 986213605,
+    "final_mtm": -1795.9518432617188,
+    "avg_reward": -0.04498654608154297,
+    "orders_sent": 231,
+    "fills_rcvd": 106,
+    "risk_rejects": 19,
+    "blocked": 0,
+    "loss": -0.026399932535631315,
+    "action_counts": {
+      "0": 145,
+      "1": 101,
+      "2": 149
+    }
+  },
+  {
+    "episode": 98,
+    "regime": "VOLATILE",
+    "seed": 749147527,
+    "final_mtm": -1412.9913330078125,
+    "avg_reward": -0.03522657832519531,
+    "orders_sent": 240,
+    "fills_rcvd": 109,
+    "risk_rejects": 15,
+    "blocked": 0,
+    "loss": -0.030965170124545693,
+    "action_counts": {
+      "0": 129,
+      "1": 104,
+      "2": 151
+    }
+  },
+  {
+    "episode": 99,
+    "regime": "VOLATILE",
+    "seed": 823935009,
+    "final_mtm": -1587.4710083007812,
+    "avg_reward": -0.03973006520751953,
+    "orders_sent": 130,
+    "fills_rcvd": 75,
+    "risk_rejects": 195,
+    "blocked": 0,
+    "loss": -0.022485892404802144,
+    "action_counts": {
+      "0": 169,
+      "1": 142,
+      "2": 183
+    }
+  },
+  {
+    "episode": 100,
+    "regime": "VOLATILE",
+    "seed": 726067136,
+    "final_mtm": -1074.9191284179688,
+    "avg_reward": -0.02674681821044922,
+    "orders_sent": 233,
+    "fills_rcvd": 112,
+    "risk_rejects": 5,
+    "blocked": 0,
+    "loss": -0.08215269286717687,
+    "action_counts": {
+      "0": 155,
+      "1": 88,
+      "2": 150
+    }
+  },
+  {
+    "episode": 101,
+    "regime": "VOLATILE",
+    "seed": 173897862,
+    "final_mtm": -60.91766357421875,
+    "avg_reward": -0.0013895065893554683,
+    "orders_sent": 8,
+    "fills_rcvd": 8,
+    "risk_rejects": 333,
+    "blocked": 0,
+    "loss": -0.00698249414563179,
+    "action_counts": {
+      "0": 275,
+      "1": 154,
+      "2": 187
+    }
+  },
+  {
+    "episode": 102,
+    "regime": "VOLATILE",
+    "seed": 269174483,
+    "final_mtm": -497.747802734375,
+    "avg_reward": -0.012406215068359374,
+    "orders_sent": 33,
+    "fills_rcvd": 28,
+    "risk_rejects": 337,
+    "blocked": 0,
+    "loss": -0.012020858516916633,
+    "action_counts": {
+      "0": 221,
+      "1": 170,
+      "2": 200
+    }
+  },
+  {
+    "episode": 103,
+    "regime": "VOLATILE",
+    "seed": 989366466,
+    "final_mtm": -150.7598876953125,
+    "avg_reward": -0.003385717192382812,
+    "orders_sent": 37,
+    "fills_rcvd": 26,
+    "risk_rejects": 313,
+    "blocked": 0,
+    "loss": 0.009333164244890214,
+    "action_counts": {
+      "0": 237,
+      "1": 157,
+      "2": 193
+    }
+  },
+  {
+    "episode": 104,
+    "regime": "VOLATILE",
+    "seed": 187711998,
+    "final_mtm": -1054.0359497070312,
+    "avg_reward": -0.02632891874267578,
+    "orders_sent": 184,
+    "fills_rcvd": 93,
+    "risk_rejects": 88,
+    "blocked": 0,
+    "loss": -0.014930818096867629,
+    "action_counts": {
+      "0": 168,
+      "1": 119,
+      "2": 153
+    }
+  },
+  {
+    "episode": 105,
+    "regime": "VOLATILE",
+    "seed": 731520554,
+    "final_mtm": -91.34674072265625,
+    "avg_reward": -0.0024187135180664065,
+    "orders_sent": 3,
+    "fills_rcvd": 3,
+    "risk_rejects": 347,
+    "blocked": 0,
+    "loss": -0.011058131232857704,
+    "action_counts": {
+      "0": 271,
+      "1": 154,
+      "2": 196
+    }
+  },
+  {
+    "episode": 106,
+    "regime": "VOLATILE",
+    "seed": 611081151,
+    "final_mtm": -1389.1357421875,
+    "avg_reward": -0.0347974085546875,
+    "orders_sent": 183,
+    "fills_rcvd": 83,
+    "risk_rejects": 129,
+    "blocked": 0,
+    "loss": -0.01451316209776061,
+    "action_counts": {
+      "0": 129,
+      "1": 131,
+      "2": 181
+    }
+  },
+  {
+    "episode": 107,
+    "regime": "VOLATILE",
+    "seed": 985171071,
+    "final_mtm": -579.7592163085938,
+    "avg_reward": -0.014532240407714843,
+    "orders_sent": 42,
+    "fills_rcvd": 27,
+    "risk_rejects": 340,
+    "blocked": 0,
+    "loss": 0.0014019347261637449,
+    "action_counts": {
+      "0": 200,
+      "1": 187,
+      "2": 195
+    }
+  },
+  {
+    "episode": 108,
+    "regime": "VOLATILE",
+    "seed": 383489697,
+    "final_mtm": -954.8858642578125,
+    "avg_reward": -0.023823106606445314,
+    "orders_sent": 86,
+    "fills_rcvd": 51,
+    "risk_rejects": 253,
+    "blocked": 0,
+    "loss": -0.012801424470833607,
+    "action_counts": {
+      "0": 199,
+      "1": 147,
+      "2": 192
+    }
+  },
+  {
+    "episode": 109,
+    "regime": "VOLATILE",
+    "seed": 706111019,
+    "final_mtm": -453.1890869140625,
+    "avg_reward": -0.011119722172851561,
+    "orders_sent": 24,
+    "fills_rcvd": 19,
+    "risk_rejects": 348,
+    "blocked": 0,
+    "loss": -0.013560504838824271,
+    "action_counts": {
+      "0": 228,
+      "1": 168,
+      "2": 204
+    }
+  },
+  {
+    "episode": 110,
+    "regime": "VOLATILE",
+    "seed": 601940901,
+    "final_mtm": 92.6422119140625,
+    "avg_reward": 0.0023197552978515626,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 347,
+    "blocked": 0,
+    "loss": -0.008646806888282298,
+    "action_counts": {
+      "0": 273,
+      "1": 152,
+      "2": 197
+    }
+  },
+  {
+    "episode": 111,
+    "regime": "VOLATILE",
+    "seed": 491725582,
+    "final_mtm": -895.6085205078125,
+    "avg_reward": -0.022315198012695315,
+    "orders_sent": 96,
+    "fills_rcvd": 59,
+    "risk_rejects": 247,
+    "blocked": 0,
+    "loss": -0.05048170297717055,
+    "action_counts": {
+      "0": 185,
+      "1": 163,
+      "2": 180
+    }
+  },
+  {
+    "episode": 112,
+    "regime": "VOLATILE",
+    "seed": 360688651,
+    "final_mtm": -1139.862060546875,
+    "avg_reward": -0.028507206513671876,
+    "orders_sent": 232,
+    "fills_rcvd": 112,
+    "risk_rejects": 11,
+    "blocked": 0,
+    "loss": -0.0017615158909133502,
+    "action_counts": {
+      "0": 150,
+      "1": 104,
+      "2": 139
+    }
+  },
+  {
+    "episode": 113,
+    "regime": "VOLATILE",
+    "seed": 584459610,
+    "final_mtm": -706.7703247070312,
+    "avg_reward": -0.01750238811767578,
+    "orders_sent": 78,
+    "fills_rcvd": 45,
+    "risk_rejects": 267,
+    "blocked": 0,
+    "loss": -0.01804646456407176,
+    "action_counts": {
+      "0": 201,
+      "1": 151,
+      "2": 194
+    }
+  },
+  {
+    "episode": 114,
+    "regime": "VOLATILE",
+    "seed": 257839056,
+    "final_mtm": -1469.0643310546875,
+    "avg_reward": -0.036834473276367186,
+    "orders_sent": 235,
+    "fills_rcvd": 121,
+    "risk_rejects": 22,
+    "blocked": 0,
+    "loss": -0.09437131349529539,
+    "action_counts": {
+      "0": 132,
+      "1": 131,
+      "2": 126
+    }
+  },
+  {
+    "episode": 115,
+    "regime": "VOLATILE",
+    "seed": 517358894,
+    "final_mtm": -78.6865234375,
+    "avg_reward": -0.0020101380859375,
+    "orders_sent": 5,
+    "fills_rcvd": 5,
+    "risk_rejects": 358,
+    "blocked": 0,
+    "loss": -0.02057625548914075,
+    "action_counts": {
+      "0": 256,
+      "1": 174,
+      "2": 189
+    }
+  },
+  {
+    "episode": 116,
+    "regime": "VOLATILE",
+    "seed": 309107555,
+    "final_mtm": -103.86810302734375,
+    "avg_reward": -0.002736407575683594,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 308,
+    "blocked": 0,
+    "loss": -0.00787485633045435,
+    "action_counts": {
+      "0": 312,
+      "1": 134,
+      "2": 176
+    }
+  },
+  {
+    "episode": 117,
+    "regime": "VOLATILE",
+    "seed": 633806835,
+    "final_mtm": -1219.2718505859375,
+    "avg_reward": -0.030427546264648435,
+    "orders_sent": 119,
+    "fills_rcvd": 64,
+    "risk_rejects": 181,
+    "blocked": 0,
+    "loss": -0.01931902690557763,
+    "action_counts": {
+      "0": 205,
+      "1": 169,
+      "2": 131
+    }
+  },
+  {
+    "episode": 118,
+    "regime": "VOLATILE",
+    "seed": 680482575,
+    "final_mtm": -421.90704345703125,
+    "avg_reward": -0.010517831086425782,
+    "orders_sent": 53,
+    "fills_rcvd": 33,
+    "risk_rejects": 276,
+    "blocked": 0,
+    "loss": -0.012481089991827806,
+    "action_counts": {
+      "0": 242,
+      "1": 168,
+      "2": 161
+    }
+  },
+  {
+    "episode": 119,
+    "regime": "VOLATILE",
+    "seed": 142104589,
+    "final_mtm": -305.426025390625,
+    "avg_reward": -0.007421025634765624,
+    "orders_sent": 41,
+    "fills_rcvd": 25,
+    "risk_rejects": 301,
+    "blocked": 0,
+    "loss": -0.015943651646375658,
+    "action_counts": {
+      "0": 241,
+      "1": 178,
+      "2": 164
+    }
+  },
+  {
+    "episode": 120,
+    "regime": "VOLATILE",
+    "seed": 416631333,
+    "final_mtm": -53.4637451171875,
+    "avg_reward": -0.0013462336279296873,
+    "orders_sent": 4,
+    "fills_rcvd": 4,
+    "risk_rejects": 327,
+    "blocked": 0,
+    "loss": -0.012508652359247207,
+    "action_counts": {
+      "0": 289,
+      "1": 168,
+      "2": 163
+    }
+  },
+  {
+    "episode": 121,
+    "regime": "VOLATILE",
+    "seed": 890028574,
+    "final_mtm": -1045.9640502929688,
+    "avg_reward": -0.02609565625732422,
+    "orders_sent": 213,
+    "fills_rcvd": 110,
+    "risk_rejects": 7,
+    "blocked": 0,
+    "loss": -0.028144958295992444,
+    "action_counts": {
+      "0": 193,
+      "1": 115,
+      "2": 105
+    }
+  },
+  {
+    "episode": 122,
+    "regime": "VOLATILE",
+    "seed": 1637619,
+    "final_mtm": -925.6240844726562,
+    "avg_reward": -0.023097142111816408,
+    "orders_sent": 90,
+    "fills_rcvd": 50,
+    "risk_rejects": 233,
+    "blocked": 0,
+    "loss": -0.03930310139225589,
+    "action_counts": {
+      "0": 211,
+      "1": 160,
+      "2": 163
+    }
+  },
+  {
+    "episode": 123,
+    "regime": "VOLATILE",
+    "seed": 750098451,
+    "final_mtm": -266.2078857421875,
+    "avg_reward": -0.0064229071435546875,
+    "orders_sent": 20,
+    "fills_rcvd": 20,
+    "risk_rejects": 362,
+    "blocked": 0,
+    "loss": -0.00847945255227387,
+    "action_counts": {
+      "0": 222,
+      "1": 193,
+      "2": 189
+    }
+  },
+  {
+    "episode": 124,
+    "regime": "VOLATILE",
+    "seed": 257071932,
+    "final_mtm": -858.7799072265625,
+    "avg_reward": -0.021302677680664062,
+    "orders_sent": 62,
+    "fills_rcvd": 40,
+    "risk_rejects": 276,
+    "blocked": 0,
+    "loss": -0.01045721893509229,
+    "action_counts": {
+      "0": 224,
+      "1": 178,
+      "2": 160
+    }
+  },
+  {
+    "episode": 125,
+    "regime": "VOLATILE",
+    "seed": 481182646,
+    "final_mtm": -156.09893798828125,
+    "avg_reward": -0.0036620734497070317,
+    "orders_sent": 9,
+    "fills_rcvd": 9,
+    "risk_rejects": 370,
+    "blocked": 0,
+    "loss": -0.018967856792733072,
+    "action_counts": {
+      "0": 236,
+      "1": 213,
+      "2": 166
+    }
+  },
+  {
+    "episode": 126,
+    "regime": "VOLATILE",
+    "seed": 939979708,
+    "final_mtm": 72.9339599609375,
+    "avg_reward": 0.0018243689990234376,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 342,
+    "blocked": 0,
+    "loss": -0.02466667890548706,
+    "action_counts": {
+      "0": 278,
+      "1": 187,
+      "2": 157
+    }
+  },
+  {
+    "episode": 127,
+    "regime": "VOLATILE",
+    "seed": 939028649,
+    "final_mtm": -72.491455078125,
+    "avg_reward": -0.001842176376953125,
+    "orders_sent": 3,
+    "fills_rcvd": 3,
+    "risk_rejects": 326,
+    "blocked": 0,
+    "loss": -0.01834560912102461,
+    "action_counts": {
+      "0": 292,
+      "1": 159,
+      "2": 170
+    }
+  },
+  {
+    "episode": 128,
+    "regime": "VOLATILE",
+    "seed": 431931978,
+    "final_mtm": -207.27996826171875,
+    "avg_reward": -0.005035209206542968,
+    "orders_sent": 23,
+    "fills_rcvd": 20,
+    "risk_rejects": 364,
+    "blocked": 0,
+    "loss": -0.010130699072033168,
+    "action_counts": {
+      "0": 214,
+      "1": 214,
+      "2": 173
+    }
+  },
+  {
+    "episode": 129,
+    "regime": "VOLATILE",
+    "seed": 609319785,
+    "final_mtm": -171.30126953125,
+    "avg_reward": -0.0042438167382812505,
+    "orders_sent": 5,
+    "fills_rcvd": 5,
+    "risk_rejects": 363,
+    "blocked": 0,
+    "loss": -0.011632262635976076,
+    "action_counts": {
+      "0": 251,
+      "1": 209,
+      "2": 159
+    }
+  },
+  {
+    "episode": 130,
+    "regime": "VOLATILE",
+    "seed": 711028416,
+    "final_mtm": -129.388427734375,
+    "avg_reward": -0.0029512206933593747,
+    "orders_sent": 10,
+    "fills_rcvd": 10,
+    "risk_rejects": 356,
+    "blocked": 0,
+    "loss": -0.013492165040224791,
+    "action_counts": {
+      "0": 248,
+      "1": 202,
+      "2": 164
+    }
+  },
+  {
+    "episode": 131,
+    "regime": "VOLATILE",
+    "seed": 177893145,
+    "final_mtm": -139.691162109375,
+    "avg_reward": -0.003359249052734375,
+    "orders_sent": 37,
+    "fills_rcvd": 24,
+    "risk_rejects": 278,
+    "blocked": 0,
+    "loss": -0.010658861696720123,
+    "action_counts": {
+      "0": 272,
+      "1": 166,
+      "2": 149
+    }
+  },
+  {
+    "episode": 132,
+    "regime": "VOLATILE",
+    "seed": 278343784,
+    "final_mtm": -59.94415283203125,
+    "avg_reward": -0.001604098820800781,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 332,
+    "blocked": 0,
+    "loss": -0.02076672427356243,
+    "action_counts": {
+      "0": 288,
+      "1": 174,
+      "2": 160
+    }
+  },
+  {
+    "episode": 133,
+    "regime": "VOLATILE",
+    "seed": 479281461,
+    "final_mtm": 55.64727783203125,
+    "avg_reward": 0.0016251019458007811,
+    "orders_sent": 5,
+    "fills_rcvd": 5,
+    "risk_rejects": 332,
+    "blocked": 0,
+    "loss": -0.010333363059908151,
+    "action_counts": {
+      "0": 282,
+      "1": 161,
+      "2": 176
+    }
+  },
+  {
+    "episode": 134,
+    "regime": "VOLATILE",
+    "seed": 523198449,
+    "final_mtm": -487.97607421875,
+    "avg_reward": -0.01216389685546875,
+    "orders_sent": 29,
+    "fills_rcvd": 22,
+    "risk_rejects": 366,
+    "blocked": 0,
+    "loss": -0.022994891786947847,
+    "action_counts": {
+      "0": 200,
+      "1": 223,
+      "2": 172
+    }
+  },
+  {
+    "episode": 135,
+    "regime": "VOLATILE",
+    "seed": 648516780,
+    "final_mtm": 7.110595703125,
+    "avg_reward": 0.0006487048925781257,
+    "orders_sent": 31,
+    "fills_rcvd": 23,
+    "risk_rejects": 344,
+    "blocked": 0,
+    "loss": -0.023251480842009186,
+    "action_counts": {
+      "0": 218,
+      "1": 193,
+      "2": 182
+    }
+  },
+  {
+    "episode": 136,
+    "regime": "VOLATILE",
+    "seed": 949054720,
+    "final_mtm": -1595.3720092773438,
+    "avg_reward": -0.03995432023193359,
+    "orders_sent": 230,
+    "fills_rcvd": 121,
+    "risk_rejects": 17,
+    "blocked": 0,
+    "loss": 0.03705592932445662,
+    "action_counts": {
+      "0": 147,
+      "1": 145,
+      "2": 102
+    }
+  },
+  {
+    "episode": 137,
+    "regime": "VOLATILE",
+    "seed": 349980605,
+    "final_mtm": -189.0869140625,
+    "avg_reward": -0.004775962851562499,
+    "orders_sent": 7,
+    "fills_rcvd": 7,
+    "risk_rejects": 378,
+    "blocked": 0,
+    "loss": -0.022623855900019408,
+    "action_counts": {
+      "0": 232,
+      "1": 221,
+      "2": 164
+    }
+  },
+  {
+    "episode": 138,
+    "regime": "VOLATILE",
+    "seed": 501322721,
+    "final_mtm": -1262.115478515625,
+    "avg_reward": -0.03161680196289062,
+    "orders_sent": 216,
+    "fills_rcvd": 115,
+    "risk_rejects": 58,
+    "blocked": 0,
+    "loss": -0.03019798014845167,
+    "action_counts": {
+      "0": 134,
+      "1": 140,
+      "2": 134
+    }
+  },
+  {
+    "episode": 139,
+    "regime": "VOLATILE",
+    "seed": 883389791,
+    "final_mtm": -135.45379638671875,
+    "avg_reward": -0.0032260099096679683,
+    "orders_sent": 12,
+    "fills_rcvd": 12,
+    "risk_rejects": 389,
+    "blocked": 0,
+    "loss": -0.008730476442724466,
+    "action_counts": {
+      "0": 211,
+      "1": 229,
+      "2": 172
+    }
+  },
+  {
+    "episode": 140,
+    "regime": "VOLATILE",
+    "seed": 872324895,
+    "final_mtm": -1451.885986328125,
+    "avg_reward": -0.036382534658203125,
+    "orders_sent": 236,
+    "fills_rcvd": 130,
+    "risk_rejects": 19,
+    "blocked": 0,
+    "loss": -0.06609472865238786,
+    "action_counts": {
+      "0": 135,
+      "1": 123,
+      "2": 132
+    }
+  },
+  {
+    "episode": 141,
+    "regime": "VOLATILE",
+    "seed": 589015029,
+    "final_mtm": -89.4805908203125,
+    "avg_reward": -0.0021903547705078123,
+    "orders_sent": 11,
+    "fills_rcvd": 11,
+    "risk_rejects": 411,
+    "blocked": 0,
+    "loss": -0.00846689883619547,
+    "action_counts": {
+      "0": 191,
+      "1": 206,
+      "2": 216
+    }
+  },
+  {
+    "episode": 142,
+    "regime": "VOLATILE",
+    "seed": 679774873,
+    "final_mtm": -752.9022216796875,
+    "avg_reward": -0.018868060541992186,
+    "orders_sent": 62,
+    "fills_rcvd": 41,
+    "risk_rejects": 340,
+    "blocked": 0,
+    "loss": -0.013341027311980724,
+    "action_counts": {
+      "0": 160,
+      "1": 194,
+      "2": 208
+    }
+  },
+  {
+    "episode": 143,
+    "regime": "VOLATILE",
+    "seed": 899204367,
+    "final_mtm": -1188.934326171875,
+    "avg_reward": -0.02983356315429687,
+    "orders_sent": 112,
+    "fills_rcvd": 62,
+    "risk_rejects": 254,
+    "blocked": 0,
+    "loss": -0.00940196868032217,
+    "action_counts": {
+      "0": 146,
+      "1": 152,
+      "2": 214
+    }
+  },
+  {
+    "episode": 144,
+    "regime": "VOLATILE",
+    "seed": 15816452,
+    "final_mtm": -110.50262451171875,
+    "avg_reward": -0.0026048356127929685,
+    "orders_sent": 26,
+    "fills_rcvd": 19,
+    "risk_rejects": 376,
+    "blocked": 0,
+    "loss": -0.02117354329675436,
+    "action_counts": {
+      "0": 196,
+      "1": 191,
+      "2": 211
+    }
+  },
+  {
+    "episode": 145,
+    "regime": "VOLATILE",
+    "seed": 728550938,
+    "final_mtm": -1263.8153076171875,
+    "avg_reward": -0.031683772690429685,
+    "orders_sent": 64,
+    "fills_rcvd": 46,
+    "risk_rejects": 346,
+    "blocked": 0,
+    "loss": -0.01934308765663041,
+    "action_counts": {
+      "0": 150,
+      "1": 206,
+      "2": 204
+    }
+  },
+  {
+    "episode": 146,
+    "regime": "VOLATILE",
+    "seed": 3644005,
+    "final_mtm": -668.206787109375,
+    "avg_reward": -0.016737799677734373,
+    "orders_sent": 50,
+    "fills_rcvd": 32,
+    "risk_rejects": 326,
+    "blocked": 0,
+    "loss": -0.013738921533028284,
+    "action_counts": {
+      "0": 198,
+      "1": 187,
+      "2": 189
+    }
+  },
+  {
+    "episode": 147,
+    "regime": "VOLATILE",
+    "seed": 770221930,
+    "final_mtm": -1499.0310668945312,
+    "avg_reward": -0.03760492667236328,
+    "orders_sent": 226,
+    "fills_rcvd": 113,
+    "risk_rejects": 18,
+    "blocked": 0,
+    "loss": -0.002148151397705078,
+    "action_counts": {
+      "0": 156,
+      "1": 119,
+      "2": 125
+    }
+  },
+  {
+    "episode": 148,
+    "regime": "VOLATILE",
+    "seed": 883402124,
+    "final_mtm": -69.8455810546875,
+    "avg_reward": -0.001742464526367187,
+    "orders_sent": 6,
+    "fills_rcvd": 6,
+    "risk_rejects": 381,
+    "blocked": 0,
+    "loss": -0.013814456528052688,
+    "action_counts": {
+      "0": 231,
+      "1": 197,
+      "2": 190
+    }
+  },
+  {
+    "episode": 149,
+    "regime": "VOLATILE",
+    "seed": 657197528,
+    "final_mtm": -824.2050170898438,
+    "avg_reward": -0.020419020427246092,
+    "orders_sent": 72,
+    "fills_rcvd": 46,
+    "risk_rejects": 280,
+    "blocked": 0,
+    "loss": -0.027416321448981762,
+    "action_counts": {
+      "0": 200,
+      "1": 194,
+      "2": 158
+    }
+  },
+  {
+    "episode": 150,
+    "regime": "VOLATILE",
+    "seed": 127673084,
+    "final_mtm": -515.05126953125,
+    "avg_reward": -0.012793106738281249,
+    "orders_sent": 50,
+    "fills_rcvd": 33,
+    "risk_rejects": 319,
+    "blocked": 0,
+    "loss": -0.02020737777153651,
+    "action_counts": {
+      "0": 205,
+      "1": 174,
+      "2": 195
+    }
+  },
+  {
+    "episode": 151,
+    "regime": "VOLATILE",
+    "seed": 213156334,
+    "final_mtm": -55.13916015625,
+    "avg_reward": -0.0011025740039062495,
+    "orders_sent": 28,
+    "fills_rcvd": 22,
+    "risk_rejects": 319,
+    "blocked": 0,
+    "loss": 0.011948398267850279,
+    "action_counts": {
+      "0": 249,
+      "1": 165,
+      "2": 182
+    }
+  },
+  {
+    "episode": 152,
+    "regime": "VOLATILE",
+    "seed": 300630181,
+    "final_mtm": -2015.0054931640625,
+    "avg_reward": -0.05044731232910156,
+    "orders_sent": 231,
+    "fills_rcvd": 125,
+    "risk_rejects": 22,
+    "blocked": 0,
+    "loss": -0.08784578181803226,
+    "action_counts": {
+      "0": 140,
+      "1": 121,
+      "2": 132
+    }
+  },
+  {
+    "episode": 153,
+    "regime": "VOLATILE",
+    "seed": 195659470,
+    "final_mtm": -1298.309326171875,
+    "avg_reward": -0.032496218154296874,
+    "orders_sent": 224,
+    "fills_rcvd": 105,
+    "risk_rejects": 58,
+    "blocked": 0,
+    "loss": -0.03566417896321842,
+    "action_counts": {
+      "0": 118,
+      "1": 126,
+      "2": 156
+    }
+  },
+  {
+    "episode": 154,
+    "regime": "VOLATILE",
+    "seed": 916910061,
+    "final_mtm": -295.30181884765625,
+    "avg_reward": -0.007337810471191405,
+    "orders_sent": 28,
+    "fills_rcvd": 22,
+    "risk_rejects": 336,
+    "blocked": 0,
+    "loss": -0.03648728653788567,
+    "action_counts": {
+      "0": 232,
+      "1": 178,
+      "2": 186
+    }
+  },
+  {
+    "episode": 155,
+    "regime": "VOLATILE",
+    "seed": 673923354,
+    "final_mtm": -144.17572021484375,
+    "avg_reward": -0.0037213230053710937,
+    "orders_sent": 3,
+    "fills_rcvd": 3,
+    "risk_rejects": 352,
+    "blocked": 0,
+    "loss": -0.01620803065598011,
+    "action_counts": {
+      "0": 266,
+      "1": 206,
+      "2": 149
+    }
+  },
+  {
+    "episode": 156,
+    "regime": "VOLATILE",
+    "seed": 294972736,
+    "final_mtm": -517.6589965820312,
+    "avg_reward": -0.012900099914550782,
+    "orders_sent": 52,
+    "fills_rcvd": 30,
+    "risk_rejects": 303,
+    "blocked": 0,
+    "loss": -0.015054310775465436,
+    "action_counts": {
+      "0": 217,
+      "1": 177,
+      "2": 178
+    }
+  },
+  {
+    "episode": 157,
+    "regime": "VOLATILE",
+    "seed": 858806076,
+    "final_mtm": -475.73394775390625,
+    "avg_reward": -0.011768853693847656,
+    "orders_sent": 55,
+    "fills_rcvd": 38,
+    "risk_rejects": 278,
+    "blocked": 0,
+    "loss": -0.00875546203719245,
+    "action_counts": {
+      "0": 236,
+      "1": 144,
+      "2": 189
+    }
+  },
+  {
+    "episode": 158,
+    "regime": "VOLATILE",
+    "seed": 924879153,
+    "final_mtm": -207.20367431640625,
+    "avg_reward": -0.005061871857910155,
+    "orders_sent": 19,
+    "fills_rcvd": 17,
+    "risk_rejects": 356,
+    "blocked": 0,
+    "loss": -0.02489270521327853,
+    "action_counts": {
+      "0": 230,
+      "1": 188,
+      "2": 187
+    }
+  },
+  {
+    "episode": 159,
+    "regime": "VOLATILE",
+    "seed": 701763208,
+    "final_mtm": -1413.0706787109375,
+    "avg_reward": -0.035455281967773436,
+    "orders_sent": 124,
+    "fills_rcvd": 67,
+    "risk_rejects": 187,
+    "blocked": 0,
+    "loss": -0.019083073013462126,
+    "action_counts": {
+      "0": 189,
+      "1": 138,
+      "2": 173
+    }
+  },
+  {
+    "episode": 160,
+    "regime": "VOLATILE",
+    "seed": 698774176,
+    "final_mtm": -219.69451904296875,
+    "avg_reward": -0.005378207976074218,
+    "orders_sent": 10,
+    "fills_rcvd": 10,
+    "risk_rejects": 371,
+    "blocked": 0,
+    "loss": -0.009328082017600537,
+    "action_counts": {
+      "0": 233,
+      "1": 194,
+      "2": 187
+    }
+  },
+  {
+    "episode": 161,
+    "regime": "VOLATILE",
+    "seed": 123598712,
+    "final_mtm": -1300.0579833984375,
+    "avg_reward": -0.03249067458496094,
+    "orders_sent": 227,
+    "fills_rcvd": 113,
+    "risk_rejects": 17,
+    "blocked": 0,
+    "loss": -0.009537396154233388,
+    "action_counts": {
+      "0": 154,
+      "1": 127,
+      "2": 117
+    }
+  },
+  {
+    "episode": 162,
+    "regime": "VOLATILE",
+    "seed": 298941263,
+    "final_mtm": -73.3123779296875,
+    "avg_reward": -0.0017189794482421878,
+    "orders_sent": 9,
+    "fills_rcvd": 9,
+    "risk_rejects": 350,
+    "blocked": 0,
+    "loss": -0.0070523940026760105,
+    "action_counts": {
+      "0": 256,
+      "1": 175,
+      "2": 184
+    }
+  },
+  {
+    "episode": 163,
+    "regime": "VOLATILE",
+    "seed": 45417709,
+    "final_mtm": -748.2009887695312,
+    "avg_reward": -0.018583739719238282,
+    "orders_sent": 67,
+    "fills_rcvd": 48,
+    "risk_rejects": 260,
+    "blocked": 0,
+    "loss": -0.016853434551093314,
+    "action_counts": {
+      "0": 230,
+      "1": 182,
+      "2": 145
+    }
+  },
+  {
+    "episode": 164,
+    "regime": "VOLATILE",
+    "seed": 731215719,
+    "final_mtm": 207.89642333984375,
+    "avg_reward": 0.005671775583496095,
+    "orders_sent": 22,
+    "fills_rcvd": 19,
+    "risk_rejects": 331,
+    "blocked": 0,
+    "loss": 0.004107215069234371,
+    "action_counts": {
+      "0": 249,
+      "1": 172,
+      "2": 181
+    }
+  },
+  {
+    "episode": 165,
+    "regime": "VOLATILE",
+    "seed": 337921759,
+    "final_mtm": -53.25164794921875,
+    "avg_reward": -0.0014842861987304687,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 340,
+    "blocked": 0,
+    "loss": -0.012439999729394913,
+    "action_counts": {
+      "0": 280,
+      "1": 195,
+      "2": 147
+    }
+  },
+  {
+    "episode": 166,
+    "regime": "VOLATILE",
+    "seed": 609314899,
+    "final_mtm": -899.6795654296875,
+    "avg_reward": -0.02256090913574219,
+    "orders_sent": 51,
+    "fills_rcvd": 34,
+    "risk_rejects": 300,
+    "blocked": 0,
+    "loss": -0.0152407998426093,
+    "action_counts": {
+      "0": 222,
+      "1": 189,
+      "2": 162
+    }
+  },
+  {
+    "episode": 167,
+    "regime": "VOLATILE",
+    "seed": 45103019,
+    "final_mtm": -329.9652099609375,
+    "avg_reward": -0.008070950249023438,
+    "orders_sent": 24,
+    "fills_rcvd": 18,
+    "risk_rejects": 311,
+    "blocked": 0,
+    "loss": -0.04008494657464325,
+    "action_counts": {
+      "0": 265,
+      "1": 181,
+      "2": 154
+    }
+  },
+  {
+    "episode": 168,
+    "regime": "VOLATILE",
+    "seed": 753042790,
+    "final_mtm": -1046.4370727539062,
+    "avg_reward": -0.026158731818847657,
+    "orders_sent": 36,
+    "fills_rcvd": 26,
+    "risk_rejects": 334,
+    "blocked": 0,
+    "loss": -0.00042391647584736345,
+    "action_counts": {
+      "0": 218,
+      "1": 211,
+      "2": 159
+    }
+  },
+  {
+    "episode": 169,
+    "regime": "VOLATILE",
+    "seed": 530950948,
+    "final_mtm": 42.877197265625,
+    "avg_reward": 0.0009680899316406251,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 316,
+    "blocked": 0,
+    "loss": -0.011989224329590797,
+    "action_counts": {
+      "0": 304,
+      "1": 152,
+      "2": 166
+    }
+  },
+  {
+    "episode": 170,
+    "regime": "VOLATILE",
+    "seed": 969278640,
+    "final_mtm": -1582.5698852539062,
+    "avg_reward": -0.03950484713134766,
+    "orders_sent": 192,
+    "fills_rcvd": 102,
+    "risk_rejects": 70,
+    "blocked": 0,
+    "loss": -0.02832505160144397,
+    "action_counts": {
+      "0": 170,
+      "1": 142,
+      "2": 120
+    }
+  },
+  {
+    "episode": 171,
+    "regime": "VOLATILE",
+    "seed": 467551806,
+    "final_mtm": -1291.0049438476562,
+    "avg_reward": -0.03229155859619141,
+    "orders_sent": 223,
+    "fills_rcvd": 115,
+    "risk_rejects": 12,
+    "blocked": 0,
+    "loss": -0.01070857041382364,
+    "action_counts": {
+      "0": 166,
+      "1": 112,
+      "2": 123
+    }
+  },
+  {
+    "episode": 172,
+    "regime": "VOLATILE",
+    "seed": 577597634,
+    "final_mtm": -26.422119140625,
+    "avg_reward": -0.0006924329785156251,
+    "orders_sent": 3,
+    "fills_rcvd": 3,
+    "risk_rejects": 335,
+    "blocked": 0,
+    "loss": -0.016789683513343333,
+    "action_counts": {
+      "0": 283,
+      "1": 186,
+      "2": 152
+    }
+  },
+  {
+    "episode": 173,
+    "regime": "VOLATILE",
+    "seed": 403275795,
+    "final_mtm": -819.2474365234375,
+    "avg_reward": -0.020438325913085937,
+    "orders_sent": 61,
+    "fills_rcvd": 40,
+    "risk_rejects": 254,
+    "blocked": 0,
+    "loss": -0.020145252346992493,
+    "action_counts": {
+      "0": 248,
+      "1": 174,
+      "2": 141
+    }
+  },
+  {
+    "episode": 174,
+    "regime": "VOLATILE",
+    "seed": 9554175,
+    "final_mtm": -779.608154296875,
+    "avg_reward": -0.019457908857421873,
+    "orders_sent": 61,
+    "fills_rcvd": 43,
+    "risk_rejects": 275,
+    "blocked": 0,
+    "loss": -0.032404620200395584,
+    "action_counts": {
+      "0": 227,
+      "1": 181,
+      "2": 155
+    }
+  },
+  {
+    "episode": 175,
+    "regime": "VOLATILE",
+    "seed": 291386004,
+    "final_mtm": -285.66131591796875,
+    "avg_reward": -0.007178317897949218,
+    "orders_sent": 15,
+    "fills_rcvd": 15,
+    "risk_rejects": 325,
+    "blocked": 0,
+    "loss": -0.007761297235265374,
+    "action_counts": {
+      "0": 269,
+      "1": 194,
+      "2": 146
+    }
+  },
+  {
+    "episode": 176,
+    "regime": "VOLATILE",
+    "seed": 847852411,
+    "final_mtm": -768.2113647460938,
+    "avg_reward": -0.01926484411865234,
+    "orders_sent": 97,
+    "fills_rcvd": 47,
+    "risk_rejects": 232,
+    "blocked": 0,
+    "loss": -0.0010250802669260236,
+    "action_counts": {
+      "0": 198,
+      "1": 167,
+      "2": 162
+    }
+  },
+  {
+    "episode": 177,
+    "regime": "VOLATILE",
+    "seed": 100618677,
+    "final_mtm": -1257.2341918945312,
+    "avg_reward": -0.03135680479736328,
+    "orders_sent": 247,
+    "fills_rcvd": 126,
+    "risk_rejects": 6,
+    "blocked": 0,
+    "loss": -0.025119672218958538,
+    "action_counts": {
+      "0": 125,
+      "1": 119,
+      "2": 134
+    }
+  },
+  {
+    "episode": 178,
+    "regime": "VOLATILE",
+    "seed": 666298724,
+    "final_mtm": -1232.0266723632812,
+    "avg_reward": -0.03080834180908203,
+    "orders_sent": 223,
+    "fills_rcvd": 111,
+    "risk_rejects": 10,
+    "blocked": 0,
+    "loss": -0.02362707456839936,
+    "action_counts": {
+      "0": 169,
+      "1": 105,
+      "2": 128
+    }
+  },
+  {
+    "episode": 179,
+    "regime": "VOLATILE",
+    "seed": 289505573,
+    "final_mtm": -1778.5568237304688,
+    "avg_reward": -0.04457519559326172,
+    "orders_sent": 230,
+    "fills_rcvd": 118,
+    "risk_rejects": 31,
+    "blocked": 0,
+    "loss": -0.04529105020420892,
+    "action_counts": {
+      "0": 133,
+      "1": 109,
+      "2": 152
+    }
+  },
+  {
+    "episode": 180,
+    "regime": "VOLATILE",
+    "seed": 626476933,
+    "final_mtm": -1489.1128540039062,
+    "avg_reward": -0.03719150635009765,
+    "orders_sent": 232,
+    "fills_rcvd": 115,
+    "risk_rejects": 12,
+    "blocked": 0,
+    "loss": -0.01201200591666358,
+    "action_counts": {
+      "0": 150,
+      "1": 131,
+      "2": 113
+    }
+  },
+  {
+    "episode": 181,
+    "regime": "VOLATILE",
+    "seed": 423905661,
+    "final_mtm": -1506.4620971679688,
+    "avg_reward": -0.03769214742919922,
+    "orders_sent": 230,
+    "fills_rcvd": 132,
+    "risk_rejects": 16,
+    "blocked": 0,
+    "loss": -0.014148424778665816,
+    "action_counts": {
+      "0": 148,
+      "1": 121,
+      "2": 125
+    }
+  },
+  {
+    "episode": 182,
+    "regime": "VOLATILE",
+    "seed": 139201899,
+    "final_mtm": -4.19464111328125,
+    "avg_reward": 2.9823972167969e-05,
+    "orders_sent": 6,
+    "fills_rcvd": 6,
+    "risk_rejects": 350,
+    "blocked": 0,
+    "loss": -0.014498335681855679,
+    "action_counts": {
+      "0": 262,
+      "1": 169,
+      "2": 187
+    }
+  },
+  {
+    "episode": 183,
+    "regime": "VOLATILE",
+    "seed": 513319027,
+    "final_mtm": -720.76416015625,
+    "avg_reward": -0.01812738400390625,
+    "orders_sent": 26,
+    "fills_rcvd": 22,
+    "risk_rejects": 350,
+    "blocked": 0,
+    "loss": -0.014143878081813454,
+    "action_counts": {
+      "0": 222,
+      "1": 205,
+      "2": 171
+    }
+  },
+  {
+    "episode": 184,
+    "regime": "VOLATILE",
+    "seed": 51815875,
+    "final_mtm": 77.79541015625,
+    "avg_reward": 0.002352235253906251,
+    "orders_sent": 12,
+    "fills_rcvd": 12,
+    "risk_rejects": 362,
+    "blocked": 0,
+    "loss": -0.005768877500668168,
+    "action_counts": {
+      "0": 238,
+      "1": 194,
+      "2": 180
+    }
+  },
+  {
+    "episode": 185,
+    "regime": "VOLATILE",
+    "seed": 920237022,
+    "final_mtm": -1150.3189086914062,
+    "avg_reward": -0.028785897717285156,
+    "orders_sent": 233,
+    "fills_rcvd": 120,
+    "risk_rejects": 16,
+    "blocked": 0,
+    "loss": -0.028850636844124113,
+    "action_counts": {
+      "0": 144,
+      "1": 121,
+      "2": 128
+    }
+  },
+  {
+    "episode": 186,
+    "regime": "VOLATILE",
+    "seed": 76089441,
+    "final_mtm": -388.92974853515625,
+    "avg_reward": -0.009687253713378904,
+    "orders_sent": 16,
+    "fills_rcvd": 16,
+    "risk_rejects": 363,
+    "blocked": 0,
+    "loss": 0.0011370365973562002,
+    "action_counts": {
+      "0": 229,
+      "1": 193,
+      "2": 186
+    }
+  },
+  {
+    "episode": 187,
+    "regime": "VOLATILE",
+    "seed": 897176439,
+    "final_mtm": -1641.961669921875,
+    "avg_reward": -0.04100619174804688,
+    "orders_sent": 224,
+    "fills_rcvd": 119,
+    "risk_rejects": 27,
+    "blocked": 0,
+    "loss": -0.024562731385231018,
+    "action_counts": {
+      "0": 149,
+      "1": 119,
+      "2": 132
+    }
+  },
+  {
+    "episode": 188,
+    "regime": "VOLATILE",
+    "seed": 445304936,
+    "final_mtm": -1443.8720703125,
+    "avg_reward": -0.0360818667578125,
+    "orders_sent": 238,
+    "fills_rcvd": 115,
+    "risk_rejects": 16,
+    "blocked": 0,
+    "loss": -0.021364427703831877,
+    "action_counts": {
+      "0": 133,
+      "1": 127,
+      "2": 127
+    }
+  },
+  {
+    "episode": 189,
+    "regime": "VOLATILE",
+    "seed": 602187609,
+    "final_mtm": -1546.9100952148438,
+    "avg_reward": -0.03873159238037109,
+    "orders_sent": 224,
+    "fills_rcvd": 107,
+    "risk_rejects": 19,
+    "blocked": 0,
+    "loss": -0.02605098592383521,
+    "action_counts": {
+      "0": 158,
+      "1": 123,
+      "2": 120
+    }
+  },
+  {
+    "episode": 190,
+    "regime": "VOLATILE",
+    "seed": 508959618,
+    "final_mtm": -541.845703125,
+    "avg_reward": -0.013482417578125001,
+    "orders_sent": 22,
+    "fills_rcvd": 19,
+    "risk_rejects": 355,
+    "blocked": 0,
+    "loss": -0.03964934539981187,
+    "action_counts": {
+      "0": 225,
+      "1": 198,
+      "2": 179
+    }
+  },
+  {
+    "episode": 191,
+    "regime": "VOLATILE",
+    "seed": 856712071,
+    "final_mtm": -1133.1161499023438,
+    "avg_reward": -0.028240353747558594,
+    "orders_sent": 226,
+    "fills_rcvd": 117,
+    "risk_rejects": 5,
+    "blocked": 0,
+    "loss": -0.0349402805524213,
+    "action_counts": {
+      "0": 167,
+      "1": 131,
+      "2": 100
+    }
+  },
+  {
+    "episode": 192,
+    "regime": "VOLATILE",
+    "seed": 368994095,
+    "final_mtm": 34.8358154296875,
+    "avg_reward": 0.000979705385742188,
+    "orders_sent": 7,
+    "fills_rcvd": 7,
+    "risk_rejects": 332,
+    "blocked": 0,
+    "loss": -0.017703162878751753,
+    "action_counts": {
+      "0": 278,
+      "1": 181,
+      "2": 158
+    }
+  },
+  {
+    "episode": 193,
+    "regime": "VOLATILE",
+    "seed": 124563708,
+    "final_mtm": -1513.006591796875,
+    "avg_reward": -0.03784090479492187,
+    "orders_sent": 225,
+    "fills_rcvd": 123,
+    "risk_rejects": 14,
+    "blocked": 0,
+    "loss": -0.032968991569110324,
+    "action_counts": {
+      "0": 161,
+      "1": 126,
+      "2": 113
+    }
+  },
+  {
+    "episode": 194,
+    "regime": "VOLATILE",
+    "seed": 457989818,
+    "final_mtm": 1.31072998046875,
+    "avg_reward": 1.8673249511719163e-05,
+    "orders_sent": 4,
+    "fills_rcvd": 4,
+    "risk_rejects": 330,
+    "blocked": 0,
+    "loss": -0.023097677156329155,
+    "action_counts": {
+      "0": 286,
+      "1": 159,
+      "2": 175
+    }
+  },
+  {
+    "episode": 195,
+    "regime": "VOLATILE",
+    "seed": 359792463,
+    "final_mtm": -236.82403564453125,
+    "avg_reward": -0.0056537158911132805,
+    "orders_sent": 54,
+    "fills_rcvd": 33,
+    "risk_rejects": 296,
+    "blocked": 0,
+    "loss": -0.026082898748831615,
+    "action_counts": {
+      "0": 220,
+      "1": 167,
+      "2": 183
+    }
+  },
+  {
+    "episode": 196,
+    "regime": "VOLATILE",
+    "seed": 960355455,
+    "final_mtm": -471.197509765625,
+    "avg_reward": -0.011582252744140624,
+    "orders_sent": 35,
+    "fills_rcvd": 30,
+    "risk_rejects": 318,
+    "blocked": 0,
+    "loss": -0.027750238543376327,
+    "action_counts": {
+      "0": 236,
+      "1": 180,
+      "2": 173
+    }
+  },
+  {
+    "episode": 197,
+    "regime": "VOLATILE",
+    "seed": 178839333,
+    "final_mtm": -1365.5731201171875,
+    "avg_reward": -0.03409195800292969,
+    "orders_sent": 227,
+    "fills_rcvd": 105,
+    "risk_rejects": 12,
+    "blocked": 0,
+    "loss": 0.009471785809312547,
+    "action_counts": {
+      "0": 158,
+      "1": 121,
+      "2": 118
+    }
+  },
+  {
+    "episode": 198,
+    "regime": "VOLATILE",
+    "seed": 403267662,
+    "final_mtm": -1197.6089477539062,
+    "avg_reward": -0.029908968693847657,
+    "orders_sent": 106,
+    "fills_rcvd": 65,
+    "risk_rejects": 202,
+    "blocked": 0,
+    "loss": -0.055424862230817475,
+    "action_counts": {
+      "0": 210,
+      "1": 168,
+      "2": 140
+    }
+  },
+  {
+    "episode": 199,
+    "regime": "VOLATILE",
+    "seed": 685991591,
+    "final_mtm": -242.55523681640625,
+    "avg_reward": -0.005830140920410155,
+    "orders_sent": 21,
+    "fills_rcvd": 18,
+    "risk_rejects": 308,
+    "blocked": 0,
+    "loss": -0.014274201542139053,
+    "action_counts": {
+      "0": 274,
+      "1": 161,
+      "2": 168
+    }
+  },
+  {
+    "episode": 200,
+    "regime": "VOLATILE",
+    "seed": 867340192,
+    "final_mtm": -591.9540405273438,
+    "avg_reward": -0.014858801013183591,
+    "orders_sent": 39,
+    "fills_rcvd": 29,
+    "risk_rejects": 278,
+    "blocked": 0,
+    "loss": -0.007124199625104665,
+    "action_counts": {
+      "0": 268,
+      "1": 158,
+      "2": 159
+    }
+  },
+  {
+    "episode": 201,
+    "regime": "VOLATILE",
+    "seed": 805167323,
+    "final_mtm": -1389.4683837890625,
+    "avg_reward": -0.034837149594726564,
+    "orders_sent": 219,
+    "fills_rcvd": 105,
+    "risk_rejects": 23,
+    "blocked": 0,
+    "loss": -0.050692948911871226,
+    "action_counts": {
+      "0": 165,
+      "1": 123,
+      "2": 119
+    }
+  },
+  {
+    "episode": 202,
+    "regime": "VOLATILE",
+    "seed": 413189634,
+    "final_mtm": -700.0442504882812,
+    "avg_reward": -0.01739067626220703,
+    "orders_sent": 33,
+    "fills_rcvd": 24,
+    "risk_rejects": 333,
+    "blocked": 0,
+    "loss": -0.002556021697819233,
+    "action_counts": {
+      "0": 225,
+      "1": 210,
+      "2": 156
+    }
+  },
+  {
+    "episode": 203,
+    "regime": "VOLATILE",
+    "seed": 422849068,
+    "final_mtm": -283.135986328125,
+    "avg_reward": -0.006955999658203125,
+    "orders_sent": 26,
+    "fills_rcvd": 21,
+    "risk_rejects": 298,
+    "blocked": 0,
+    "loss": -0.008320566825568676,
+    "action_counts": {
+      "0": 274,
+      "1": 185,
+      "2": 139
+    }
+  },
+  {
+    "episode": 204,
+    "regime": "VOLATILE",
+    "seed": 311193720,
+    "final_mtm": -72.24884033203125,
+    "avg_reward": -0.001722501008300781,
+    "orders_sent": 6,
+    "fills_rcvd": 6,
+    "risk_rejects": 316,
+    "blocked": 0,
+    "loss": -0.010439975280314684,
+    "action_counts": {
+      "0": 296,
+      "1": 159,
+      "2": 163
+    }
+  },
+  {
+    "episode": 205,
+    "regime": "VOLATILE",
+    "seed": 524651442,
+    "final_mtm": -4.10919189453125,
+    "avg_reward": 0.00013842520263671938,
+    "orders_sent": 16,
+    "fills_rcvd": 16,
+    "risk_rejects": 324,
+    "blocked": 0,
+    "loss": -0.030273856502026318,
+    "action_counts": {
+      "0": 268,
+      "1": 174,
+      "2": 166
+    }
+  },
+  {
+    "episode": 206,
+    "regime": "VOLATILE",
+    "seed": 767088997,
+    "final_mtm": -1562.1246337890625,
+    "avg_reward": -0.039165315844726566,
+    "orders_sent": 239,
+    "fills_rcvd": 119,
+    "risk_rejects": 19,
+    "blocked": 0,
+    "loss": 0.05924521493060248,
+    "action_counts": {
+      "0": 128,
+      "1": 133,
+      "2": 125
+    }
+  },
+  {
+    "episode": 207,
+    "regime": "VOLATILE",
+    "seed": 454234677,
+    "final_mtm": -1688.9144897460938,
+    "avg_reward": -0.04224349224365234,
+    "orders_sent": 182,
+    "fills_rcvd": 89,
+    "risk_rejects": 75,
+    "blocked": 0,
+    "loss": -0.01735998104725565,
+    "action_counts": {
+      "0": 185,
+      "1": 129,
+      "2": 128
+    }
+  },
+  {
+    "episode": 208,
+    "regime": "VOLATILE",
+    "seed": 236372224,
+    "final_mtm": -1501.959228515625,
+    "avg_reward": -0.037595410712890624,
+    "orders_sent": 228,
+    "fills_rcvd": 120,
+    "risk_rejects": 16,
+    "blocked": 0,
+    "loss": -0.04850270599126816,
+    "action_counts": {
+      "0": 153,
+      "1": 115,
+      "2": 129
+    }
+  },
+  {
+    "episode": 209,
+    "regime": "VOLATILE",
+    "seed": 280157999,
+    "final_mtm": -1359.2620849609375,
+    "avg_reward": -0.034027642124023434,
+    "orders_sent": 111,
+    "fills_rcvd": 66,
+    "risk_rejects": 201,
+    "blocked": 0,
+    "loss": 0.07833325086782376,
+    "action_counts": {
+      "0": 201,
+      "1": 144,
+      "2": 168
+    }
+  },
+  {
+    "episode": 210,
+    "regime": "VOLATILE",
+    "seed": 178866107,
+    "final_mtm": -304.77294921875,
+    "avg_reward": -0.007498093730468749,
+    "orders_sent": 33,
+    "fills_rcvd": 24,
+    "risk_rejects": 290,
+    "blocked": 0,
+    "loss": -0.008238078467547894,
+    "action_counts": {
+      "0": 268,
+      "1": 163,
+      "2": 160
+    }
+  },
+  {
+    "episode": 211,
+    "regime": "VOLATILE",
+    "seed": 384959330,
+    "final_mtm": -450.3082275390625,
+    "avg_reward": -0.011038590688476561,
+    "orders_sent": 35,
+    "fills_rcvd": 28,
+    "risk_rejects": 280,
+    "blocked": 0,
+    "loss": -0.03382610809057951,
+    "action_counts": {
+      "0": 274,
+      "1": 173,
+      "2": 142
+    }
+  },
+  {
+    "episode": 212,
+    "regime": "VOLATILE",
+    "seed": 882596045,
+    "final_mtm": 114.84222412109375,
+    "avg_reward": 0.0032110206030273444,
+    "orders_sent": 12,
+    "fills_rcvd": 12,
+    "risk_rejects": 302,
+    "blocked": 0,
+    "loss": -0.02111278921365738,
+    "action_counts": {
+      "0": 298,
+      "1": 156,
+      "2": 158
+    }
+  },
+  {
+    "episode": 213,
+    "regime": "VOLATILE",
+    "seed": 753772221,
+    "final_mtm": -305.8502197265625,
+    "avg_reward": -0.007686410493164063,
+    "orders_sent": 15,
+    "fills_rcvd": 15,
+    "risk_rejects": 326,
+    "blocked": 0,
+    "loss": -0.012527353595942259,
+    "action_counts": {
+      "0": 268,
+      "1": 174,
+      "2": 167
+    }
+  },
+  {
+    "episode": 214,
+    "regime": "VOLATILE",
+    "seed": 564591324,
+    "final_mtm": -123.24676513671875,
+    "avg_reward": -0.002871964128417969,
+    "orders_sent": 12,
+    "fills_rcvd": 12,
+    "risk_rejects": 322,
+    "blocked": 0,
+    "loss": -0.004500522185117007,
+    "action_counts": {
+      "0": 278,
+      "1": 174,
+      "2": 160
+    }
+  },
+  {
+    "episode": 215,
+    "regime": "VOLATILE",
+    "seed": 726839357,
+    "final_mtm": -1367.596435546875,
+    "avg_reward": -0.034346380888671875,
+    "orders_sent": 220,
+    "fills_rcvd": 118,
+    "risk_rejects": 18,
+    "blocked": 0,
+    "loss": -0.004225363954901695,
+    "action_counts": {
+      "0": 167,
+      "1": 119,
+      "2": 119
+    }
+  },
+  {
+    "episode": 216,
+    "regime": "VOLATILE",
+    "seed": 533744611,
+    "final_mtm": -867.8848266601562,
+    "avg_reward": -0.021650010666503905,
+    "orders_sent": 122,
+    "fills_rcvd": 78,
+    "risk_rejects": 158,
+    "blocked": 0,
+    "loss": -0.020789674017578363,
+    "action_counts": {
+      "0": 222,
+      "1": 150,
+      "2": 130
+    }
+  },
+  {
+    "episode": 217,
+    "regime": "VOLATILE",
+    "seed": 222514635,
+    "final_mtm": -107.5714111328125,
+    "avg_reward": -0.0023873652783203115,
+    "orders_sent": 17,
+    "fills_rcvd": 17,
+    "risk_rejects": 322,
+    "blocked": 0,
+    "loss": -0.014396983198821545,
+    "action_counts": {
+      "0": 268,
+      "1": 180,
+      "2": 159
+    }
+  },
+  {
+    "episode": 218,
+    "regime": "VOLATILE",
+    "seed": 856238398,
+    "final_mtm": -747.6089477539062,
+    "avg_reward": -0.018572853693847653,
+    "orders_sent": 71,
+    "fills_rcvd": 44,
+    "risk_rejects": 241,
+    "blocked": 0,
+    "loss": -0.01442411376370324,
+    "action_counts": {
+      "0": 241,
+      "1": 173,
+      "2": 139
+    }
+  },
+  {
+    "episode": 219,
+    "regime": "VOLATILE",
+    "seed": 157147940,
+    "final_mtm": -1269.3267822265625,
+    "avg_reward": -0.031737199555664064,
+    "orders_sent": 212,
+    "fills_rcvd": 99,
+    "risk_rejects": 13,
+    "blocked": 0,
+    "loss": -0.01637561752327851,
+    "action_counts": {
+      "0": 187,
+      "1": 130,
+      "2": 95
+    }
+  },
+  {
+    "episode": 220,
+    "regime": "VOLATILE",
+    "seed": 492212888,
+    "final_mtm": -92.999267578125,
+    "avg_reward": -0.002117616689453125,
+    "orders_sent": 15,
+    "fills_rcvd": 15,
+    "risk_rejects": 295,
+    "blocked": 0,
+    "loss": -0.011318163480609655,
+    "action_counts": {
+      "0": 299,
+      "1": 154,
+      "2": 156
+    }
+  },
+  {
+    "episode": 221,
+    "regime": "VOLATILE",
+    "seed": 586684151,
+    "final_mtm": -1611.6973876953125,
+    "avg_reward": -0.04027482469238281,
+    "orders_sent": 200,
+    "fills_rcvd": 107,
+    "risk_rejects": 33,
+    "blocked": 0,
+    "loss": -0.044933321087488105,
+    "action_counts": {
+      "0": 191,
+      "1": 131,
+      "2": 102
+    }
+  },
+  {
+    "episode": 222,
+    "regime": "VOLATILE",
+    "seed": 112471460,
+    "final_mtm": -1820.7412719726562,
+    "avg_reward": -0.0456441967993164,
+    "orders_sent": 162,
+    "fills_rcvd": 83,
+    "risk_rejects": 121,
+    "blocked": 0,
+    "loss": -0.03249543742276728,
+    "action_counts": {
+      "0": 179,
+      "1": 137,
+      "2": 146
+    }
+  },
+  {
+    "episode": 223,
+    "regime": "VOLATILE",
+    "seed": 523881146,
+    "final_mtm": -1431.5887451171875,
+    "avg_reward": -0.035818838627929686,
+    "orders_sent": 213,
+    "fills_rcvd": 101,
+    "risk_rejects": 16,
+    "blocked": 0,
+    "loss": 0.0022610032132693698,
+    "action_counts": {
+      "0": 182,
+      "1": 114,
+      "2": 115
+    }
+  },
+  {
+    "episode": 224,
+    "regime": "VOLATILE",
+    "seed": 435840192,
+    "final_mtm": -313.63372802734375,
+    "avg_reward": -0.007979563200683593,
+    "orders_sent": 8,
+    "fills_rcvd": 8,
+    "risk_rejects": 328,
+    "blocked": 0,
+    "loss": -0.01531621590256691,
+    "action_counts": {
+      "0": 280,
+      "1": 178,
+      "2": 158
+    }
+  },
+  {
+    "episode": 225,
+    "regime": "VOLATILE",
+    "seed": 454450285,
+    "final_mtm": -257.70416259765625,
+    "avg_reward": -0.0061214890649414055,
+    "orders_sent": 29,
+    "fills_rcvd": 26,
+    "risk_rejects": 302,
+    "blocked": 0,
+    "loss": -0.017061430029571056,
+    "action_counts": {
+      "0": 264,
+      "1": 180,
+      "2": 151
+    }
+  },
+  {
+    "episode": 226,
+    "regime": "VOLATILE",
+    "seed": 531939059,
+    "final_mtm": -202.5299072265625,
+    "avg_reward": -0.004643667680664062,
+    "orders_sent": 19,
+    "fills_rcvd": 17,
+    "risk_rejects": 329,
+    "blocked": 0,
+    "loss": 0.004772708006203175,
+    "action_counts": {
+      "0": 257,
+      "1": 187,
+      "2": 161
+    }
+  },
+  {
+    "episode": 227,
+    "regime": "VOLATILE",
+    "seed": 953249540,
+    "final_mtm": -1479.6295166015625,
+    "avg_reward": -0.03715788791503906,
+    "orders_sent": 234,
+    "fills_rcvd": 122,
+    "risk_rejects": 16,
+    "blocked": 0,
+    "loss": -0.03314183599182537,
+    "action_counts": {
+      "0": 142,
+      "1": 118,
+      "2": 132
+    }
+  },
+  {
+    "episode": 228,
+    "regime": "VOLATILE",
+    "seed": 535197828,
+    "final_mtm": 54.40673828125,
+    "avg_reward": 0.0016935984570312507,
+    "orders_sent": 21,
+    "fills_rcvd": 19,
+    "risk_rejects": 325,
+    "blocked": 0,
+    "loss": -0.007878785999491811,
+    "action_counts": {
+      "0": 257,
+      "1": 166,
+      "2": 180
+    }
+  },
+  {
+    "episode": 229,
+    "regime": "VOLATILE",
+    "seed": 681896630,
+    "final_mtm": -116.82586669921875,
+    "avg_reward": -0.0027242416674804685,
+    "orders_sent": 69,
+    "fills_rcvd": 37,
+    "risk_rejects": 241,
+    "blocked": 0,
+    "loss": -0.018216234528356127,
+    "action_counts": {
+      "0": 245,
+      "1": 155,
+      "2": 155
+    }
+  },
+  {
+    "episode": 230,
+    "regime": "VOLATILE",
+    "seed": 216887515,
+    "final_mtm": -971.148681640625,
+    "avg_reward": -0.024343377041015624,
+    "orders_sent": 117,
+    "fills_rcvd": 60,
+    "risk_rejects": 185,
+    "blocked": 0,
+    "loss": -0.013750271406024694,
+    "action_counts": {
+      "0": 205,
+      "1": 154,
+      "2": 148
+    }
+  },
+  {
+    "episode": 231,
+    "regime": "VOLATILE",
+    "seed": 999991155,
+    "final_mtm": -100.8026123046875,
+    "avg_reward": -0.002033530307617187,
+    "orders_sent": 19,
+    "fills_rcvd": 18,
+    "risk_rejects": 306,
+    "blocked": 0,
+    "loss": -0.012738344632089138,
+    "action_counts": {
+      "0": 280,
+      "1": 174,
+      "2": 151
+    }
+  },
+  {
+    "episode": 232,
+    "regime": "VOLATILE",
+    "seed": 365309776,
+    "final_mtm": -447.1466064453125,
+    "avg_reward": -0.01104798016113281,
+    "orders_sent": 50,
+    "fills_rcvd": 32,
+    "risk_rejects": 282,
+    "blocked": 0,
+    "loss": -0.017797607307632763,
+    "action_counts": {
+      "0": 242,
+      "1": 164,
+      "2": 168
+    }
+  },
+  {
+    "episode": 233,
+    "regime": "VOLATILE",
+    "seed": 802127894,
+    "final_mtm": -219.98748779296875,
+    "avg_reward": -0.005202192194824218,
+    "orders_sent": 64,
+    "fills_rcvd": 36,
+    "risk_rejects": 247,
+    "blocked": 0,
+    "loss": -0.0219717671473821,
+    "action_counts": {
+      "0": 249,
+      "1": 159,
+      "2": 152
+    }
+  },
+  {
+    "episode": 234,
+    "regime": "VOLATILE",
+    "seed": 878448923,
+    "final_mtm": -128.0975341796875,
+    "avg_reward": -0.0031527133544921875,
+    "orders_sent": 5,
+    "fills_rcvd": 5,
+    "risk_rejects": 342,
+    "blocked": 0,
+    "loss": -0.014593378873541951,
+    "action_counts": {
+      "0": 272,
+      "1": 176,
+      "2": 171
+    }
+  },
+  {
+    "episode": 235,
+    "regime": "VOLATILE",
+    "seed": 563830760,
+    "final_mtm": -210.00518798828125,
+    "avg_reward": -0.00505730469970703,
+    "orders_sent": 31,
+    "fills_rcvd": 26,
+    "risk_rejects": 325,
+    "blocked": 0,
+    "loss": 0.00788228022865951,
+    "action_counts": {
+      "0": 237,
+      "1": 187,
+      "2": 169
+    }
+  },
+  {
+    "episode": 236,
+    "regime": "VOLATILE",
+    "seed": 275825854,
+    "final_mtm": -590.8645629882812,
+    "avg_reward": -0.01466357907470703,
+    "orders_sent": 107,
+    "fills_rcvd": 60,
+    "risk_rejects": 238,
+    "blocked": 0,
+    "loss": -0.010843091747827,
+    "action_counts": {
+      "0": 172,
+      "1": 177,
+      "2": 168
+    }
+  },
+  {
+    "episode": 237,
+    "regime": "VOLATILE",
+    "seed": 167403104,
+    "final_mtm": -464.76593017578125,
+    "avg_reward": -0.01129817825439453,
+    "orders_sent": 34,
+    "fills_rcvd": 23,
+    "risk_rejects": 314,
+    "blocked": 0,
+    "loss": -0.003966868855059147,
+    "action_counts": {
+      "0": 242,
+      "1": 180,
+      "2": 168
+    }
+  },
+  {
+    "episode": 238,
+    "regime": "VOLATILE",
+    "seed": 625936843,
+    "final_mtm": -327.9998779296875,
+    "avg_reward": -0.007972066948242186,
+    "orders_sent": 19,
+    "fills_rcvd": 17,
+    "risk_rejects": 341,
+    "blocked": 0,
+    "loss": -0.034515987150371075,
+    "action_counts": {
+      "0": 245,
+      "1": 172,
+      "2": 188
+    }
+  },
+  {
+    "episode": 239,
+    "regime": "VOLATILE",
+    "seed": 758463451,
+    "final_mtm": -197.2564697265625,
+    "avg_reward": -0.004840671743164062,
+    "orders_sent": 6,
+    "fills_rcvd": 6,
+    "risk_rejects": 319,
+    "blocked": 0,
+    "loss": -0.0034423805307596924,
+    "action_counts": {
+      "0": 293,
+      "1": 168,
+      "2": 157
+    }
+  },
+  {
+    "episode": 240,
+    "regime": "VOLATILE",
+    "seed": 71253575,
+    "final_mtm": -318.22662353515625,
+    "avg_reward": -0.007735835588378906,
+    "orders_sent": 17,
+    "fills_rcvd": 17,
+    "risk_rejects": 356,
+    "blocked": 0,
+    "loss": -0.012631863821297884,
+    "action_counts": {
+      "0": 234,
+      "1": 197,
+      "2": 176
+    }
+  },
+  {
+    "episode": 241,
+    "regime": "VOLATILE",
+    "seed": 554618503,
+    "final_mtm": -1060.09521484375,
+    "avg_reward": -0.026664535371093753,
+    "orders_sent": 101,
+    "fills_rcvd": 55,
+    "risk_rejects": 236,
+    "blocked": 0,
+    "loss": -0.015117696589893766,
+    "action_counts": {
+      "0": 186,
+      "1": 180,
+      "2": 157
+    }
+  },
+  {
+    "episode": 242,
+    "regime": "VOLATILE",
+    "seed": 42323429,
+    "final_mtm": -747.3403930664062,
+    "avg_reward": -0.018791514826660156,
+    "orders_sent": 53,
+    "fills_rcvd": 38,
+    "risk_rejects": 313,
+    "blocked": 0,
+    "loss": -0.020867459889915254,
+    "action_counts": {
+      "0": 205,
+      "1": 196,
+      "2": 170
+    }
+  },
+  {
+    "episode": 243,
+    "regime": "VOLATILE",
+    "seed": 140118024,
+    "final_mtm": -215.33660888671875,
+    "avg_reward": -0.005049170222167968,
+    "orders_sent": 14,
+    "fills_rcvd": 14,
+    "risk_rejects": 343,
+    "blocked": 0,
+    "loss": -0.02215761076658964,
+    "action_counts": {
+      "0": 253,
+      "1": 181,
+      "2": 176
+    }
+  },
+  {
+    "episode": 244,
+    "regime": "VOLATILE",
+    "seed": 16413288,
+    "final_mtm": -84.44366455078125,
+    "avg_reward": -0.0018567766137695312,
+    "orders_sent": 11,
+    "fills_rcvd": 11,
+    "risk_rejects": 326,
+    "blocked": 0,
+    "loss": -0.019448627531528474,
+    "action_counts": {
+      "0": 276,
+      "1": 178,
+      "2": 159
+    }
+  },
+  {
+    "episode": 245,
+    "regime": "VOLATILE",
+    "seed": 481669872,
+    "final_mtm": -1384.5306396484375,
+    "avg_reward": -0.034575380991210936,
+    "orders_sent": 212,
+    "fills_rcvd": 110,
+    "risk_rejects": 9,
+    "blocked": 0,
+    "loss": -0.012201854160853795,
+    "action_counts": {
+      "0": 192,
+      "1": 102,
+      "2": 119
+    }
+  },
+  {
+    "episode": 246,
+    "regime": "VOLATILE",
+    "seed": 172540638,
+    "final_mtm": -2167.1279907226562,
+    "avg_reward": -0.05435116976806641,
+    "orders_sent": 199,
+    "fills_rcvd": 103,
+    "risk_rejects": 74,
+    "blocked": 0,
+    "loss": -0.01754804906834449,
+    "action_counts": {
+      "0": 152,
+      "1": 132,
+      "2": 141
+    }
+  },
+  {
+    "episode": 247,
+    "regime": "VOLATILE",
+    "seed": 932755703,
+    "final_mtm": -108.0230712890625,
+    "avg_reward": -0.0022881767822265624,
+    "orders_sent": 13,
+    "fills_rcvd": 13,
+    "risk_rejects": 352,
+    "blocked": 0,
+    "loss": -0.008871447248384356,
+    "action_counts": {
+      "0": 246,
+      "1": 192,
+      "2": 173
+    }
+  },
+  {
+    "episode": 248,
+    "regime": "VOLATILE",
+    "seed": 398704816,
+    "final_mtm": -1572.5906372070312,
+    "avg_reward": -0.03943923593017579,
+    "orders_sent": 254,
+    "fills_rcvd": 124,
+    "risk_rejects": 18,
+    "blocked": 0,
+    "loss": -0.02126934876044591,
+    "action_counts": {
+      "0": 99,
+      "1": 151,
+      "2": 121
+    }
+  },
+  {
+    "episode": 249,
+    "regime": "VOLATILE",
+    "seed": 967539535,
+    "final_mtm": -269.70672607421875,
+    "avg_reward": -0.006712983151855468,
+    "orders_sent": 6,
+    "fills_rcvd": 6,
+    "risk_rejects": 371,
+    "blocked": 0,
+    "loss": -0.011751648969948292,
+    "action_counts": {
+      "0": 241,
+      "1": 196,
+      "2": 181
+    }
+  },
+  {
+    "episode": 250,
+    "regime": "VOLATILE",
+    "seed": 36098064,
+    "final_mtm": -1450.0534057617188,
+    "avg_reward": -0.03633441014404297,
+    "orders_sent": 207,
+    "fills_rcvd": 89,
+    "risk_rejects": 64,
+    "blocked": 0,
+    "loss": -0.005928848737052509,
+    "action_counts": {
+      "0": 146,
+      "1": 152,
+      "2": 119
+    }
+  },
+  {
+    "episode": 251,
+    "regime": "VOLATILE",
+    "seed": 728611445,
+    "final_mtm": -1558.4335327148438,
+    "avg_reward": -0.03904471831787109,
+    "orders_sent": 209,
+    "fills_rcvd": 109,
+    "risk_rejects": 69,
+    "blocked": 0,
+    "loss": -0.003668735602072307,
+    "action_counts": {
+      "0": 137,
+      "1": 136,
+      "2": 142
+    }
+  },
+  {
+    "episode": 252,
+    "regime": "VOLATILE",
+    "seed": 556197497,
+    "final_mtm": -294.54498291015625,
+    "avg_reward": -0.007171564572753904,
+    "orders_sent": 27,
+    "fills_rcvd": 22,
+    "risk_rejects": 332,
+    "blocked": 0,
+    "loss": -0.006379099935293198,
+    "action_counts": {
+      "0": 238,
+      "1": 189,
+      "2": 170
+    }
+  },
+  {
+    "episode": 253,
+    "regime": "VOLATILE",
+    "seed": 81989888,
+    "final_mtm": -385.546875,
+    "avg_reward": -0.009461136875,
+    "orders_sent": 24,
+    "fills_rcvd": 18,
+    "risk_rejects": 358,
+    "blocked": 0,
+    "loss": 0.011671493574976922,
+    "action_counts": {
+      "0": 218,
+      "1": 182,
+      "2": 200
+    }
+  },
+  {
+    "episode": 254,
+    "regime": "VOLATILE",
+    "seed": 972575646,
+    "final_mtm": -130.6182861328125,
+    "avg_reward": -0.003376167153320313,
+    "orders_sent": 3,
+    "fills_rcvd": 3,
+    "risk_rejects": 361,
+    "blocked": 0,
+    "loss": -0.013159902766346931,
+    "action_counts": {
+      "0": 257,
+      "1": 165,
+      "2": 199
+    }
+  },
+  {
+    "episode": 255,
+    "regime": "VOLATILE",
+    "seed": 311025502,
+    "final_mtm": -702.838134765625,
+    "avg_reward": -0.017482578369140626,
+    "orders_sent": 46,
+    "fills_rcvd": 38,
+    "risk_rejects": 304,
+    "blocked": 0,
+    "loss": -0.04410373717546463,
+    "action_counts": {
+      "0": 228,
+      "1": 174,
+      "2": 176
+    }
+  },
+  {
+    "episode": 256,
+    "regime": "VOLATILE",
+    "seed": 642758169,
+    "final_mtm": -730.7662963867188,
+    "avg_reward": -0.018251867409667968,
+    "orders_sent": 74,
+    "fills_rcvd": 40,
+    "risk_rejects": 316,
+    "blocked": 0,
+    "loss": -0.02484753800349103,
+    "action_counts": {
+      "0": 160,
+      "1": 213,
+      "2": 177
+    }
+  },
+  {
+    "episode": 257,
+    "regime": "VOLATILE",
+    "seed": 517773866,
+    "final_mtm": -362.9119873046875,
+    "avg_reward": -0.008917404682617187,
+    "orders_sent": 38,
+    "fills_rcvd": 28,
+    "risk_rejects": 327,
+    "blocked": 0,
+    "loss": -0.06405866425484419,
+    "action_counts": {
+      "0": 221,
+      "1": 174,
+      "2": 191
+    }
+  },
+  {
+    "episode": 258,
+    "regime": "VOLATILE",
+    "seed": 417223669,
+    "final_mtm": -340.10009765625,
+    "avg_reward": -0.008282632441406248,
+    "orders_sent": 55,
+    "fills_rcvd": 35,
+    "risk_rejects": 297,
+    "blocked": 0,
+    "loss": -0.021400326086829107,
+    "action_counts": {
+      "0": 217,
+      "1": 167,
+      "2": 185
+    }
+  },
+  {
+    "episode": 259,
+    "regime": "VOLATILE",
+    "seed": 250796052,
+    "final_mtm": -1511.846923828125,
+    "avg_reward": -0.03795510809570313,
+    "orders_sent": 218,
+    "fills_rcvd": 111,
+    "risk_rejects": 28,
+    "blocked": 0,
+    "loss": -0.045095855104071755,
+    "action_counts": {
+      "0": 162,
+      "1": 103,
+      "2": 143
+    }
+  },
+  {
+    "episode": 260,
+    "regime": "VOLATILE",
+    "seed": 856910832,
+    "final_mtm": -255.43365478515625,
+    "avg_reward": -0.006393776369628905,
+    "orders_sent": 16,
+    "fills_rcvd": 16,
+    "risk_rejects": 293,
+    "blocked": 0,
+    "loss": -0.027628291258588435,
+    "action_counts": {
+      "0": 299,
+      "1": 130,
+      "2": 179
+    }
+  },
+  {
+    "episode": 261,
+    "regime": "VOLATILE",
+    "seed": 950536373,
+    "final_mtm": -1786.1526489257812,
+    "avg_reward": -0.04475474622314453,
+    "orders_sent": 221,
+    "fills_rcvd": 99,
+    "risk_rejects": 37,
+    "blocked": 0,
+    "loss": -0.027607536209481105,
+    "action_counts": {
+      "0": 145,
+      "1": 109,
+      "2": 149
+    }
+  },
+  {
+    "episode": 262,
+    "regime": "VOLATILE",
+    "seed": 195388642,
+    "final_mtm": -171.4508056640625,
+    "avg_reward": -0.004224500141601563,
+    "orders_sent": 9,
+    "fills_rcvd": 9,
+    "risk_rejects": 340,
+    "blocked": 0,
+    "loss": -0.0013515447266399861,
+    "action_counts": {
+      "0": 266,
+      "1": 163,
+      "2": 186
+    }
+  },
+  {
+    "episode": 263,
+    "regime": "VOLATILE",
+    "seed": 612320138,
+    "final_mtm": -1212.4542236328125,
+    "avg_reward": -0.030255645590820314,
+    "orders_sent": 148,
+    "fills_rcvd": 70,
+    "risk_rejects": 123,
+    "blocked": 0,
+    "loss": -0.013650669250637293,
+    "action_counts": {
+      "0": 205,
+      "1": 120,
+      "2": 151
+    }
+  },
+  {
+    "episode": 264,
+    "regime": "VOLATILE",
+    "seed": 70460844,
+    "final_mtm": -284.130859375,
+    "avg_reward": -0.006891471484375001,
+    "orders_sent": 15,
+    "fills_rcvd": 15,
+    "risk_rejects": 316,
+    "blocked": 0,
+    "loss": -0.022798263793811203,
+    "action_counts": {
+      "0": 278,
+      "1": 159,
+      "2": 172
+    }
+  },
+  {
+    "episode": 265,
+    "regime": "VOLATILE",
+    "seed": 281329440,
+    "final_mtm": -460.53924560546875,
+    "avg_reward": -0.011592486140136717,
+    "orders_sent": 81,
+    "fills_rcvd": 48,
+    "risk_rejects": 225,
+    "blocked": 0,
+    "loss": -0.01839434624546104,
+    "action_counts": {
+      "0": 237,
+      "1": 152,
+      "2": 154
+    }
+  },
+  {
+    "episode": 266,
+    "regime": "VOLATILE",
+    "seed": 325135257,
+    "final_mtm": -171.50115966796875,
+    "avg_reward": -0.004376813991699219,
+    "orders_sent": 3,
+    "fills_rcvd": 3,
+    "risk_rejects": 318,
+    "blocked": 0,
+    "loss": -0.01606551893055439,
+    "action_counts": {
+      "0": 300,
+      "1": 159,
+      "2": 162
+    }
+  },
+  {
+    "episode": 267,
+    "regime": "VOLATILE",
+    "seed": 412489364,
+    "final_mtm": -104.16259765625,
+    "avg_reward": -0.0026965499414062497,
+    "orders_sent": 3,
+    "fills_rcvd": 3,
+    "risk_rejects": 341,
+    "blocked": 0,
+    "loss": -0.01781727056950331,
+    "action_counts": {
+      "0": 277,
+      "1": 180,
+      "2": 164
+    }
+  },
+  {
+    "episode": 268,
+    "regime": "VOLATILE",
+    "seed": 66850838,
+    "final_mtm": -14.69573974609375,
+    "avg_reward": -0.00037326349365234375,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 356,
+    "blocked": 0,
+    "loss": -0.007078573806211352,
+    "action_counts": {
+      "0": 264,
+      "1": 168,
+      "2": 190
+    }
+  },
+  {
+    "episode": 269,
+    "regime": "VOLATILE",
+    "seed": 136710684,
+    "final_mtm": -1234.27734375,
+    "avg_reward": -0.03084996859375,
+    "orders_sent": 51,
+    "fills_rcvd": 33,
+    "risk_rejects": 308,
+    "blocked": 0,
+    "loss": -0.01555378357362416,
+    "action_counts": {
+      "0": 214,
+      "1": 184,
+      "2": 175
+    }
+  },
+  {
+    "episode": 270,
+    "regime": "VOLATILE",
+    "seed": 783242681,
+    "final_mtm": -2282.33642578125,
+    "avg_reward": -0.057286390644531254,
+    "orders_sent": 178,
+    "fills_rcvd": 88,
+    "risk_rejects": 104,
+    "blocked": 0,
+    "loss": -0.020264099219015667,
+    "action_counts": {
+      "0": 164,
+      "1": 138,
+      "2": 144
+    }
+  },
+  {
+    "episode": 271,
+    "regime": "VOLATILE",
+    "seed": 59622705,
+    "final_mtm": -1064.9749755859375,
+    "avg_reward": -0.026702299389648437,
+    "orders_sent": 121,
+    "fills_rcvd": 67,
+    "risk_rejects": 193,
+    "blocked": 0,
+    "loss": -0.017818870954215527,
+    "action_counts": {
+      "0": 189,
+      "1": 153,
+      "2": 161
+    }
+  },
+  {
+    "episode": 272,
+    "regime": "VOLATILE",
+    "seed": 516825598,
+    "final_mtm": 28.23638916015625,
+    "avg_reward": 0.0006889197290039063,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 321,
+    "blocked": 0,
+    "loss": -0.01928945379331708,
+    "action_counts": {
+      "0": 299,
+      "1": 155,
+      "2": 168
+    }
+  },
+  {
+    "episode": 273,
+    "regime": "VOLATILE",
+    "seed": 528100469,
+    "final_mtm": -1615.0177001953125,
+    "avg_reward": -0.04041347750488281,
+    "orders_sent": 133,
+    "fills_rcvd": 79,
+    "risk_rejects": 174,
+    "blocked": 0,
+    "loss": -0.010626683942973614,
+    "action_counts": {
+      "0": 184,
+      "1": 146,
+      "2": 161
+    }
+  },
+  {
+    "episode": 274,
+    "regime": "VOLATILE",
+    "seed": 646357827,
+    "final_mtm": -685.5514526367188,
+    "avg_reward": -0.01722937631591797,
+    "orders_sent": 40,
+    "fills_rcvd": 26,
+    "risk_rejects": 311,
+    "blocked": 0,
+    "loss": -0.06628964766860009,
+    "action_counts": {
+      "0": 233,
+      "1": 181,
+      "2": 170
+    }
+  },
+  {
+    "episode": 275,
+    "regime": "VOLATILE",
+    "seed": 723213158,
+    "final_mtm": -952.6138305664062,
+    "avg_reward": -0.023795305764160155,
+    "orders_sent": 102,
+    "fills_rcvd": 52,
+    "risk_rejects": 218,
+    "blocked": 0,
+    "loss": -0.05107874754402372,
+    "action_counts": {
+      "0": 202,
+      "1": 148,
+      "2": 172
+    }
+  },
+  {
+    "episode": 276,
+    "regime": "VOLATILE",
+    "seed": 870041647,
+    "final_mtm": -1072.6028442382812,
+    "avg_reward": -0.02686067610595703,
+    "orders_sent": 207,
+    "fills_rcvd": 109,
+    "risk_rejects": 10,
+    "blocked": 0,
+    "loss": -0.02572031265922955,
+    "action_counts": {
+      "0": 200,
+      "1": 96,
+      "2": 121
+    }
+  },
+  {
+    "episode": 277,
+    "regime": "VOLATILE",
+    "seed": 441459425,
+    "final_mtm": -1539.5797729492188,
+    "avg_reward": -0.038595934323730464,
+    "orders_sent": 95,
+    "fills_rcvd": 55,
+    "risk_rejects": 193,
+    "blocked": 0,
+    "loss": -0.035849696646134056,
+    "action_counts": {
+      "0": 241,
+      "1": 141,
+      "2": 147
+    }
+  },
+  {
+    "episode": 278,
+    "regime": "VOLATILE",
+    "seed": 500664216,
+    "final_mtm": -1469.1619873046875,
+    "avg_reward": -0.03677294468261719,
+    "orders_sent": 99,
+    "fills_rcvd": 61,
+    "risk_rejects": 184,
+    "blocked": 0,
+    "loss": -0.03857864889626702,
+    "action_counts": {
+      "0": 242,
+      "1": 163,
+      "2": 120
+    }
+  },
+  {
+    "episode": 279,
+    "regime": "VOLATILE",
+    "seed": 50502209,
+    "final_mtm": -819.8272705078125,
+    "avg_reward": -0.020340726762695313,
+    "orders_sent": 118,
+    "fills_rcvd": 64,
+    "risk_rejects": 137,
+    "blocked": 0,
+    "loss": -0.021395572170149535,
+    "action_counts": {
+      "0": 251,
+      "1": 130,
+      "2": 125
+    }
+  },
+  {
+    "episode": 280,
+    "regime": "VOLATILE",
+    "seed": 835531433,
+    "final_mtm": -1548.5931396484375,
+    "avg_reward": -0.03881298349121094,
+    "orders_sent": 225,
+    "fills_rcvd": 106,
+    "risk_rejects": 11,
+    "blocked": 0,
+    "loss": -0.08266530505248479,
+    "action_counts": {
+      "0": 164,
+      "1": 113,
+      "2": 123
+    }
+  },
+  {
+    "episode": 281,
+    "regime": "VOLATILE",
+    "seed": 34860526,
+    "final_mtm": -429.425048828125,
+    "avg_reward": -0.010615771220703125,
+    "orders_sent": 39,
+    "fills_rcvd": 25,
+    "risk_rejects": 290,
+    "blocked": 0,
+    "loss": -0.050656530633568765,
+    "action_counts": {
+      "0": 256,
+      "1": 165,
+      "2": 164
+    }
+  },
+  {
+    "episode": 282,
+    "regime": "VOLATILE",
+    "seed": 142488637,
+    "final_mtm": -496.099853515625,
+    "avg_reward": -0.012506126337890625,
+    "orders_sent": 15,
+    "fills_rcvd": 15,
+    "risk_rejects": 315,
+    "blocked": 0,
+    "loss": -0.029342095926404,
+    "action_counts": {
+      "0": 279,
+      "1": 163,
+      "2": 167
+    }
+  },
+  {
+    "episode": 283,
+    "regime": "VOLATILE",
+    "seed": 113058311,
+    "final_mtm": -60.63232421875,
+    "avg_reward": -0.00153665310546875,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 311,
+    "blocked": 0,
+    "loss": -0.01958903493359685,
+    "action_counts": {
+      "0": 309,
+      "1": 155,
+      "2": 158
+    }
+  },
+  {
+    "episode": 284,
+    "regime": "VOLATILE",
+    "seed": 696851134,
+    "final_mtm": -453.10516357421875,
+    "avg_reward": -0.011207334089355467,
+    "orders_sent": 48,
+    "fills_rcvd": 32,
+    "risk_rejects": 284,
+    "blocked": 0,
+    "loss": -0.018864354480885796,
+    "action_counts": {
+      "0": 244,
+      "1": 163,
+      "2": 169
+    }
+  },
+  {
+    "episode": 285,
+    "regime": "VOLATILE",
+    "seed": 411688727,
+    "final_mtm": -13.62457275390625,
+    "avg_reward": -0.0003531743188476561,
+    "orders_sent": 4,
+    "fills_rcvd": 4,
+    "risk_rejects": 340,
+    "blocked": 0,
+    "loss": -0.013517734035849572,
+    "action_counts": {
+      "0": 276,
+      "1": 144,
+      "2": 200
+    }
+  },
+  {
+    "episode": 286,
+    "regime": "VOLATILE",
+    "seed": 834793382,
+    "final_mtm": -952.67333984375,
+    "avg_reward": -0.02372015349609375,
+    "orders_sent": 121,
+    "fills_rcvd": 58,
+    "risk_rejects": 167,
+    "blocked": 0,
+    "loss": -0.02179740136489272,
+    "action_counts": {
+      "0": 215,
+      "1": 114,
+      "2": 174
+    }
+  },
+  {
+    "episode": 287,
+    "regime": "VOLATILE",
+    "seed": 946264565,
+    "final_mtm": -1109.3002319335938,
+    "avg_reward": -0.027537975798339845,
+    "orders_sent": 221,
+    "fills_rcvd": 103,
+    "risk_rejects": 8,
+    "blocked": 0,
+    "loss": -0.04258946542228971,
+    "action_counts": {
+      "0": 174,
+      "1": 93,
+      "2": 136
+    }
+  },
+  {
+    "episode": 288,
+    "regime": "VOLATILE",
+    "seed": 752497980,
+    "final_mtm": -297.95989990234375,
+    "avg_reward": -0.007082422497558594,
+    "orders_sent": 27,
+    "fills_rcvd": 24,
+    "risk_rejects": 320,
+    "blocked": 0,
+    "loss": -0.04261927343904972,
+    "action_counts": {
+      "0": 250,
+      "1": 125,
+      "2": 222
+    }
+  },
+  {
+    "episode": 289,
+    "regime": "VOLATILE",
+    "seed": 678941521,
+    "final_mtm": -1535.5300903320312,
+    "avg_reward": -0.03851734225830079,
+    "orders_sent": 224,
+    "fills_rcvd": 110,
+    "risk_rejects": 25,
+    "blocked": 0,
+    "loss": -0.03840646254164832,
+    "action_counts": {
+      "0": 151,
+      "1": 96,
+      "2": 153
+    }
+  },
+  {
+    "episode": 290,
+    "regime": "VOLATILE",
+    "seed": 698440189,
+    "final_mtm": -1210.8291625976562,
+    "avg_reward": -0.030174404064941405,
+    "orders_sent": 231,
+    "fills_rcvd": 111,
+    "risk_rejects": 9,
+    "blocked": 0,
+    "loss": 0.01345572793590171,
+    "action_counts": {
+      "0": 155,
+      "1": 95,
+      "2": 145
+    }
+  },
+  {
+    "episode": 291,
+    "regime": "VOLATILE",
+    "seed": 732861596,
+    "final_mtm": -191.2017822265625,
+    "avg_reward": -0.004727934555664062,
+    "orders_sent": 10,
+    "fills_rcvd": 10,
+    "risk_rejects": 369,
+    "blocked": 0,
+    "loss": -0.013481565238907933,
+    "action_counts": {
+      "0": 235,
+      "1": 156,
+      "2": 223
+    }
+  },
+  {
+    "episode": 292,
+    "regime": "VOLATILE",
+    "seed": 318243463,
+    "final_mtm": -1182.2525024414062,
+    "avg_reward": -0.029585077561035154,
+    "orders_sent": 233,
+    "fills_rcvd": 112,
+    "risk_rejects": 12,
+    "blocked": 0,
+    "loss": 0.006857008407158511,
+    "action_counts": {
+      "0": 146,
+      "1": 86,
+      "2": 159
+    }
+  },
+  {
+    "episode": 293,
+    "regime": "VOLATILE",
+    "seed": 136483383,
+    "final_mtm": 137.11090087890625,
+    "avg_reward": 0.003608932521972656,
+    "orders_sent": 6,
+    "fills_rcvd": 6,
+    "risk_rejects": 345,
+    "blocked": 0,
+    "loss": -0.016881216689944266,
+    "action_counts": {
+      "0": 267,
+      "1": 146,
+      "2": 205
+    }
+  },
+  {
+    "episode": 294,
+    "regime": "VOLATILE",
+    "seed": 416232390,
+    "final_mtm": -282.5592041015625,
+    "avg_reward": -0.0067401851025390615,
+    "orders_sent": 25,
+    "fills_rcvd": 22,
+    "risk_rejects": 344,
+    "blocked": 0,
+    "loss": -0.027866119518876076,
+    "action_counts": {
+      "0": 230,
+      "1": 152,
+      "2": 217
+    }
+  },
+  {
+    "episode": 295,
+    "regime": "VOLATILE",
+    "seed": 984501358,
+    "final_mtm": -1152.6718139648438,
+    "avg_reward": -0.02864327034912109,
+    "orders_sent": 239,
+    "fills_rcvd": 99,
+    "risk_rejects": 4,
+    "blocked": 0,
+    "loss": 0.06317712366580963,
+    "action_counts": {
+      "0": 143,
+      "1": 106,
+      "2": 137
+    }
+  },
+  {
+    "episode": 296,
+    "regime": "VOLATILE",
+    "seed": 731226098,
+    "final_mtm": -183.8775634765625,
+    "avg_reward": -0.004680494086914062,
+    "orders_sent": 4,
+    "fills_rcvd": 4,
+    "risk_rejects": 364,
+    "blocked": 0,
+    "loss": -0.022422097297385334,
+    "action_counts": {
+      "0": 252,
+      "1": 139,
+      "2": 229
+    }
+  },
+  {
+    "episode": 297,
+    "regime": "VOLATILE",
+    "seed": 130516898,
+    "final_mtm": -34.80224609375,
+    "avg_reward": -0.0008346711523437501,
+    "orders_sent": 5,
+    "fills_rcvd": 5,
+    "risk_rejects": 386,
+    "blocked": 0,
+    "loss": -0.011891780607402324,
+    "action_counts": {
+      "0": 228,
+      "1": 145,
+      "2": 246
+    }
+  },
+  {
+    "episode": 298,
+    "regime": "VOLATILE",
+    "seed": 843413548,
+    "final_mtm": -212.66326904296875,
+    "avg_reward": -0.005115476726074218,
+    "orders_sent": 12,
+    "fills_rcvd": 12,
+    "risk_rejects": 363,
+    "blocked": 0,
+    "loss": -0.02062880024313927,
+    "action_counts": {
+      "0": 237,
+      "1": 154,
+      "2": 221
+    }
+  },
+  {
+    "episode": 299,
+    "regime": "VOLATILE",
+    "seed": 41001197,
+    "final_mtm": -221.29669189453125,
+    "avg_reward": -0.005462332297363281,
+    "orders_sent": 9,
+    "fills_rcvd": 9,
+    "risk_rejects": 371,
+    "blocked": 0,
+    "loss": -0.011117206700146199,
+    "action_counts": {
+      "0": 235,
+      "1": 160,
+      "2": 220
+    }
+  },
+  {
+    "episode": 300,
+    "regime": "VOLATILE",
+    "seed": 477364717,
+    "final_mtm": -1459.4879150390625,
+    "avg_reward": -0.036510842875976564,
+    "orders_sent": 229,
+    "fills_rcvd": 100,
+    "risk_rejects": 8,
+    "blocked": 0,
+    "loss": 0.036475581250020435,
+    "action_counts": {
+      "0": 159,
+      "1": 101,
+      "2": 136
+    }
+  },
+  {
+    "episode": 301,
+    "regime": "VOLATILE",
+    "seed": 204524720,
+    "final_mtm": -2074.4949340820312,
+    "avg_reward": -0.052066058352050776,
+    "orders_sent": 175,
+    "fills_rcvd": 87,
+    "risk_rejects": 101,
+    "blocked": 0,
+    "loss": -0.08175260154530406,
+    "action_counts": {
+      "0": 173,
+      "1": 143,
+      "2": 133
+    }
+  },
+  {
+    "episode": 302,
+    "regime": "VOLATILE",
+    "seed": 847783227,
+    "final_mtm": -78.594970703125,
+    "avg_reward": -0.0016986392675781253,
+    "orders_sent": 9,
+    "fills_rcvd": 9,
+    "risk_rejects": 340,
+    "blocked": 0,
+    "loss": -0.02302873102016747,
+    "action_counts": {
+      "0": 266,
+      "1": 187,
+      "2": 162
+    }
+  },
+  {
+    "episode": 303,
+    "regime": "VOLATILE",
+    "seed": 47933804,
+    "final_mtm": -105.792236328125,
+    "avg_reward": -0.002276360908203125,
+    "orders_sent": 15,
+    "fills_rcvd": 15,
+    "risk_rejects": 354,
+    "blocked": 0,
+    "loss": -0.009059264650568366,
+    "action_counts": {
+      "0": 240,
+      "1": 191,
+      "2": 178
+    }
+  },
+  {
+    "episode": 304,
+    "regime": "VOLATILE",
+    "seed": 42929923,
+    "final_mtm": -7.72247314453125,
+    "avg_reward": -2.4211828613281135e-05,
+    "orders_sent": 6,
+    "fills_rcvd": 6,
+    "risk_rejects": 339,
+    "blocked": 0,
+    "loss": -0.01210673600435257,
+    "action_counts": {
+      "0": 273,
+      "1": 180,
+      "2": 165
+    }
+  },
+  {
+    "episode": 305,
+    "regime": "VOLATILE",
+    "seed": 967519050,
+    "final_mtm": -1238.0722045898438,
+    "avg_reward": -0.03094964011474609,
+    "orders_sent": 113,
+    "fills_rcvd": 60,
+    "risk_rejects": 190,
+    "blocked": 0,
+    "loss": -0.02332907565869391,
+    "action_counts": {
+      "0": 208,
+      "1": 149,
+      "2": 154
+    }
+  },
+  {
+    "episode": 306,
+    "regime": "VOLATILE",
+    "seed": 558414587,
+    "final_mtm": -1189.7735595703125,
+    "avg_reward": -0.029881603989257814,
+    "orders_sent": 131,
+    "fills_rcvd": 64,
+    "risk_rejects": 177,
+    "blocked": 0,
+    "loss": -0.009315312374383211,
+    "action_counts": {
+      "0": 185,
+      "1": 139,
+      "2": 169
+    }
+  },
+  {
+    "episode": 307,
+    "regime": "VOLATILE",
+    "seed": 613963167,
+    "final_mtm": -1603.302001953125,
+    "avg_reward": -0.04027432504882813,
+    "orders_sent": 147,
+    "fills_rcvd": 80,
+    "risk_rejects": 158,
+    "blocked": 0,
+    "loss": -0.010437171906232834,
+    "action_counts": {
+      "0": 172,
+      "1": 151,
+      "2": 154
+    }
+  },
+  {
+    "episode": 308,
+    "regime": "VOLATILE",
+    "seed": 246591432,
+    "final_mtm": -854.217529296875,
+    "avg_reward": -0.021299798232421875,
+    "orders_sent": 55,
+    "fills_rcvd": 37,
+    "risk_rejects": 299,
+    "blocked": 0,
+    "loss": -0.0284015250702699,
+    "action_counts": {
+      "0": 215,
+      "1": 163,
+      "2": 191
+    }
+  },
+  {
+    "episode": 309,
+    "regime": "VOLATILE",
+    "seed": 879818839,
+    "final_mtm": -1138.1820678710938,
+    "avg_reward": -0.028447761696777343,
+    "orders_sent": 70,
+    "fills_rcvd": 46,
+    "risk_rejects": 249,
+    "blocked": 0,
+    "loss": -0.031554787109295525,
+    "action_counts": {
+      "0": 235,
+      "1": 158,
+      "2": 161
+    }
+  },
+  {
+    "episode": 310,
+    "regime": "VOLATILE",
+    "seed": 673696419,
+    "final_mtm": -123.3673095703125,
+    "avg_reward": -0.002952567739257812,
+    "orders_sent": 8,
+    "fills_rcvd": 8,
+    "risk_rejects": 319,
+    "blocked": 0,
+    "loss": -0.016446287743747234,
+    "action_counts": {
+      "0": 289,
+      "1": 170,
+      "2": 157
+    }
+  },
+  {
+    "episode": 311,
+    "regime": "VOLATILE",
+    "seed": 750012279,
+    "final_mtm": -135.11810302734375,
+    "avg_reward": -0.003553192575683594,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 323,
+    "blocked": 0,
+    "loss": -0.011741311941295862,
+    "action_counts": {
+      "0": 297,
+      "1": 171,
+      "2": 154
+    }
+  },
+  {
+    "episode": 312,
+    "regime": "VOLATILE",
+    "seed": 544502697,
+    "final_mtm": -315.84930419921875,
+    "avg_reward": -0.007816667604980468,
+    "orders_sent": 16,
+    "fills_rcvd": 16,
+    "risk_rejects": 343,
+    "blocked": 0,
+    "loss": -0.022810782492160796,
+    "action_counts": {
+      "0": 249,
+      "1": 164,
+      "2": 195
+    }
+  },
+  {
+    "episode": 313,
+    "regime": "VOLATILE",
+    "seed": 121811533,
+    "final_mtm": -1716.0247802734375,
+    "avg_reward": -0.04285774450683593,
+    "orders_sent": 118,
+    "fills_rcvd": 67,
+    "risk_rejects": 177,
+    "blocked": 0,
+    "loss": -0.027016378939151764,
+    "action_counts": {
+      "0": 211,
+      "1": 145,
+      "2": 150
+    }
+  },
+  {
+    "episode": 314,
+    "regime": "VOLATILE",
+    "seed": 957609170,
+    "final_mtm": -1236.7691040039062,
+    "avg_reward": -0.030844712600097655,
+    "orders_sent": 224,
+    "fills_rcvd": 102,
+    "risk_rejects": 8,
+    "blocked": 0,
+    "loss": -0.02530708390155009,
+    "action_counts": {
+      "0": 169,
+      "1": 116,
+      "2": 116
+    }
+  },
+  {
+    "episode": 315,
+    "regime": "VOLATILE",
+    "seed": 990936485,
+    "final_mtm": -339.21661376953125,
+    "avg_reward": -0.00813902534423828,
+    "orders_sent": 14,
+    "fills_rcvd": 14,
+    "risk_rejects": 342,
+    "blocked": 0,
+    "loss": -0.005444420501589775,
+    "action_counts": {
+      "0": 254,
+      "1": 191,
+      "2": 165
+    }
+  },
+  {
+    "episode": 316,
+    "regime": "VOLATILE",
+    "seed": 112491154,
+    "final_mtm": -55.07965087890625,
+    "avg_reward": -0.0013140612719726565,
+    "orders_sent": 5,
+    "fills_rcvd": 5,
+    "risk_rejects": 367,
+    "blocked": 0,
+    "loss": -0.010472406959161162,
+    "action_counts": {
+      "0": 247,
+      "1": 186,
+      "2": 186
+    }
+  },
+  {
+    "episode": 317,
+    "regime": "VOLATILE",
+    "seed": 106527989,
+    "final_mtm": -19.06280517578125,
+    "avg_reward": -0.0003880851293945313,
+    "orders_sent": 9,
+    "fills_rcvd": 9,
+    "risk_rejects": 372,
+    "blocked": 0,
+    "loss": -0.01418307600542903,
+    "action_counts": {
+      "0": 234,
+      "1": 183,
+      "2": 198
+    }
+  },
+  {
+    "episode": 318,
+    "regime": "VOLATILE",
+    "seed": 167673266,
+    "final_mtm": -620.1553344726562,
+    "avg_reward": -0.015370618361816406,
+    "orders_sent": 48,
+    "fills_rcvd": 32,
+    "risk_rejects": 314,
+    "blocked": 0,
+    "loss": -0.02124333671397633,
+    "action_counts": {
+      "0": 214,
+      "1": 168,
+      "2": 194
+    }
+  },
+  {
+    "episode": 319,
+    "regime": "VOLATILE",
+    "seed": 32965780,
+    "final_mtm": -92.16766357421875,
+    "avg_reward": -0.002360101589355468,
+    "orders_sent": 8,
+    "fills_rcvd": 8,
+    "risk_rejects": 419,
+    "blocked": 0,
+    "loss": -0.007480224408209324,
+    "action_counts": {
+      "0": 189,
+      "1": 172,
+      "2": 255
+    }
+  },
+  {
+    "episode": 320,
+    "regime": "VOLATILE",
+    "seed": 462876400,
+    "final_mtm": -134.77630615234375,
+    "avg_reward": -0.003154662653808593,
+    "orders_sent": 12,
+    "fills_rcvd": 12,
+    "risk_rejects": 409,
+    "blocked": 0,
+    "loss": -0.02900899345986545,
+    "action_counts": {
+      "0": 191,
+      "1": 194,
+      "2": 227
+    }
+  },
+  {
+    "episode": 321,
+    "regime": "VOLATILE",
+    "seed": 32357387,
+    "final_mtm": -27.94036865234375,
+    "avg_reward": -0.0007706642163085937,
+    "orders_sent": 4,
+    "fills_rcvd": 4,
+    "risk_rejects": 438,
+    "blocked": 0,
+    "loss": -0.0012795705813914537,
+    "action_counts": {
+      "0": 178,
+      "1": 180,
+      "2": 262
+    }
+  },
+  {
+    "episode": 322,
+    "regime": "VOLATILE",
+    "seed": 927775860,
+    "final_mtm": -367.47589111328125,
+    "avg_reward": -0.009225802277832032,
+    "orders_sent": 9,
+    "fills_rcvd": 9,
+    "risk_rejects": 376,
+    "blocked": 0,
+    "loss": -0.00740879625082016,
+    "action_counts": {
+      "0": 230,
+      "1": 170,
+      "2": 215
+    }
+  },
+  {
+    "episode": 323,
+    "regime": "VOLATILE",
+    "seed": 775825398,
+    "final_mtm": -649.0997314453125,
+    "avg_reward": -0.016246143286132813,
+    "orders_sent": 73,
+    "fills_rcvd": 42,
+    "risk_rejects": 295,
+    "blocked": 0,
+    "loss": -0.030743167011274233,
+    "action_counts": {
+      "0": 183,
+      "1": 154,
+      "2": 214
+    }
+  },
+  {
+    "episode": 324,
+    "regime": "VOLATILE",
+    "seed": 378498241,
+    "final_mtm": -299.01885986328125,
+    "avg_reward": -0.0074540464965820305,
+    "orders_sent": 52,
+    "fills_rcvd": 34,
+    "risk_rejects": 328,
+    "blocked": 0,
+    "loss": -0.010527962611781226,
+    "action_counts": {
+      "0": 192,
+      "1": 167,
+      "2": 213
+    }
+  },
+  {
+    "episode": 325,
+    "regime": "VOLATILE",
+    "seed": 385746309,
+    "final_mtm": -164.28985595703125,
+    "avg_reward": -0.003921361398925781,
+    "orders_sent": 41,
+    "fills_rcvd": 32,
+    "risk_rejects": 349,
+    "blocked": 0,
+    "loss": -0.029522179951891304,
+    "action_counts": {
+      "0": 193,
+      "1": 169,
+      "2": 221
+    }
+  },
+  {
+    "episode": 326,
+    "regime": "VOLATILE",
+    "seed": 370919856,
+    "final_mtm": -367.51861572265625,
+    "avg_reward": -0.008996925393066405,
+    "orders_sent": 25,
+    "fills_rcvd": 23,
+    "risk_rejects": 373,
+    "blocked": 0,
+    "loss": -0.020279574673622847,
+    "action_counts": {
+      "0": 201,
+      "1": 176,
+      "2": 222
+    }
+  },
+  {
+    "episode": 327,
+    "regime": "VOLATILE",
+    "seed": 10700018,
+    "final_mtm": -940.985107421875,
+    "avg_reward": -0.023417542685546876,
+    "orders_sent": 106,
+    "fills_rcvd": 62,
+    "risk_rejects": 234,
+    "blocked": 0,
+    "loss": -0.05057416162970993,
+    "action_counts": {
+      "0": 178,
+      "1": 140,
+      "2": 200
+    }
+  },
+  {
+    "episode": 328,
+    "regime": "VOLATILE",
+    "seed": 247491546,
+    "final_mtm": -275.42724609375,
+    "avg_reward": -0.006769301152343749,
+    "orders_sent": 14,
+    "fills_rcvd": 14,
+    "risk_rejects": 393,
+    "blocked": 0,
+    "loss": -0.019838173314929007,
+    "action_counts": {
+      "0": 203,
+      "1": 163,
+      "2": 244
+    }
+  },
+  {
+    "episode": 329,
+    "regime": "VOLATILE",
+    "seed": 75718705,
+    "final_mtm": -351.8951416015625,
+    "avg_reward": -0.008937023540039063,
+    "orders_sent": 7,
+    "fills_rcvd": 7,
+    "risk_rejects": 405,
+    "blocked": 0,
+    "loss": -0.009095662645995617,
+    "action_counts": {
+      "0": 205,
+      "1": 181,
+      "2": 231
+    }
+  },
+  {
+    "episode": 330,
+    "regime": "VOLATILE",
+    "seed": 153858694,
+    "final_mtm": -1173.5031127929688,
+    "avg_reward": -0.02936226281982422,
+    "orders_sent": 223,
+    "fills_rcvd": 110,
+    "risk_rejects": 8,
+    "blocked": 0,
+    "loss": 0.00685883206980569,
+    "action_counts": {
+      "0": 171,
+      "1": 94,
+      "2": 137
+    }
+  },
+  {
+    "episode": 331,
+    "regime": "VOLATILE",
+    "seed": 219893447,
+    "final_mtm": -98.95477294921875,
+    "avg_reward": -0.0026276693237304687,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 326,
+    "blocked": 0,
+    "loss": -0.009087958466261625,
+    "action_counts": {
+      "0": 294,
+      "1": 164,
+      "2": 164
+    }
+  },
+  {
+    "episode": 332,
+    "regime": "VOLATILE",
+    "seed": 786088973,
+    "final_mtm": -39.056396484375,
+    "avg_reward": -0.001146359912109375,
+    "orders_sent": 2,
+    "fills_rcvd": 2,
+    "risk_rejects": 338,
+    "blocked": 0,
+    "loss": -0.014406034350395202,
+    "action_counts": {
+      "0": 282,
+      "1": 189,
+      "2": 151
+    }
+  },
+  {
+    "episode": 333,
+    "regime": "VOLATILE",
+    "seed": 132273237,
+    "final_mtm": -382.33489990234375,
+    "avg_reward": -0.009394772497558594,
+    "orders_sent": 28,
+    "fills_rcvd": 20,
+    "risk_rejects": 327,
+    "blocked": 0,
+    "loss": -0.03433545553125441,
+    "action_counts": {
+      "0": 241,
+      "1": 192,
+      "2": 163
+    }
+  },
+  {
+    "episode": 334,
+    "regime": "VOLATILE",
+    "seed": 314889701,
+    "final_mtm": -1602.4795532226562,
+    "avg_reward": -0.03998244883056641,
+    "orders_sent": 231,
+    "fills_rcvd": 106,
+    "risk_rejects": 17,
+    "blocked": 0,
+    "loss": -0.03667810346399035,
+    "action_counts": {
+      "0": 145,
+      "1": 125,
+      "2": 123
+    }
+  },
+  {
+    "episode": 335,
+    "regime": "VOLATILE",
+    "seed": 26468747,
+    "final_mtm": -58.36181640625,
+    "avg_reward": -0.0015315154101562501,
+    "orders_sent": 3,
+    "fills_rcvd": 3,
+    "risk_rejects": 328,
+    "blocked": 0,
+    "loss": -0.018935710517689587,
+    "action_counts": {
+      "0": 290,
+      "1": 171,
+      "2": 160
+    }
+  },
+  {
+    "episode": 336,
+    "regime": "VOLATILE",
+    "seed": 250035853,
+    "final_mtm": -878.4744262695312,
+    "avg_reward": -0.02191936565673828,
+    "orders_sent": 38,
+    "fills_rcvd": 29,
+    "risk_rejects": 319,
+    "blocked": 0,
+    "loss": -0.02276459871791303,
+    "action_counts": {
+      "0": 229,
+      "1": 203,
+      "2": 154
+    }
+  },
+  {
+    "episode": 337,
+    "regime": "VOLATILE",
+    "seed": 200781813,
+    "final_mtm": -975.714111328125,
+    "avg_reward": -0.024503012783203125,
+    "orders_sent": 102,
+    "fills_rcvd": 60,
+    "risk_rejects": 214,
+    "blocked": 0,
+    "loss": -0.027071851253923442,
+    "action_counts": {
+      "0": 206,
+      "1": 166,
+      "2": 150
+    }
+  },
+  {
+    "episode": 338,
+    "regime": "VOLATILE",
+    "seed": 511847186,
+    "final_mtm": -1763.6367797851562,
+    "avg_reward": -0.0441699594946289,
+    "orders_sent": 194,
+    "fills_rcvd": 101,
+    "risk_rejects": 23,
+    "blocked": 0,
+    "loss": -0.023609502241015434,
+    "action_counts": {
+      "0": 213,
+      "1": 122,
+      "2": 95
+    }
+  },
+  {
+    "episode": 339,
+    "regime": "VOLATILE",
+    "seed": 277261375,
+    "final_mtm": -883.1375122070312,
+    "avg_reward": -0.022099787805175783,
+    "orders_sent": 123,
+    "fills_rcvd": 65,
+    "risk_rejects": 144,
+    "blocked": 0,
+    "loss": -0.01834630430676043,
+    "action_counts": {
+      "0": 234,
+      "1": 132,
+      "2": 135
+    }
+  },
+  {
+    "episode": 340,
+    "regime": "VOLATILE",
+    "seed": 223468287,
+    "final_mtm": -1913.3575439453125,
+    "avg_reward": -0.047873858598632815,
+    "orders_sent": 211,
+    "fills_rcvd": 96,
+    "risk_rejects": 13,
+    "blocked": 0,
+    "loss": -0.024807467790586606,
+    "action_counts": {
+      "0": 190,
+      "1": 112,
+      "2": 112
+    }
+  },
+  {
+    "episode": 341,
+    "regime": "VOLATILE",
+    "seed": 508278597,
+    "final_mtm": -383.12225341796875,
+    "avg_reward": -0.009473376335449219,
+    "orders_sent": 13,
+    "fills_rcvd": 13,
+    "risk_rejects": 335,
+    "blocked": 0,
+    "loss": -0.03952414896339178,
+    "action_counts": {
+      "0": 263,
+      "1": 170,
+      "2": 178
+    }
+  },
+  {
+    "episode": 342,
+    "regime": "VOLATILE",
+    "seed": 318200782,
+    "final_mtm": -1613.2858276367188,
+    "avg_reward": -0.04041051569091797,
+    "orders_sent": 183,
+    "fills_rcvd": 90,
+    "risk_rejects": 71,
+    "blocked": 0,
+    "loss": -0.010676033262695585,
+    "action_counts": {
+      "0": 187,
+      "1": 125,
+      "2": 129
+    }
+  },
+  {
+    "episode": 343,
+    "regime": "VOLATILE",
+    "seed": 593999830,
+    "final_mtm": -277.52838134765625,
+    "avg_reward": -0.006773779533691406,
+    "orders_sent": 17,
+    "fills_rcvd": 17,
+    "risk_rejects": 317,
+    "blocked": 0,
+    "loss": -0.011338406335562467,
+    "action_counts": {
+      "0": 273,
+      "1": 158,
+      "2": 176
+    }
+  },
+  {
+    "episode": 344,
+    "regime": "VOLATILE",
+    "seed": 197618403,
+    "final_mtm": -1640.0115966796875,
+    "avg_reward": -0.040982399916992186,
+    "orders_sent": 197,
+    "fills_rcvd": 106,
+    "risk_rejects": 18,
+    "blocked": 0,
+    "loss": -0.026684194803237915,
+    "action_counts": {
+      "0": 212,
+      "1": 112,
+      "2": 103
+    }
+  },
+  {
+    "episode": 345,
+    "regime": "VOLATILE",
+    "seed": 86769017,
+    "final_mtm": -173.44207763671875,
+    "avg_reward": -0.004196121940917968,
+    "orders_sent": 14,
+    "fills_rcvd": 14,
+    "risk_rejects": 297,
+    "blocked": 0,
+    "loss": -0.018412549048662186,
+    "action_counts": {
+      "0": 299,
+      "1": 166,
+      "2": 145
+    }
+  },
+  {
+    "episode": 346,
+    "regime": "VOLATILE",
+    "seed": 623683279,
+    "final_mtm": 99.21112060546875,
+    "avg_reward": 0.0027406080151367185,
+    "orders_sent": 9,
+    "fills_rcvd": 9,
+    "risk_rejects": 351,
+    "blocked": 0,
+    "loss": -0.024748469330370428,
+    "action_counts": {
+      "0": 255,
+      "1": 186,
+      "2": 174
+    }
+  },
+  {
+    "episode": 347,
+    "regime": "VOLATILE",
+    "seed": 404360285,
+    "final_mtm": -1531.8328857421875,
+    "avg_reward": -0.03835438214355469,
+    "orders_sent": 215,
+    "fills_rcvd": 104,
+    "risk_rejects": 20,
+    "blocked": 0,
+    "loss": -0.04331003774755767,
+    "action_counts": {
+      "0": 175,
+      "1": 114,
+      "2": 121
+    }
+  },
+  {
+    "episode": 348,
+    "regime": "VOLATILE",
+    "seed": 134472124,
+    "final_mtm": -138.69781494140625,
+    "avg_reward": -0.0036500353735351558,
+    "orders_sent": 3,
+    "fills_rcvd": 3,
+    "risk_rejects": 374,
+    "blocked": 0,
+    "loss": -0.019487692648544906,
+    "action_counts": {
+      "0": 244,
+      "1": 171,
+      "2": 206
+    }
+  },
+  {
+    "episode": 349,
+    "regime": "VOLATILE",
+    "seed": 339186828,
+    "final_mtm": -2168.2785034179688,
+    "avg_reward": -0.05436716758544922,
+    "orders_sent": 234,
+    "fills_rcvd": 106,
+    "risk_rejects": 35,
+    "blocked": 0,
+    "loss": -0.13685872086456843,
+    "action_counts": {
+      "0": 123,
+      "1": 121,
+      "2": 148
+    }
+  },
+  {
+    "episode": 350,
+    "regime": "VOLATILE",
+    "seed": 254109724,
+    "final_mtm": -701.849365234375,
+    "avg_reward": -0.017387889130859376,
+    "orders_sent": 52,
+    "fills_rcvd": 34,
+    "risk_rejects": 330,
+    "blocked": 0,
+    "loss": -0.027855791358484164,
+    "action_counts": {
+      "0": 190,
+      "1": 148,
+      "2": 234
+    }
+  }
+]

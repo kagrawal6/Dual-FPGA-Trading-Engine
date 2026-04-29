@@ -1,0 +1,92 @@
+{
+  "avg_mtm": 0.0,
+  "min_mtm": 0.0,
+  "max_mtm": 0.0,
+  "avg_hold_mtm": 0.0,
+  "avg_mean_reversion_mtm": -971.5883255004883,
+  "avg_excess_vs_hold": 0.0,
+  "avg_excess_vs_mean_reversion": 971.5883255004883,
+  "orders": 0,
+  "fills": 0,
+  "risk_rejects": 0,
+  "blocked": 0,
+  "action_mix": {
+    "HOLD": 1.0,
+    "BUY": 0.0,
+    "SELL": 0.0
+  },
+  "per_regime": {
+    "CALM": {
+      "avg_mtm": 0.0,
+      "min_mtm": 0.0,
+      "max_mtm": 0.0,
+      "avg_hold_mtm": 0.0,
+      "avg_mean_reversion_mtm": 0.0,
+      "avg_excess_vs_hold": 0.0,
+      "avg_excess_vs_mean_reversion": 0.0,
+      "orders": 0,
+      "fills": 0,
+      "risk_rejects": 0,
+      "blocked": 0,
+      "action_counts": {
+        "0": 4992,
+        "1": 0,
+        "2": 0
+      }
+    },
+    "VOLATILE": {
+      "avg_mtm": 0.0,
+      "min_mtm": 0.0,
+      "max_mtm": 0.0,
+      "avg_hold_mtm": 0.0,
+      "avg_mean_reversion_mtm": -904.1110992431641,
+      "avg_excess_vs_hold": 0.0,
+      "avg_excess_vs_mean_reversion": 904.1110992431641,
+      "orders": 0,
+      "fills": 0,
+      "risk_rejects": 0,
+      "blocked": 0,
+      "action_counts": {
+        "0": 4992,
+        "1": 0,
+        "2": 0
+      }
+    },
+    "BURST": {
+      "avg_mtm": 0.0,
+      "min_mtm": 0.0,
+      "max_mtm": 0.0,
+      "avg_hold_mtm": 0.0,
+      "avg_mean_reversion_mtm": 0.0,
+      "avg_excess_vs_hold": 0.0,
+      "avg_excess_vs_mean_reversion": 0.0,
+      "orders": 0,
+      "fills": 0,
+      "risk_rejects": 0,
+      "blocked": 0,
+      "action_counts": {
+        "0": 4992,
+        "1": 0,
+        "2": 0
+      }
+    },
+    "ADVERSARIAL": {
+      "avg_mtm": 0.0,
+      "min_mtm": 0.0,
+      "max_mtm": 0.0,
+      "avg_hold_mtm": 0.0,
+      "avg_mean_reversion_mtm": -2982.242202758789,
+      "avg_excess_vs_hold": 0.0,
+      "avg_excess_vs_mean_reversion": 2982.242202758789,
+      "orders": 0,
+      "fills": 0,
+      "risk_rejects": 0,
+      "blocked": 0,
+      "action_counts": {
+        "0": 4992,
+        "1": 0,
+        "2": 0
+      }
+    }
+  }
+}
