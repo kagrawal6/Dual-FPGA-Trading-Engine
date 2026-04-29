@@ -22,6 +22,9 @@
 //   0x100 FILLS_SENT                 (R)  (added — was wired but unexposed)
 //   0x104 REJECTS_SENT               (R)  (added — was wired but unexposed)
 //   0x108 LINK_ERRORS                (R)  (added — was wired but unexposed)
+//   0x110..0x14C LIVE_BID[0..15]     (R)  (B3) per-symbol live bid (Q16.16)
+//   0x150..0x18C LIVE_ASK[0..15]     (R)  (B3) per-symbol live ask (Q16.16)
+//   0x190..0x1CC LIVE_MID[0..15]     (R)  (B3) per-symbol live mid (Q16.16)
 // ============================================================================
 
 `timescale 1ns / 1ps
@@ -82,7 +85,12 @@ module board_a_axi_regs
     input  logic [COUNTER_W-1:0]           fills_sent,
     input  logic [COUNTER_W-1:0]           rejects_sent,
     input  logic [COUNTER_W-1:0]           link_errors,
-    input  logic [6:0]                     fifo_fill
+    input  logic [6:0]                     fifo_fill,
+
+    // B3: per-symbol live price snapshots (from market_sim)
+    input  price_t                         live_bid [NUM_SYM],
+    input  price_t                         live_ask [NUM_SYM],
+    input  price_t                         live_mid [NUM_SYM]
 );
     // -------------------------------------------------------------------------
     // ADDITION: Extended register map for dynamic symbol metadata (up to NUM_SYM)
@@ -108,6 +116,10 @@ module board_a_axi_regs
     localparam logic [8:0] ADDR_FILLS_SENT       = 9'h100;
     localparam logic [8:0] ADDR_REJECTS_SENT     = 9'h104;
     localparam logic [8:0] ADDR_LINK_ERRORS      = 9'h108;
+    // B3: per-symbol live price snapshots
+    localparam logic [8:0] ADDR_LIVE_BID_BASE    = 9'h110; // +4*i, 16 → 0x110..0x14C
+    localparam logic [8:0] ADDR_LIVE_ASK_BASE    = 9'h150; // +4*i, 16 → 0x150..0x18C
+    localparam logic [8:0] ADDR_LIVE_MID_BASE    = 9'h190; // +4*i, 16 → 0x190..0x1CC
 
     logic write_fire;
     logic read_fire;
@@ -149,6 +161,13 @@ module board_a_axi_regs
                 rd_data_mux = sym_init_spread[i];
             if (rd_addr == 9'(ADDR_SECTOR_BASE + 4*i))
                 rd_data_mux = {{(32-SECTOR_ID_W){1'b0}}, sym_sector_id[i]};
+            // B3: live per-symbol price snapshots
+            if (rd_addr == 9'(ADDR_LIVE_BID_BASE + 4*i))
+                rd_data_mux = live_bid[i];
+            if (rd_addr == 9'(ADDR_LIVE_ASK_BASE + 4*i))
+                rd_data_mux = live_ask[i];
+            if (rd_addr == 9'(ADDR_LIVE_MID_BASE + 4*i))
+                rd_data_mux = live_mid[i];
         end
         for (int j = 0; j < (NUM_SYM+1)/2; j++) begin
             if (rd_addr == 9'(ADDR_TOKEN_BASE + 4*j)) begin

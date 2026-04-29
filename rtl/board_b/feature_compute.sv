@@ -40,7 +40,10 @@ module feature_compute
     output price_t      bid_out,
     output price_t      ask_out,
     output symbol_t     symbol_out,
-    output logic        feature_valid
+    output logic        feature_valid,
+
+    // B3: per-symbol EMA snapshot (combinational tap of ema_state[])
+    output price_t      ema_value [NUM_SYM]
 );
 
     // ── Per-symbol EMA state ────────────────────────────────────
@@ -179,6 +182,13 @@ module feature_compute
                     ema_state[s2_sym] <= ema_new;
                 end
             end
+        end
+    end
+
+    // B3: combinational tap of per-symbol EMA state for AXI/dashboard.
+    always_comb begin
+        for (int i = 0; i < NUM_SYM; i++) begin
+            ema_value[i] = ema_state[i];
         end
     end
 
