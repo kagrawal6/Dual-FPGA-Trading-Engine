@@ -293,23 +293,30 @@ module nn_inference
         end else begin
             signal_valid <= 1'b0;
             if (h2_valid) begin
-                case (action_comb)
-                    ACT_BUY: begin
-                        signal_valid  <= 1'b1;
-                        signal_side   <= 1'b0;
-                        signal_price  <= h2_ask;
-                        signal_qty    <= h2_qty;
-                        signal_symbol <= h2_sym;
-                    end
-                    ACT_SELL: begin
-                        signal_valid  <= 1'b1;
-                        signal_side   <= 1'b1;
-                        signal_price  <= h2_bid;
-                        signal_qty    <= h2_qty;
-                        signal_symbol <= h2_sym;
-                    end
-                    default: ;
-                endcase
+                // Only trade on:
+                //   symbols 0-7  (trained symbols — confirmed profitable)
+                //   VOLATILE (1) or ADVERSARIAL (3) regimes only
+                if (h2_sym < 8 &&
+                    (regime == 2'd1 || regime == 2'd3)) begin
+                    case (action_comb)
+                        ACT_BUY: begin
+                            signal_valid  <= 1'b1;
+                            signal_side   <= 1'b0;
+                            signal_price  <= h2_ask;
+                            signal_qty    <= h2_qty;
+                            signal_symbol <= h2_sym;
+                        end
+                        ACT_SELL: begin
+                            signal_valid  <= 1'b1;
+                            signal_side   <= 1'b1;
+                            signal_price  <= h2_bid;
+                            signal_qty    <= h2_qty;
+                            signal_symbol <= h2_sym;
+                        end
+                        default: ;
+                    endcase
+                end
+                // symbols 8-15 or CALM/BURST regime → HOLD (signal_valid stays 0)
             end
         end
     end
