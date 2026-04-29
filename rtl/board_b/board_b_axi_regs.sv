@@ -35,6 +35,13 @@
 //   0x1C0..0x1FC PNL_CASH_HI[0..15]  — per-symbol cash flow [47:32] sign-extended
 //   0x200..0x23C LAST_FILL_PRICE[0..15] — per-symbol last execution price (Q16.16)
 //   0x240..0x25C TRADES_PACK[0..7]   — per-symbol fill counts (2× 16b packed/word)
+//
+// B3 extensions:
+//   0x260..0x29C EMA[0..15]            — per-symbol EMA snapshot (Q16.16)
+//   0x2A0, 0x2A4 LAST_SIGNAL_PACK[0..1] — per-symbol last signal classification
+//                                       4 bits per sym, 8 syms per word; encoding:
+//                                       0=NONE 1=BUY 2=SELL 3=RISK_BLOCKED
+//   0x2A8 LAST_LATENCY                 — most recent single latency sample (cycles)
 // ============================================================================
 
 `timescale 1ns / 1ps
@@ -108,7 +115,12 @@ module board_b_axi_regs
     input  price_t                qb_best_ask [NUM_SYM],   // from quote_book
     input  cash_t                 pnl_cash_per_sym [NUM_SYM], // from position_tracker
     input  price_t                last_fill_price  [NUM_SYM], // from position_tracker
-    input  logic [15:0]           trades_per_sym   [NUM_SYM]  // from position_tracker
+    input  logic [15:0]           trades_per_sym   [NUM_SYM], // from position_tracker
+
+    // B3 inputs
+    input  price_t                ema_value    [NUM_SYM],   // from feature_compute
+    input  logic [2:0]            last_signal  [NUM_SYM],   // from risk_manager
+    input  logic [COUNTER_W-1:0]  last_latency              // from latency_histogram
 );
 
     // ── Address constants ───────────────────────────────────────
@@ -143,6 +155,11 @@ module board_b_axi_regs
     localparam logic [9:0] ADDR_PNL_HI_BASE      = 10'h1C0; // +4*i, 16 → 0x1C0..0x1FC
     localparam logic [9:0] ADDR_LAST_FILL_BASE   = 10'h200; // +4*i, 16 → 0x200..0x23C
     localparam logic [9:0] ADDR_TRADES_PACK_BASE = 10'h240; // +4*j, 8 words, 2 syms each → 0x240..0x25C
+
+    // B3 register windows
+    localparam logic [9:0] ADDR_EMA_BASE             = 10'h260; // +4*i, 16 → 0x260..0x29C
+    localparam logic [9:0] ADDR_LAST_SIGNAL_PACK_BASE = 10'h2A0; // +4*j, 2 words (8 syms × 4b each)
+    localparam logic [9:0] ADDR_LAST_LATENCY         = 10'h2A8;
 
     // ── AXI handshake ───────────────────────────────────────────
     logic write_fire, read_fire;
@@ -185,6 +202,8 @@ module board_b_axi_regs
         else if (rd_addr == ADDR_LAT_MAX)       rd_data_mux = lat_max;
         else if (rd_addr == ADDR_LAT_SUM)       rd_data_mux = lat_sum;
         else if (rd_addr == ADDR_LAT_COUNT)     rd_data_mux = lat_count;
+        // B3: most-recent single latency sample
+        else if (rd_addr == ADDR_LAST_LATENCY)  rd_data_mux = last_latency;
 
         for (int i = 0; i < NUM_SYM; i++) begin
             if (rd_addr == 10'(ADDR_POS_BASE + 4*i))
@@ -199,12 +218,30 @@ module board_b_axi_regs
                 rd_data_mux = {{16{pnl_cash_per_sym[i][47]}}, pnl_cash_per_sym[i][47:32]};
             if (rd_addr == 10'(ADDR_LAST_FILL_BASE + 4*i))
                 rd_data_mux = last_fill_price[i];
+            // B3: per-symbol EMA snapshot
+            if (rd_addr == 10'(ADDR_EMA_BASE + 4*i))
+                rd_data_mux = ema_value[i];
         end
 
         for (int j = 0; j < (NUM_SYM+1)/2; j++) begin
             if (rd_addr == 10'(ADDR_TRADES_PACK_BASE + 4*j)) begin
                 rd_data_mux[15:0]  = trades_per_sym[2*j];
                 rd_data_mux[31:16] = ((2*j+1) < NUM_SYM) ? trades_per_sym[2*j+1] : 16'h0;
+            end
+        end
+
+        // B3: pack per-symbol last_signal (3-bit value zero-extended to 4 bits) into
+        // 32-bit words. 8 symbols per word → 2 words for NUM_SYM=16.
+        // Layout per word j: bits [4*k +:4] = last_signal[8*j + k] for k in 0..7.
+        for (int j = 0; j < (NUM_SYM+7)/8; j++) begin
+            if (rd_addr == 10'(ADDR_LAST_SIGNAL_PACK_BASE + 4*j)) begin
+                rd_data_mux = 32'h0;
+                for (int k = 0; k < 8; k++) begin
+                    int sidx;
+                    sidx = 8*j + k;
+                    if (sidx < NUM_SYM)
+                        rd_data_mux[4*k +: 4] = {1'b0, last_signal[sidx]};
+                end
             end
         end
 

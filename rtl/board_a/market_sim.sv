@@ -62,6 +62,9 @@ module market_sim
     output price_t               best_bid [NUM_SYM],
     output price_t               best_ask [NUM_SYM],
 
+    // B3: Live mid price snapshot per symbol (for AXI/dashboard)
+    output price_t               cur_mid  [NUM_SYM],
+
     // Status
     output logic [COUNTER_W-1:0] quotes_generated
 );
@@ -235,11 +238,14 @@ module market_sim
 
     always_comb begin
         for (int ci = 0; ci < NUM_SYM; ci++) begin
-            sprice_t c_mid = sprice_t'(init_mid[ci]);
-            sprice_t c_spr = sprice_t'((init_spread[ci] == '0) ? 32'h0000_0001 : init_spread[ci]);
-            sprice_t c_hsp = c_spr >>> 1;
-            sprice_t c_bid = c_mid - c_hsp;
-            sprice_t c_ask = c_mid + c_hsp;
+            // ModelSim requires `automatic` here — variables declared inside a
+            // for-loop in always_comb otherwise default to static and reject
+            // non-constant initializers (init_mid/init_spread are not constants).
+            automatic sprice_t c_mid = sprice_t'(init_mid[ci]);
+            automatic sprice_t c_spr = sprice_t'((init_spread[ci] == '0) ? 32'h0000_0001 : init_spread[ci]);
+            automatic sprice_t c_hsp = c_spr >>> 1;
+            automatic sprice_t c_bid = c_mid - c_hsp;
+            automatic sprice_t c_ask = c_mid + c_hsp;
 
             if (c_bid < MIN_PRICE_Q16_16)      init_bid_c[ci] = price_t'(MIN_PRICE_Q16_16);
             else if (c_bid > MAX_PRICE_Q16_16) init_bid_c[ci] = price_t'(MAX_PRICE_Q16_16);
@@ -313,5 +319,14 @@ module market_sim
     end
 
     assign quote_frame = quote_frame_hold;
+
+    // B3: Expose live per-symbol mid as a combinational tap of internal state.
+    // mid_price[] is updated by the always_ff block on every do_quote and
+    // initialized to init_mid[] on lfsr_load.
+    always_comb begin
+        for (int i = 0; i < NUM_SYM; i++) begin
+            cur_mid[i] = mid_price[i];
+        end
+    end
 
 endmodule

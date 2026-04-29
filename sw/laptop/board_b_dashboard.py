@@ -84,8 +84,13 @@ def _hex_to_rgb(h: str) -> Tuple[int, int, int]:
 def regime_chart_tint(regime_name: str, dark: bool) -> Tuple[str, str]:
     """Plotly paper_bg / plot_bg tint from Board A regime (truthful: same data, visual skin)."""
     name = regime_name.upper() if regime_name else "CALM"
+    base = theme_colors(dark)
     if name not in REGIME_INFO:
-        name = "CALM"
+        # Neutral tint when regime is unavailable (avoid pretending CALM).
+        r, g, b = _hex_to_rgb(base["muted"])
+        a = 0.10 if dark else 0.16
+        tint = f"rgba({r},{g},{b},{a})"
+        return base["card"], tint
     r, g, b = _hex_to_rgb(REGIME_INFO[name][0])
     a = 0.14 if dark else 0.20
     tint = f"rgba({r},{g},{b},{a})"
@@ -95,6 +100,8 @@ def regime_chart_tint(regime_name: str, dark: bool) -> Tuple[str, str]:
 
 def latency_regime_caption(regime_name: str) -> str:
     name = (regime_name or "CALM").upper()
+    if name == "UNKNOWN":
+        return "Latency regime info unavailable (regime fields missing from telemetry)."
     tips = {
         "CALM": "Expect tighter latency clusters — fewer tail events.",
         "VOLATILE": "Tails often widen — compare p99 to CALM when you switch.",
@@ -203,13 +210,39 @@ class SerialTelemetryReader(threading.Thread):
         self.last_mono: float = 0.0
         self.latest: Dict[str, Any] = {}
         self.rates = {"q": 0.0, "o": 0.0, "f": 0.0, "rej": 0.0}
+        # "Heartbeat" is a dashboard-side liveness counter (telemetry samples ingested).
+        # This is not a PL-internal counter, but it is useful to detect stalls on the link.
+        self.heartbeat: int = 0
+
+        # Events are derived in software from telemetry counter deltas and transitions.
+        # This avoids requiring any RTL changes.
+        self._events: Deque[Dict[str, Any]] = deque(maxlen=100)
+        self._last_link_up: Optional[bool] = None
+        self._last_risk_halt: Optional[bool] = None
+        self._last_state: Optional[str] = None
+        self._last_strategy: Optional[str] = None
+        self._last_regime_name_evt: Optional[str] = None
+        self._last_mmio_err_mono: float = 0.0
+
+        # Heartbeat stall detection (dashboard-side): if reader ingests stop
+        # advancing heartbeat across consecutive snapshots, we flag a stall.
+        self._last_snapshot_hb: int = 0
+        self._stall_snapshot_count: int = 0
+        self.hardware_stalled: bool = False
 
         self._prev_mono: float = 0.0
         self._prev: Dict[str, int] = {}
 
         self.history_t: Deque[float] = deque(maxlen=8000)
         self.history_cash: Deque[float] = deque(maxlen=8000)
+        self.history_pnl: Deque[float] = deque(maxlen=8000)
+        self.history_port: Deque[float] = deque(maxlen=8000)
         self.history_rej: Deque[float] = deque(maxlen=8000)
+        # Activity over time (derived rates, not cumulative counters).
+        self.history_rate_q: Deque[float] = deque(maxlen=8000)
+        self.history_rate_o: Deque[float] = deque(maxlen=8000)
+        self.history_rate_f: Deque[float] = deque(maxlen=8000)
+        self.history_rate_rej: Deque[float] = deque(maxlen=8000)
 
         self._last_regime_name: str = ""
         self._last_regime_id: int = -1
@@ -271,6 +304,17 @@ class SerialTelemetryReader(threading.Thread):
                     except json.JSONDecodeError:
                         with self._lock:
                             self.parse_errors = min(self.parse_errors + 1, 99999)
+                            now_mono = time.monotonic()
+                            # Throttle MMIO/parse error events so the log doesn't explode.
+                            if now_mono - self._last_mmio_err_mono > 2.0:
+                                self._last_mmio_err_mono = now_mono
+                                self._events.append(
+                                    {
+                                        "ts": time.time(),
+                                        "type": "MMIO ERROR",
+                                        "msg": "Unable to parse telemetry JSON line",
+                                    }
+                                )
                         continue
                     self._ingest(data)
             except Exception:
@@ -285,34 +329,74 @@ class SerialTelemetryReader(threading.Thread):
     def _ingest(self, data: Dict[str, Any]) -> None:
         now = time.monotonic()
         with self._lock:
+            cur_qps = int(data.get("qps", 0) or 0)
+            cur_ops = int(data.get("ops", 0) or 0)
+            cur_fps = int(data.get("fps", 0) or 0)
+            cur_rej = int(data.get("rej", 0) or 0)
+
+            prev_qps = int(self._prev.get("qps", 0) or 0)
+            prev_ops = int(self._prev.get("ops", 0) or 0)
+            prev_fps = int(self._prev.get("fps", 0) or 0)
+            prev_rej = int(self._prev.get("rej", 0) or 0)
+
             if self._prev_mono > 0:
                 dt = now - self._prev_mono
                 if dt > 1e-6:
+                    # Emit events derived from counter deltas.
+                    dq = max(0, cur_qps - prev_qps)
+                    do = max(0, cur_ops - prev_ops)
+                    df = max(0, cur_fps - prev_fps)
+                    dr = max(0, cur_rej - prev_rej)
+                    if dq > 0:
+                        self._events.append(
+                            {"ts": time.time(), "type": "QUOTE RX", "msg": f"+{dq} quotes"}
+                        )
+                    if do > 0:
+                        self._events.append(
+                            {"ts": time.time(), "type": "ORDER TX", "msg": f"+{do} orders"}
+                        )
+                    if df > 0:
+                        self._events.append(
+                            {"ts": time.time(), "type": "FILL RX", "msg": f"+{df} fills"}
+                        )
+                    if dr > 0:
+                        self._events.append(
+                            {"ts": time.time(), "type": "RISK REJECT", "msg": f"+{dr} rejects"}
+                        )
+
                     self.rates["q"] = max(
-                        0.0, (int(data.get("qps", 0)) - self._prev.get("qps", 0)) / dt
+                        0.0, (cur_qps - prev_qps) / dt
                     )
                     self.rates["o"] = max(
-                        0.0, (int(data.get("ops", 0)) - self._prev.get("ops", 0)) / dt
+                        0.0, (cur_ops - prev_ops) / dt
                     )
                     self.rates["f"] = max(
-                        0.0, (int(data.get("fps", 0)) - self._prev.get("fps", 0)) / dt
+                        0.0, (cur_fps - prev_fps) / dt
                     )
                     self.rates["rej"] = max(
-                        0.0, (int(data.get("rej", 0)) - self._prev.get("rej", 0)) / dt
+                        0.0, (cur_rej - prev_rej) / dt
                     )
             self._prev_mono = now
             self._prev = {
-                "qps": int(data.get("qps", 0)),
-                "ops": int(data.get("ops", 0)),
-                "fps": int(data.get("fps", 0)),
-                "rej": int(data.get("rej", 0)),
+                "qps": cur_qps,
+                "ops": cur_ops,
+                "fps": cur_fps,
+                "rej": cur_rej,
             }
             cash = cash_to_dollars(
                 int(data.get("cash_lo", 0)), int(data.get("cash_hi", 0))
             )
             self.history_t.append(now)
             self.history_cash.append(cash)
+            # Profit chart inputs.
+            self.history_pnl.append(float(data.get("total_pnl", cash) or cash))
+            self.history_port.append(float(data.get("port_value", cash) or cash))
             self.history_rej.append(float(self.rates["rej"]))
+            # Activity chart inputs (rates, already derived in previous block).
+            self.history_rate_q.append(float(self.rates.get("q", 0.0) or 0.0))
+            self.history_rate_o.append(float(self.rates.get("o", 0.0) or 0.0))
+            self.history_rate_f.append(float(self.rates.get("f", 0.0) or 0.0))
+            self.history_rate_rej.append(float(self.rates.get("rej", 0.0) or 0.0))
             if self._session_cash_start is None:
                 self._session_cash_start = cash
             self._session_cash_min = (
@@ -327,6 +411,50 @@ class SerialTelemetryReader(threading.Thread):
             )
             self.latest = data
             self.last_mono = now
+            self.heartbeat += 1
+
+            # Transition events: link/risk/state/strategy/regime.
+            link_up_now = bool(data.get("link_up", False))
+            risk_halt_now = bool(data.get("risk_halt", False))
+            if self._last_link_up is not None and link_up_now != self._last_link_up:
+                self._events.append(
+                    {
+                        "ts": time.time(),
+                        "type": "LINK UP" if link_up_now else "LINK DOWN",
+                        "msg": "Link state changed",
+                    }
+                )
+            if self._last_risk_halt is not None and risk_halt_now != self._last_risk_halt:
+                if risk_halt_now:
+                    self._events.append(
+                        {"ts": time.time(), "type": "RISK HALT", "msg": "Risk gate halted"}
+                    )
+            self._last_link_up = link_up_now
+            self._last_risk_halt = risk_halt_now
+
+            st_now = data.get("state", None)
+            st_str = str(st_now).strip() if st_now is not None else ""
+            if self._last_state is not None and st_str and st_str != self._last_state:
+                self._events.append(
+                    {"ts": time.time(), "type": "FSM CHANGE", "msg": st_str}
+                )
+            self._last_state = st_str or self._last_state
+
+            strat_now = data.get("strategy", None)
+            strat_str = str(strat_now).strip() if strat_now is not None else ""
+            if self._last_strategy is not None and strat_str and strat_str != self._last_strategy:
+                self._events.append(
+                    {"ts": time.time(), "type": "STRATEGY CHANGE", "msg": strat_str}
+                )
+            self._last_strategy = strat_str or self._last_strategy
+
+            reg_now = data.get("regime_name", None)
+            reg_str = str(reg_now).strip().upper() if reg_now is not None else ""
+            if self._last_regime_name_evt is not None and reg_str and reg_str != self._last_regime_name_evt:
+                self._events.append(
+                    {"ts": time.time(), "type": "MARKET REGIME", "msg": reg_str}
+                )
+            self._last_regime_name_evt = reg_str or self._last_regime_name_evt
 
             nm = str(data.get("regime_name") or "").strip().upper()
             rid_raw = data.get("regime")
@@ -363,12 +491,36 @@ class SerialTelemetryReader(threading.Thread):
             self._regime_edge_pending = False
             return e
 
-    def snapshot(self) -> Tuple[Dict[str, Any], Dict[str, float], float, bool]:
+    def snapshot(
+        self,
+    ) -> Tuple[Dict[str, Any], Dict[str, float], float, bool, int]:
         with self._lock:
             age_ms = (
                 (time.monotonic() - self.last_mono) * 1000 if self.last_mono else 1e9
             )
-            return dict(self.latest), dict(self.rates), age_ms, self.connected
+            # Update stall detection based on whether heartbeat is changing.
+            if self.connected and self.last_mono:
+                if self.heartbeat == self._last_snapshot_hb and self.heartbeat != 0:
+                    self._stall_snapshot_count += 1
+                else:
+                    self._stall_snapshot_count = 0
+                self._last_snapshot_hb = self.heartbeat
+                # ~250ms poll interval → 3 snapshots ≈ 0.75s without heartbeat change.
+                self.hardware_stalled = self._stall_snapshot_count >= 3
+            else:
+                self.hardware_stalled = False
+
+            return (
+                dict(self.latest),
+                dict(self.rates),
+                age_ms,
+                self.connected,
+                self.heartbeat,
+            )
+
+    def events_snapshot(self) -> List[Dict[str, Any]]:
+        with self._lock:
+            return list(self._events)
 
     def history_arrays(
         self, window_sec: float
@@ -389,6 +541,62 @@ class SerialTelemetryReader(threading.Thread):
         else:
             t_rel = []
         return t_rel, c_list, r_list
+
+    def history_profit_arrays(
+        self, window_sec: float
+    ) -> Tuple[List[float], List[float], List[float], List[float]]:
+        """Cash + PnL(MTM) + Port value time-series for the profit chart."""
+        cutoff = time.monotonic() - window_sec
+        t_list: List[float] = []
+        cash_list: List[float] = []
+        pnl_list: List[float] = []
+        port_list: List[float] = []
+        with self._lock:
+            for t, cash, pnl, port in zip(
+                self.history_t, self.history_cash, self.history_pnl, self.history_port
+            ):
+                if t >= cutoff:
+                    t_list.append(t)
+                    cash_list.append(cash)
+                    pnl_list.append(pnl)
+                    port_list.append(port)
+        if t_list:
+            t0 = t_list[0]
+            t_rel = [x - t0 for x in t_list]
+        else:
+            t_rel = []
+        return t_rel, cash_list, pnl_list, port_list
+
+    def history_activity_arrays(
+        self, window_sec: float
+    ) -> Tuple[List[float], List[float], List[float], List[float], List[float]]:
+        """Activity line series (rates) over the last window_sec."""
+        cutoff = time.monotonic() - window_sec
+        t_list: List[float] = []
+        q_list: List[float] = []
+        o_list: List[float] = []
+        f_list: List[float] = []
+        r_list: List[float] = []
+        with self._lock:
+            for t, q, o, f, r in zip(
+                self.history_t,
+                self.history_rate_q,
+                self.history_rate_o,
+                self.history_rate_f,
+                self.history_rate_rej,
+            ):
+                if t >= cutoff:
+                    t_list.append(t)
+                    q_list.append(q)
+                    o_list.append(o)
+                    f_list.append(f)
+                    r_list.append(r)
+        if t_list:
+            t0 = t_list[0]
+            t_rel = [x - t0 for x in t_list]
+        else:
+            t_rel = []
+        return t_rel, q_list, o_list, f_list, r_list
 
     def session_cash_stats(self) -> Optional[Dict[str, float]]:
         """Session min/max/start since first telemetry sample (this dashboard run)."""
@@ -434,6 +642,8 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                     "enable_sound": False,
                     "enable_confetti": False,
                     "reduced_motion": False,
+                    "presenter_mode": True,
+                    "debug_mode": False,
                 },
             ),
             dcc.Interval(id="tick", interval=250, n_intervals=0),
@@ -515,6 +725,25 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                     id="regime-strip",
                                 ),
                                 html.Div(id="flow-strip"),
+                                dcc.Tabs(
+                                    id="view-tabs",
+                                    value="demo",
+                                    persistence=True,
+                                    children=[
+                                        dcc.Tab(
+                                            label="Demo View",
+                                            value="demo",
+                                        ),
+                                        dcc.Tab(
+                                            label="Debug View",
+                                            value="debug",
+                                        ),
+                                    ],
+                                    className="bb-main-tabs",
+                                    style={"marginBottom": "6px"},
+                                ),
+                                html.Div(id="kpi-strip"),
+                                html.Div(id="sys-diagram"),
                                 html.H2(
                                     "Profit & loss (what viewers usually ask first)",
                                     id="pnl-section-title",
@@ -531,6 +760,12 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                     id="fig-positions",
                                     style={"height": "520px", "maxWidth": "1100px"},
                                 ),
+                                html.H3(
+                                    "Per-symbol book (quotes + exposure)",
+                                    className="bb-section-heading",
+                                    style={"marginTop": "18px", "marginBottom": "10px"},
+                                ),
+                                html.Div(id="symbol-table", style={"width": "100%", "overflowX": "hidden"}),
                                 html.H3(
                                     "Activity & throughput",
                                     className="bb-section-heading",
@@ -569,6 +804,38 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                         ),
                                     ],
                                     style={"marginTop": "4px"},
+                                ),
+                                html.Div(
+                                    [
+                                        html.Div(
+                                            [
+                                                html.H3(
+                                                    "Recent Events",
+                                                    className="bb-section-heading",
+                                                    style={"marginTop": 0, "marginBottom": "10px"},
+                                                ),
+                                                html.Div(id="events-panel"),
+                                            ],
+                                            style={"minWidth": 0},
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.H3(
+                                                    "Strategy / Risk Diagnostics",
+                                                    className="bb-section-heading",
+                                                    style={"marginTop": 0, "marginBottom": "10px"},
+                                                ),
+                                                html.Div(id="diag-panel"),
+                                            ],
+                                            style={"minWidth": 0},
+                                        ),
+                                    ],
+                                    style={
+                                        "display": "grid",
+                                        "gridTemplateColumns": "minmax(0, 1fr) minmax(360px, 0.9fr)",
+                                        "gap": "16px",
+                                        "marginTop": "18px",
+                                    },
                                 ),
                             ],
                             className="bb-tab-page",
@@ -672,6 +939,31 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                     ],
                                     value=[],
                                 ),
+                                html.Br(),
+                                html.Label("Presenter mode (recommended for demos)"),
+                                dcc.Checklist(
+                                    id="set-presenter",
+                                    options=[
+                                        {
+                                            "label": " Large headline metrics + less debug text",
+                                            "value": "p",
+                                        }
+                                    ],
+                                    value=["p"],
+                                ),
+                                html.Br(),
+                                html.Hr(),
+                                html.Label("View mode"),
+                                dcc.Checklist(
+                                    id="set-debug",
+                                    options=[
+                                        {
+                                            "label": " Show raw telemetry diagnostics (Debug View)",
+                                            "value": "d",
+                                        }
+                                    ],
+                                    value=[],
+                                ),
                                 html.P(
                                     "Port and baud are set in the bar above (Connect). "
                                     "Regime display and regime-change effects follow regime / regime_name "
@@ -741,9 +1033,11 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         Input("set-sound", "value"),
         Input("set-confetti", "value"),
         Input("set-reduced", "value"),
+        Input("set-presenter", "value"),
+        Input("set-debug", "value"),
         State("prefs-store", "data"),
     )
-    def on_prefs(dark, hist_sec, syms, show_q, sound, confetti, reduced, cur):
+    def on_prefs(dark, hist_sec, syms, show_q, sound, confetti, reduced, presenter, debug, cur):
         cur = cur or {}
         out = {**cur}
         if dark is not None:
@@ -760,6 +1054,10 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             out["enable_confetti"] = bool("c" in confetti)
         if reduced is not None:
             out["reduced_motion"] = bool("r" in reduced)
+        if presenter is not None:
+            out["presenter_mode"] = bool("p" in presenter)
+        if debug is not None:
+            out["debug_mode"] = bool("d" in debug)
         return out
 
     @callback(
@@ -772,20 +1070,32 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         prefs = prefs or {}
         telem = telem or {}
         dark = prefs.get("dark", True)
+        presenter = prefs.get("presenter_mode", True)
         reduced = prefs.get("reduced_motion", False)
         c = theme_colors(dark)
         latest = telem.get("latest") or {}
-        name = str(latest.get("regime_name") or "").strip().upper()
-        if not name or name == "?":
-            rid = int(latest.get("regime", 0)) & 3
-            name = REGIME_LABELS[rid] if rid < len(REGIME_LABELS) else "CALM"
-        if name not in REGIME_INFO:
-            name = "CALM"
-        bg, blurb = REGIME_INFO[name]
+        regime_name_raw = latest.get("regime_name", None)
+        name = "UNKNOWN"
+        if regime_name_raw is not None:
+            rn = str(regime_name_raw).strip().upper()
+            if rn and rn != "?" and rn in REGIME_INFO:
+                name = rn
+        if name == "UNKNOWN" and latest.get("regime", None) is not None:
+            try:
+                rid = int(latest.get("regime", 0)) & 3
+                if 0 <= rid < len(REGIME_LABELS):
+                    name = REGIME_LABELS[rid]
+            except (TypeError, ValueError):
+                name = "UNKNOWN"
+        if name in REGIME_INFO:
+            bg, blurb = REGIME_INFO[name]
+        else:
+            bg = c["grid"]
+            blurb = "Market regime diagnostics unavailable — regime_name/regime fields missing from telemetry."
         edge = bool(telem.get("regime_edge"))
         pulse_cls = "" if reduced else (" bb-regime-pulse" if edge else "")
 
-        inner = [
+        inner: List[Any] = [
             html.Div(
                 [
                     html.Span(
@@ -793,7 +1103,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                         className="bb-regime-title",
                     ),
                     html.Span(
-                        f" · id={int(latest.get('regime', 0)) & 3}",
+                        " · id=UNKNOWN" if latest.get("regime", None) is None else f" · id={int(latest.get('regime', 0)) & 3}",
                         className="bb-mono bb-regime-id",
                     ),
                 ],
@@ -809,19 +1119,22 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                     "fontWeight": "500",
                 },
             ),
-            html.Div(
-                "Source: JSON lines may include regime and regime_name (however your pipeline "
-                "fills them). Edges for motion and optional chime/confetti come from successive "
-                "samples, or from regime_changes if your publisher adds that counter.",
-                style={
-                    "marginTop": "12px",
-                    "fontSize": "12px",
-                    "opacity": 0.88,
-                    "fontFamily": FONT_UI,
-                    "fontVariantNumeric": "tabular-nums",
-                },
-            ),
         ]
+        if not presenter:
+            inner.append(
+                html.Div(
+                    "Source: JSON lines may include regime and regime_name (however your pipeline "
+                    "fills them). Edges for motion and optional chime/confetti come from successive "
+                    "samples, or from regime_changes if your publisher adds that counter.",
+                    style={
+                        "marginTop": "12px",
+                        "fontSize": "12px",
+                        "opacity": 0.88,
+                        "fontFamily": FONT_UI,
+                        "fontVariantNumeric": "tabular-nums",
+                    },
+                )
+            )
         children = html.Div(
             inner,
             className="bb-regime-inner" + pulse_cls,
@@ -895,14 +1208,17 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         if freeze and freeze.get("active") and freeze.get("payload") is not None:
             return freeze["payload"]
         regime_edge = reader.pop_regime_edge()
-        latest, rates, age_ms, connected = reader.snapshot()
+        latest, rates, age_ms, connected, heartbeat = reader.snapshot()
         return {
             "latest": latest,
             "rates": rates,
             "age_ms": age_ms,
             "connected": connected,
+            "heartbeat": heartbeat,
+            "hardware_stalled": reader.hardware_stalled,
             "parse_errors": reader.parse_errors,
             "regime_edge": regime_edge,
+            "events": reader.events_snapshot(),
             "ts": time.time(),
         }
 
@@ -925,23 +1241,94 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         telem = _active_data(telem or {}, freeze)
         prefs = prefs or {}
         dark = prefs.get("dark", True)
+        presenter = prefs.get("presenter_mode", True)
         c = theme_colors(dark)
         latest = telem.get("latest") or {}
         age_ms = float(telem.get("age_ms", 1e9))
+        heartbeat = telem.get("heartbeat", 0)
         connected = telem.get("connected", False)
+        hardware_stalled = bool(telem.get("hardware_stalled", False))
         stale = (age_ms > STALE_MS) and not paused
 
-        rn = str(latest.get("regime_name") or "").strip().upper()
-        if not rn or rn == "?":
-            rn = REGIME_LABELS[int(latest.get("regime", 0)) & 3]
-        regime_show = rn
+        rates = telem.get("rates") or {}
 
-        state = latest.get("state", "—")
-        strat = latest.get("strategy", "—")
-        link_up = latest.get("link_up", False)
-        risk_halt = latest.get("risk_halt", False)
-        link_err = int(latest.get("link_err", 0))
-        pe = int(telem.get("parse_errors", 0))
+        def _clean(v: Any, fallback: str = "UNKNOWN") -> str:
+            s = "" if v is None else str(v).strip()
+            if not s or s in ("?", "—", "-", "null", "None"):
+                return fallback
+            return s
+
+        raw_link_up = bool(latest.get("link_up", False))
+        raw_risk_halt = bool(latest.get("risk_halt", False))
+        raw_state = latest.get("state", None)
+        raw_strategy = latest.get("strategy", None)
+
+        # FSM STATE label (explicit fallback; no '?')
+        fsm_state = _clean(raw_state)
+        if fsm_state.startswith("B_"):
+            fsm_short = fsm_state[2:]
+            if fsm_short in ("RESET", "IDLE", "ARMED"):
+                fsm_state = "RESET" if fsm_short == "RESET" else "IDLE" if fsm_short == "IDLE" else "RUNNING"
+            elif fsm_short == "TRADING":
+                fsm_state = "RUNNING"
+            elif fsm_short == "HALTED":
+                fsm_state = "STOPPED"
+        if fsm_state in ("UNKNOWN", "—", "?"):
+            fsm_state = "UNKNOWN"
+
+        # STRATEGY label (explicit fallback; no '?')
+        strat_raw = _clean(raw_strategy)
+        if fsm_state != "RUNNING":
+            strat = "IDLE"
+        else:
+            strat_map = {
+                "MEAN_REV": "MEAN REVERSION",
+                "MOMENTUM": "MOMENTUM",
+                "NN": "ML",
+                "AUTO": "SAFE",
+            }
+            strat = strat_map.get(strat_raw, "UNKNOWN")
+
+        # MARKET REGIME label (explicit fallback; do not assume CALM when missing)
+        regime_name_raw = latest.get("regime_name", None)
+        regime_show = "UNKNOWN"
+        rn = str(regime_name_raw).strip().upper() if regime_name_raw is not None else ""
+        if rn and rn != "?" and rn in REGIME_INFO:
+            regime_show = rn
+        else:
+            if "regime" in latest and latest.get("regime", None) is not None:
+                try:
+                    rid = int(latest.get("regime", 0)) & 3
+                    regime_show = REGIME_LABELS[rid]
+                except (TypeError, ValueError):
+                    regime_show = "UNKNOWN"
+
+        # RISK STATE label
+        risk_halt = raw_risk_halt
+        rej_rate = float(rates.get("rej", 0.0) or 0.0)
+        if risk_halt:
+            risk_state = "HALTED"
+            risk_tone = c["bad"]
+        elif rej_rate > 0:
+            risk_state = "REJECTING"
+            risk_tone = c["warn"]
+        else:
+            risk_state = "OK"
+            risk_tone = c["good"]
+
+        link_up = raw_link_up
+        link_err = int(latest.get("link_err", 0) or 0)
+        pe = int(telem.get("parse_errors", 0) or 0)
+
+        qps = int(latest.get("qps", 0) or 0)
+        ops = int(latest.get("ops", 0) or 0)
+        fps = int(latest.get("fps", 0) or 0)
+        has_quotes = (qps > 0) or (float(rates.get("q", 0.0) or 0.0) > 0.0)
+        has_orders = (ops > 0) or (float(rates.get("o", 0.0) or 0.0) > 0.0)
+        has_fills = (fps > 0) or (float(rates.get("f", 0.0) or 0.0) > 0.0)
+
+        axi_ok = connected and (not stale) and pe == 0
+        telemetry_mode = "LIVE" if (connected and not stale) else ("STALE" if connected else "DISCONNECTED")
 
         root_style = {
             "minHeight": "100vh",
@@ -961,66 +1348,128 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         }
 
         if paused:
-            banner = html.Div(
-                "Paused — charts frozen; serial may still run in the background.",
-                style={
-                    **_banner_base,
-                    "backgroundColor": c["card"],
-                    "color": c["text"],
-                    "border": f"1px solid {c['grid']}",
-                },
-            )
+            status_text = "BOARD B STATUS: PAUSED — charts frozen"
+            status_tone = c["muted"]
+            hint = "Serial may still run in the background."
         elif not connected:
-            banner = html.Div(
-                "Disconnected — enter serial port in the bar above, then Connect.",
-                style={
-                    **_banner_base,
-                    "backgroundColor": c["card"],
-                    "color": c["text"],
-                    "border": f"1px solid {c['bad']}",
-                },
-            )
+            status_text = "BOARD B STATUS: MMIO ERROR — Unable to read telemetry registers"
+            status_tone = c["bad"]
+            hint = "No telemetry is arriving. Check serial link and board-side server."
+        elif hardware_stalled:
+            status_text = "BOARD B STATUS: HARDWARE STALLED — Telemetry heartbeat not incrementing"
+            status_tone = c["bad"]
+            hint = "Telemetry ingest heartbeat stopped changing while link state is not stale."
         elif stale:
-            banner = html.Div(
-                f"Stale data — {age_ms:.0f} ms since last JSON line.",
-                style={
-                    **_banner_base,
-                    "backgroundColor": c["card"],
-                    "color": c["warn"],
-                    "border": f"1px solid {c['grid']}",
-                },
-            )
+            status_text = "BOARD B STATUS: HARDWARE STALLED — Telemetry updates are stale"
+            status_tone = c["bad"]
+            hint = f"Last telemetry update was {age_ms:.0f} ms ago."
         else:
-            ok = link_up and not risk_halt and link_err == 0
-            banner = html.Div(
-                [
-                    html.Span(
-                        "Live",
-                        style={
-                            "color": c["good"] if ok else c["warn"],
-                            "fontWeight": "800",
-                            "marginRight": "10px",
-                        },
-                    ),
-                    html.Span(
-                        f"{regime_show} · {state} · {strat} · "
-                        f"{'Link up' if link_up else 'Link down'} · "
-                        f"{'Risk halt' if risk_halt else 'Risk OK'} · "
-                        f"errors link={link_err} json={pe}",
-                        style={"color": c["muted"], "fontWeight": "500"},
-                    ),
-                ],
-                style={
-                    **_banner_base,
-                    "backgroundColor": c["card"],
-                    "border": f"1px solid {c['grid']}",
-                },
-            )
+            if not link_up:
+                status_text = "BOARD B STATUS: LINK DOWN — No quotes received from Board A"
+                status_tone = c["bad"]
+                hint = "Board B is alive, but the RX link is not delivering quotes."
+            elif not has_quotes:
+                status_text = "BOARD B STATUS: WAITING — Hardware alive, links OK, but no quotes yet"
+                status_tone = c["warn"]
+                hint = "Try starting Board A and verify link mapping/PMOD wiring."
+            elif risk_halt:
+                status_text = "BOARD B STATUS: RISK HALTED — Orders blocked"
+                status_tone = c["bad"]
+                hint = f"Risk rejects: {int(latest.get('rej', 0) or 0):,}."
+            elif has_quotes and has_orders:
+                status_text = "BOARD B STATUS: LIVE — Receiving quotes and sending orders"
+                status_tone = c["good"]
+                hint = "Traffic is flowing through the pipeline."
+            elif has_quotes and not has_orders:
+                status_text = "BOARD B STATUS: WAITING — Quotes flowing, but no orders sent"
+                status_tone = c["warn"]
+                hint = "Check strategy activation and risk thresholds."
+            else:
+                status_text = "BOARD B STATUS: UNKNOWN"
+                status_tone = c["warn"]
+                hint = "Telemetry is present but state is ambiguous."
+
+        # Meta strip (right-aligned on the same header row)
+        meta_strip = html.Div(
+            [
+                html.Span(f"Last telemetry update: {age_ms:.0f} ms ago", style={"color": c["muted"]}),
+                html.Span(" · ", style={"color": c["muted"]}),
+                html.Span(f"Telemetry heartbeat: {int(heartbeat):08d}", style={"color": c["text"]}),
+                html.Span(" · ", style={"color": c["muted"]}),
+                html.Span(f"AXI/MMIO: {'OK' if axi_ok else 'ERROR'}", style={"color": c["good"] if axi_ok else c["bad"]}),
+                html.Span(" · ", style={"color": c["muted"]}),
+                html.Span(f"Telemetry: {telemetry_mode}", style={"color": c["warn"] if telemetry_mode != 'LIVE' else c["good"]}),
+            ],
+            style={
+                "fontSize": "12px",
+                "fontWeight": "600",
+                "letterSpacing": "0.01em",
+                "whiteSpace": "nowrap",
+            },
+        )
+
+        banner = html.Div(
+            [
+                html.Div(
+                    [
+                        html.Span(
+                            status_text,
+                            style={
+                                "color": status_tone,
+                                "fontWeight": "900",
+                                "fontSize": "16px",
+                                "letterSpacing": "0.01em",
+                            },
+                        ),
+                        html.Div(
+                            hint,
+                            style={
+                                "color": c["muted"],
+                                "fontSize": "12px",
+                                "marginTop": "6px",
+                                "fontWeight": "500",
+                                "lineHeight": "1.4",
+                            },
+                        ),
+                    ],
+                    style={"flex": "1 1 auto", "minWidth": 0},
+                ),
+                html.Div(meta_strip, style={"flex": "0 0 auto", "marginLeft": "18px"}),
+            ],
+            style={
+                **_banner_base,
+                "backgroundColor": c["card"],
+                "border": f"1px solid {c['grid']}",
+                "display": "flex",
+                "alignItems": "flex-start",
+                "justifyContent": "space-between",
+                "gap": "14px",
+                "maxWidth": "1200px",
+                "marginLeft": "auto",
+                "marginRight": "auto",
+            },
+        )
+
+        title = html.Div(
+            "Board B — Trader Telemetry",
+            style={
+                "fontSize": "22px",
+                "fontWeight": "900",
+                "letterSpacing": "-0.01em",
+                "margin": "14px 0 6px",
+                "maxWidth": "1200px",
+                "marginLeft": "auto",
+                "marginRight": "auto",
+            },
+        )
         root_cls = "bb-root bb-root--dark" if dark else "bb-root bb-root--light"
-        return banner, root_style, root_cls
+        if presenter:
+            root_cls += " bb-presenter"
+        return html.Div([title, banner]), root_style, root_cls
 
     @callback(
         Output("flow-strip", "children"),
+        Output("kpi-strip", "children"),
         Output("pnl-section-title", "style"),
         Output("pnl-hero", "children"),
         Output("fig-pnl", "figure"),
@@ -1030,14 +1479,22 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         Output("fig-mini-hist", "figure"),
         Output("scalar-table", "children"),
         Output("fig-latency", "figure"),
+        Output("events-panel", "children"),
+        Output("diag-panel", "children"),
+        Output("symbol-table", "children"),
+        Output("sys-diagram", "children"),
         Input("telemetry-store", "data"),
         Input("prefs-store", "data"),
+        Input("view-tabs", "value"),
         State("freeze-store", "data"),
     )
-    def render_figures(telem, prefs, freeze):
+    def render_figures(telem, prefs, view_tab, freeze):
         telem = _active_data(telem or {}, freeze or {})
         prefs = prefs or {}
         dark = prefs.get("dark", True)
+        presenter = prefs.get("presenter_mode", True)
+        debug_mode = prefs.get("debug_mode", False)
+        effective_debug = bool(debug_mode) or (view_tab == "debug")
         hist_sec = float(prefs.get("history_sec", DEFAULT_HISTORY_SEC))
         sym_filter = prefs.get("symbols", list(range(NUM_SYMBOLS)))
         show_quotes = prefs.get("show_quotes_bar", True)
@@ -1046,11 +1503,21 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         latest = telem.get("latest") or {}
         rates = telem.get("rates") or {}
 
-        rname = str(latest.get("regime_name") or "").strip().upper()
-        if not rname or rname == "?":
-            rname = REGIME_LABELS[int(latest.get("regime", 0)) & 3]
-        chart_paper, chart_plot = regime_chart_tint(rname, dark)
-        lat_cap = latency_regime_caption(rname)
+        regime_name_raw = latest.get("regime_name", None)
+        regime_lbl_for_charts = "UNKNOWN"
+        if regime_name_raw is not None:
+            rn = str(regime_name_raw).strip().upper()
+            if rn and rn != "?" and rn in REGIME_INFO:
+                regime_lbl_for_charts = rn
+        if regime_lbl_for_charts == "UNKNOWN" and latest.get("regime", None) is not None:
+            try:
+                rid = int(latest.get("regime", 0)) & 3
+                regime_lbl_for_charts = REGIME_LABELS[rid]
+            except (TypeError, ValueError, IndexError):
+                regime_lbl_for_charts = "UNKNOWN"
+
+        chart_paper, chart_plot = regime_chart_tint(regime_lbl_for_charts, dark)
+        lat_cap = latency_regime_caption(regime_lbl_for_charts)
 
         state = latest.get("state", "—")
         risk_halt = latest.get("risk_halt", False)
@@ -1106,7 +1573,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                     },
                 ),
                 html.Div(
-                    "Logical flow (for narration) — profit is above, not here",
+                    "Narrative flow — market data to risk-checked execution",
                     style={
                         "fontWeight": "500",
                         "marginBottom": "8px",
@@ -1156,6 +1623,204 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             },
         )
 
+        def _kpi_card(
+            label: str,
+            value: str,
+            tone: str,
+            sub: str = "",
+            tooltip: str = "",
+            clickable: bool = False,
+        ) -> html.Div:
+            return html.Div(
+                [
+                    html.Div(
+                        label,
+                        style={
+                            "fontSize": "11px",
+                            "fontWeight": "700",
+                            "letterSpacing": "0.08em",
+                            "textTransform": "uppercase",
+                            "color": c["muted"],
+                        },
+                    ),
+                    html.Div(
+                        value,
+                        className="bb-mono",
+                        style={
+                            "fontSize": "26px",
+                            "fontWeight": "800",
+                            "lineHeight": "1.15",
+                            "marginTop": "4px",
+                            "color": tone,
+                        },
+                    ),
+                    html.Div(
+                        sub,
+                        style={
+                            "fontSize": "12px",
+                            "marginTop": "6px",
+                            "color": c["muted"],
+                            "minHeight": "18px",
+                        },
+                    ),
+                ],
+                style={
+                    "flex": "1 1 180px",
+                    "minWidth": "170px",
+                    "padding": "14px 16px",
+                    "borderRadius": "14px",
+                    "backgroundColor": c["card"],
+                    "border": f"1px solid {c['grid']}",
+                    "cursor": "pointer" if clickable else "default",
+                    "transition": "box-shadow 0.15s ease, border-color 0.15s ease",
+                },
+                title=tooltip or None,
+                className="bb-kpi-card" if clickable else None,
+            )
+
+        def _label_unknown(v: Any) -> str:
+            s = "" if v is None else str(v).strip()
+            if not s or s in ("?", "—", "-", "null", "None"):
+                return "UNKNOWN"
+            return s
+
+        def _fsm_label(raw_state: Any) -> str:
+            s = _label_unknown(raw_state)
+            m = {
+                "B_RESET": "RESET",
+                "B_IDLE": "IDLE",
+                "B_ARMED": "RUNNING",
+                "B_TRADING": "RUNNING",
+                "B_HALTED": "STOPPED",
+            }
+            return m.get(s, "UNKNOWN" if s == "UNKNOWN" else s.replace("B_", ""))  # never returns '?'
+
+        def _strategy_label(raw_strategy: Any, fsm_lbl: str) -> str:
+            if fsm_lbl not in ("RUNNING",):
+                return "IDLE"
+            s = _label_unknown(raw_strategy)
+            return {
+                "MEAN_REV": "MEAN REVERSION",
+                "MOMENTUM": "MOMENTUM",
+                "NN": "ML",
+                "AUTO": "SAFE",
+                "MEAN_REVERSION": "MEAN REVERSION",
+                "ML": "ML",
+                "SAFE": "SAFE",
+            }.get(s, "UNKNOWN")
+
+        def _regime_label(latest_obj: Dict[str, Any]) -> str:
+            rn_raw = latest_obj.get("regime_name", None)
+            if rn_raw is not None:
+                rn = _label_unknown(rn_raw).upper()
+                if rn in REGIME_INFO:
+                    return rn
+            if latest_obj.get("regime", None) is not None:
+                try:
+                    rid = int(latest_obj.get("regime", 0)) & 3
+                    if 0 <= rid < len(REGIME_LABELS):
+                        return REGIME_LABELS[rid]
+                except (TypeError, ValueError):
+                    pass
+            return "UNKNOWN"
+
+        def _risk_label(risk_halt_flag: bool, rej_rate_value: float) -> str:
+            if risk_halt_flag:
+                return "HALTED"
+            # If risk gate is not halted but we are rejecting, call it REJECTING.
+            if rej_rate_value > 0.0:
+                return "REJECTING"
+            return "OK"
+
+        raw_state = latest.get("state", None)
+        fsm_lbl = _fsm_label(raw_state)
+        strat_lbl = _strategy_label(latest.get("strategy", None), fsm_lbl)
+
+        link_up = bool(latest.get("link_up", False))
+        risk_halt = bool(latest.get("risk_halt", False))
+        rej_rate = float(rates.get("rej", 0.0) or 0.0)
+
+        regime_lbl = _regime_label(latest)
+        risk_lbl = _risk_label(risk_halt, rej_rate)
+
+        parse_err = int(telem.get("parse_errors", 0) or 0)
+        qps = int(latest.get("qps", 0) or 0)
+        ops = int(latest.get("ops", 0) or 0)
+        fps = int(latest.get("fps", 0) or 0)
+        rej = int(latest.get("rej", 0) or 0)
+
+        total_pnl = float(latest.get("total_pnl", 0.0) or 0.0)
+        port_value = float(latest.get("port_value", 0.0) or 0.0)
+        cash_val = float(latest.get("cash", 0.0) or 0.0)
+
+        system_row = html.Div(
+            [
+                _kpi_card(
+                    "LINK STATUS",
+                    "UP" if link_up else "DOWN",
+                    c["good"] if link_up else c["bad"],
+                    "Board-to-board RX",
+                    tooltip=(
+                        "Board B is receiving quotes from Board A."
+                        if link_up
+                        else "Board B is alive, but no quotes are arriving from Board A."
+                    ),
+                    clickable=True,
+                ),
+                _kpi_card(
+                    "FSM STATE",
+                    fsm_lbl,
+                    c["accent"] if fsm_lbl in ("RUNNING", "RESET") else c["muted"],
+                    "Board B control flow",
+                ),
+                _kpi_card(
+                    "STRATEGY",
+                    strat_lbl,
+                    c["accent"] if strat_lbl not in ("IDLE", "UNKNOWN") else c["muted"],
+                    "ML / rules layer",
+                ),
+                _kpi_card(
+                    "MARKET REGIME",
+                    regime_lbl,
+                    c["accent"] if regime_lbl != "UNKNOWN" else c["muted"],
+                    "Telemetry-derived",
+                ),
+                _kpi_card(
+                    "RISK STATE",
+                    risk_lbl,
+                    c["bad"] if risk_lbl in ("HALTED", "REJECTING") else c["good"],
+                    ("" if presenter else f"Rej counter: {rej:,}"),
+                    tooltip=(
+                        "Orders may be blocked because risk limits are being enforced."
+                        if risk_halt or risk_lbl in ("REJECTING", "HALTED")
+                        else "Risk limits are OK; orders are allowed to flow."
+                    ),
+                    clickable=True,
+                ),
+            ],
+            style={"display": "flex", "flexWrap": "wrap", "gap": "10px", "marginBottom": "10px"},
+        )
+
+        perf_row = html.Div(
+            [
+                _kpi_card("CASH", f"${cash_val:,.2f}", c["good"] if cash_val >= 0 else c["bad"], "Board B realized"),
+                _kpi_card(
+                    "TOTAL PNL",
+                    f"${total_pnl:+,.2f}",
+                    c["good"] if total_pnl >= 0 else c["bad"],
+                    "MTM aggregate",
+                ),
+                _kpi_card("PORT VALUE", f"${port_value:,.2f}", c["accent"], "Cash + Σ pos·mid"),
+                _kpi_card("QUOTES RX", f"{qps:,}", c["muted"], "Board A → B"),
+                _kpi_card("ORDERS TX", f"{ops:,}", c["muted"], "B → Board A"),
+                _kpi_card("FILLS RX", f"{fps:,}", c["muted"], "Execution results"),
+                _kpi_card("RISK REJECTS", f"{rej:,}", c["bad"] if rej > 0 else c["muted"], "Gate pressure"),
+            ],
+            style={"display": "flex", "flexWrap": "wrap", "gap": "10px"},
+        )
+
+        kpis = html.Div([system_row, perf_row], style={"marginBottom": "18px"})
+
         cash = cash_to_dollars(
             int(latest.get("cash_lo", 0)), int(latest.get("cash_hi", 0))
         )
@@ -1192,7 +1857,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                     f"${cash:,.2f}",
                                     className="bb-mono",
                                     style={
-                                        "fontSize": "52px",
+                                        "fontSize": "64px" if presenter else "52px",
                                         "fontWeight": "900",
                                         "lineHeight": "1.1",
                                         "color": cash_color,
@@ -1218,14 +1883,14 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                     f"{'+' if sess_delta >= 0 else ''}${sess_delta:,.2f}",
                                     className="bb-mono",
                                     style={
-                                        "fontSize": "36px",
+                                        "fontSize": "42px" if presenter else "36px",
                                         "fontWeight": "800",
                                         "color": delta_color,
                                         "marginTop": "6px",
                                     },
                                 ),
                                 html.Div(
-                                    "Since this dashboard first saw telemetry",
+                                    "Session delta since dashboard start",
                                     style={
                                         "fontSize": "12px",
                                         "color": c["muted"],
@@ -1291,11 +1956,15 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                     },
                 ),
                 html.Div(
-                    "This is realized P&L from fills (Q32.16), not full mark-to-market unless you add price feeds. "
-                    "Positions below show how many shares the engine holds per symbol.",
+                    (
+                        "Realized P&L from hardware fills. Exposure below shows current inventory by symbol."
+                        if presenter
+                        else "This is realized P&L from fills (Q32.16), not full mark-to-market unless you add price feeds. "
+                        "Positions below show how many shares the engine holds per symbol."
+                    ),
                     style={
                         "marginTop": "12px",
-                        "fontSize": "14px",
+                        "fontSize": "16px" if presenter else "14px",
                         "lineHeight": "1.45",
                         "color": c["muted"],
                         "maxWidth": "960px",
@@ -1304,38 +1973,76 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             ]
         )
 
-        t_rel, cash_h, _rej = reader.history_arrays(hist_sec)
+        t_rel, cash_h, pnl_h, port_h = reader.history_profit_arrays(hist_sec)
         if freeze and freeze.get("active"):
             t_rel = [0.0]
             cash_h = [cash]
+            pnl_h = [float(latest.get("total_pnl", 0.0) or 0.0)]
+            port_h = [float(latest.get("port_value", 0.0) or 0.0)]
 
         fig_pnl = go.Figure()
-        if len(cash_h) > 1:
-            fig_pnl.add_trace(
-                go.Scatter(
-                    x=t_rel,
-                    y=cash_h,
-                    mode="lines",
-                    line=dict(color=c["good"], width=2.5),
-                    name="Realized cash",
-                    hovertemplate="t=%{x:.2f}s<br>$%{y:.2f}<extra></extra>",
-                )
+        if len(t_rel) > 0:
+            if len(cash_h) == 0:
+                cash_h = [0.0]
+            if len(pnl_h) == 0:
+                pnl_h = [0.0]
+            if len(port_h) == 0:
+                port_h = [0.0]
+
+            any_movement = (
+                (max(abs(float(x) or 0.0) for x in cash_h) > 1e-6)
+                or (max(abs(float(x) or 0.0) for x in pnl_h) > 1e-6)
+                or (max(abs(float(x) or 0.0) for x in port_h) > 1e-6)
             )
-        elif len(cash_h) == 1:
-            fig_pnl.add_trace(
-                go.Scatter(
-                    x=[0],
-                    y=cash_h,
-                    mode="markers",
-                    marker=dict(size=10, color=c["good"]),
-                    hovertemplate="$%{y:.2f}<extra></extra>",
+
+            if not any_movement:
+                fig_pnl = fig_blank(
+                    "Waiting for trading data...<br>No cash, P&L, or portfolio movement has been observed yet.",
+                    c,
                 )
-            )
+            else:
+                line_mode = "lines" if len(t_rel) > 1 else "markers"
+                fig_pnl.add_trace(
+                    go.Scatter(
+                        x=t_rel,
+                        y=cash_h,
+                        mode=line_mode,
+                        line=dict(color=c["good"], width=2.5),
+                        marker=dict(size=10, color=c["good"]),
+                        name="Cash",
+                        hovertemplate="t=%{x:.2f}s<br>Cash=$%{y:.2f}<extra></extra>",
+                    )
+                )
+                fig_pnl.add_trace(
+                    go.Scatter(
+                        x=t_rel,
+                        y=pnl_h,
+                        mode=line_mode,
+                        line=dict(color=c["accent"], width=2.2),
+                        marker=dict(size=10, color=c["accent"]),
+                        name="Total PnL MTM",
+                        hovertemplate="t=%{x:.2f}s<br>Total PnL=$%{y:.2f}<extra></extra>",
+                    )
+                )
+                fig_pnl.add_trace(
+                    go.Scatter(
+                        x=t_rel,
+                        y=port_h,
+                        mode=line_mode,
+                        line=dict(color=c["warn"], width=2.2),
+                        marker=dict(size=10, color=c["warn"]),
+                        name="Port Value",
+                        hovertemplate="t=%{x:.2f}s<br>Port=$%{y:.2f}<extra></extra>",
+                    )
+                )
         else:
-            fig_pnl = fig_blank("Waiting for telemetry…", c)
+            fig_pnl = fig_blank(
+                "Waiting for trading data...<br>No cash, P&L, or portfolio movement has been observed yet.",
+                c,
+            )
         fig_pnl.update_layout(
             title=dict(
-                text="Cash over time",
+                text="Profit & Portfolio",
                 font=_plot_font(c, 13),
             ),
             paper_bgcolor=chart_paper,
@@ -1352,41 +2059,71 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             yaxis=dict(showgrid=True, gridcolor=c["grid"], title="USD", zeroline=False),
         )
 
-        bars_x: List[float] = []
-        bars_y: List[str] = []
-        colors: List[str] = []
-        if show_quotes:
-            bars_x.append(float(rates.get("q", 0.0)))
-            bars_y.append("Quotes/s")
-            colors.append(c["muted"])
-        bars_x.extend(
-            [
-                float(rates.get("o", 0.0)),
-                float(rates.get("f", 0.0)),
-                float(rates.get("rej", 0.0)),
-            ]
-        )
-        bars_y.extend(["Orders/s", "Fills/s", "Risk rej/s"])
-        colors.extend([c["accent"], c["good"], c["bad"]])
-        fig_thr = go.Figure(
-            go.Bar(
-                x=bars_x,
-                y=bars_y,
-                orientation="h",
-                marker_color=colors,
-                hovertemplate="%{y}: %{x:.1f}<extra></extra>",
+        # Activity over time: derived rates (quotes/orders/fills/rejects).
+        qps_i = int(latest.get("qps", 0) or 0)
+        ops_i = int(latest.get("ops", 0) or 0)
+        fps_i = int(latest.get("fps", 0) or 0)
+        has_any_traffic_now = (qps_i > 0) or (ops_i > 0) or (fps_i > 0)
+
+        t_act, q_h, o_h, f_h, r_h = reader.history_activity_arrays(hist_sec)
+        if (not t_act) or (not has_any_traffic_now) or (
+            max(q_h + o_h + f_h + r_h) if (q_h or o_h or f_h or r_h) else 0.0
+        ) <= 1e-12:
+            fig_thr = fig_blank("No traffic yet.<br>Check Board A is running, PMOD cables are connected, and link status is UP.", c)
+        else:
+            fig_thr = go.Figure()
+            if show_quotes:
+                fig_thr.add_trace(
+                    go.Scatter(
+                        x=t_act,
+                        y=q_h,
+                        mode="lines",
+                        line=dict(color=c["muted"], width=2.2),
+                        name="quotes/sec",
+                        hovertemplate="t=%{x:.2f}s<br>quotes/sec=%{y:.1f}<extra></extra>",
+                    )
+                )
+            fig_thr.add_trace(
+                go.Scatter(
+                    x=t_act,
+                    y=o_h,
+                    mode="lines",
+                    line=dict(color=c["accent"], width=2.2),
+                    name="orders/sec",
+                    hovertemplate="t=%{x:.2f}s<br>orders/sec=%{y:.1f}<extra></extra>",
+                )
             )
-        )
-        fig_thr.update_layout(
-            title=dict(text="Throughput", font=_plot_font(c, 13)),
-            paper_bgcolor=chart_paper,
-            plot_bgcolor=chart_plot,
-            font=_plot_font(c),
-            height=240,
-            margin=dict(l=100, r=20, t=40, b=30),
-            xaxis=dict(showgrid=True, gridcolor=c["grid"]),
-            yaxis=dict(showgrid=False),
-        )
+            fig_thr.add_trace(
+                go.Scatter(
+                    x=t_act,
+                    y=f_h,
+                    mode="lines",
+                    line=dict(color=c["good"], width=2.2),
+                    name="fills/sec",
+                    hovertemplate="t=%{x:.2f}s<br>fills/sec=%{y:.1f}<extra></extra>",
+                )
+            )
+            fig_thr.add_trace(
+                go.Scatter(
+                    x=t_act,
+                    y=r_h,
+                    mode="lines",
+                    line=dict(color=c["bad"], width=2.2),
+                    name="risk rejects/sec",
+                    hovertemplate="t=%{x:.2f}s<br>risk rejects/sec=%{y:.1f}<extra></extra>",
+                )
+            )
+            fig_thr.update_layout(
+                title=dict(text="Traffic Activity", font=_plot_font(c, 13)),
+                paper_bgcolor=chart_paper,
+                plot_bgcolor=chart_plot,
+                font=_plot_font(c),
+                height=240,
+                margin=dict(l=55, r=20, t=40, b=40),
+                xaxis=dict(showgrid=True, gridcolor=c["grid"], title="window (s)"),
+                yaxis=dict(showgrid=True, gridcolor=c["grid"], title="rate per second"),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+            )
 
         hist = [int(x) for x in latest.get("hist", [0] * NUM_HIST_BINS)]
         x_idx = [i * HIST_BIN_CYCLES for i in range(NUM_HIST_BINS)]
@@ -1409,7 +2146,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             yaxis=dict(title="fills"),
         )
 
-        lat_cnt = int(latest.get("lat_cnt", 0))
+        lat_cnt = int(latest.get("lat_cnt", 0) or 0)
         lat_mean_cy = int(latest.get("lat_sum", 0)) / lat_cnt if lat_cnt else 0.0
         p50, p99 = compute_percentiles(hist)
 
@@ -1504,35 +2241,536 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             if 0 <= i < NUM_SYMBOLS:
                 names.append(SYMBOL_NAMES[i])
                 vals.append(int(pos[i]))
-        fig_pos = go.Figure(
-            go.Bar(
-                y=names,
-                x=vals,
-                orientation="h",
-                marker_color=[c["good"] if v >= 0 else c["bad"] for v in vals],
-                hovertemplate="%{y}: %{x} shares<extra></extra>",
+        # Empty-state behavior: if we have no quotes yet, show a clear message.
+        qps_i = int(latest.get("qps", 0) or 0)
+        ops_i = int(latest.get("ops", 0) or 0)
+        fps_i = int(latest.get("fps", 0) or 0)
+        has_any_traffic = (qps_i > 0) or (ops_i > 0) or (fps_i > 0)
+
+        if not has_any_traffic:
+            fig_pos = fig_blank("Waiting for quotes from Board A…", c)
+        else:
+            fig_pos = go.Figure(
+                go.Bar(
+                    y=names,
+                    x=vals,
+                    orientation="h",
+                    marker_color=[c["good"] if v >= 0 else c["bad"] for v in vals],
+                    hovertemplate="%{y}: %{x} shares<extra></extra>",
+                )
             )
+            fig_pos.update_layout(
+                title=dict(text="Positions", font=_plot_font(c, 13)),
+                paper_bgcolor=chart_paper,
+                plot_bgcolor=chart_plot,
+                font=_plot_font(c, 12),
+                xaxis=dict(
+                    title="shares (signed)",
+                    showgrid=True,
+                    gridcolor=c["grid"],
+                    zeroline=True,
+                    zerolinewidth=2,
+                    zerolinecolor=c["muted"],
+                ),
+                yaxis=dict(autorange="reversed"),
+                margin=dict(l=72, r=24, t=56, b=48),
+                height=500,
+            )
+
+        # Empty-state overlays for throughput and latency
+        if not has_any_traffic:
+            fig_thr = fig_blank("No traffic yet.<br>Check that Board A is running.", c)
+            fig_mini = fig_blank("No fills received yet…", c)
+            fig_lat = fig_blank("No fills received yet…", c)
+        else:
+            # Quotes/orders can exist without fills; explain the specific reason latency is empty.
+            if fps_i <= 0:
+                fig_mini = fig_blank("No fills received yet…", c)
+                fig_lat = fig_blank(
+                    "No fills received yet.<br>Latency data will appear after orders are filled.",
+                    c,
+                )
+
+        # ── Events + diagnostics (Priority 2) ─────────────────────────────
+        events = telem.get("events") or []
+
+        def _fmt_time_ms(t: Any) -> str:
+            try:
+                tf = float(t)
+            except (TypeError, ValueError):
+                return "--:--:--.---"
+            lt = time.localtime(tf)
+            ms = int((tf - int(tf)) * 1000.0)
+            return f"{lt.tm_hour:02d}:{lt.tm_min:02d}:{lt.tm_sec:02d}.{ms:03d}"
+
+        def _event_color(ev_type: str) -> str:
+            if ev_type in ("FILL RX", "LINK UP"):
+                return c["good"]
+            if ev_type in ("QUOTE RX", "ORDER TX", "FSM CHANGE", "STRATEGY CHANGE", "MARKET REGIME"):
+                return c["accent"]
+            if ev_type in ("RISK HALT", "LINK DOWN", "MMIO ERROR"):
+                return c["bad"]
+            if ev_type in ("RISK REJECT",):
+                return c["warn"]
+            return c["muted"]
+
+        if not events:
+            events_panel = html.Div(
+                "No events yet. Waiting for hardware activity.",
+                style={"color": c["muted"], "fontSize": "13px", "lineHeight": "1.5"},
+            )
+        else:
+            # Newest first.
+            evs = list(events)[::-1][:60]
+            rows = []
+            for ev in evs:
+                ev_type = str(ev.get("type") or "UNKNOWN")
+                msg = str(ev.get("msg") or "")
+                rows.append(
+                    html.Div(
+                        [
+                            html.Span(
+                                _fmt_time_ms(ev.get("ts")),
+                                className="bb-mono",
+                                style={"color": c["muted"], "fontSize": "12px", "minWidth": "108px"},
+                            ),
+                            html.Span(
+                                ev_type,
+                                style={
+                                    "color": _event_color(ev_type),
+                                    "fontWeight": "900",
+                                    "fontSize": "12px",
+                                    "letterSpacing": "0.01em",
+                                },
+                            ),
+                            html.Span(msg, style={"color": c["text"], "fontSize": "12px", "opacity": 0.95}),
+                        ],
+                        style={"display": "flex", "gap": "10px", "flexWrap": "wrap", "padding": "6px 0"},
+                    )
+                )
+            events_panel = html.Div(
+                rows,
+                style={
+                    "borderRadius": "14px",
+                    "padding": "12px 14px",
+                    "border": f"1px solid {c['grid']}",
+                    "backgroundColor": c["card"],
+                    "maxHeight": "320px",
+                    "overflowY": "auto",
+                },
+            )
+
+        # Strategy / Risk diagnostics (derived, not raw buy/sell)
+        pos = latest.get("pos", [0] * NUM_SYMBOLS)
+        if not isinstance(pos, list):
+            pos = [0] * NUM_SYMBOLS
+        exposure = sum(abs(int(x) if x is not None else 0) for x in pos[:NUM_SYMBOLS])
+        symbol_idx = None
+        for i in range(min(NUM_SYMBOLS, len(pos))):
+            try:
+                if int(pos[i]) != 0:
+                    symbol_idx = i
+                    break
+            except (TypeError, ValueError):
+                continue
+        selected_symbol = SYMBOL_NAMES[symbol_idx] if symbol_idx is not None else "UNKNOWN"
+
+        decision = "UNKNOWN"
+        reason = "Telemetry is present but decision logic cannot be derived."
+        conf = 0.2
+        qps_i = int(latest.get("qps", 0) or 0)
+        ops_i = int(latest.get("ops", 0) or 0)
+        fps_i = int(latest.get("fps", 0) or 0)
+        has_quotes = qps_i > 0
+        has_orders = ops_i > 0
+        has_fills = fps_i > 0
+
+        if risk_halt:
+            decision = "HOLD (risk halted)"
+            reason = f"Risk gate is HALTED; rejecting/halting order generation (rej={rej:,})."
+            conf = 0.95
+        elif not has_quotes:
+            decision = "WAITING_FOR_QUOTES"
+            reason = "No quotes received yet from Board A (RX link may be down or Board A not running)."
+            conf = 0.45
+        elif has_quotes and not has_orders:
+            decision = "HOLD"
+            reason = "Quotes are flowing, but orders are not being generated yet (strategy trigger/threshold not met)."
+            conf = 0.6
+        elif has_orders:
+            decision = "SENDING_ORDERS"
+            reason = "Strategy is generating orders; monitor for fills and risk rejects."
+            conf = 0.8
+
+        ml_diag = (
+            "ML diagnostics unavailable (telemetry provides only strategy name)."
+            if strat_lbl == "ML"
+            else "ML diagnostics unavailable."
         )
-        fig_pos.update_layout(
-            title=dict(text="Positions", font=_plot_font(c, 13)),
-            paper_bgcolor=chart_paper,
-            plot_bgcolor=chart_plot,
-            font=_plot_font(c, 12),
-            xaxis=dict(
-                title="shares (signed)",
-                showgrid=True,
-                gridcolor=c["grid"],
-                zeroline=True,
-                zerolinewidth=2,
-                zerolinecolor=c["muted"],
-            ),
-            yaxis=dict(autorange="reversed"),
-            margin=dict(l=72, r=24, t=56, b=48),
-            height=500,
+
+        risk_section = html.Div(
+            [
+                html.Div("Risk State", style={"color": c["muted"], "fontSize": "11px", "textTransform": "uppercase", "letterSpacing": "0.08em"}),
+                html.Div(risk_lbl, style={"fontWeight": "900", "fontSize": "18px", "color": c["bad"] if risk_lbl in ("HALTED","REJECTING") else c["good"], "marginTop": "4px"}),
+                html.Div(f"Exposure (Σ|pos|): {exposure:,}", style={"color": c["text"], "fontSize": "13px", "marginTop": "8px"}),
+                html.Div("Position limit: UNKNOWN (not exposed in current telemetry).", style={"color": c["muted"], "fontSize": "13px", "marginTop": "4px"}),
+                html.Div(f"Reject count: {rej:,}", style={"color": c["muted"], "fontSize": "13px", "marginTop": "4px"}),
+                html.Div("Last reject reason: UNKNOWN (not provided).", style={"color": c["muted"], "fontSize": "13px", "marginTop": "4px"}),
+            ]
+        )
+
+        strategy_section = html.Div(
+            [
+                html.Div("Strategy", style={"color": c["muted"], "fontSize": "11px", "textTransform": "uppercase", "letterSpacing": "0.08em"}),
+                html.Div(strat_lbl, style={"fontWeight": "900", "fontSize": "18px", "color": c["accent"], "marginTop": "4px"}),
+                html.Div(f"Current decision: {decision}", style={"color": c["text"], "fontSize": "13px", "marginTop": "8px"}),
+                html.Div(f"Reason: {reason}", style={"color": c["muted"], "fontSize": "13px", "marginTop": "4px", "lineHeight": "1.45"}),
+                html.Div(f"Confidence: {int(conf * 100)}%", style={"color": c["muted"], "fontSize": "13px", "marginTop": "8px"}),
+                html.Div(f"Regime: {regime_lbl}", style={"color": c["muted"], "fontSize": "13px", "marginTop": "4px"}),
+                html.Div(f"Selected symbol: {selected_symbol}", style={"color": c["muted"], "fontSize": "13px", "marginTop": "4px"}),
+                html.Div(ml_diag, style={"color": c["muted"], "fontSize": "13px", "marginTop": "8px", "lineHeight": "1.45"}),
+            ]
+        )
+
+        diag_panel = html.Div(
+            [
+                strategy_section,
+                html.Div(style={"height": "1px", "backgroundColor": c["grid"], "margin": "14px 0"}),
+                risk_section,
+                (
+                    html.Div(
+                        [
+                            html.Div(
+                                "Debug View (raw telemetry)",
+                                style={
+                                    "color": c["muted"],
+                                    "fontSize": "11px",
+                                    "textTransform": "uppercase",
+                                    "letterSpacing": "0.08em",
+                                    "marginBottom": "8px",
+                                    "fontWeight": "700",
+                                },
+                            ),
+                            html.Div(
+                                f"Raw state: {latest.get('state', 'UNKNOWN')}",
+                                style={"color": c["text"], "fontSize": "13px"},
+                            ),
+                            html.Div(
+                                f"Raw strategy: {latest.get('strategy', 'UNKNOWN')}",
+                                style={"color": c["text"], "fontSize": "13px", "marginTop": "4px"},
+                            ),
+                            html.Div(
+                                f"Raw regime: regime={latest.get('regime', 'UNKNOWN')} regime_name={latest.get('regime_name', 'UNKNOWN')}",
+                                style={"color": c["text"], "fontSize": "13px", "marginTop": "4px"},
+                            ),
+                            html.Div(
+                                f"Link errors: {int(latest.get('link_err', 0) or 0)} | Parse errors: {int(telem.get('parse_errors', 0) or 0)}",
+                                style={"color": c["text"], "fontSize": "13px", "marginTop": "4px"},
+                            ),
+                            html.Div(
+                                f"Counters: qps={int(latest.get('qps', 0) or 0)} ops={int(latest.get('ops', 0) or 0)} fps={int(latest.get('fps', 0) or 0)} rej={int(latest.get('rej', 0) or 0)}",
+                                style={"color": c["text"], "fontSize": "13px", "marginTop": "4px"},
+                            ),
+                            html.Div(
+                                f"Telemetry heartbeat (ingest count): {int(telem.get('heartbeat', 0) or 0)}",
+                                style={"color": c["text"], "fontSize": "13px", "marginTop": "4px"},
+                            ),
+                            html.Div(
+                                "Raw telemetry snapshot (truncated):",
+                                style={
+                                    "color": c["muted"],
+                                    "fontSize": "13px",
+                                    "marginTop": "10px",
+                                    "fontWeight": "700",
+                                },
+                            ),
+                            html.Pre(
+                                (
+                                    __import__("json").dumps(latest, indent=2, sort_keys=True)[:900]
+                                    + ("…" if len(__import__("json").dumps(latest, indent=2, sort_keys=True)) > 900 else "")
+                                ),
+                                style={
+                                    "color": c["text"],
+                                    "fontSize": "11px",
+                                    "whiteSpace": "pre-wrap",
+                                    "wordBreak": "break-word",
+                                    "marginTop": "6px",
+                                    "backgroundColor": "#0f172a",
+                                    "padding": "10px",
+                                    "borderRadius": "12px",
+                                    "border": f"1px solid {c['grid']}",
+                                    "maxHeight": "220px",
+                                    "overflowY": "auto",
+                                },
+                            ),
+                        ],
+                        style={"marginTop": "14px", "paddingTop": "14px", "borderTop": f"1px solid {c['grid']}"},
+                    )
+                    if effective_debug
+                    else None
+                ),
+            ],
+            style={
+                "borderRadius": "14px",
+                "padding": "12px 14px",
+                "border": f"1px solid {c['grid']}",
+                "backgroundColor": c["card"],
+            },
+        )
+
+        # Per-symbol book table (derived from existing telemetry fields).
+        if not has_any_traffic:
+            symbol_table = html.Div(
+                "Waiting for quotes from Board A…",
+                style={"color": c["muted"], "fontSize": "13px", "lineHeight": "1.5"},
+            )
+        else:
+            import math
+
+            def _fmt_money_signed(v: Any) -> str:
+                try:
+                    fv = float(v)
+                    if math.isnan(fv):
+                        return "—"
+                except (TypeError, ValueError):
+                    return "—"
+                if fv >= 0:
+                    return f"+${fv:,.2f}"
+                return f"-${abs(fv):,.2f}"
+
+            def _fmt_money(v: Any) -> str:
+                try:
+                    fv = float(v)
+                    if math.isnan(fv):
+                        return "—"
+                except (TypeError, ValueError):
+                    return "—"
+                return f"${fv:,.2f}"
+
+            def _fmt_count(v: Any) -> str:
+                try:
+                    return f"{int(v):,}"
+                except (TypeError, ValueError):
+                    return "—"
+
+            bid = latest.get("bid", [0.0] * NUM_SYMBOLS)
+            ask = latest.get("ask", [0.0] * NUM_SYMBOLS)
+            mid = latest.get("mid", [0.0] * NUM_SYMBOLS)
+            spread = latest.get("spread", [0.0] * NUM_SYMBOLS)
+            pos = latest.get("pos", [0] * NUM_SYMBOLS)
+            pnl_mtm = latest.get("pnl_mtm", [0.0] * NUM_SYMBOLS)
+            trades = latest.get("trades", [0] * NUM_SYMBOLS)
+            last_fill = latest.get("last_fill", [0.0] * NUM_SYMBOLS)
+
+            for arr_name, arr, default in (
+                ("bid", bid, [0.0] * NUM_SYMBOLS),
+                ("ask", ask, [0.0] * NUM_SYMBOLS),
+                ("mid", mid, [0.0] * NUM_SYMBOLS),
+                ("spread", spread, [0.0] * NUM_SYMBOLS),
+                ("pos", pos, [0] * NUM_SYMBOLS),
+                ("pnl_mtm", pnl_mtm, [0.0] * NUM_SYMBOLS),
+                ("trades", trades, [0] * NUM_SYMBOLS),
+                ("last_fill", last_fill, [0.0] * NUM_SYMBOLS),
+            ):
+                if not isinstance(arr, list):
+                    locals()[arr_name] = default
+
+            # Ensure all arrays are long enough.
+            def _pad_list(v: Any, n: int, fill: Any) -> List[Any]:
+                if not isinstance(v, list):
+                    v = []
+                out = list(v)
+                while len(out) < n:
+                    out.append(fill)
+                return out[:n]
+
+            bid = _pad_list(bid, NUM_SYMBOLS, 0.0)
+            ask = _pad_list(ask, NUM_SYMBOLS, 0.0)
+            mid = _pad_list(mid, NUM_SYMBOLS, 0.0)
+            spread = _pad_list(spread, NUM_SYMBOLS, 0.0)
+            pos = _pad_list(pos, NUM_SYMBOLS, 0)
+            pnl_mtm = _pad_list(pnl_mtm, NUM_SYMBOLS, 0.0)
+            trades = _pad_list(trades, NUM_SYMBOLS, 0)
+            last_fill = _pad_list(last_fill, NUM_SYMBOLS, 0.0)
+
+            headers = ["SYM", "BID", "ASK", "MID", "SPREAD", "POS", "PNL", "TRADES", "LAST ACTION"]
+            th_style = {
+                "textAlign": "left",
+                "padding": "6px 6px",
+                "borderBottom": f"1px solid {c['grid']}",
+                "color": c["muted"],
+                "fontSize": "11px",
+                "letterSpacing": "0.06em",
+                "textTransform": "uppercase",
+                "fontWeight": "700",
+                "whiteSpace": "nowrap",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
+            }
+            td_style = {
+                "padding": "6px 6px",
+                "borderBottom": f"1px solid {c['grid']}",
+                "fontSize": "12px",
+                "whiteSpace": "nowrap",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
+            }
+
+            body_rows: List[html.Tr] = []
+            for i in sym_filter:
+                if not (0 <= i < NUM_SYMBOLS):
+                    continue
+                ticker = SYMBOL_NAMES[i]
+                b = bid[i]
+                a = ask[i]
+                m = mid[i]
+                spr = spread[i]
+                p = pos[i]
+                pnl = pnl_mtm[i]
+                tr = trades[i]
+                lf = last_fill[i]
+
+                quote_missing = (b == 0.0 and a == 0.0 and m == 0.0 and spr == 0.0)
+                pos_s = "0" if int(p) == 0 else (f"+{int(p)}" if int(p) > 0 else f"{int(p)}")
+
+                last_action = "—"
+                if int(tr) > 0:
+                    last_action = "FILL"
+
+                if quote_missing:
+                    bid_s = ask_s = mid_s = spread_s = pnl_s = "—"
+                else:
+                    bid_s = _fmt_money(b)
+                    ask_s = _fmt_money(a)
+                    mid_s = _fmt_money(m)
+                    spread_s = f"{float(spr):.3f}"
+                    pnl_s = _fmt_money_signed(pnl)
+
+                # Value color semantics.
+                pnl_color = c["muted"]
+                try:
+                    if not quote_missing:
+                        pnl_color = c["good"] if float(pnl) >= 0 else c["bad"]
+                except (TypeError, ValueError):
+                    pnl_color = c["muted"]
+
+                body_rows.append(
+                    html.Tr(
+                        [
+                            html.Td(ticker, style=td_style),
+                            html.Td(bid_s, style=td_style),
+                            html.Td(ask_s, style=td_style),
+                            html.Td(mid_s, style=td_style),
+                            html.Td(spread_s, style=td_style),
+                            html.Td(pos_s, style=td_style),
+                            html.Td(pnl_s, style={**td_style, "color": pnl_color, "fontWeight": "700"}),
+                            html.Td(_fmt_count(tr), style={**td_style}),
+                            html.Td(last_action, style=td_style),
+                        ]
+                    )
+                )
+
+            symbol_table = html.Table(
+                [
+                    html.Thead(html.Tr([html.Th(h, style=th_style) for h in headers])),
+                    html.Tbody(body_rows),
+                ],
+                style={
+                    "width": "100%",
+                    "borderCollapse": "collapse",
+                    "tableLayout": "fixed",
+                    "overflowX": "hidden",
+                },
+            )
+
+        # Mini system diagram (demo-friendly, no RTL dependence).
+        def _pill(text: str, color: str) -> html.Span:
+            return html.Span(
+                text,
+                style={
+                    "display": "inline-block",
+                    "padding": "4px 10px",
+                    "borderRadius": "999px",
+                    "fontSize": "12px",
+                    "fontWeight": "900",
+                    "letterSpacing": "0.01em",
+                    "color": "#000000" if color in (c["accent"], c["good"]) else "#ffffff",
+                    "backgroundColor": color,
+                },
+            )
+
+        qps_i = int(latest.get("qps", 0) or 0)
+        ops_i = int(latest.get("ops", 0) or 0)
+        board_a_status = "QUOTES RX" if qps_i > 0 else "WAITING"
+        link_status = "UP" if link_up else "DOWN"
+        link_color = c["good"] if link_up else c["bad"]
+        board_a_color = c["good"] if qps_i > 0 else c["warn"]
+        board_b_color = c["accent"] if fsm_lbl in ("RUNNING", "RESET") else c["muted"]
+        orders_status = "BLOCKED" if risk_halt else ("SENDING" if ops_i > 0 else "IDLE")
+        orders_color = c["bad"] if risk_halt else (c["good"] if ops_i > 0 else c["warn"])
+        exchange_status = "RISK HALTED" if risk_halt else "ENABLED"
+        exchange_color = c["bad"] if risk_halt else c["good"]
+
+        sys_diagram = html.Div(
+            [
+                html.Div(
+                    "Mini System Diagram",
+                    style={"fontSize": "11px", "color": c["muted"], "textTransform": "uppercase", "letterSpacing": "0.08em", "fontWeight": "800", "marginBottom": "10px"},
+                ),
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                html.Div("Board A", style={"fontWeight": "900", "fontSize": "12px", "color": c["muted"]}),
+                                html.Div("Market Sim", style={"fontWeight": "900", "fontSize": "14px", "color": c["text"], "marginTop": "2px"}),
+                                _pill(board_a_status, board_a_color),
+                            ],
+                            style={"padding": "12px 12px", "borderRadius": "14px", "border": f"1px solid {c['grid']}", "backgroundColor": c["card"]},
+                        ),
+                        html.Div("→", style={"fontWeight": "900", "fontSize": "22px", "color": c["muted"]}),
+                        html.Div(
+                            [
+                                html.Div("PMOD Link", style={"fontWeight": "900", "fontSize": "12px", "color": c["muted"]}),
+                                _pill(link_status, link_color),
+                            ],
+                            style={"padding": "12px 12px", "borderRadius": "14px", "border": f"1px solid {c['grid']}", "backgroundColor": c["card"]},
+                        ),
+                        html.Div("→", style={"fontWeight": "900", "fontSize": "22px", "color": c["muted"]}),
+                        html.Div(
+                            [
+                                html.Div("Board B", style={"fontWeight": "900", "fontSize": "12px", "color": c["muted"]}),
+                                html.Div("Trader", style={"fontWeight": "900", "fontSize": "14px", "color": c["text"], "marginTop": "2px"}),
+                                _pill(fsm_lbl if fsm_lbl != "UNKNOWN" else "UNKNOWN", board_b_color),
+                            ],
+                            style={"padding": "12px 12px", "borderRadius": "14px", "border": f"1px solid {c['grid']}", "backgroundColor": c["card"]},
+                        ),
+                        html.Div("→", style={"fontWeight": "900", "fontSize": "22px", "color": c["muted"]}),
+                        html.Div(
+                            [
+                                html.Div("Orders TX", style={"fontWeight": "900", "fontSize": "12px", "color": c["muted"]}),
+                                _pill(orders_status, orders_color),
+                            ],
+                            style={"padding": "12px 12px", "borderRadius": "14px", "border": f"1px solid {c['grid']}", "backgroundColor": c["card"]},
+                        ),
+                        html.Div("→", style={"fontWeight": "900", "fontSize": "22px", "color": c["muted"]}),
+                        html.Div(
+                            [
+                                html.Div("Board A", style={"fontWeight": "900", "fontSize": "12px", "color": c["muted"]}),
+                                html.Div("Exchange", style={"fontWeight": "900", "fontSize": "14px", "color": c["text"], "marginTop": "2px"}),
+                                _pill(exchange_status, exchange_color),
+                            ],
+                            style={"padding": "12px 12px", "borderRadius": "14px", "border": f"1px solid {c['grid']}", "backgroundColor": c["card"]},
+                        ),
+                    ],
+                    style={"display": "flex", "flexWrap": "wrap", "alignItems": "center", "gap": "12px"},
+                ),
+            ],
+            style={"marginTop": "10px"},
         )
 
         return (
             flow,
+            kpis,
             pnl_title_style,
             pnl_hero,
             fig_pnl,
@@ -1542,6 +2780,10 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             fig_mini,
             scalar,
             fig_lat,
+            events_panel,
+            diag_panel,
+            symbol_table,
+            sys_diagram,
         )
 
     @callback(

@@ -273,3 +273,33 @@
 .bb-root--light .bb-section-heading {
   color: #6b6b6b;
 }
+
+/* Presenter mode: declutter and emphasize headline metrics on projector */
+.bb-presenter .bb-toolbar {
+  display: none;
+}
+
+.bb-presenter .bb-main-tabs .tab {
+  font-size: 17px !important;
+  padding: 16px 20px !important;
+}
+
+/* KPI card hover highlight (light interactivity, demo-friendly) */
+.bb-kpi-card:hover {
+  border-color: rgba(255, 255, 255, 0.55) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+
+/* Avoid horizontal scrolling on wide graphs */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.bb-root {
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+}

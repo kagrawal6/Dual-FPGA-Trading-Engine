@@ -119,7 +119,7 @@ _HTML_TEMPLATE = """<!DOCTYPE html>
   </style>
 </head>
 <body>
-  <h1>Board B — hardware telemetry</h1>
+  <h1>Board B — Hardware Telemetry</h1>
   <div class="grid" id="cards"></div>
   <div class="row">
     <div class="chart-box"><canvas id="chMain"></canvas></div>
