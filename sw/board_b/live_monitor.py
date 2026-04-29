@@ -10,6 +10,7 @@ Reads all Board B AXI status registers at ~5 Hz and renders:
   * ACTIVITY  +  P&L  side-by-side panels
   * POSITION EXPOSURE horizontal bar chart (per symbol)
   * LATENCY stats (from LAT_MIN/MAX/SUM/COUNT registers)
+  * LATENCY HISTOGRAM bar chart (16 bins x 32 cycles)
 
 Requires: Board A already running (market sim active), Board B overlay
 loaded (ol_b), and physical SW[0] flipped UP on Board B.
@@ -17,7 +18,8 @@ loaded (ol_b), and physical SW[0] flipped UP on Board B.
 Usage:
     %run board_b/live_monitor.py
     configure_and_arm()
-    monitor(duration_sec=60, regime_name='VOLATILE')
+    monitor(regime_name='VOLATILE')          # runs forever, Ctrl+C to stop
+    monitor(60, regime_name='CALM')          # explicit 60-second run
 """
 
 import time
@@ -54,6 +56,11 @@ B_LAT_COUNT      = 0xEC
 STATE_NAMES    = {0:'B_RESET', 1:'B_IDLE', 2:'B_ARMED', 3:'B_TRADING', 4:'B_HALTED'}
 STRATEGY_NAMES = {0:'MEAN_REV', 1:'MOMENTUM', 2:'NN', 3:'AUTO'}
 NUM_SYM        = 16
+NUM_HIST_BINS  = 16
+HIST_BIN_SHIFT = 5         # 32 cycles per bin (matches hft_pkg::BIN_SHIFT)
+HIST_BIN_CY    = 1 << HIST_BIN_SHIFT
+NS_PER_CY      = 10        # 100 MHz core clock
+
 SYMBOL_NAMES = ['AAPL','MSFT','GOOG','META','NVDA','AMD','INTC','AVGO',
                 'AMZN','TSLA','JPM','GS','JNJ','PFE','XOM','CVX']
 
@@ -126,6 +133,9 @@ def read_latency():
         'count': cnt,
         'avg':   mmio.read(B_LAT_SUM) / cnt,
     }
+
+def read_hist_bins():
+    return [mmio.read(B_HIST_BASE + 4*i) for i in range(NUM_HIST_BINS)]
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -293,6 +303,54 @@ def render(prev, cur, session, regime_name):
     lines.append(bold(f"  └{'─' * inner}┘"))
     lines.append("")
 
+    # ── LATENCY HISTOGRAM panel (16 bins x 32 cycles) ────────────
+    hist = cur['hist']
+    title = f" LATENCY HISTOGRAM ({HIST_BIN_CY} cy/bin) "
+    lines.append(bold(f"  ┌─{title}{'─' * (inner - len(title) - 1)}┐"))
+    total_h = sum(hist)
+    max_h   = max(hist) if hist else 0
+    # Each row: "  │ {label:>10} {bar:<HBAR} {pct:>5.1f}% {count:>9,} │"
+    # = 4 + 10 + 1 + HBAR + 1 + 6 + 1 + 9 + 2 = 34 + HBAR
+    # Header is inner + 4 chars wide, so HBAR = (inner + 4) - 34 = inner - 30.
+    HBAR = max(20, inner - 30)
+    if total_h == 0:
+        empty_msg = '(no fills measured yet — histogram empty)'
+        lines.append(f"  │ {dim(empty_msg):<{inner + 10}}│")
+        for _ in range(NUM_HIST_BINS - 1):
+            lines.append(f"  │{' ' * inner}│")
+    else:
+        for i, count in enumerate(hist):
+            lo_cy = i * HIST_BIN_CY
+            if i < NUM_HIST_BINS - 1:
+                hi_cy = lo_cy + HIST_BIN_CY - 1
+                label = f"{lo_cy:>3}-{hi_cy:<3} cy"   # 10 chars
+            else:
+                label = f"  ≥{lo_cy:<3}  cy"           # 10 chars (sat bin)
+            pct = (count / total_h * 100.0) if total_h else 0.0
+            bar_len = int(count / max_h * HBAR) if max_h else 0
+            bar = "█" * bar_len
+            bar_padded = f"{bar:<{HBAR}}"
+            if count == 0:
+                c_bar = dim(f"{'·':<{HBAR}}")
+                c_lbl = dim(label)
+                c_pct = dim(f"{pct:>5.1f}%")
+                c_cnt = dim(f"{count:>9,}")
+            elif i <= 1:
+                c_bar = green(bar_padded);  c_lbl = green(label)
+                c_pct = green(f"{pct:>5.1f}%"); c_cnt = f"{count:>9,}"
+            elif i <= 4:
+                c_bar = cyan(bar_padded);   c_lbl = cyan(label)
+                c_pct = cyan(f"{pct:>5.1f}%"); c_cnt = f"{count:>9,}"
+            elif i <= 9:
+                c_bar = yellow(bar_padded); c_lbl = yellow(label)
+                c_pct = yellow(f"{pct:>5.1f}%"); c_cnt = f"{count:>9,}"
+            else:
+                c_bar = red(bar_padded);    c_lbl = red(label)
+                c_pct = red(f"{pct:>5.1f}%"); c_cnt = f"{count:>9,}"
+            lines.append(f"  │ {c_lbl} {c_bar} {c_pct} {c_cnt} │")
+    lines.append(bold(f"  └{'─' * inner}┘"))
+    lines.append("")
+
     # ── Footer ────────────────────────────────────────────────────
     elapsed = cur['t'] - prev['start_t']
     lines.append(dim(
@@ -321,15 +379,17 @@ def _snapshot(start_t, t):
         'pos':  [read_position(i) for i in range(NUM_SYM)],
         'cash': read_cash(),
         'lat':  read_latency(),
+        'hist': read_hist_bins(),
         'start_t': start_t,
     }
 
 
-def monitor(duration_sec=60.0, poll_hz=5.0, regime_name='CALM'):
+def monitor(duration_sec=None, poll_hz=5.0, regime_name='CALM'):
     """Run the live monitor.
 
     Args:
-        duration_sec : total run time in seconds (Ctrl+C stops early).
+        duration_sec : total run time in seconds, or None to run forever
+                       until Ctrl+C is pressed (default).
         poll_hz      : dashboard refresh rate in Hz (default 5).
         regime_name  : name of the regime currently set on Board A
                        (informational — Board B can't read A's regime directly).
@@ -345,8 +405,11 @@ def monitor(duration_sec=60.0, poll_hz=5.0, regime_name='CALM'):
         'start_cash': prev['cash'],
     }
 
+    forever = duration_sec is None
+    deadline = float('inf') if forever else (start_t + duration_sec)
+
     try:
-        while (time.monotonic() - start_t) < duration_sec:
+        while time.monotonic() < deadline:
             time.sleep(interval)
             cur = _snapshot(start_t, time.monotonic())
             render(prev, cur, session, regime_name)
@@ -399,6 +462,7 @@ def configure_and_arm(strategy=0, threshold=0x00010000, ema_alpha=0x0000199A,
 
 print("Helpers loaded:")
 print("  configure_and_arm(...)                                   - arm Board B for trading")
-print("  monitor(duration_sec=60, regime_name='VOLATILE')         - golden-model-style live dashboard")
+print("  monitor(regime_name='VOLATILE')                          - run dashboard forever (Ctrl+C to stop)")
+print("  monitor(60, regime_name='CALM')                          - run dashboard for 60 seconds")
 print()
-print("Quick start:  configure_and_arm(); monitor(60, regime_name='CALM')")
+print("Quick start:  configure_and_arm(); monitor(regime_name='CALM')")

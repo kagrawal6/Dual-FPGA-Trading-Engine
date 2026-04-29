@@ -1,11 +1,12 @@
-% ============================================================================
-%  ECE 554 Capstone Poster — Dual-FPGA Deterministic Trading Engine
-%  36 in × 43 in   (vertical / portrait)
-%  Compile:  pdflatex poster.tex   (run twice for TikZ overlays)
-% ============================================================================
+% =============================================================================
+%  ECE 554 Capstone Poster - "TradeMark"
+%  Dual-FPGA Deterministic Trading Engine
+%  Vertical / Portrait, 36 in (W) x 43 in (H)
+%  Compile:  pdflatex poster.tex     (run twice for TikZ overlays)
+% =============================================================================
 \documentclass[final]{article}
 
-% ---------- page geometry ---------------------------------------------------
+% ---------- page geometry ----------------------------------------------------
 \usepackage[
   paperwidth=36in,
   paperheight=43in,
@@ -22,375 +23,420 @@
   positioning, calc, arrows.meta, fit, backgrounds,
   decorations.pathreplacing, shapes.geometric, shapes.misc, shadows
 }
-\usepackage{fontawesome5}
 \usepackage{tabularx}
 \usepackage{booktabs}
-\usepackage{multicol}
 \usepackage{enumitem}
 \usepackage{amsmath}
 \usepackage{ragged2e}
-\usepackage{setspace}
 \usepackage{anyfontsize}
 
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{0.35em}
+\setlength{\parskip}{0.30em}
 
-% ---------- UW-Madison color palette ----------------------------------------
+% ---------- UW-Madison color palette -----------------------------------------
 \definecolor{uwred}{HTML}{C5050C}
 \definecolor{uwdarkred}{HTML}{9B0000}
 \definecolor{uwwhite}{HTML}{FFFFFF}
 \definecolor{uwgray}{HTML}{646569}
-\definecolor{uwlightgray}{HTML}{F0F0F0}
-\definecolor{uwdark}{HTML}{282728}
-\definecolor{boardAcolor}{HTML}{0F5B2E}
-\definecolor{boardBcolor}{HTML}{1A4B8C}
-\definecolor{linkcolor}{HTML}{D47500}
+\definecolor{uwlightgray}{HTML}{F2F2F2}
+\definecolor{uwdark}{HTML}{222222}
+\definecolor{boardAcolor}{HTML}{0F5B2E}      % green
+\definecolor{boardBcolor}{HTML}{1A4B8C}      % blue
+\definecolor{linkcolor}{HTML}{D47500}        % orange
 \definecolor{accentgold}{HTML}{F0AB00}
 \definecolor{metricbg}{HTML}{FFF8E1}
-\definecolor{softgreen}{HTML}{E8F5E9}
+\definecolor{softbg}{HTML}{FAFAFA}
 
-% ---------- helper macros ---------------------------------------------------
+% ---------- helper macros ----------------------------------------------------
+% A standard rounded section box with a thick colored top bar
 \newcommand{\sectionbox}[3]{%
   \begin{tikzpicture}
     \node[
-      inner sep=0.42in,
+      inner sep=0.40in,
       fill=white,
       rounded corners=10pt,
       draw=#1, line width=3pt,
-      text width=\linewidth-1.05in,
+      text width=\linewidth-1.0in,
       anchor=north west,
       drop shadow={shadow xshift=3pt, shadow yshift=-3pt, opacity=0.12}
     ] (box) {%
-      \vspace{-0.12in}
-      {\fontsize{36}{43}\selectfont\bfseries\color{#1}#2}\\[0.28in]
-      {\fontsize{22}{30}\selectfont\RaggedRight #3}%
+      \vspace{-0.10in}
+      {\fontsize{34}{40}\selectfont\bfseries\color{#1}#2}\\[0.22in]
+      {\fontsize{20}{27}\selectfont\RaggedRight #3}%
     };
   \end{tikzpicture}%
 }
 
+% Highlighted metric card
 \newcommand{\metriccard}[3]{%
   \begin{tikzpicture}
     \node[
-      inner sep=0.28in,
+      inner sep=0.26in,
       fill=metricbg,
       rounded corners=8pt,
-      minimum width=4.6in,
+      minimum width=4.8in,
+      minimum height=2.95in,
       text width=4.2in,
+      align=center,
       anchor=center,
       drop shadow={shadow xshift=2pt, shadow yshift=-2pt, opacity=0.10}
     ] {%
-      {\fontsize{52}{58}\selectfont\bfseries\color{uwred}#1}\\[0.06in]
-      {\fontsize{25}{31}\selectfont\bfseries\color{uwdark}#2}\\[0.08in]
-      {\fontsize{18}{24}\selectfont\color{uwgray}#3}%
+      {\fontsize{50}{55}\selectfont\bfseries\color{uwred}#1}\\[0.04in]
+      {\fontsize{22}{27}\selectfont\bfseries\color{uwdark}#2}\\[0.06in]
+      {\fontsize{16}{21}\selectfont\color{uwgray}#3}%
     };
   \end{tikzpicture}%
 }
 
-% ============================================================================
+% =============================================================================
 \begin{document}
 \begin{tikzpicture}[remember picture, overlay]
 
-% ========================  BACKGROUND  ======================================
+% ===========================  BACKGROUND  ====================================
 \fill[uwwhite] (current page.south west) rectangle (current page.north east);
 
-% Top red banner
+% Top red banner (4.0 in tall - matches your reference image)
 \fill[uwred] ([yshift=0in]current page.north west)
-  rectangle ([yshift=-5.6in]current page.north east);
+  rectangle ([yshift=-4.0in]current page.north east);
 
-% Thin gold accent line below banner
-\fill[accentgold] ([yshift=-5.6in]current page.north west)
-  rectangle ([yshift=-5.72in]current page.north east);
+% Thin gold accent stripe under banner
+\fill[accentgold] ([yshift=-4.0in]current page.north west)
+  rectangle ([yshift=-4.10in]current page.north east);
 
-% Bottom red strip
+% Bottom red footer strip
 \fill[uwred] (current page.south west)
-  rectangle ([yshift=1.4in]current page.south east);
+  rectangle ([yshift=1.10in]current page.south east);
 
-% ========================  HEADER  ==========================================
-\node[anchor=north, text width=34in, align=center]
-  at ([yshift=-0.45in]current page.north) {%
-    {\fontsize{24}{28}\selectfont\color{uwwhite!80}%
-      \textbf{ECE 554} \;\textbar\; Capstone Design Project \;\textbar\;
-      University of Wisconsin--Madison}\\[0.30in]
-    {\fontsize{60}{70}\selectfont\bfseries\color{uwwhite}%
-      Dual-FPGA Deterministic Trading Engine}\\[0.40in]
-    {\fontsize{27}{33}\selectfont\color{uwwhite!90}%
-      Sub-microsecond, zero-jitter market processing on Zynq UltraScale+}\\[0.50in]
-    {\fontsize{26}{32}\selectfont\color{accentgold}%
-      \textbf{Kushal Agrawal} \quad\textbar\quad \textbf{Eeshana Hari}}\\[0.12in]
-    {\fontsize{21}{26}\selectfont\color{uwwhite!75}%
-      Advisor: ECE 554 Course Staff \quad\textbar\quad
-      Platform: 2$\times$ AMD AUP-ZU3 (XCZU3EG) \quad\textbar\quad Spring 2026}%
+% ===========================  TOP BANNER  ====================================
+% Left third: Kushal Agrawal / Eeshana Hari
+\node[anchor=west, text width=11in, align=left]
+  at ([xshift=1.0in, yshift=-2.0in]current page.north west) {%
+    {\fontsize{42}{50}\selectfont\bfseries\color{uwwhite}Kushal Agrawal}\\[0.10in]
+    {\fontsize{42}{50}\selectfont\bfseries\color{uwwhite}Eeshana Hari}%
   };
 
-% ========================  FOOTER  ==========================================
+% Center: ECE 554 (small) / TradeMark (large)
+\node[anchor=center, text width=14in, align=center]
+  at ([yshift=-2.0in]current page.north) {%
+    {\fontsize{32}{38}\selectfont\bfseries\color{uwwhite!90}ECE 554}\\[0.10in]
+    {\fontsize{72}{82}\selectfont\bfseries\color{uwwhite}TradeMark}%
+  };
+
+% Right third: Arjun Ganesan
+\node[anchor=east, text width=8.5in, align=right]
+  at ([xshift=-4.5in, yshift=-2.0in]current page.north east) {%
+    {\fontsize{42}{50}\selectfont\bfseries\color{uwwhite}Arjun Ganesan}%
+  };
+
+% ===========================  FOOTER  ========================================
 \node[anchor=south, text width=34in, align=center]
-  at ([yshift=0.35in]current page.south) {%
-    {\fontsize{20}{24}\selectfont\color{uwwhite!85}%
+  at ([yshift=0.30in]current page.south) {%
+    {\fontsize{20}{24}\selectfont\color{uwwhite!90}%
       Department of Electrical \& Computer Engineering
       \quad\textbar\quad University of Wisconsin--Madison
-      \quad\textbar\quad Spring 2026}%
+      \quad\textbar\quad ECE 554 Spring 2026}%
   };
 
 \end{tikzpicture}
 
-% ============================================================================
-%                           CONTENT AREA
-% ============================================================================
-\vspace*{6.15in}
+% =============================================================================
+%                            CONTENT AREA
+%   Banner ends at 4.10in (red 4.0in + gold accent 0.10in).
+%   Body starts ~0.5in below the gold accent.
+% =============================================================================
+\vspace*{4.6in}
 
-\hspace{0.55in}%
-\begin{minipage}[t]{34.0in}
+\hspace{0.6in}%
+\begin{minipage}[t]{34.8in}
 
-% ========================================================================
-%  ROW 1 — Three-column layout
-% ========================================================================
-\begin{minipage}[t]{10.6in}
+% ===========================================================================
+%  ROW 1 - INTRODUCTION (full width) - one paragraph, lets the demo do the work
+% ===========================================================================
+\sectionbox{uwred}{Introduction}{%
+\vspace{-0.05in}
+Modern electronic trading needs \textbf{deterministic, sub-microsecond
+decisions}. A CPU running the same loop tail-jitters
+\textbf{10--100\,$\mu$s} from OS scheduling, cache misses, and
+interrupts --- so the latency you measure in software is never the
+latency you actually got. Move the loop into \textbf{FPGA fabric} and
+every stage gets a fixed cycle cost, every metric is captured in
+hardware, and there is no OS in the path to lie about it.
 
-% ---- MOTIVATION --------------------------------------------------------
-\sectionbox{uwred}{Motivation}{%
-Modern electronic trading demands \textbf{deterministic,
-sub-microsecond decision-making}. General-purpose CPUs introduce
-unpredictable jitter from OS scheduling, cache misses, and interrupts
-(typically 10--100\,$\mu$s), making software-based latency measurement
-unreliable and trading non-deterministic.
-
-\vspace{0.20in}
-Our project demonstrates that an \textbf{FPGA fabric} can guarantee a
-\textbf{fixed, predictable pipeline latency with zero jitter} for every
-market event --- and that \textbf{all performance metrics can be
-measured in hardware}, free from OS contamination.
-
-\vspace{0.22in}
-\textbf{Why two physically separate FPGAs?}
-
-\vspace{0.10in}
-A single FPGA looping back to itself would be trivially simple and
-unrealistic. Two boards force real engineering challenges:
-
-\vspace{0.12in}
-\begin{itemize}[leftmargin=0.35in, itemsep=0.08in, labelsep=0.12in]
-  \item[\color{uwred}\faIcon{microchip}]
-    Custom \textbf{physical-layer link} design across a cable
-  \item[\color{uwred}\faIcon{sync}]
-    \textbf{Clock domain crossing} between independent oscillators
-  \item[\color{uwred}\faIcon{project-diagram}]
-    Clean \textbf{separation of concerns}: Exchange vs.\ Trader
-    mirrors real-world infrastructure
-  \item[\color{uwred}\faIcon{chart-line}]
-    \textbf{Hardware-measured} latency, throughput, and P\&L ---
-    not software estimates
-\end{itemize}%
+\vspace{0.16in}
+{\fontsize{22}{28}\selectfont\bfseries\color{uwdark}%
+\textcolor{uwred}{\textbf{TradeMark}} is two FPGAs on the bench: one
+is a synthetic stock exchange, the other is a trader, and they argue
+across a custom PMOD link at a \textcolor{uwred}{1.44\,$\mu$s
+round-trip with zero jitter} --- on \emph{every} quote.}
 }
 
 \vspace{0.50in}
 
-% ---- BOARD A -----------------------------------------------------------
-\sectionbox{boardAcolor}{Board A \;\textemdash\; Exchange-Lite}{%
-Simulates a simplified stock exchange with a synthetic market model
-for \textbf{16 real S\&P\,500 tickers} across 8 GICS sectors:
-
-\vspace{0.12in}
-\begin{itemize}[leftmargin=0.35in, itemsep=0.08in, labelsep=0.12in]
-  \item[\color{boardAcolor}\faIcon{chart-bar}]
-    \textbf{Market Simulator:} LFSR-based noise engine generates
-    realistic bid/ask quotes with correlated sector drift
-  \item[\color{boardAcolor}\faIcon{bolt}]
-    \textbf{4 Market Regimes:} CALM, VOLATILE, BURST, ADVERSARIAL
-    --- switchable at runtime via PS or physical buttons
-  \item[\color{boardAcolor}\faIcon{exchange-alt}]
-    \textbf{Order Matching:} Matches incoming orders against current
-    best prices; returns FILL or REJECT within \textbf{1 cycle}
-  \item[\color{boardAcolor}\faIcon{filter}]
-    \textbf{TX Arbiter:} Prioritizes fills/rejects over the quote
-    stream for fair bandwidth allocation on the link
-  \item[\color{boardAcolor}\faIcon{cog}]
-    \textbf{AXI-Lite Control:} Per-symbol init prices, spreads,
-    and sector IDs configurable from Python over MMIO
-\end{itemize}
-
-\vspace{0.15in}
-\textbf{FSM:}\; RESET $\to$ IDLE $\to$ RUNNING $\leftrightarrow$ STOPPED\\[0.06in]
-\textbf{Verified on silicon}: all 16 symbol slots exercised from
-PYNQ Jupyter over AXI-Lite MMIO at 50\,MHz PL clock.%
-}
-
-\vspace{0.50in}
-
-% ---- LINK LAYER --------------------------------------------------------
-\sectionbox{linkcolor}{Board-to-Board Link Layer}{%
-Full-duplex communication over PMOD cables with
-custom serialization and CDC:
-
-\vspace{0.12in}
-\begin{itemize}[leftmargin=0.35in, itemsep=0.08in, labelsep=0.12in]
-  \item[\color{linkcolor}\faIcon{plug}]
-    \textbf{Physical:} 2$\times$ PMOD cables (JA: A$\to$B, JB: B$\to$A)
-    for simultaneous quote delivery and order return
-  \item[\color{linkcolor}\faIcon{clock}]
-    \textbf{Mesochronous Clocking:} Each board runs its own oscillator;
-    a 2-FF CDC synchronizer at the RX side handles clock differences
-  \item[\color{linkcolor}\faIcon{database}]
-    \textbf{128-bit Frames:} Fixed-format messages (QUOTE, ORDER, FILL)
-    serialized as 32 nibbles over a 4-bit data path
-  \item[\color{linkcolor}\faIcon{tachometer-alt}]
-    \textbf{Throughput:} $\sim$1.47\,M frames/s sustained at 50\,MHz
-    nibble rate; 640\,ns serialization per frame
-  \item[\color{linkcolor}\faIcon{handshake}]
-    \textbf{Backpressure:} Ready/valid handshake prevents data
-    loss under burst conditions; 40\,ns minimum inter-frame gap
-\end{itemize}
-
-\vspace{0.12in}
-All prices encoded in \textbf{Q16.16 fixed-point} (16-bit integer,
-16-bit fraction) for cycle-efficient arithmetic without floating-point
-units.%
-}
-
-\end{minipage}%
-\hfill
-% ========================================================================
-%  CENTER COLUMN — Architecture Diagram
-% ========================================================================
-\begin{minipage}[t]{12.4in}
-
+% ===========================================================================
+%  ROW 2 - SYSTEM ARCHITECTURE (full width)
+% ===========================================================================
 \sectionbox{uwdark}{System Architecture}{%
-\vspace{0.12in}
+\vspace{-0.05in}
 \begin{center}
+{\fontsize{18}{22}\selectfont\color{uwgray}%
+  Round-trip:\;
+  \textbf{\color{boardAcolor}\textcircled{\small 1}}\,Quote \;$\to$\;
+  \textbf{\color{linkcolor}\textcircled{\small 2}}\,Link A$\to$B \;$\to$\;
+  \textbf{\color{boardBcolor}\textcircled{\small 3}}\,Strategy \;$\to$\;
+  \textbf{\color{linkcolor}\textcircled{\small 4}}\,Link B$\to$A \;$\to$\;
+  \textbf{\color{boardAcolor}\textcircled{\small 5}}\,Match \;$\to$\;
+  \textbf{\color{boardBcolor}\textcircled{\small 6}}\,Fill \& P\&L}
+\vspace{0.18in}
+
 \begin{tikzpicture}[
+  x=1in, y=1in,
   >=Stealth,
-  node distance=0.28in,
-  every node/.style={font=\fontsize{17}{21}\selectfont},
+  every node/.style={font=\fontsize{12}{15}\selectfont},
   block/.style={
-    rectangle, rounded corners=6pt, draw=#1, line width=2pt,
-    fill=#1!8, minimum height=0.62in, text width=2.7in,
-    align=center, font=\fontsize{15}{19}\selectfont\bfseries
+    rectangle, rounded corners=5pt, draw=#1, line width=1.6pt,
+    fill=#1!12, minimum height=0.46in, minimum width=1.95in,
+    align=center, font=\fontsize{11}{14}\selectfont\bfseries,
+    inner sep=2pt,
+    drop shadow={shadow xshift=2pt, shadow yshift=-2pt, opacity=0.18}
+  },
+  smallblock/.style={
+    rectangle, rounded corners=5pt, draw=#1, line width=1.6pt,
+    fill=#1!18, minimum height=0.46in, minimum width=1.45in,
+    align=center, font=\fontsize{11}{14}\selectfont\bfseries,
+    inner sep=2pt,
+    drop shadow={shadow xshift=2pt, shadow yshift=-2pt, opacity=0.18}
+  },
+  linkblock/.style={
+    rectangle, rounded corners=5pt, draw=linkcolor, line width=1.8pt,
+    fill=linkcolor!18, minimum height=0.46in, minimum width=1.45in,
+    align=center, font=\fontsize{11}{14}\selectfont\bfseries\color{linkcolor!80!black},
+    inner sep=2pt,
+    drop shadow={shadow xshift=2pt, shadow yshift=-2pt, opacity=0.20}
   },
   bigbox/.style={
-    rectangle, rounded corners=10pt, draw=#1, line width=3pt,
-    fill=#1!4, inner sep=0.20in
+    rectangle, rounded corners=12pt, draw=#1, line width=2.8pt,
+    fill=#1!3, inner sep=0.22in,
+    drop shadow={shadow xshift=4pt, shadow yshift=-4pt, opacity=0.10}
   },
-  cable/.style={
-    line width=5pt, color=linkcolor, -{Stealth[length=8pt]}
+  flow/.style={line width=1.7pt, color=#1!85, -{Stealth[length=6pt]}},
+  axi/.style ={line width=1.0pt, color=uwgray, dashed, -{Stealth[length=4pt]}},
+  cable/.style={line width=7pt, color=linkcolor, -{Stealth[length=14pt]},
+                line cap=round},
+  stagecirc/.style={
+    circle, draw=#1, line width=1.8pt, fill=white, inner sep=1pt,
+    minimum size=0.62in, align=center,
+    font=\bfseries\color{#1},
+    drop shadow={shadow xshift=1.8pt, shadow yshift=-1.8pt, opacity=0.25}
   },
-  cableback/.style={
-    line width=5pt, color=linkcolor, Stealth[length=8pt]-
+  frametag/.style={
+    rectangle, rounded corners=2pt, draw=linkcolor, line width=0.8pt,
+    fill=white, inner sep=2pt,
+    font=\fontsize{9}{11}\selectfont\bfseries\color{linkcolor!75!black}
   },
 ]
 
-% ---- Board A nodes ----
-\node[block=boardAcolor] (msim)
-  {Market Sim\\[-2pt]{\fontsize{12}{15}\selectfont\normalfont
-   LFSR noise $\cdot$ 4 regimes}};
+% =========================== HOST =====================================
+% Compact, slightly left of center so Board B's heading has clear space.
+\node[rectangle, rounded corners=8pt, draw=uwdark, line width=2.2pt,
+      fill=uwlightgray, minimum height=0.62in, text width=4.4in,
+      align=center, font=\fontsize{14}{18}\selectfont\bfseries,
+      drop shadow={shadow xshift=3pt, shadow yshift=-3pt, opacity=0.12}]
+  (host) at (-0.6, 0.20)
+  {Host Laptop \;$\cdot$\; Jupyter Lab\\[-1pt]
+   {\fontsize{10}{13}\selectfont\normalfont
+    PYNQ overlays \(\cdot\) AXI-Lite MMIO via USB-Eth}};
 
-\node[block=boardAcolor, below=0.16in of msim] (exch)
-  {Exchange-Lite\\[-2pt]{\fontsize{12}{15}\selectfont\normalfont
-   Order matching}};
+% ===== LAYOUT GRID ==========================================================
+%
+%  Board A (7 visible modules from board_a_top.sv):
+%    columns:  left=-9.0   center=-7.5   right=-5.0   link=-3.0
+%    rows:     AXI=-2.0    row2=-2.95   QFIFO=-4.20  TXArb=-5.30
+%              spec=-7.10  LinkRX=-8.65
+%
+%  Board B (11 visible modules from board_b_top.sv):
+%    columns:  link=3.0    pipeline=5.5   side=7.5
+%    rows:     AXI=-2.0    row2=-2.95   stride 0.95 down to OMgr=-7.70
+%              LinkTX=-8.65
+%
+%  Cable alignment (perfectly horizontal):
+%    A.LinkTX (y=-2.95)  <-->  B.LinkRX (y=-2.95)        PMOD JA
+%    A.LinkRX (y=-8.65)  <-->  B.LinkTX (y=-8.65)        PMOD JB
+%
+%  Q+F  arrow rises at  x = -3.0  (LinkTX/LinkRX column centerline)
+%  ORDER arrow rises at x = -3.85 (just LEFT of link column, no collision)
+%
+% ============================================================================
 
-\node[block=boardAcolor, below=0.16in of exch] (txarb)
-  {TX Arbiter\\[-2pt]{\fontsize{12}{15}\selectfont\normalfont
-   Fill $>$ Quote priority}};
-
-\node[block=boardAcolor, below=0.16in of txarb] (linktxA)
-  {Link TX\\[-2pt]{\fontsize{12}{15}\selectfont\normalfont
-   4-bit serialize}};
-
-\node[block=boardAcolor, above=0.16in of msim] (actrlA)
-  {Board A Ctrl\\[-2pt]{\fontsize{12}{15}\selectfont\normalfont
-   AXI-Lite + FSM}};
-
-\begin{scope}[on background layer]
-  \node[bigbox=boardAcolor,
-        fit=(actrlA)(msim)(exch)(txarb)(linktxA),
-        label={[font=\fontsize{20}{24}\selectfont\bfseries
-               \color{boardAcolor}]above:BOARD A --- Exchange}
-  ] (boxA) {};
-\end{scope}
-
-% ---- Board B nodes ----
-\node[block=boardBcolor, right=2.6in of actrlA] (bctrl)
-  {Board B Ctrl\\[-2pt]{\fontsize{12}{15}\selectfont\normalfont
-   AXI-Lite + FSM}};
-
-\node[block=boardBcolor, below=0.16in of bctrl] (demux)
-  {Msg Demux\\[-2pt]{\fontsize{12}{15}\selectfont\normalfont
-   Quote / Fill split}};
-
-\node[block=boardBcolor, below=0.16in of demux] (qbook)
-  {Quote Book\\[-2pt]{\fontsize{12}{15}\selectfont\normalfont
-   Best bid/ask $\times$ 16}};
-
-\node[block=boardBcolor, below=0.16in of qbook] (feat)
-  {Feature Compute\\[-2pt]{\fontsize{12}{15}\selectfont\normalfont
-   EMA + deviation}};
-
-\node[block=boardBcolor, below=0.16in of feat] (strat)
-  {Strategy Engine\\[-2pt]{\fontsize{12}{15}\selectfont\normalfont
-   Mean reversion}};
-
-\node[block=boardBcolor, below=0.16in of strat] (risk)
-  {Risk Manager\\[-2pt]{\fontsize{12}{15}\selectfont\normalfont
-   Position limits}};
-
-\node[block=boardBcolor, below=0.16in of risk] (omgr)
-  {Order Manager\\[-2pt]{\fontsize{12}{15}\selectfont\normalfont
-   Send orders}};
-
-\node[block=boardBcolor, below=0.16in of omgr] (pos)
-  {Position Tracker\\[-2pt]{\fontsize{12}{15}\selectfont\normalfont
-   P\&L accounting}};
-
-\node[block=boardBcolor, below=0.16in of pos] (hist)
-  {Latency Histogram\\[-2pt]{\fontsize{12}{15}\selectfont\normalfont
-   HW cycle counter}};
+% =========================== BOARD B (right) ================================
+\node[block=boardBcolor]   (b_axi)    at ( 5.5, -2.0)  {AXI-Lite Regs};
+\node[linkblock]           (b_linkrx) at ( 3.0, -2.95) {Link RX};
+\node[block=boardBcolor]   (b_demux)  at ( 5.5, -2.95) {Msg Demux};
+\node[block=boardBcolor]   (b_qbook)  at ( 5.5, -3.90) {Quote Book};
+\node[block=boardBcolor]   (b_feat)   at ( 5.5, -4.85) {Feature Compute};
+\node[block=boardBcolor]   (b_strat)  at ( 5.5, -5.80) {Strategy Engine};
+\node[block=boardBcolor]   (b_risk)   at ( 5.5, -6.75) {Risk Manager};
+\node[block=boardBcolor]   (b_omgr)   at ( 5.5, -7.70) {Order Manager};
+\node[linkblock]           (b_linktx) at ( 3.0, -8.65) {Link TX};
+\node[block=boardBcolor]   (b_pos)    at ( 8.0, -3.90) {Position Tracker};
+\node[block=boardBcolor]   (b_lat)    at ( 8.0, -6.75) {Latency Hist.};
 
 \begin{scope}[on background layer]
   \node[bigbox=boardBcolor,
-        fit=(bctrl)(demux)(qbook)(feat)(strat)(risk)(omgr)(pos)(hist),
-        label={[font=\fontsize{20}{24}\selectfont\bfseries
-               \color{boardBcolor}]above:BOARD B --- Trader}
+        fit=(b_axi)(b_linkrx)(b_demux)(b_qbook)(b_feat)(b_strat)
+            (b_risk)(b_omgr)(b_linktx)(b_pos)(b_lat),
+        label={[font=\fontsize{18}{22}\selectfont\bfseries
+               \color{boardBcolor}, yshift=0.06in]above:%
+               BOARD B \;\textemdash\; Trader}
   ] (boxB) {};
 \end{scope}
 
-% ---- Internal arrows: Board A ----
-\draw[->, thick, boardAcolor!70] (actrlA) -- (msim);
-\draw[->, thick, boardAcolor!70] (msim)   -- (exch);
-\draw[->, thick, boardAcolor!70] (exch)   -- (txarb);
-\draw[->, thick, boardAcolor!70] (txarb)  -- (linktxA);
+% Board B AXI fan-out (config plane, dashed)
+\draw[axi] (b_axi.south) -- (b_demux.north);
+\draw[axi] (b_axi.west)  -| (b_linkrx.north);
+\draw[axi] (b_axi.east)  -| ([xshift=0.30]b_strat.east) -- (b_strat.east);
+\draw[axi] (b_axi.east)  -| ([xshift=0.30]b_risk.east)  -- (b_risk.east);
 
-% ---- Internal arrows: Board B ----
-\draw[->, thick, boardBcolor!70] (bctrl)  -- (demux);
-\draw[->, thick, boardBcolor!70] (demux)  -- (qbook);
-\draw[->, thick, boardBcolor!70] (qbook)  -- (feat);
-\draw[->, thick, boardBcolor!70] (feat)   -- (strat);
-\draw[->, thick, boardBcolor!70] (strat)  -- (risk);
-\draw[->, thick, boardBcolor!70] (risk)   -- (omgr);
-\draw[->, thick, boardBcolor!70] (omgr)   -- (pos);
-\draw[->, thick, boardBcolor!70] (pos)    -- (hist);
+% Pipeline data flow (vertical: top -> bottom)
+\draw[flow=boardBcolor] (b_linkrx.east) -- (b_demux.west);
+\draw[flow=boardBcolor] (b_demux)  -- (b_qbook);
+\draw[flow=boardBcolor] (b_qbook)  -- (b_feat);
+\draw[flow=boardBcolor] (b_feat)   -- (b_strat);
+\draw[flow=boardBcolor] (b_strat)  -- (b_risk);
+\draw[flow=boardBcolor] (b_risk)   -- (b_omgr);
+\draw[flow=boardBcolor] (b_omgr.south) |- (b_linktx.east);
 
-% ---- PMOD cables (A→B and B→A) ----
-\draw[cable] ([yshift=-0.04in]linktxA.east) --
-  node[above, font=\fontsize{14}{17}\selectfont\bfseries,
-       color=linkcolor]{PMOD JA --- Quotes \& Fills}
-  ++(2.6in,0) |- ([yshift=-0.04in]demux.west);
+% Side branch: Demux -> Position Tracker (FILL feedback)
+\draw[flow=boardBcolor] (b_demux.east) -- (b_pos.west)
+  node[midway, above=0.05,
+       font=\fontsize{10}{12}\selectfont\bfseries\color{boardBcolor!85}]{FILL};
 
-\draw[cableback] ([yshift=0.04in]linktxA.east) --
-  ++(1.1in,0) |-
-  node[below, near start,
-       font=\fontsize{14}{17}\selectfont\bfseries,
-       color=linkcolor]{PMOD JB --- Orders}
-  ([yshift=0.04in]omgr.west);
+% Latency-histogram timing taps (very thin, dotted -- it's instrumentation)
+\draw[axi, color=boardBcolor!65, line width=1.0pt]
+  (b_omgr.east) -- (b_lat.west);
+\draw[axi, color=boardBcolor!65, line width=1.0pt]
+  (b_pos.south) -- (b_lat.north);
 
-% ---- Laptop ----
-\node[rectangle, rounded corners=6pt, draw=uwgray, line width=2pt,
-      fill=uwlightgray, minimum height=0.55in, text width=2.3in,
-      align=center, font=\fontsize{15}{19}\selectfont\bfseries,
-      below=0.5in of hist]
-  (laptop) {Laptop Dashboard\\[-2pt]
-    {\fontsize{12}{15}\selectfont\normalfont Plotly/Dash via UART}};
+% =========================== BOARD A (left) =================================
+\node[block=boardAcolor]   (a_axi)    at (-7.5, -2.0)  {AXI-Lite Regs};
+\node[block=boardAcolor]   (a_msim)   at (-9.0, -2.95) {Market Sim};
+\node[block=boardAcolor]   (a_exch)   at (-5.0, -2.95) {Exchange-Lite};
+\node[linkblock]           (a_linktx) at (-3.0, -2.95) {Link TX};
+\node[block=boardAcolor]   (a_qfifo)  at (-9.0, -4.20) {Quote FIFO};
+\node[block=boardAcolor]   (a_txarb)  at (-7.0, -5.30) {TX Arbiter};
+\node[linkblock]           (a_linkrx) at (-3.0, -8.65) {Link RX};
 
-\draw[->, thick, uwgray] (hist.south) -- (laptop.north)
-  node[midway, right, font=\fontsize{13}{16}\selectfont] {UART JSON};
+\begin{scope}[on background layer]
+  \node[bigbox=boardAcolor,
+        fit=(a_axi)(a_msim)(a_exch)(a_qfifo)(a_txarb)(a_linktx)(a_linkrx),
+        label={[font=\fontsize{18}{22}\selectfont\bfseries
+               \color{boardAcolor}, yshift=0.06in]above:%
+               BOARD A \;\textemdash\; Market Sim + Exchange}
+  ] (boxA) {};
+\end{scope}
+
+% --- Board A AXI config (dashed) ---
+\draw[axi] (a_axi.south) -- (a_msim.north);
+\draw[axi] (a_axi.south) -- (a_exch.north);
+\draw[axi] (a_axi.east)  -| (a_linktx.north);
+
+% --- Board A data plane ---
+% (1) Market Sim continuously feeds Exchange with best bid/ask
+\draw[flow=boardAcolor, line width=1.4pt]
+   (a_msim.east) -- (a_exch.west)
+   node[midway, above=0.04,
+        font=\fontsize{9}{11}\selectfont\bfseries\color{boardAcolor!85}]
+        {best bid / ask};
+
+% (2) Market Sim -> Quote FIFO -> TX Arbiter (quote stream)
+\draw[flow=boardAcolor] (a_msim.south) -- (a_qfifo.north)
+   node[midway, right=0.05,
+        font=\fontsize{9}{11}\selectfont\bfseries\color{boardAcolor!85}]
+        {QUOTE};
+\draw[flow=boardAcolor] (a_qfifo.south) |- (a_txarb.west);
+
+% (3) Exchange-Lite -> TX Arbiter (fill / reject)
+\draw[flow=boardAcolor] (a_exch.south) |- (a_txarb.east)
+   node[pos=0.40, right=0.05,
+        font=\fontsize{9}{11}\selectfont\bfseries\color{boardAcolor!85}]
+        {FILL / REJECT};
+
+% (4) TX Arbiter -> Link TX  -- arrow rises at x = -3.0
+\draw[flow=boardAcolor, line width=2.0pt]
+   (a_txarb.east) -| (a_linktx.south);
+\node[font=\fontsize{11}{14}\selectfont\bfseries\color{boardAcolor!85}]
+   at (-2.55, -4.20) {Q + F};
+
+% (5) Link RX -> Exchange  -- arrow rises at x = -3.85 (clear of Link column)
+\draw[flow=boardAcolor, line width=2.0pt]
+   ([xshift=-0.125]a_linkrx.north west) |- (a_exch.south east);
+\node[font=\fontsize{11}{14}\selectfont\bfseries\color{boardAcolor!85}]
+   at (-4.30, -6.10) {ORDER};
+
+% --- Board A: spec badge fills the central empty area ---
+\node[rectangle, rounded corners=5pt, fill=boardAcolor!10,
+      draw=boardAcolor!55, line width=1.0pt,
+      minimum width=2.20in, text width=2.05in,
+      align=center, font=\fontsize{11}{14}\selectfont,
+      anchor=center,
+      drop shadow={shadow xshift=1.5pt, shadow yshift=-1.5pt, opacity=0.15}]
+  (a_specs) at (-6.0, -7.10)
+  {\textbf{\color{boardAcolor}50\,MHz} \;$\cdot$\; 16 symbols\\[2pt]
+   6 sectors \;$\cdot$\; 4 regimes\\[2pt]
+   {\fontsize{9}{11}\selectfont
+    Reproducible LFSR seed}};
+
+% =========================== HOST AXI =======================================
+\draw[axi, line width=1.5pt] (host.south) -- ++(0,-0.45) -| (a_axi.north);
+\draw[axi, line width=1.5pt] (host.south) -- ++(0,-0.45) -| (b_axi.north);
+
+% =========================== PMOD CABLES (thick + frame tags) ==============
+%   Each cable runs in its own dedicated horizontal "lane" -- no overlap.
+% PMOD JA  (top, A->B):  Quote / Fill / Reject
+\draw[cable] (a_linktx.east) -- (b_linkrx.west);
+\node[font=\fontsize{15}{18}\selectfont\bfseries\color{linkcolor}]
+  at ($(a_linktx.east)!0.5!(b_linkrx.west) + (0,0.40)$) {PMOD JA};
+\node[frametag]
+  at ($(a_linktx.east)!0.5!(b_linkrx.west)$)
+  {128-bit \;$\cdot$\; 32 nibbles \;$\cdot$\; 640\,ns};
+\node[font=\fontsize{11}{14}\selectfont\color{linkcolor!85!black}]
+  at ($(a_linktx.east)!0.5!(b_linkrx.west) + (0,-0.36)$)
+  {QUOTE \;$\cdot$\; FILL \;$\cdot$\; REJECT};
+
+% PMOD JB  (bottom, B->A):  Order
+\draw[cable] (b_linktx.west) -- (a_linkrx.east);
+\node[font=\fontsize{15}{18}\selectfont\bfseries\color{linkcolor}]
+  at ($(b_linktx.west)!0.5!(a_linkrx.east) + (0,0.40)$) {PMOD JB};
+\node[frametag]
+  at ($(b_linktx.west)!0.5!(a_linkrx.east)$)
+  {128-bit \;$\cdot$\; 32 nibbles \;$\cdot$\; 640\,ns};
+\node[font=\fontsize{11}{14}\selectfont\color{linkcolor!85!black}]
+  at ($(b_linktx.west)!0.5!(a_linkrx.east) + (0,-0.36)$) {ORDER};
+
+% =========================== STAGE BADGES ==================================
+% Each stage circle now contains BOTH a number and the action it represents,
+% so the round-trip flow (1) Quote -> (2) Link -> (3) Strategy -> (4) Link
+% -> (5) Match -> (6) P&L is self-documenting on the diagram.
+\node[stagecirc=boardAcolor] at ($(a_msim.north)        +(0,0.42)$)
+   {\fontsize{14}{14}\selectfont 1\\[-1pt]
+    {\fontsize{8}{9}\selectfont QUOTE}};
+\node[stagecirc=linkcolor]   at ($(a_linktx.east)!0.5!(b_linkrx.west)
+                                  +(0,1.05)$)
+   {\fontsize{14}{14}\selectfont 2\\[-1pt]
+    {\fontsize{8}{9}\selectfont LINK}};
+\node[stagecirc=boardBcolor] at ($(b_strat.north east)  +(0.70,0.42)$)
+   {\fontsize{14}{14}\selectfont 3\\[-1pt]
+    {\fontsize{7}{8}\selectfont STRATEGY}};
+\node[stagecirc=linkcolor]   at ($(b_linktx.west)!0.5!(a_linkrx.east)
+                                  +(0,1.05)$)
+   {\fontsize{14}{14}\selectfont 4\\[-1pt]
+    {\fontsize{8}{9}\selectfont LINK}};
+\node[stagecirc=boardAcolor] at ($(a_exch.north)        +(0,0.42)$)
+   {\fontsize{14}{14}\selectfont 5\\[-1pt]
+    {\fontsize{8}{9}\selectfont MATCH}};
+\node[stagecirc=boardBcolor] at ($(b_pos.north)         +(0,0.60)$)
+   {\fontsize{14}{14}\selectfont 6\\[-1pt]
+    {\fontsize{8}{9}\selectfont P\&L}};
 
 \end{tikzpicture}
 \end{center}%
@@ -398,240 +444,233 @@ units.%
 
 \vspace{0.50in}
 
-% ---- CLOSED-LOOP DATA LIFECYCLE ----------------------------------------
-\sectionbox{uwdark}{Closed-Loop Data Lifecycle}{%
+% ===========================================================================
+%  ROW 2.5 - THE MATH BEHIND THE PIPELINE (full width, compact 4-col)
+% ===========================================================================
+\sectionbox{uwdark}{The Math Behind the Pipeline}{%
+\vspace{-0.05in}
+Every quantity is \textbf{fixed-point}, every op is \textbf{shift-and-add},
+every stage has a \textbf{deterministic cycle cost} --- the discipline that
+makes hardware trading cycle-accurate.
+
+\vspace{0.12in}
+
+\begin{minipage}[t]{8.0in}
+{\fontsize{18}{22}\selectfont\bfseries\color{boardAcolor}%
+ 1.\;Fixed-Point}
+
+\vspace{0.04in}
+{\fontsize{14}{18}\selectfont\itshape\color{uwgray}%
+ Why every number is integer-encoded and why that gives us zero jitter.}
+
 \vspace{0.06in}
-\begin{center}
-\begin{tikzpicture}[
-  >=Stealth,
-  every node/.style={font=\fontsize{18}{22}\selectfont},
-  stage/.style={
-    rectangle, rounded corners=5pt, draw=#1, line width=2pt,
-    fill=#1!10, minimum height=0.55in, text width=2.0in,
-    align=center, font=\fontsize{15}{19}\selectfont\bfseries
-  },
-  arr/.style={->, line width=3pt, color=#1},
-]
-
-\node[stage=boardAcolor]                          (s1) {Quote\\Generation};
-\node[stage=linkcolor,   right=0.30in of s1]      (s2) {Link TX\\Serialize};
-\node[stage=boardBcolor, right=0.30in of s2]      (s3) {Feature\\Compute};
-\node[stage=boardBcolor, right=0.30in of s3]      (s4) {Strategy\\+ Risk};
-\node[stage=linkcolor,   right=0.30in of s4]      (s5) {Link TX\\Order};
-\node[stage=boardAcolor, right=0.30in of s5]      (s6) {Exchange\\Match};
-\node[stage=boardBcolor, right=0.30in of s6]      (s7) {Fill \&\\P\&L};
-
-\draw[arr=boardAcolor] (s1) -- (s2);
-\draw[arr=linkcolor]   (s2) -- (s3);
-\draw[arr=boardBcolor] (s3) -- (s4);
-\draw[arr=boardBcolor] (s4) -- (s5);
-\draw[arr=linkcolor]   (s5) -- (s6);
-\draw[arr=boardAcolor] (s6) -- (s7);
-
-\node[below=0.10in of s1,
-      font=\fontsize{13}{16}\selectfont\color{uwgray}]
-  {Board A};
-\node[below=0.10in of s2,
-      font=\fontsize{13}{16}\selectfont\color{uwgray}]
-  {Cable};
-\node[below=0.10in of s3,
-      font=\fontsize{13}{16}\selectfont\color{uwgray}]
-  {Board B};
-\node[below=0.10in of s4,
-      font=\fontsize{13}{16}\selectfont\color{uwgray}]
-  {Board B};
-\node[below=0.10in of s5,
-      font=\fontsize{13}{16}\selectfont\color{uwgray}]
-  {Cable};
-\node[below=0.10in of s6,
-      font=\fontsize{13}{16}\selectfont\color{uwgray}]
-  {Board A};
-\node[below=0.10in of s7,
-      font=\fontsize{13}{16}\selectfont\color{uwgray}]
-  {Board B};
-
-\end{tikzpicture}
-\end{center}
-
-\vspace{0.08in}
-Board~A generates synthetic \textbf{QUOTE}s $\to$ serializes over
-PMOD $\to$ Board~B processes through the deterministic pipeline
-$\to$ \textbf{ORDER} sent back $\to$ Board~A matches $\to$
-\textbf{FILL} returned $\to$ Board~B updates positions, P\&L,
-and latency histogram. The entire round trip is measured
-\textbf{cycle-accurately in hardware}.%
-}
-
-\end{minipage}%
-\hfill
-% ========================================================================
-%  RIGHT COLUMN
-% ========================================================================
-\begin{minipage}[t]{10.6in}
-
-% ---- BOARD B -----------------------------------------------------------
-\sectionbox{boardBcolor}{Board B \;\textemdash\; Trader Pipeline}{%
-Processes every quote through an \textbf{8-stage deterministic
-pipeline} with guaranteed fixed latency:
-
-\vspace{0.12in}
-\begin{itemize}[leftmargin=0.35in, itemsep=0.08in, labelsep=0.12in]
-  \item[\color{boardBcolor}\faIcon{inbox}]
-    \textbf{Msg Demux:} Separates incoming QUOTEs from FILLs
-    based on frame type field
-  \item[\color{boardBcolor}\faIcon{book}]
-    \textbf{Quote Book:} Maintains best bid/ask for all 16 symbols
-  \item[\color{boardBcolor}\faIcon{square-root-alt}]
-    \textbf{Feature Compute:} Exponential Moving Average (EMA) with
-    configurable $\alpha$; computes price deviation from fair value
-  \item[\color{boardBcolor}\faIcon{brain}]
-    \textbf{Strategy Engine:} Mean-reversion baseline --- buys when
-    price deviates below EMA by threshold, sells when above
-  \item[\color{boardBcolor}\faIcon{shield-alt}]
-    \textbf{Risk Manager:} Enforces per-symbol position limits and
-    tracks pending orders to prevent over-exposure
-  \item[\color{boardBcolor}\faIcon{paper-plane}]
-    \textbf{Order Manager:} Formats and serializes orders for
-    transmission back to Board A
-  \item[\color{boardBcolor}\faIcon{wallet}]
-    \textbf{Position Tracker:} Real-time P\&L, cash accounting,
-    and fill reconciliation
-  \item[\color{boardBcolor}\faIcon{stopwatch}]
-    \textbf{Latency Histogram:} Cycle-accurate round-trip
-    measurement computed entirely in FPGA fabric (16 bins)
+Floats add unpredictable rounding. We use two scaled-integer
+formats so the FPGA does ordinary integer adds:
+\begin{itemize}[leftmargin=0.24in, itemsep=0.03in, labelsep=0.08in,
+                topsep=0.04in]
+  \item[\color{boardAcolor}\textbullet]
+    \textbf{Q16.16} (u32) for prices, spreads, EMAs ---
+    16 integer bits ($\$0$--$\$65{,}535$), 16 fraction bits
+    ($\sim\!\$1.5\!\!\times\!\!10^{-5}$ resolution)
+  \item[\color{boardAcolor}\textbullet]
+    \textbf{Q32.16} (s48) for cash and P\&L ---
+    handles \(\pm\$2.1\)\,B before saturation
+  \item[\color{boardAcolor}\textbullet]
+    \textbf{1-cycle} add/sub everywhere; no FPU \(\Rightarrow\)
+    no NaN/Inf, \textbf{zero jitter} between identical runs
+  \item[\color{boardAcolor}\textbullet]
+    Same LFSR seed \(\Rightarrow\) bit-exact replays for debug
 \end{itemize}
+\end{minipage}\hfill
+\begin{minipage}[t]{8.0in}
+{\fontsize{18}{22}\selectfont\bfseries\color{boardAcolor}%
+ 2.\;Market Sim (A)}
 
-\vspace{0.15in}
-\textbf{FSM:}\; RESET $\to$ IDLE $\to$ ARMED $\to$ TRADING
-$\leftrightarrow$ HALTED%
-}
+\vspace{0.04in}
+{\fontsize{14}{18}\selectfont\itshape\color{uwgray}%
+ How 16 stock prices wander realistically without ever drifting away.}
 
-\vspace{0.50in}
+\vspace{0.06in}
+Each tick, a price is pulled toward its anchor (mean-reversion)
+plus three layers of random shock:
+\[
+  p_{s,t+1} = p_{s,t}
+   + \underbrace{\kappa_r(\bar{p}_s - p_{s,t})}_{\text{pull to anchor}}
+   + \underbrace{\sigma_r(n_{g}+n_{\mathrm{sec}}+n_s)}_{\text{3-tier noise}}
+\]
+\(\kappa_r,\sigma_r\) flip with the regime ---
+\textbf{CALM}\,\(\to\)\,\textbf{VOL}\,\(\to\)\,\textbf{BURST}\,\(\to\)\,\textbf{ADV}.
+Three LFSR-32s (period \(2^{32}\!-\!1\)) feed the noise.
+Bid/ask = \(p_s\!\pm\!\tfrac{1}{2}\mathrm{spread}_s\).
+\end{minipage}\hfill
+\begin{minipage}[t]{8.0in}
+{\fontsize{18}{22}\selectfont\bfseries\color{boardBcolor}%
+ 3.\;Strategy + Risk (B)}
 
-% ---- KEY METRICS -------------------------------------------------------
-\sectionbox{uwred}{Key Performance Metrics}{%
-\vspace{0.12in}
-\begin{center}
-\begin{tabular}{@{}p{5.1in}p{4.9in}@{}}
+\vspace{0.04in}
+{\fontsize{14}{18}\selectfont\itshape\color{uwgray}%
+ ``Cheap reverts up, rich reverts down,'' with 3 safety nets.}
 
-\metriccard{80\,ns}{Quote-to-Order Latency}{%
-8-stage pipeline $\cdot$ 8 cycles\\
-\textbf{Zero jitter} --- fixed cycle count}
-&
-\metriccard{68.3K}{Quotes/s (measured on silicon)}{%
-Board A running at 50\,MHz\\
-QUOTE\_INTERVAL = 1000}
-\\[0.35in]
-\metriccard{1.47M}{Max Link Throughput (fps)}{%
-128-bit frames on 4-bit PMOD\\
-50\,MHz effective nibble rate}
-&
-\metriccard{16}{Simultaneous S\&P\,500 Symbols}{%
-8 GICS sectors $\cdot$ correlated drift\\
-AAPL, MSFT, NVDA, GOOGL, \ldots}
-\\[0.35in]
-\metriccard{640\,ns}{Link Serialization Latency}{%
-128-bit frame $\to$ 32 nibbles\\
-+ 40\,ns inter-frame gap}
-&
-\metriccard{0}{Latches \& Critical Warnings}{%
-Clean synthesis on Vivado\\
-for both Board A and Board B}
+\vspace{0.06in}
+\textbf{1.\;Fair value} (single-DSP EMA --- a smoothed estimate of the
+``true'' price):\;
+\(\mu_{s,t+1}\!=\!\mu_{s,t}\!+\!\alpha(p_{s,t}\!-\!\mu_{s,t})\)
 
-\end{tabular}
-\end{center}%
-}
+\smallskip
+\textbf{2.\;Decision} ($\Delta\!=\!$ how far above/below fair value;
+threshold \(\theta\) replaces division by \(\sigma\)):\;
+\(\Delta_s\!=\!p_s\!-\!\mu_s\;\Rightarrow\;\)\textcolor{boardBcolor!85}{BUY}
+if cheap, \textcolor{boardBcolor!85}{SELL} if rich.
 
-\vspace{0.50in}
+\smallskip
+\textbf{3.\;Safety} (3 parallel comparators block bad orders):\;
+position \(|q_s\!+\!\delta|\!\le\!Q_{\max}\), rate
+\(r_t\!\le\!r_{\max}\), drawdown \(C_t\!\ge\!-L_{\max}\).
 
-% ---- VALIDATION --------------------------------------------------------
-\sectionbox{uwgray}{Validation \& Software Stack}{%
-\begin{minipage}[t]{4.9in}
-{\fontsize{26}{32}\selectfont\bfseries\color{uwdark}Verification}
+\smallskip
+\textbf{4.\;P\&L} (after every accepted FILL):\;
+\(\mathrm{P\&L}_t = C_t + \sum_{s} q_s\,p_s\)
+\end{minipage}\hfill
+\begin{minipage}[t]{8.0in}
+{\fontsize{18}{22}\selectfont\bfseries\color{linkcolor}%
+ 4.\;Latency}
 
-\vspace{0.10in}
-\begin{itemize}[leftmargin=0.35in, itemsep=0.08in, labelsep=0.12in]
-  \item[\color{uwgray}\faIcon{code}]
-    \textbf{Golden Model:} Bit-accurate Python
-    reference for every RTL module
-  \item[\color{uwgray}\faIcon{vial}]
-    \textbf{Testbenches:} Per-module SystemVerilog
-    TBs + full system-level integration
-  \item[\color{uwgray}\faIcon{cogs}]
-    \textbf{Dual Sim Flow:} ModelSim and Verilator
-    for independent cross-checking
-  \item[\color{uwgray}\faIcon{check-circle}]
-    \textbf{On-silicon:} Hardware verified via
-    PYNQ Jupyter + AXI-Lite MMIO
-\end{itemize}
-\end{minipage}%
-\hfill
-\begin{minipage}[t]{4.9in}
-{\fontsize{26}{32}\selectfont\bfseries\color{uwdark}Software}
+\vspace{0.04in}
+{\fontsize{14}{18}\selectfont\itshape\color{uwgray}%
+ Why we can quote a single number and trust it.}
 
-\vspace{0.10in}
-\begin{itemize}[leftmargin=0.35in, itemsep=0.08in, labelsep=0.12in]
-  \item[\color{uwgray}\faIcon{server}]
-    \textbf{PYNQ Overlays:} .bit/.hwh pairs
-    deployed to each board's SD card
-  \item[\color{uwgray}\faIcon{broadcast-tower}]
-    \textbf{Telemetry Server:} Board B PS polls
-    hardware registers at 20\,Hz
-  \item[\color{uwgray}\faIcon{desktop}]
-    \textbf{Live Dashboard:} Real-time Plotly/Dash
-    on laptop via UART (115\,200\,baud)
-  \item[\color{uwgray}\faIcon{sliders-h}]
-    \textbf{Runtime Control:} Regime switching,
-    threshold tuning, symbol config
-\end{itemize}
-\end{minipage}%
-}
-
+\vspace{0.06in}
+Every stage has a fixed cycle count, so the round-trip is just
+their sum (no OS, no contention):
+\[
+  T_{\mathrm{RT}} =
+  \underbrace{1}_{\text{quote}} +
+  \underbrace{32}_{\text{A}\to\text{B}} +
+  \underbrace{6}_{\text{pipe}} +
+  \underbrace{32}_{\text{B}\to\text{A}} +
+  \underbrace{1}_{\text{match}}\;\text{cy}
+\]
+\(@\,50\,\mathrm{MHz}\;(20\,\mathrm{ns/cy})\):\;
+\(T_{\mathrm{RT}}\!\approx\!72\,\mathrm{cy}\!=\!\mathbf{1.44\,\mu s}\),
+\textbf{every quote, no exceptions}. The on-chip Latency Histogram
+(\(16\!\times\!8\)\,cy bins) measures
+\(\Delta t = t_{\mathrm{fill}}\!-\!t_{\mathrm{send}}\) in fabric, so
+the metric itself is jitter-free.
 \end{minipage}
+}
 
-% ========================================================================
-%  FULL-WIDTH BOTTOM ROW
-% ========================================================================
-\vspace{0.55in}
+\vspace{0.50in}
 
-% ---- TECHNOLOGY STACK STRIP --------------------------------------------
-\begin{center}
-\begin{tikzpicture}
-\node[
-  inner sep=0.35in,
-  fill=uwdark,
-  rounded corners=10pt,
-  text width=33in,
-  align=center,
-  drop shadow={shadow xshift=3pt, shadow yshift=-3pt, opacity=0.15}
-] {%
-  {\fontsize{26}{32}\selectfont\color{uwwhite}\bfseries
-    Technology Stack}\\[0.20in]
-  {\fontsize{21}{27}\selectfont\color{uwwhite!85}
-    \textbf{FPGA:}\; AMD Zynq UltraScale+ XCZU3EG (2$\times$ AUP-ZU3)
-    \quad\textbar\quad
-    \textbf{HDL:}\; SystemVerilog \;---\; centralized \texttt{hft\_pkg.sv}
-    \quad\textbar\quad
-    \textbf{Build:}\; Vivado 2024.1 + TCL automation
-    \quad\textbar\quad
-    \textbf{Deploy:}\; PYNQ
-  }\\[0.10in]
-  {\fontsize{21}{27}\selectfont\color{uwwhite!85}
-    \textbf{Arithmetic:}\; Q16.16 fixed-point
-    \quad\textbar\quad
-    \textbf{CDC:}\; 2-FF synchronizer at link RX
-    \quad\textbar\quad
-    \textbf{Noise Gen:}\; 32-bit Galois LFSR
-    \quad\textbar\quad
-    \textbf{SW:}\; Python\,3 + Plotly\,Dash
-  }%
-};
-\end{tikzpicture}
-\end{center}
+% ===========================================================================
+%  ROW 3 - HARDWARE IMPLEMENTATION (full width, 3 columns: A | link | B)
+% ===========================================================================
+\sectionbox{uwdark}{Hardware Implementation}{%
+\vspace{-0.05in}
+Two AMD Zynq UltraScale+ \textbf{XCZU3EG} boards, all logic written
+in SystemVerilog around a shared \texttt{hft\_pkg.sv}, every
+register-mapped surface driven from Python over AXI-Lite MMIO.
 
-\vspace{0.45in}
+\vspace{0.18in}
 
-% ---- CONCLUSIONS -------------------------------------------------------
+% ---- Column 1: Board A ----------------------------------------------------
+\begin{minipage}[t]{10.6in}
+{\fontsize{22}{26}\selectfont\bfseries\color{boardAcolor}%
+ Board A \;\textemdash\; Market Sim + Exchange}
+
+\vspace{0.06in}
+{\fontsize{14}{18}\selectfont\itshape\color{uwgray}%
+ Generates 16 correlated stock prices and matches incoming orders
+ against best bid/ask in 1 cycle.}
+
+\vspace{0.10in}
+\begin{itemize}[leftmargin=0.30in, itemsep=0.06in, labelsep=0.10in]
+  \item[\color{boardAcolor}\textbullet]
+    \textbf{Market Sim:} 3-tier LFSR noise (global / sector /
+    per-symbol) with O--U pull-back; 4 regimes (CALM\,$\to$\,VOL\,$\to$\,BURST\,$\to$\,ADV)
+  \item[\color{boardAcolor}\textbullet]
+    \textbf{Quote FIFO + TX Arbiter:} buffers quotes, prioritizes
+    fill/reject responses for fair link bandwidth
+  \item[\color{boardAcolor}\textbullet]
+    \textbf{Exchange-Lite:} 1-cycle order match against live best
+    bid/ask; emits \textsc{FILL} or \textsc{REJECT}
+  \item[\color{boardAcolor}\textbullet]
+    \textbf{AXI-Lite regs:} per-symbol mid, spread, sector, 16-bit
+    company tokens --- all writable live from Python
+\end{itemize}
+
+\vspace{0.10in}
+{\fontsize{13}{17}\selectfont\color{uwdark}%
+\textbf{FSM:}\; RESET\,$\to$\,IDLE\,$\to$\,RUNNING\,$\leftrightarrow$\,STOPPED}
+\end{minipage}\hfill
+% ---- Column 2: Link Layer -------------------------------------------------
+\begin{minipage}[t]{10.6in}
+{\fontsize{22}{26}\selectfont\bfseries\color{linkcolor}%
+ Link Layer \;\textemdash\; Custom PMOD}
+
+\vspace{0.06in}
+{\fontsize{14}{18}\selectfont\itshape\color{uwgray}%
+ Full-duplex 128-bit framed bus over two PMOD ribbons --- our own
+ protocol, no IP-core black boxes.}
+
+\vspace{0.10in}
+\begin{itemize}[leftmargin=0.30in, itemsep=0.06in, labelsep=0.10in]
+  \item[\color{linkcolor}\textbullet]
+    \textbf{Physical:} 2$\times$12-pin PMOD (JA: A$\to$B,\; JB: B$\to$A)
+    --- simultaneous quote and order paths
+  \item[\color{linkcolor}\textbullet]
+    \textbf{Frame:} 128 b = 4-b msg\_type + 4-b sym\_id + 32-b bid +
+    32-b ask + 16-b qty + 16-b seq + 24-b rsvd/CRC
+  \item[\color{linkcolor}\textbullet]
+    \textbf{Mesochronous CDC:} each board has its own crystal;
+    2-FF synchronizer at every RX nibble deserializer
+  \item[\color{linkcolor}\textbullet]
+    \textbf{Throughput:} 32 nibbles\,$\times$\,20\,ns = \textbf{640\,ns/frame};
+    1.5\,M frames/s ceiling, 64-deep TX FIFOs absorb burst storms
+\end{itemize}
+
+\vspace{0.10in}
+{\fontsize{13}{17}\selectfont\color{uwdark}%
+\textbf{Handshake:}\; ready/valid on both ends, no dropped frames}
+\end{minipage}\hfill
+% ---- Column 3: Board B ----------------------------------------------------
+\begin{minipage}[t]{10.6in}
+{\fontsize{22}{26}\selectfont\bfseries\color{boardBcolor}%
+ Board B \;\textemdash\; Trader Pipeline}
+
+\vspace{0.06in}
+{\fontsize{14}{18}\selectfont\itshape\color{uwgray}%
+ 7-stage deterministic pipeline; one quote in $\to$ one order out, in
+ a fixed cycle count every time.}
+
+\vspace{0.10in}
+\begin{itemize}[leftmargin=0.30in, itemsep=0.06in, labelsep=0.10in]
+  \item[\color{boardBcolor}\textbullet]
+    \textbf{Demux + Quote Book:} routes by msg\_type, maintains live
+    best bid/ask for all 16 symbols
+  \item[\color{boardBcolor}\textbullet]
+    \textbf{Feature Compute:} single-DSP per-symbol EMA fair value,
+    deviation $\Delta = p_s - \mu_s$
+  \item[\color{boardBcolor}\textbullet]
+    \textbf{Strategy + Risk:} Mean-Rev (default) / Momentum / NN-stub
+    / Auto; 3 parallel comparators for position, rate, drawdown caps
+  \item[\color{boardBcolor}\textbullet]
+    \textbf{Position Tracker + Latency Hist:} Q32.16 cash + per-symbol
+    qty; on-chip 16-bin quote-to-fill measurement
+\end{itemize}
+
+\vspace{0.10in}
+{\fontsize{13}{17}\selectfont\color{uwdark}%
+\textbf{FSM:}\; B\_RESET\,$\to$\,B\_IDLE\,$\to$\,B\_ARMED\,$\to$\,B\_TRADING\,$\leftrightarrow$\,B\_HALTED}
+\end{minipage}
+}
+
+\vspace{0.22in}
+
+% ===========================================================================
+%  ROW 5 - CONCLUSIONS & KEY PERFORMANCE
+%   Top: 3 headline metric cards.
+%   Bottom: 2-col takeaway bullets (one bullet = how we verified).
+% ===========================================================================
 \begin{center}
 \begin{tikzpicture}
 \node[
@@ -639,45 +678,73 @@ for both Board A and Board B}
   fill=white,
   rounded corners=10pt,
   draw=uwred, line width=3pt,
-  text width=33in,
+  text width=33.5in,
   align=left,
   drop shadow={shadow xshift=3pt, shadow yshift=-3pt, opacity=0.12}
 ] {%
-  {\fontsize{36}{43}\selectfont\bfseries\color{uwred}
-    Conclusions \& Key Takeaways}\\[0.25in]
-  {\fontsize{22}{30}\selectfont\RaggedRight
+  {\fontsize{34}{40}\selectfont\bfseries\color{uwred}
+    Conclusions \& Key Performance}\\[0.20in]
 
-  \begin{minipage}[t]{15.8in}
-  \begin{itemize}[leftmargin=0.35in, itemsep=0.10in, labelsep=0.12in]
-    \item[\color{uwred}\faIcon{check}]
-      Demonstrated a \textbf{complete closed-loop trading system}
-      across two physically separate FPGAs with a custom
-      board-to-board link
-    \item[\color{uwred}\faIcon{check}]
-      Achieved \textbf{80\,ns deterministic quote-to-order latency}
-      with zero jitter --- every quote processed in exactly 8 clock
-      cycles
-    \item[\color{uwred}\faIcon{check}]
-      All latency and throughput metrics measured
-      \textbf{entirely in FPGA fabric}, eliminating OS-induced
-      measurement noise
+  % ---- METRIC ROW (3 cards) ----------------------------------------------
+  \begin{center}
+  \begin{tabular}{@{}c c c@{}}
+  \metriccard{1.44\,$\mu$s}{Round-Trip Latency}{%
+  72 cy @ 50\,MHz\\
+  \textbf{zero jitter}, every quote}
+  &
+  \metriccard{150+}{On-Silicon Assertions}{%
+  24-group PYNQ test suite\\
+  all passing on Board A}
+  &
+  \metriccard{0 / 0}{Latches / Crit. Warnings}{%
+  Clean Vivado synthesis,\\
+  timing closed both boards}
+  \end{tabular}
+  \end{center}
+
+  \vspace{0.18in}
+
+  {\fontsize{18}{24}\selectfont\RaggedRight
+
+  \begin{minipage}[t]{16.0in}
+  \begin{itemize}[leftmargin=0.35in, itemsep=0.08in, labelsep=0.12in]
+    \item[\color{uwred}\textbullet]
+      \textbf{Closed-loop trading across two FPGAs} ---
+      synthetic exchange (A) and trader (B) connected by a custom
+      128-bit framed PMOD link with ready/valid backpressure
+    \item[\color{uwred}\textbullet]
+      \textbf{16 real S\&P\,500 tickers} across 6 GICS sectors,
+      driven by a 3-tier LFSR + Ornstein--Uhlenbeck market model
+      under 4 live-switchable regimes (CALM / VOL / BURST / ADV)
+    \item[\color{uwred}\textbullet]
+      All latency, throughput, and P\&L metrics measured
+      \textbf{entirely in FPGA fabric} --- no OS in the path,
+      no software contamination of the numbers
+    \item[\color{uwred}\textbullet]
+      Mesochronous CDC at every link RX (each board has its own
+      crystal), 64-deep TX FIFOs absorb regime-burst storms losslessly
   \end{itemize}
-  \end{minipage}%
-  \hfill
-  \begin{minipage}[t]{15.8in}
-  \begin{itemize}[leftmargin=0.35in, itemsep=0.10in, labelsep=0.12in]
-    \item[\color{uwred}\faIcon{check}]
-      Synthesized and verified on silicon with \textbf{zero latches,
-      zero critical warnings}, timing met at 50\,MHz
-    \item[\color{uwred}\faIcon{check}]
-      Full \textbf{Python golden model} enables bit-accurate
-      verification of every hardware module
-    \item[\color{uwred}\faIcon{check}]
-      System handles \textbf{4 market regimes} with real-time
-      adaptation, exercising the pipeline under calm, volatile,
-      burst, and adversarial conditions
+  \end{minipage}\hfill
+  \begin{minipage}[t]{16.0in}
+  \begin{itemize}[leftmargin=0.35in, itemsep=0.08in, labelsep=0.12in]
+    \item[\color{uwred}\textbullet]
+      \textbf{Verified at three levels:} Python golden model
+      $\to$ SystemVerilog testbenches $\to$ on-silicon self-checking
+      PS test suite, all in bit-for-bit agreement
+    \item[\color{uwred}\textbullet]
+      \textbf{Q16.16 / Q32.16 fixed-point arithmetic} throughout ---
+      no FPU, no NaN/Inf, and same-seed LFSRs give bit-exact replays
+      for every debug session
+    \item[\color{uwred}\textbullet]
+      \textbf{Single SystemVerilog package} (\texttt{hft\_pkg.sv})
+      shared by both boards --- one source of truth for frame format,
+      regimes, and msg types
+    \item[\color{uwred}\textbullet]
+      \textbf{Full PYNQ deploy:} \texttt{.bit}+\texttt{.hwh} overlay
+      per board, Python live monitor at 5\,Hz, runtime-switchable
+      strategy / threshold / position cap \emph{while trading}
   \end{itemize}
-  \end{minipage}%
+  \end{minipage}
 
   }%
 };
