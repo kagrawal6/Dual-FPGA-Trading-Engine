@@ -65,6 +65,7 @@ from register_map import (
     BID_BASE, ASK_BASE,
     PNL_CASH_LO_BASE, PNL_CASH_HI_BASE,
     LAST_FILL_BASE, TRADES_PACK_BASE,
+    EMA_BASE, LAST_SIGNAL_PACK_BASE, LAST_LATENCY,
     NUM_SYMBOLS, NUM_HIST_BINS,
     q16_16, from_q16_16, signed32, cash_q32_16, read_trades_pack,
 )
@@ -95,6 +96,9 @@ def read_per_symbol(mmio: MMIO) -> dict:
     ask       = [from_q16_16(mmio.read(ASK_BASE + i * 4))   for i in range(NUM_SYMBOLS)]
     last_fill = [from_q16_16(mmio.read(LAST_FILL_BASE + i * 4)) for i in range(NUM_SYMBOLS)]
 
+    # Per-symbol EMA snapshot (Q16.16 → float).
+    ema_vals = [from_q16_16(mmio.read(EMA_BASE + i * 4)) for i in range(NUM_SYMBOLS)]
+
     pnl_cash = [
         cash_q32_16(
             mmio.read(PNL_CASH_LO_BASE + i * 4),
@@ -105,6 +109,28 @@ def read_per_symbol(mmio: MMIO) -> dict:
 
     trades = [read_trades_pack(mmio, i) for i in range(NUM_SYMBOLS)]
 
+    # Strategy “last signal” classification per symbol — 4 bits per symbol:
+    # 0=NONE 1=BUY 2=SELL 3=RISK_BLOCKED
+    signal_code = [0] * NUM_SYMBOLS
+    for j in range((NUM_SYMBOLS + 7) // 8):
+        word = mmio.read(LAST_SIGNAL_PACK_BASE + 4 * j)
+        for k in range(8):
+            idx = 8 * j + k
+            if idx >= NUM_SYMBOLS:
+                break
+            signal_code[idx] = (word >> (4 * k)) & 0x7
+
+    signal_label = []
+    for code in signal_code:
+        if code == 1:
+            signal_label.append("BUY")
+        elif code == 2:
+            signal_label.append("SELL")
+        elif code == 3:
+            signal_label.append("RISK_BLOCKED")
+        else:
+            signal_label.append("NONE")
+
     # Derived per-symbol quantities
     mid = [(b + a) * 0.5 if (a > 0 or b > 0) else 0.0 for b, a in zip(bid, ask)]
     spread    = [(a - b) if (a > 0 and b > 0) else 0.0 for b, a in zip(bid, ask)]
@@ -112,9 +138,19 @@ def read_per_symbol(mmio: MMIO) -> dict:
     pnl_mtm   = [pc + p * m for pc, p, m in zip(pnl_cash, pos, mid)]
 
     return {
-        "pos": pos, "bid": bid, "ask": ask, "mid": mid, "spread": spread,
-        "pnl_cash": pnl_cash, "pnl_mtm": pnl_mtm, "pos_value": pos_value,
-        "last_fill": last_fill, "trades": trades,
+        "pos": pos,
+        "bid": bid,
+        "ask": ask,
+        "mid": mid,
+        "spread": spread,
+        "ema": ema_vals,
+        "signal_code": signal_code,
+        "signal": signal_label,
+        "pnl_cash": pnl_cash,
+        "pnl_mtm": pnl_mtm,
+        "pos_value": pos_value,
+        "last_fill": last_fill,
+        "trades": trades,
     }
 
 
@@ -148,6 +184,9 @@ def read_telemetry_snapshot(mmio: MMIO) -> dict:
         "ask": [round(v, 4) for v in psd["ask"]],
         "mid": [round(v, 4) for v in psd["mid"]],
         "spread": [round(v, 4) for v in psd["spread"]],
+        "ema": [round(v, 4) for v in psd["ema"]],
+        "signal": psd["signal"],
+        "signal_code": psd["signal_code"],
         "pnl_cash": [round(v, 4) for v in psd["pnl_cash"]],
         "pnl_mtm": [round(v, 4) for v in psd["pnl_mtm"]],
         "pos_value": [round(v, 4) for v in psd["pos_value"]],
@@ -158,6 +197,7 @@ def read_telemetry_snapshot(mmio: MMIO) -> dict:
         "lat_max": mmio.read(LAT_MAX),
         "lat_sum": mmio.read(LAT_SUM),
         "lat_cnt": mmio.read(LAT_COUNT),
+        "last_latency": mmio.read(LAST_LATENCY),
     }
 
 

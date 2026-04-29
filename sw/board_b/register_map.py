@@ -53,6 +53,11 @@ LAST_FILL_BASE    = 0x200   # +4*i, 16 → 0x200..0x23C
 # Word j → trades[2*j] in [15:0], trades[2*j+1] in [31:16]
 TRADES_PACK_BASE  = 0x240   # +4*j, 8 words → 0x240..0x25C
 
+# B3 extensions (see board_b_axi_regs.sv)
+EMA_BASE              = 0x260   # +4*i, 16 → 0x260..0x29C (Q16.16 EMA snapshot per symbol)
+LAST_SIGNAL_PACK_BASE = 0x2A0   # +4*j, 2 words; 4 bits per symbol (0=NONE,1=BUY,2=SELL,3=RISK_BLOCKED)
+LAST_LATENCY          = 0x2A8   # most recent single latency sample (cycles)
+
 NUM_SYMBOLS    = 16
 NUM_HIST_BINS  = 16
 

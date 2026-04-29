@@ -761,6 +761,36 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                     style={"height": "520px", "maxWidth": "1100px"},
                                 ),
                                 html.H3(
+                                    "EMA vs mid (per symbol — why we trade)",
+                                    className="bb-section-heading",
+                                    style={"marginTop": "22px", "marginBottom": "6px"},
+                                ),
+                                html.Div(
+                                    [
+                                        dcc.Dropdown(
+                                            id="ema-symbol",
+                                            options=[
+                                                {"label": f"{SYMBOL_NAMES[i]} (#{i})", "value": i}
+                                                for i in range(NUM_SYMBOLS)
+                                            ],
+                                            value=0,
+                                            clearable=False,
+                                            style={"width": "220px"},
+                                        ),
+                                        dcc.Graph(
+                                            id="fig-ema",
+                                            style={"height": "260px", "maxWidth": "720px"},
+                                        ),
+                                    ],
+                                    style={
+                                        "display": "flex",
+                                        "flexWrap": "wrap",
+                                        "alignItems": "flex-start",
+                                        "gap": "16px",
+                                        "marginBottom": "10px",
+                                    },
+                                ),
+                                html.H3(
                                     "Per-symbol book (quotes + exposure)",
                                     className="bb-section-heading",
                                     style={"marginTop": "18px", "marginBottom": "10px"},
@@ -1486,9 +1516,10 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         Input("telemetry-store", "data"),
         Input("prefs-store", "data"),
         Input("view-tabs", "value"),
+        Input("ema-symbol", "value"),
         State("freeze-store", "data"),
     )
-    def render_figures(telem, prefs, view_tab, freeze):
+    def render_figures(telem, prefs, view_tab, ema_idx, freeze):
         telem = _active_data(telem or {}, freeze or {})
         prefs = prefs or {}
         dark = prefs.get("dark", True)
@@ -2125,6 +2156,49 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
             )
 
+        # EMA vs mid for selected symbol (snapshot-style, not full history).
+        try:
+            idx = int(ema_idx) if ema_idx is not None else 0
+        except (TypeError, ValueError):
+            idx = 0
+        if idx < 0 or idx >= NUM_SYMBOLS:
+            idx = 0
+        sym_name = SYMBOL_NAMES[idx]
+        mid_arr = latest.get("mid") or []
+        ema_arr = latest.get("ema") or []
+        if not isinstance(mid_arr, list) or not isinstance(ema_arr, list) or len(mid_arr) <= idx or len(ema_arr) <= idx:
+            fig_ema = fig_blank(
+                "EMA telemetry unavailable.<br>Update Board B PYNQ server to emit EMA per symbol.",
+                c,
+            )
+        else:
+            cur_mid = float(mid_arr[idx] or 0.0)
+            cur_ema = float(ema_arr[idx] or 0.0)
+            dev = cur_mid - cur_ema
+            bars = ["PRICE (mid)", "EMA", "DEVIATION"]
+            vals = [cur_mid, cur_ema, dev]
+            colors_ema = [c["text"], c["accent"], c["good"] if dev >= 0 else c["bad"]]
+            fig_ema = go.Figure(
+                go.Bar(
+                    x=bars,
+                    y=vals,
+                    marker_color=colors_ema,
+                    hovertemplate="%{x}: %{y:.4f}<extra></extra>",
+                )
+            )
+            fig_ema.update_layout(
+                title=dict(
+                    text=f"{sym_name}: EMA vs mid snapshot",
+                    font=_plot_font(c, 13),
+                ),
+                paper_bgcolor=chart_paper,
+                plot_bgcolor=chart_plot,
+                font=_plot_font(c, 11),
+                height=240,
+                margin=dict(l=40, r=20, t=40, b=40),
+                yaxis=dict(showgrid=True, gridcolor=c["grid"], title="price"),
+            )
+
         hist = [int(x) for x in latest.get("hist", [0] * NUM_HIST_BINS)]
         x_idx = [i * HIST_BIN_CYCLES for i in range(NUM_HIST_BINS)]
         fig_mini = go.Figure(
@@ -2561,6 +2635,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             pnl_mtm = latest.get("pnl_mtm", [0.0] * NUM_SYMBOLS)
             trades = latest.get("trades", [0] * NUM_SYMBOLS)
             last_fill = latest.get("last_fill", [0.0] * NUM_SYMBOLS)
+            signal_arr = latest.get("signal", ["NONE"] * NUM_SYMBOLS)
 
             for arr_name, arr, default in (
                 ("bid", bid, [0.0] * NUM_SYMBOLS),
@@ -2571,6 +2646,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                 ("pnl_mtm", pnl_mtm, [0.0] * NUM_SYMBOLS),
                 ("trades", trades, [0] * NUM_SYMBOLS),
                 ("last_fill", last_fill, [0.0] * NUM_SYMBOLS),
+                ("signal_arr", signal_arr, ["NONE"] * NUM_SYMBOLS),
             ):
                 if not isinstance(arr, list):
                     locals()[arr_name] = default
@@ -2592,6 +2668,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             pnl_mtm = _pad_list(pnl_mtm, NUM_SYMBOLS, 0.0)
             trades = _pad_list(trades, NUM_SYMBOLS, 0)
             last_fill = _pad_list(last_fill, NUM_SYMBOLS, 0.0)
+            signal_arr = _pad_list(signal_arr, NUM_SYMBOLS, "NONE")
 
             headers = ["SYM", "BID", "ASK", "MID", "SPREAD", "POS", "PNL", "TRADES", "LAST ACTION"]
             th_style = {
@@ -2629,12 +2706,15 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                 pnl = pnl_mtm[i]
                 tr = trades[i]
                 lf = last_fill[i]
+                sig = str(signal_arr[i] or "NONE").upper()
 
                 quote_missing = (b == 0.0 and a == 0.0 and m == 0.0 and spr == 0.0)
                 pos_s = "0" if int(p) == 0 else (f"+{int(p)}" if int(p) > 0 else f"{int(p)}")
 
                 last_action = "—"
-                if int(tr) > 0:
+                if sig in ("BUY", "SELL", "RISK_BLOCKED"):
+                    last_action = sig
+                elif int(tr) > 0:
                     last_action = "FILL"
 
                 if quote_missing:
