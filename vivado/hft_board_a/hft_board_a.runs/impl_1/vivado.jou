@@ -3,8 +3,8 @@
 # SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
 # IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
 # SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
-# Start of session at: Wed Apr 29 01:49:38 2026
-# Process ID         : 20416
+# Start of session at: Wed Apr 29 02:25:51 2026
+# Process ID         : 16124
 # Current directory  : C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/impl_1
 # Command line       : vivado.exe -log system_wrapper.vdi -applog -product Vivado -messageDb vivado.pb -mode batch -source system_wrapper.tcl -notrace
 # Log file           : C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/impl_1/system_wrapper.vdi
@@ -17,8 +17,8 @@
 # CPU Physical cores : 4
 # CPU Logical cores  : 8
 # Host memory        : 16889 MB
-# Swap memory        : 20537 MB
-# Total Virtual      : 37426 MB
-# Available Virtual  : 8711 MB
+# Swap memory        : 22197 MB
+# Total Virtual      : 39087 MB
+# Available Virtual  : 17128 MB
 #-----------------------------------------------------------
 source system_wrapper.tcl -notrace

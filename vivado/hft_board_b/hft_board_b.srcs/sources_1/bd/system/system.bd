@@ -155,6 +155,9 @@
           "PSU__FPGA_PL0_ENABLE": {
             "value": "1"
           },
+          "PSU__GPIO_EMIO_WIDTH": {
+            "value": "1"
+          },
           "PSU__GPIO_EMIO__WIDTH": {
             "value": "[94:0]"
           },

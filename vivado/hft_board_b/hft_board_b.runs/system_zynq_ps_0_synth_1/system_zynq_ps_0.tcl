@@ -58,7 +58,7 @@ if {$::dispatch::connected} {
 OPTRACE "system_zynq_ps_0_synth_1" START { ROLLUP_AUTO }
 set_param power.BramSDPPropagationFix 1
 set_param general.usePosixSpawnForFork 1
-set_param chipscope.maxJobs 2
+set_param chipscope.maxJobs 1
 set_param physdb.placeDBImplUsesPlaceStorage 0
 set_param power.enableUnconnectedCarry8PinPower 1
 set_param power.enableCarry8RouteBelPower 1

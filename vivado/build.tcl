@@ -31,9 +31,13 @@ puts " Building project: $proj"
 puts "============================================================"
 
 # ── Synthesis ──────────────────────────────────────────────────────────────
+# NOTE: -jobs reduced from 4 → 2 to keep peak memory under ~5 GB. With 4
+# parallel OOC IP synth subruns (Zynq PS + SmartConnect + reset + hft_core),
+# Vivado peaks at ~6–8 GB, which OOMs on a 16 GB Windows host where Chrome
+# / Cursor / etc. are also resident. Two parallel jobs is the sweet spot.
 puts "\n>>> Running Synthesis ..."
 reset_run synth_1
-launch_runs synth_1 -jobs 4
+launch_runs synth_1 -jobs 2
 wait_on_run synth_1
 
 set synth_status [get_property STATUS [get_runs synth_1]]
@@ -44,8 +48,10 @@ if {$synth_status ne "synth_design Complete!"} {
 }
 
 # ── Implementation + Bitstream ─────────────────────────────────────────────
+# NOTE: -jobs reduced from 4 → 2 (see synth note above). Place + Route +
+# write_bitstream is even more memory-hungry per job than synth.
 puts "\n>>> Running Implementation + write_bitstream ..."
-launch_runs impl_1 -to_step write_bitstream -jobs 4
+launch_runs impl_1 -to_step write_bitstream -jobs 2
 wait_on_run impl_1
 
 set impl_status [get_property STATUS [get_runs impl_1]]
