@@ -15,6 +15,8 @@ from register_map import *
 
 FSM_NAMES = {0: "B_RESET", 1: "B_IDLE", 2: "B_ARMED", 3: "B_TRADING", 4: "B_HALTED"}
 STRATEGY_NAMES = {0: "MEAN_REV", 1: "MOMENTUM", 2: "NN", 3: "AUTO"}
+# Optional: when PL exposes regime in AXI, read those registers here and add
+# "regime", "regime_name", "regime_changes" (or equivalent) to each JSON line.
 
 
 def decode_status(raw: int) -> dict:

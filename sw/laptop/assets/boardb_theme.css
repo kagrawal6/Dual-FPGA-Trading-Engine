@@ -1,0 +1,118 @@
+/* Board B dashboard — Bloomberg-adjacent polish + regime motion */
+
+.bb-mono {
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.bb-headline {
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.bb-regime-title {
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.bb-regime-id {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.bb-btn-secondary {
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #58a6ff;
+  background: transparent;
+  color: #58a6ff;
+  cursor: pointer;
+}
+
+.bb-btn-secondary:hover {
+  background: rgba(88, 166, 255, 0.12);
+}
+
+.bb-btn-close {
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  float: right;
+}
+
+.bb-modal-panel {
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  max-width: 560px;
+  width: 92vw;
+  padding: 20px 22px 24px;
+  border-radius: 12px;
+  background: #161b22;
+  color: #e6edf3;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+
+.bb-confetti-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10000;
+  overflow: hidden;
+}
+
+.bb-confetti-piece {
+  position: absolute;
+  top: -12px;
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  opacity: 0.95;
+  animation: bb-confetti-fall 2.2s ease-in forwards;
+}
+
+@keyframes bb-confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0.15;
+  }
+}
+
+.bb-regime-pulse {
+  animation: bb-regime-kick 0.65s ease-out;
+}
+
+@keyframes bb-regime-kick {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  35% {
+    transform: scale(1.02);
+    filter: brightness(1.12);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bb-regime-pulse,
+  .bb-confetti-piece {
+    animation: none !important;
+  }
+}
