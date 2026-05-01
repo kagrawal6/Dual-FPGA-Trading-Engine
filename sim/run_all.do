@@ -46,8 +46,13 @@ proc run_group {group_name tb_list} {
             set fsize [file size transcript]
         }
 
+        # -voptargs="+acc" — required on ModelSim ASE 2020 (-novopt is
+        # deprecated and produces "Error loading design"). vopt cost is
+        # mostly paid once the NN is in the work library; consider using
+        # the per-group runners (run_all_board_b_lite.do etc) for fast
+        # iteration on individual leaf modules.
         if {[catch {
-            vsim -voptargs=+acc work.$tb -quiet -onfinish stop
+            vsim -voptargs="+acc" work.$tb -quiet -onfinish stop
             run -all
             quit -sim
         } err]} {
@@ -135,6 +140,7 @@ run_group "Board B" {
     tb_latency_histogram
     tb_board_b_ctrl
     tb_board_b_axi_regs
+    tb_nn_inference
     tb_board_b_top
     tb_board_b_pipeline
 }

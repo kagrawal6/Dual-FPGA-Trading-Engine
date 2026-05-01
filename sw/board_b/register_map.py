@@ -80,6 +80,39 @@ LAST_SIGNAL_LABELS = {
     LAST_SIGNAL_RISK_BLOCKED: "RISK_BLOCKED",
 }
 
+# Strategy enum (writes to STRATEGY_SEL @ 0x004; readable @ STATUS[1:0]).
+# These match the strategy_e enum in rtl/shared/hft_pkg.sv.
+STRAT_MEAN_REV  = 0   # Legacy mean-reversion via strategy_engine.sv
+STRAT_MOMENTUM  = 1   # Reserved (no implementation in current RTL)
+STRAT_NN        = 2   # 9→128→128→64→3 MLP via nn_inference.sv
+STRAT_AUTO      = 3   # Reserved (regime-driven auto-select; same path as MEAN_REV today)
+STRAT_LABELS = {
+    STRAT_MEAN_REV: "MEAN_REV",
+    STRAT_MOMENTUM: "MOMENTUM",
+    STRAT_NN:       "NN",
+    STRAT_AUTO:     "AUTO",
+}
+
+
+def strategy_label(code: int) -> str:
+    """Human-readable label for a strategy enum code."""
+    return STRAT_LABELS.get(code & 0x3, "RESERVED")
+
+
+def select_strategy(mmio, code: int) -> None:
+    """Write `code` to STRATEGY_SEL. Note: this only takes effect when
+    sw[3] (sw_strategy_override) is LOW on the physical board — when the
+    override is HIGH the active strategy is taken from sw[2:1] instead."""
+    mmio.write(STRATEGY_SEL, int(code) & 0x3)
+
+
+def read_active_strategy(mmio) -> int:
+    """Read the *active* strategy (post-override mux) from STATUS[1:0].
+    Use this rather than reading STRATEGY_SEL when you want to know what
+    the design is actually running."""
+    return mmio.read(STATUS) & 0x3
+
+
 NUM_SYMBOLS    = 16
 NUM_HIST_BINS  = 16
 

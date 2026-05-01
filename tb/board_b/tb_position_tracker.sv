@@ -34,6 +34,17 @@ module tb_position_tracker;
     price_t       last_fill_price  [TB_NUM_SYM];
     logic [15:0]  trades_per_sym   [TB_NUM_SYM];
 
+    // NN inputs: per-symbol current mid and per-quote feature pulse.
+    // For this unit test we hold them at zero — the NN-only outputs
+    // (entry_mid / holding_time) just stay at zero, which does not affect
+    // the legacy P&L / position checks below.
+    price_t       current_mid       [TB_NUM_SYM];
+    logic         feature_valid_in;
+    symbol_t      feature_symbol_in;
+    // NN outputs: dangled (kept observable for waveform debug)
+    price_t       entry_mid         [TB_NUM_SYM];
+    logic [7:0]   holding_time      [TB_NUM_SYM];
+
     initial clk = 0;
     always #5 clk = ~clk;
 
@@ -41,6 +52,9 @@ module tb_position_tracker;
         rst_n = 0;
         #100;
         rst_n = 1;
+        for (int i = 0; i < TB_NUM_SYM; i++) current_mid[i] = '0;
+        feature_valid_in  = 1'b0;
+        feature_symbol_in = '0;
     end
 
     position_tracker #(.NUM_SYM(TB_NUM_SYM)) dut (
@@ -49,6 +63,9 @@ module tb_position_tracker;
         .clear           (clear),
         .fill_frame      (fill_frame),
         .fill_valid      (fill_valid),
+        .current_mid     (current_mid),
+        .feature_valid_in(feature_valid_in),
+        .feature_symbol_in(feature_symbol_in),
         .position        (position),
         .cash            (cash),
         .total_pnl       (total_pnl),
@@ -61,7 +78,9 @@ module tb_position_tracker;
         .fills_rcvd      (fills_rcvd),
         .pnl_cash_per_sym(pnl_cash_per_sym),
         .last_fill_price (last_fill_price),
-        .trades_per_sym  (trades_per_sym)
+        .trades_per_sym  (trades_per_sym),
+        .entry_mid       (entry_mid),
+        .holding_time    (holding_time)
     );
 
     integer pass_count = 0;

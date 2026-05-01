@@ -31,6 +31,16 @@ module position_tracker
     input  logic [FRAME_W-1:0] fill_frame,
     input  logic                fill_valid,
 
+    // NN: per-symbol current mid (combinational) — used to seed entry_mid
+    // when a new position is opened. Wired from board_b_top from a register
+    // that latches fc_mid each time feature_valid pulses.
+    input  price_t              current_mid       [NUM_SYM],
+    // NN: per-quote pulse + symbol — used to advance the holding-time counter
+    // for the symbol that just received a fresh feature. Defaults to 0 in
+    // legacy testbenches that do not connect them (then holding_time stays 0).
+    input  logic                feature_valid_in,
+    input  symbol_t             feature_symbol_in,
+
     output position_t           position [NUM_SYM],
     output cash_t               cash,
     output sprice_t             total_pnl,
@@ -49,7 +59,12 @@ module position_tracker
     // Per-symbol P&L accounting (exposed for laptop dashboard via AXI)
     output cash_t               pnl_cash_per_sym [NUM_SYM],
     output price_t              last_fill_price  [NUM_SYM],
-    output logic [15:0]         trades_per_sym   [NUM_SYM]
+    output logic [15:0]         trades_per_sym   [NUM_SYM],
+
+    // NN: per-symbol entry_mid (price at position open, Q16.16) and
+    // holding_time (quotes seen since position opened, saturating 8-bit).
+    output price_t              entry_mid        [NUM_SYM],
+    output logic [7:0]          holding_time     [NUM_SYM]
 );
 
     // ── Combinational frame decode ──────────────────────────────
@@ -95,6 +110,8 @@ module position_tracker
                 pnl_cash_per_sym[i]  <= '0;
                 last_fill_price[i]   <= '0;
                 trades_per_sym[i]    <= '0;
+                entry_mid[i]         <= '0;
+                holding_time[i]      <= '0;
             end
         end else if (clear) begin
             cash           <= '0;
@@ -106,10 +123,25 @@ module position_tracker
                 pnl_cash_per_sym[i]  <= '0;
                 last_fill_price[i]   <= '0;
                 trades_per_sym[i]    <= '0;
+                entry_mid[i]         <= '0;
+                holding_time[i]      <= '0;
             end
         end else begin
             fill_processed <= 1'b0;
             fill_notify    <= 1'b0;
+
+            // NN: advance holding-time counter on each new feature for the
+            // matching symbol. Saturate at 0xFF so the NN's 8-bit feature
+            // stays well-defined even on long holds.
+            if (feature_valid_in && feature_symbol_in < NUM_SYM[7:0]) begin
+                if (position[feature_symbol_in] != '0) begin
+                    if (holding_time[feature_symbol_in] != 8'hFF)
+                        holding_time[feature_symbol_in] <=
+                            holding_time[feature_symbol_in] + 8'd1;
+                end else begin
+                    holding_time[feature_symbol_in] <= '0;
+                end
+            end
 
             if (fill_valid) begin
                 // Always forward fill info to risk_manager for pending clear
@@ -118,21 +150,43 @@ module position_tracker
                 fill_notify     <= 1'b1;
 
                 if (is_filled && frame_symbol < NUM_SYM[7:0]) begin
+                    // Use locals (declared with automatic for ModelSim) so we
+                    // can see prev_pos / new_pos to detect position open/close
+                    // without re-reading the non-blocking-assigned position[].
+                    automatic position_t prev_pos;
+                    automatic position_t new_pos;
+                    prev_pos = position[frame_symbol];
+
                     // ── Position + global cash + per-symbol P&L update ──
                     if (frame_side == 1'b0) begin
                         // BUY: position goes up, cash goes down
-                        position[frame_symbol] <= position[frame_symbol]
-                                                  + $signed({{(POSITION_W-QTY_W){1'b0}}, frame_qty});
+                        new_pos = prev_pos
+                                + $signed({{(POSITION_W-QTY_W){1'b0}}, frame_qty});
+                        position[frame_symbol] <= new_pos;
                         cash <= cash - $signed(product);
                         pnl_cash_per_sym[frame_symbol] <=
                             pnl_cash_per_sym[frame_symbol] - $signed(product);
                     end else begin
                         // SELL: position goes down, cash goes up
-                        position[frame_symbol] <= position[frame_symbol]
-                                                  - $signed({{(POSITION_W-QTY_W){1'b0}}, frame_qty});
+                        new_pos = prev_pos
+                                - $signed({{(POSITION_W-QTY_W){1'b0}}, frame_qty});
+                        position[frame_symbol] <= new_pos;
                         cash <= cash + $signed(product);
                         pnl_cash_per_sym[frame_symbol] <=
                             pnl_cash_per_sym[frame_symbol] + $signed(product);
+                    end
+
+                    // NN: maintain entry_mid and holding_time around opens/closes.
+                    //   - Position just opened (was flat)  → seed entry_mid, reset timer.
+                    //   - Position just closed (now flat)  → clear both.
+                    //   - Add-to / partial-out / flip kept simple: leave entry_mid at
+                    //     original open price (matches reference NN training behavior).
+                    if (prev_pos == '0 && new_pos != '0) begin
+                        entry_mid[frame_symbol]    <= current_mid[frame_symbol];
+                        holding_time[frame_symbol] <= '0;
+                    end else if (new_pos == '0) begin
+                        entry_mid[frame_symbol]    <= '0;
+                        holding_time[frame_symbol] <= '0;
                     end
 
                     last_fill_price[frame_symbol] <= frame_price;

@@ -118,12 +118,27 @@ module board_b_top
     logic    fc_valid;
     // B3: per-symbol EMA snapshot
     price_t  fc_ema_arr [NUM_SYM];
+    // NN: deltas needed by nn_inference (features 2 & 3)
+    sprice_t fc_mid_delta;
+    sprice_t fc_ema_delta;
 
-    // Strategy engine
+    // Strategy engine (legacy mean-reversion)
     logic    se_valid, se_side;
     price_t  se_price;
     qty_t    se_qty;
     symbol_t se_symbol;
+
+    // NN inference (parallel strategy)
+    logic    nn_valid, nn_side;
+    price_t  nn_price;
+    qty_t    nn_qty;
+    symbol_t nn_symbol;
+
+    // Strategy mux output (drives risk_manager)
+    logic    strat_valid, strat_side;
+    price_t  strat_price;
+    qty_t    strat_qty;
+    symbol_t strat_symbol;
 
     // Risk manager
     logic    rm_valid, rm_side;
@@ -157,6 +172,41 @@ module board_b_top
     cash_t       pnl_cash_per_sym [NUM_SYM];
     price_t      last_fill_price  [NUM_SYM];
     logic [15:0] trades_per_sym   [NUM_SYM];
+    // NN: per-symbol entry_mid (price at position open) and holding_time
+    // (quotes seen since open, sat 8-bit). Wired into nn_inference and
+    // updated by position_tracker on every fill / quote tick.
+    price_t      pt_entry_mid    [NUM_SYM];
+    logic [7:0]  pt_holding_time [NUM_SYM];
+
+    // NN: per-symbol "current mid" snapshot. Updated each time a feature
+    // pulse fires for symbol fc_symbol_out. Used as the seed for entry_mid
+    // when a fresh position opens, and as the bid_price/ask_price reference
+    // for the NN's position-relative features (it reads from feature_compute
+    // outputs; this register array is for position_tracker's entry_mid
+    // bookkeeping at fill time).
+    price_t      current_mid [NUM_SYM];
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            for (int i = 0; i < NUM_SYM; i++)
+                current_mid[i] <= '0;
+        end else if (counter_clr) begin
+            for (int i = 0; i < NUM_SYM; i++)
+                current_mid[i] <= '0;
+        end else if (fc_valid) begin
+            current_mid[fc_symbol_out] <= fc_mid;
+        end
+    end
+
+    // ── Strategy mux ────────────────────────────────────────────
+    // active_strategy comes from board_b_axi_regs (AXI strategy_sel) or
+    // board_b_ctrl (sw[2:1] when sw[3] override is high). When STRAT_NN
+    // is selected, nn_inference drives risk_manager; otherwise the legacy
+    // mean-reversion strategy_engine drives it.
+    assign strat_valid  = (active_strategy == STRAT_NN) ? nn_valid  : se_valid;
+    assign strat_side   = (active_strategy == STRAT_NN) ? nn_side   : se_side;
+    assign strat_price  = (active_strategy == STRAT_NN) ? nn_price  : se_price;
+    assign strat_qty    = (active_strategy == STRAT_NN) ? nn_qty    : se_qty;
+    assign strat_symbol = (active_strategy == STRAT_NN) ? nn_symbol : se_symbol;
 
     // Latency histogram
     logic [HIST_BIN_W-1:0] hist_bins [HIST_BINS];
@@ -294,10 +344,13 @@ module board_b_top
         .deviation(fc_deviation),
         .bid_out(fc_bid_out), .ask_out(fc_ask_out),
         .symbol_out(fc_symbol_out), .feature_valid(fc_valid),
-        .ema_value(fc_ema_arr)
+        .ema_value(fc_ema_arr),
+        // NN deltas
+        .mid_delta(fc_mid_delta),
+        .ema_delta(fc_ema_delta)
     );
 
-    // ── Strategy Engine ─────────────────────────────────────────
+    // ── Strategy Engine (mean reversion) ────────────────────────
     strategy_engine u_strategy (
         .clk(clk), .rst_n(rst_n),
         .deviation(fc_deviation),
@@ -309,13 +362,41 @@ module board_b_top
         .signal_symbol(se_symbol)
     );
 
-    // ── Risk Manager ────────────────────────────────────────────
+    // ── NN Inference (parallel strategy, selectable via STRAT_NN) ──
+    // Latency: 4 cycles, throughput: 1 decision / clk.
+    // The NN reads `position[fc_symbol_out]`, `pt_entry_mid[fc_symbol_out]`,
+    // `pt_holding_time[fc_symbol_out]` combinationally — these are the
+    // values for the symbol entering stage 1, which is then carried as
+    // h0_sym → h2_sym through the pipeline so the symbol-context of each
+    // feature stays paired with its hidden activations end-to-end.
+    nn_inference u_nn (
+        .clk(clk), .rst_n(rst_n),
+        .deviation(fc_deviation),
+        .bid_price(fc_bid_out), .ask_price(fc_ask_out),
+        .symbol_id(fc_symbol_out), .feature_valid(fc_valid),
+        .base_qty(base_qty),
+        .spread(fc_spread),
+        .mid_delta(fc_mid_delta),
+        .ema_delta(fc_ema_delta),
+        .position(position[fc_symbol_out]),
+        .regime(qb_regime),
+        .entry_mid(pt_entry_mid[fc_symbol_out]),
+        .holding_time(pt_holding_time[fc_symbol_out]),
+        .max_position(max_position),
+        .signal_valid(nn_valid),
+        .signal_side(nn_side),
+        .signal_price(nn_price),
+        .signal_qty(nn_qty),
+        .signal_symbol(nn_symbol)
+    );
+
+    // ── Risk Manager (driven by mux output) ─────────────────────
     risk_manager #(.NUM_SYM(NUM_SYM)) u_risk (
         .clk(clk), .rst_n(rst_n), .clear(counter_clr),
         .order_enable(order_enable),
-        .signal_valid(se_valid), .signal_side(se_side),
-        .signal_price(se_price), .signal_qty(se_qty),
-        .signal_symbol(se_symbol),
+        .signal_valid(strat_valid), .signal_side(strat_side),
+        .signal_price(strat_price), .signal_qty(strat_qty),
+        .signal_symbol(strat_symbol),
         .position(position), .total_pnl(total_pnl),
         .max_position(max_position), .max_order_rate(max_order_rate),
         .max_loss(max_loss),
@@ -355,6 +436,12 @@ module board_b_top
     position_tracker #(.NUM_SYM(NUM_SYM)) u_pos_tracker (
         .clk(clk), .rst_n(rst_n), .clear(counter_clr),
         .fill_frame(fill_frame_demux), .fill_valid(fill_valid_demux),
+        // NN: feed current_mid + per-quote pulse so entry_mid / holding_time
+        // are tracked correctly. Legacy strategies are unaffected — these
+        // outputs are simply ignored when STRAT_NN is not selected.
+        .current_mid(current_mid),
+        .feature_valid_in(fc_valid),
+        .feature_symbol_in(fc_symbol_out),
         .position(position), .cash(cash), .total_pnl(total_pnl),
         .ts_echo(ts_echo), .fill_processed(fill_processed),
         .fill_symbol_out(pt_fill_symbol), .fill_side_out(pt_fill_side),
@@ -362,7 +449,9 @@ module board_b_top
         .fills_rcvd(fills_rcvd),
         .pnl_cash_per_sym(pnl_cash_per_sym),
         .last_fill_price(last_fill_price),
-        .trades_per_sym(trades_per_sym)
+        .trades_per_sym(trades_per_sym),
+        .entry_mid(pt_entry_mid),
+        .holding_time(pt_holding_time)
     );
 
     // ── Latency Histogram ───────────────────────────────────────

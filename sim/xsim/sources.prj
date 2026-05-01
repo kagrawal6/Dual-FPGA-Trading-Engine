@@ -1,0 +1,85 @@
+# =============================================================================
+# Vivado XSim project file — lists every SystemVerilog source needed to
+# elaborate any of the testbenches in this repo.
+#
+# Format:
+#   sv <library> <relative-path-from-this-file>
+#
+# Compilation order matters for packages: hft_pkg first, then policy_net_pkg,
+# then RTL leaf modules, then the modules that import them, then testbenches.
+# Mirrors sim/compile_all.do.
+# =============================================================================
+
+# 1. Packages (must be first — modules import them)
+sv work ../../rtl/shared/hft_pkg.sv
+sv work ../../rtl/board_b/policy_weights.sv
+
+# 2. Shared modules
+sv work ../../rtl/shared/debounce.sv
+sv work ../../rtl/shared/sync_fifo.sv
+sv work ../../rtl/shared/lfsr32.sv
+
+# 3. Link layer
+sv work ../../rtl/link/link_tx.sv
+sv work ../../rtl/link/link_rx.sv
+
+# 4. Board A RTL
+sv work ../../rtl/board_a/market_sim.sv
+sv work ../../rtl/board_a/market_noise_gen.sv
+sv work ../../rtl/board_a/exchange_lite.sv
+sv work ../../rtl/board_a/exchange_plus.sv
+sv work ../../rtl/board_a/tx_arbiter.sv
+sv work ../../rtl/board_a/board_a_ctrl.sv
+sv work ../../rtl/board_a/board_a_axi_regs.sv
+sv work ../../rtl/board_a/board_a_top.sv
+
+# 5. Board B RTL — nn_inference depends on policy_net_pkg, board_b_top
+#    instantiates nn_inference + feature_compute + position_tracker
+sv work ../../rtl/board_b/nn_inference.sv
+sv work ../../rtl/board_b/msg_demux.sv
+sv work ../../rtl/board_b/quote_book.sv
+sv work ../../rtl/board_b/feature_compute.sv
+sv work ../../rtl/board_b/strategy_engine.sv
+sv work ../../rtl/board_b/risk_manager.sv
+sv work ../../rtl/board_b/order_manager.sv
+sv work ../../rtl/board_b/position_tracker.sv
+sv work ../../rtl/board_b/latency_histogram.sv
+sv work ../../rtl/board_b/board_b_ctrl.sv
+sv work ../../rtl/board_b/board_b_axi_regs.sv
+sv work ../../rtl/board_b/board_b_top.sv
+
+# 6. Shared testbenches
+sv work ../../tb/shared/tb_debounce.sv
+sv work ../../tb/shared/tb_sync_fifo.sv
+sv work ../../tb/shared/tb_lfsr32.sv
+
+# 7. Link testbenches
+sv work ../../tb/link/tb_link_tx.sv
+sv work ../../tb/link/tb_link_rx.sv
+sv work ../../tb/link/tb_link_loopback.sv
+
+# 8. Board A testbenches
+sv work ../../tb/board_a/tb_market_sim.sv
+sv work ../../tb/board_a/tb_market_noise_gen.sv
+sv work ../../tb/board_a/tb_exchange_lite.sv
+sv work ../../tb/board_a/tb_tx_arbiter.sv
+sv work ../../tb/board_a/tb_board_a_ctrl.sv
+sv work ../../tb/board_a/tb_board_a_top.sv
+
+# 9. Board B testbenches
+sv work ../../tb/board_b/tb_msg_demux.sv
+sv work ../../tb/board_b/tb_quote_book.sv
+sv work ../../tb/board_b/tb_feature_compute.sv
+sv work ../../tb/board_b/tb_strategy_engine.sv
+sv work ../../tb/board_b/tb_risk_manager.sv
+sv work ../../tb/board_b/tb_order_manager.sv
+sv work ../../tb/board_b/tb_position_tracker.sv
+sv work ../../tb/board_b/tb_latency_histogram.sv
+sv work ../../tb/board_b/tb_board_b_ctrl.sv
+sv work ../../tb/board_b/tb_board_b_axi_regs.sv
+sv work ../../tb/board_b/tb_nn_inference.sv
+sv work ../../tb/board_b/tb_board_b_top.sv
+sv work ../../tb/board_b/tb_board_b_pipeline.sv
+
+# 10. System-level testbench
+sv work ../../tb/tb_system_top.sv

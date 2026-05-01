@@ -749,6 +749,98 @@ module tb_board_b_top;
         end
 
         // ══════════════════════════════════════════════════════════
+        // Phase 26: NN strategy selection (AXI + physical switch)
+        //   STRATEGY_SEL @ 0x004 — write 2'b10 to select STRAT_NN.
+        //   STATUS       @ 0x040 — bits[1:0] = active_strategy[1:0].
+        //   sw[3] = sw_strategy_override (1 = use sw[2:1])
+        //   sw[2:1] = strategy_sw enum
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 26: NN strategy selection ===");
+        begin
+            logic [31:0] sel_v, status_v;
+
+            // Make sure we're back in IDLE-ish (no FSM transitions needed
+            // for the strategy-select path; the mux is purely combinational).
+            sw = 8'b0000_0000;   // override off
+            repeat (4) @(posedge clk);
+
+            // 1. Default after the prior writes/clears: STRATEGY_SEL was
+            //    last written by Phase 9 / Phase 13, so we re-establish a
+            //    known value before checking.
+            axi_write(10'h004, 32'd0);  // STRAT_MEAN_REV
+            axi_read(10'h004);
+            sel_v = axi_rd_data;
+            check32("P26: STRATEGY_SEL=0 readback", sel_v, 32'd0);
+
+            axi_read(10'h040);
+            status_v = axi_rd_data;
+            check("P26: active_strategy==MEAN_REV (sw override off)",
+                  status_v[1:0] == 2'b00);
+
+            // 2. Select NN via AXI.
+            axi_write(10'h004, 32'd2);  // STRAT_NN = 2'b10
+            axi_read(10'h004);
+            check32("P26: STRATEGY_SEL=2 readback", axi_rd_data, 32'd2);
+
+            axi_read(10'h040);
+            status_v = axi_rd_data;
+            check("P26: active_strategy==NN via AXI",
+                  status_v[1:0] == 2'b10);
+
+            // 3. Physical-switch override forces strategy to sw[2:1].
+            //    sw[3]=1, sw[2:1]=00 → MEAN_REV (overrides AXI=NN above).
+            sw = 8'b0000_1000;   // override on, sw[2:1]=00
+            // Allow the synchronous override path to settle through the
+            // AXI status read (active_strategy is combinational on the
+            // top, but sw is sampled inside board_b_ctrl).
+            repeat (4) @(posedge clk);
+            axi_read(10'h040);
+            status_v = axi_rd_data;
+            check("P26: switch override → MEAN_REV",
+                  status_v[1:0] == 2'b00);
+
+            //    sw[3]=1, sw[2:1]=10 → STRAT_NN
+            sw = 8'b0000_1100;
+            repeat (4) @(posedge clk);
+            axi_read(10'h040);
+            status_v = axi_rd_data;
+            check("P26: switch override → NN",
+                  status_v[1:0] == 2'b10);
+
+            //    sw[3]=1, sw[2:1]=11 → STRAT_AUTO
+            sw = 8'b0000_1110;
+            repeat (4) @(posedge clk);
+            axi_read(10'h040);
+            status_v = axi_rd_data;
+            check("P26: switch override → AUTO",
+                  status_v[1:0] == 2'b11);
+
+            // 4. Drop override; AXI value (still STRAT_NN) takes back over.
+            sw = 8'b0000_0000;
+            repeat (4) @(posedge clk);
+            axi_read(10'h040);
+            status_v = axi_rd_data;
+            check("P26: after override drop → AXI(NN)",
+                  status_v[1:0] == 2'b10);
+
+            // 5. NN must not crash the pipeline: drive a couple of quotes
+            //    while STRAT_NN is active and confirm the FSM stays alive
+            //    (link_up + status status path still readable). The detailed
+            //    NN behavior is verified in tb_nn_inference and tb_system_top.
+            send_link_frame(128'h1000_00B4_0000_00B4_0400_03E8_03E8_0000);
+            repeat (40) @(posedge clk);
+            send_link_frame(128'h1000_00B5_0000_00B5_0400_03E8_03E8_0000);
+            repeat (40) @(posedge clk);
+            axi_read(10'h040);
+            status_v = axi_rd_data;
+            check("P26: after NN quote stream — link_up still set",
+                  status_v[3] == 1'b1);
+
+            // Restore default strategy for any subsequent phases / clean exit.
+            axi_write(10'h004, 32'd0);
+        end
+
+        // ══════════════════════════════════════════════════════════
         // Summary
         // ══════════════════════════════════════════════════════════
         repeat (5) @(posedge clk);

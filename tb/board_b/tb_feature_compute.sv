@@ -34,7 +34,9 @@ module tb_feature_compute;
     price_t                 ask_out;
     symbol_t                symbol_out;
     logic                   feature_valid;
-    price_t                 ema_value [TB_NUM_SYM];   // B3: per-symbol EMA snapshot (wired to silence TFMPC warning)
+    price_t                 ema_value [TB_NUM_SYM];   // B3: per-symbol EMA snapshot
+    sprice_t                mid_delta;                // NN: mid[t] - mid[t-1]
+    sprice_t                ema_delta;                // NN: ema[t] - ema[t-1]
 
     initial clk = 0;
     always #5 clk = ~clk;
@@ -64,7 +66,9 @@ module tb_feature_compute;
         .ask_out      (ask_out),
         .symbol_out   (symbol_out),
         .feature_valid(feature_valid),
-        .ema_value    (ema_value)                   // B3
+        .ema_value    (ema_value),                  // B3
+        .mid_delta    (mid_delta),                  // NN
+        .ema_delta    (ema_delta)                   // NN
     );
 
     // ── Check tasks ───────────────────────────────────────────

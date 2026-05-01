@@ -43,12 +43,22 @@ module feature_compute
     output logic        feature_valid,
 
     // B3: per-symbol EMA snapshot (combinational tap of ema_state[])
-    output price_t      ema_value [NUM_SYM]
+    output price_t      ema_value [NUM_SYM],
+
+    // NN: deltas for nn_inference features 2 and 3
+    //   mid_delta = mid[t] - mid[t-1] (per-symbol prev), signed Q16.16
+    //   ema_delta = ema[t] - ema[t-1] (per-symbol prev), signed Q16.16
+    output sprice_t     mid_delta,
+    output sprice_t     ema_delta
 );
 
     // ── Per-symbol EMA state ────────────────────────────────────
     price_t  ema_state [NUM_SYM];
     logic    ema_init  [NUM_SYM];   // has this symbol seen its first quote?
+
+    // NN: per-symbol previous mid/ema for delta computation
+    price_t  mid_prev  [NUM_SYM];
+    price_t  ema_prev  [NUM_SYM];
 
     // ── Pipeline stage 1 registers ──────────────────────────────
     price_t  s1_mid;
@@ -65,6 +75,9 @@ module feature_compute
     symbol_t     s2_sym;
     logic        s2_valid;
     logic        s2_first;       // first sample for this symbol
+    // NN: snapshot of previous mid/ema for the symbol entering stage 2
+    price_t      s2_mid_prev;
+    price_t      s2_ema_prev;
 
     // ── Pipeline stage 3 (output) registers ─────────────────────
     // (declared as outputs)
@@ -105,6 +118,8 @@ module feature_compute
             s2_sym    <= '0;
             s2_valid  <= 1'b0;
             s2_first  <= 1'b0;
+            s2_mid_prev <= '0;
+            s2_ema_prev <= '0;
         end else begin
             s2_valid <= s1_valid;
             if (s1_valid) begin
@@ -112,6 +127,10 @@ module feature_compute
                 s2_bid <= s1_bid;
                 s2_ask <= s1_ask;
                 s2_sym <= s1_sym;
+                // NN: latch previous values for this symbol so stage 3 can
+                // compute mid_delta / ema_delta against the right history.
+                s2_mid_prev <= mid_prev[s1_sym];
+                s2_ema_prev <= ema_prev[s1_sym];
 
                 if (!ema_init[s1_sym]) begin
                     s2_first  <= 1'b1;
@@ -143,6 +162,8 @@ module feature_compute
             spread        <= '0;
             ema           <= '0;
             deviation     <= '0;
+            mid_delta     <= '0;
+            ema_delta     <= '0;
             bid_out       <= '0;
             ask_out       <= '0;
             symbol_out    <= '0;
@@ -150,12 +171,18 @@ module feature_compute
             for (int i = 0; i < NUM_SYM; i++) begin
                 ema_state[i] <= '0;
                 ema_init[i]  <= 1'b0;
+                mid_prev[i]  <= '0;
+                ema_prev[i]  <= '0;
             end
         end else if (clear) begin
             feature_valid <= 1'b0;
+            mid_delta     <= '0;
+            ema_delta     <= '0;
             for (int i = 0; i < NUM_SYM; i++) begin
                 ema_state[i] <= '0;
                 ema_init[i]  <= 1'b0;
+                mid_prev[i]  <= '0;
+                ema_prev[i]  <= '0;
             end
         end else begin
             feature_valid <= s2_valid;
@@ -167,19 +194,29 @@ module feature_compute
                 ask_out    <= s2_ask;
                 symbol_out <= s2_sym;
 
+                // NN: mid_delta is always defined (zero on first sample because
+                // s2_mid_prev was '0 and we then immediately write mid_prev=s2_mid).
+                mid_delta <= $signed({1'b0, s2_mid}) - $signed({1'b0, s2_mid_prev});
+
                 if (s2_first) begin
-                    ema           <= s2_mid;
-                    deviation     <= '0;
+                    ema               <= s2_mid;
+                    deviation         <= '0;
+                    ema_delta         <= '0;  // first sample: no delta
                     ema_state[s2_sym] <= s2_mid;
                     ema_init[s2_sym]  <= 1'b1;
+                    mid_prev[s2_sym]  <= s2_mid;
+                    ema_prev[s2_sym]  <= s2_mid;
                 end else begin
                     logic [47:0] sum48;
                     price_t      ema_new;
                     sum48   = s2_prod_a + s2_prod_b;
                     ema_new = sum48[47:16];
-                    ema           <= ema_new;
-                    deviation     <= $signed({1'b0, s2_mid}) - $signed({1'b0, ema_new});
+                    ema               <= ema_new;
+                    deviation         <= $signed({1'b0, s2_mid}) - $signed({1'b0, ema_new});
+                    ema_delta         <= $signed({1'b0, ema_new}) - $signed({1'b0, s2_ema_prev});
                     ema_state[s2_sym] <= ema_new;
+                    mid_prev[s2_sym]  <= s2_mid;
+                    ema_prev[s2_sym]  <= ema_new;
                 end
             end
         end

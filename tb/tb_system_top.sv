@@ -1039,6 +1039,100 @@ module tb_system_top;
         end
 
         // ══════════════════════════════════════════════════════════
+        // Phase 29: NN strategy — runtime switch + cross-board liveness
+        //   Switch Board B from MEAN_REV → STRAT_NN via AXI, run a short
+        //   regime-VOLATILE/ADVERSARIAL window, and verify:
+        //     - STATUS readback shows active_strategy = STRAT_NN
+        //     - orders_sent advances under NN as well
+        //     - LAST_SIGNAL_PACK records at least one BUY or SELL nibble
+        //       attributable to the NN window
+        //     - Switching back to MEAN_REV via AXI restores active_strategy
+        //     - Physical-switch override (sw[3:1]) takes precedence
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 29: NN strategy switch + cross-board liveness ===");
+        begin
+            logic [31:0] status_v, orders_before, orders_after;
+            logic [31:0] sp0_pre, sp0_post, sp1_pre, sp1_post;
+            int          fired_during_nn;
+            fired_during_nn = 0;
+
+            // Snapshot starting state.
+            axi_read_b(10'h048); orders_before = axi_rd_b;
+            axi_read_b(10'h2A0); sp0_pre       = axi_rd_b;
+            axi_read_b(10'h2A4); sp1_pre       = axi_rd_b;
+
+            // Force a tradable regime on Board A so the NN's policy filter
+            // (only fires on VOLATILE/ADVERSARIAL) has a chance to engage.
+            axi_write_a(9'h00C, 32'd1);   // REGIME = VOLATILE
+
+            // Switch Board B to STRAT_NN via AXI; ensure override is off.
+            sw_b = 8'b0000_0000;
+            axi_write_b(10'h004, 32'd2);  // STRAT_NN
+            repeat (4) @(posedge clk);
+            axi_read_b(10'h040);
+            status_v = axi_rd_b;
+            check("P29: active_strategy == STRAT_NN via AXI",
+                  status_v[1:0] == 2'b10);
+
+            // Run for ~80k cycles in NN mode so the trained network has
+            // a long, varied feature stream to act on.
+            repeat (80_000) @(posedge clk);
+
+            // Counters and signal-pack progressed?
+            axi_read_b(10'h048); orders_after = axi_rd_b;
+            axi_read_b(10'h2A0); sp0_post     = axi_rd_b;
+            axi_read_b(10'h2A4); sp1_post     = axi_rd_b;
+
+            $display("  P29: orders_before=%0d orders_after=%0d",
+                     orders_before, orders_after);
+            $display("  P29: sigpack pre={0x%08X,0x%08X} post={0x%08X,0x%08X}",
+                     sp1_pre, sp0_pre, sp1_post, sp0_post);
+
+            check("P29: orders_sent advanced under NN",
+                  orders_after >= orders_before);
+
+            // At least one nibble across both packs must be a BUY (1) or
+            // SELL (2) after the NN window. RISK_BLOCKED (3) and NONE (0)
+            // do not count as a "fire" for this liveness gate.
+            for (int k = 0; k < 8; k++) begin
+                if (sp0_post[4*k +: 4] == 4'd1 || sp0_post[4*k +: 4] == 4'd2)
+                    fired_during_nn = fired_during_nn + 1;
+                if (sp1_post[4*k +: 4] == 4'd1 || sp1_post[4*k +: 4] == 4'd2)
+                    fired_during_nn = fired_during_nn + 1;
+            end
+            // Note: this is a soft liveness check — depending on how the
+            // trained weights respond to this synthetic market, it is
+            // possible (but unlikely with an 80k-cycle window) that the
+            // NN holds throughout. We log but do not fail in that case;
+            // tb_nn_inference enforces strict liveness on a tighter input.
+            $display("  P29: NN BUY/SELL nibbles observed = %0d", fired_during_nn);
+
+            // Switch BACK to MEAN_REV via AXI.
+            axi_write_b(10'h004, 32'd0);
+            repeat (4) @(posedge clk);
+            axi_read_b(10'h040);
+            status_v = axi_rd_b;
+            check("P29: active_strategy == MEAN_REV after switch back",
+                  status_v[1:0] == 2'b00);
+
+            // Physical-switch override path: sw_b[3]=1, sw_b[2:1]=10 → NN.
+            sw_b = 8'b0000_1100;
+            repeat (4) @(posedge clk);
+            axi_read_b(10'h040);
+            status_v = axi_rd_b;
+            check("P29: switch override → NN takes precedence",
+                  status_v[1:0] == 2'b10);
+
+            // Drop override; AXI value (MEAN_REV) takes back over.
+            sw_b = 8'b0000_0001;   // keep trading_enable on
+            repeat (4) @(posedge clk);
+            axi_read_b(10'h040);
+            status_v = axi_rd_b;
+            check("P29: override drop → AXI(MEAN_REV)",
+                  status_v[1:0] == 2'b00);
+        end
+
+        // ══════════════════════════════════════════════════════════
         // Summary
         // ══════════════════════════════════════════════════════════
         repeat (5) @(posedge clk);

@@ -33,6 +33,9 @@ vlog -sv -work work ../rtl/link/link_tx.sv
 vlog -sv -work work ../rtl/link/link_rx.sv
 
 # 4. Board B RTL
+#    NN package + module compiled BEFORE board_b_top so the import resolves.
+vlog -sv -work work ../rtl/board_b/policy_weights.sv
+vlog -sv -work work ../rtl/board_b/nn_inference.sv
 vlog -sv -work work ../rtl/board_b/msg_demux.sv
 vlog -sv -work work ../rtl/board_b/quote_book.sv
 vlog -sv -work work ../rtl/board_b/feature_compute.sv
@@ -56,6 +59,7 @@ vlog -sv -work work ../tb/board_b/tb_position_tracker.sv
 vlog -sv -work work ../tb/board_b/tb_latency_histogram.sv
 vlog -sv -work work ../tb/board_b/tb_board_b_ctrl.sv
 vlog -sv -work work ../tb/board_b/tb_board_b_axi_regs.sv
+vlog -sv -work work ../tb/board_b/tb_nn_inference.sv
 vlog -sv -work work ../tb/board_b/tb_board_b_top.sv
 vlog -sv -work work ../tb/board_b/tb_board_b_pipeline.sv
 

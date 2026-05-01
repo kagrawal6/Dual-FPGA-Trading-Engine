@@ -83,6 +83,19 @@ module tb_board_b_pipeline;
     price_t                   fc_ema_value     [NUM_SYMBOLS];
     logic [2:0]               rm_last_signal   [NUM_SYMBOLS];
 
+    // NN: feature deltas from feature_compute and entry/holding state
+    // from position_tracker — wired so the dangled outputs do not produce
+    // TFMPC warnings. Not exercised by this legacy mean-reversion TB.
+    sprice_t                  fc_mid_delta;
+    sprice_t                  fc_ema_delta;
+    price_t                   pt_current_mid   [NUM_SYMBOLS];
+    price_t                   pt_entry_mid     [NUM_SYMBOLS];
+    logic [7:0]               pt_holding_time  [NUM_SYMBOLS];
+
+    initial begin
+        for (int i = 0; i < NUM_SYMBOLS; i++) pt_current_mid[i] = '0;
+    end
+
     logic [ALPHA_W-1:0]       ema_alpha;
     price_t                   threshold;
     qty_t                     base_qty;
@@ -124,7 +137,9 @@ module tb_board_b_pipeline;
         .deviation(fc_deviation),
         .bid_out(fc_bid_out), .ask_out(fc_ask_out),
         .symbol_out(fc_symbol_out), .feature_valid(fc_valid),
-        .ema_value(fc_ema_value)                   // B3
+        .ema_value(fc_ema_value),                  // B3
+        .mid_delta(fc_mid_delta),                  // NN
+        .ema_delta(fc_ema_delta)                   // NN
     );
 
     strategy_engine u_strategy_engine (
@@ -169,6 +184,9 @@ module tb_board_b_pipeline;
     position_tracker u_position_tracker (
         .clk(clk), .rst_n(rst_n), .clear(clear),
         .fill_frame(fill_frame), .fill_valid(fill_valid_in),
+        .current_mid     (pt_current_mid),         // NN (held at 0 here)
+        .feature_valid_in(fc_valid),               // NN
+        .feature_symbol_in(fc_symbol_out),         // NN
         .position(position), .cash(cash), .total_pnl(total_pnl),
         .ts_echo(ts_echo), .fill_processed(fill_processed),
         .fill_symbol_out(pt_fill_symbol), .fill_side_out(pt_fill_side),
@@ -176,7 +194,9 @@ module tb_board_b_pipeline;
         .fills_rcvd(fills_rcvd),
         .pnl_cash_per_sym(pnl_cash_per_sym),
         .last_fill_price (last_fill_price),
-        .trades_per_sym  (trades_per_sym)
+        .trades_per_sym  (trades_per_sym),
+        .entry_mid       (pt_entry_mid),           // NN
+        .holding_time    (pt_holding_time)         // NN
     );
 
     // ── 16-symbol init_mid values (Q16.16, matches golden model) ──
