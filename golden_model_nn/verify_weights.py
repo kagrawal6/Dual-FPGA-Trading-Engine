@@ -4,7 +4,7 @@
 # ============================================================
 import numpy as np
 
-SCALE = 64
+SCALE = 8
 
 def relu(x): return np.maximum(0, x)
 

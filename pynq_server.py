@@ -41,7 +41,8 @@ LIVE_MID_BASE    = 0x190   # B3: live_mid[i] at 0x190 + 4*i
 NUM_SYMBOLS = 16
 Q16 = 65536.0
 
-SYMBOLS = [
+# Load symbols from config file if available, otherwise use defaults
+DEFAULT_SYMBOLS = [
     ("AAPL", 180.00, 0.10), ("MSFT", 420.00, 0.15),
     ("GOOG", 175.00, 0.12), ("META", 510.00, 0.20),
     ("NVDA", 900.00, 0.25), ("AMD",  160.00, 0.08),
@@ -51,6 +52,19 @@ SYMBOLS = [
     ("JNJ",  155.00, 0.06), ("PFE",   27.00, 0.04),
     ("XOM",  105.00, 0.07), ("CVX",  155.00, 0.09),
 ]
+
+def load_symbols(config_file="symbols.json"):
+    try:
+        with open(config_file) as f:
+            data = json.load(f)
+        symbols = [(d["ticker"], d["mid"], d["spread"]) for d in data]
+        print(f"Loaded {len(symbols)} symbols from {config_file}")
+        return symbols
+    except Exception:
+        print("No symbols.json found, using defaults")
+        return DEFAULT_SYMBOLS
+
+SYMBOLS = load_symbols()
 
 latest_data = {
     "prices": [{"ticker": s[0], "bid": int(s[1]*Q16), "ask": int((s[1]+s[2])*Q16), "regime": 0}

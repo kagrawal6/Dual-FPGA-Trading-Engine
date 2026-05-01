@@ -73,11 +73,14 @@ class Decision:
     blocked_penalty: float = 0.0
     hold_penalty: float = 0.0
     obs: Optional[torch.Tensor] = None   # feature vector — stored for PPO replay
+    regime_idx: int = 0                   # integer regime index — needed for per-regime head
 
 
-class ProfitPolicyNet(nn.Module):
-    """Moderately larger MLP policy: 9 -> hidden -> hidden -> hidden -> 3 logits."""
-
+class LegacyProfitPolicyNet(nn.Module):
+    """Original MLP policy: 9 -> hidden -> hidden -> hidden2 -> 3 logits.
+    Use this to load checkpoints trained before the trunk/heads refactor.
+    Keys: net.0.weight, net.0.bias, net.2.weight ... net.6.weight/bias
+    """
     def __init__(self, input_dim: int = 9, hidden_dim: int = 128, hidden_dim2: int = 64, out_dim: int = 3):
         super().__init__()
         self.net = nn.Sequential(
@@ -90,8 +93,47 @@ class ProfitPolicyNet(nn.Module):
             nn.Linear(hidden_dim2, out_dim),
         )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, regime: torch.Tensor = None) -> torch.Tensor:
+        # regime arg ignored — single shared network, kept for API compatibility
         return self.net(x)
+
+
+class ProfitPolicyNet(nn.Module):
+    """Shared trunk + per-regime output heads.
+    
+    The trunk extracts features shared across all regimes.
+    Each regime gets its own output head so CALM, VOLATILE, BURST,
+    and ADVERSARIAL can learn completely independent decision boundaries
+    without interfering with each other.
+    """
+
+    def __init__(self, input_dim: int = 9, hidden_dim: int = 128, hidden_dim2: int = 64, num_regimes: int = 4, out_dim: int = 3):
+        super().__init__()
+        self.num_regimes = num_regimes
+        # shared feature extractor
+        self.trunk = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, hidden_dim2),
+            nn.ReLU(),
+        )
+        # one independent output head per regime
+        self.heads = nn.ModuleList([
+            nn.Linear(hidden_dim2, out_dim) for _ in range(num_regimes)
+        ])
+
+    def forward(self, x: torch.Tensor, regime: torch.Tensor) -> torch.Tensor:
+        """
+        x:      (batch, input_dim) feature vectors
+        regime: (batch,) integer regime indices 0-3
+        returns: (batch, out_dim) logits from the appropriate head per sample
+        """
+        shared = self.trunk(x)                                          # (batch, hidden_dim2)
+        all_heads = torch.stack([h(shared) for h in self.heads], dim=1) # (batch, num_regimes, out_dim)
+        idx = regime.long().view(-1, 1, 1).expand(-1, 1, all_heads.size(-1))
+        return all_heads.gather(1, idx).squeeze(1)                      # (batch, out_dim)
 
 
 class ProfitDrivenBoardB:
@@ -292,7 +334,9 @@ class ProfitDrivenBoardB:
             self.action_counts[ACTION_HOLD] += 1
             return decision
 
-        logits = policy(feat.unsqueeze(0)).squeeze(0)
+        regime_idx = int(q.regime)
+        regime_t = torch.tensor([regime_idx], dtype=torch.long, device=device)
+        logits = policy(feat.unsqueeze(0), regime_t).squeeze(0)
         if sample_action:
             logits = logits / max(float(temperature), 1e-6)
             dist = Categorical(logits=logits)
@@ -305,6 +349,7 @@ class ProfitDrivenBoardB:
         decision.action = action
         decision.symbol = q.symbol
         decision.obs = feat.detach()
+        decision.regime_idx = regime_idx
         decision.log_prob = dist.log_prob(torch.tensor(action, device=device))
         decision.entropy = dist.entropy()
         self.action_counts[action] += 1
@@ -373,6 +418,7 @@ class EpisodeTrace:
         # PPO extras — stored per action step
         self.obs: list[torch.Tensor] = []        # feature vector at decision time
         self.actions: list[int] = []             # action taken
+        self.regimes: list[int] = []             # regime index at decision time
 
 
 def set_seed(seed: int):
@@ -592,6 +638,7 @@ def run_episode(
             trace.action_time_idxs.append(len(trace.cycle_rewards) - 1)
             trace.obs.append(decision.obs)
             trace.actions.append(decision.action)
+            trace.regimes.append(decision.regime_idx)
         prev_mtm = mtm
 
     avg_reward = sum(trace.cycle_rewards) / max(len(trace.cycle_rewards), 1)
@@ -730,12 +777,34 @@ def format_eval_summary(summary: dict) -> str:
     return "\n".join(lines)
 
 
+
+
+def quantize_model(policy, bits: int = 8, scale: int = 64):
+    """
+    Simulate RTL quantization: round all weights to nearest grid point
+    then clamp to representable range for the given bit depth.
+
+    Matches export_weights.py exactly:
+      bits=8, scale=64  ->  current policy_weights.sv  (Q2.6, max_err <1%)
+      bits=4, scale=8   ->  policy_weights_4bit.sv      (Q1.3, max_err ~6%)
+    """
+    max_val =  (2 ** (bits - 1) - 1) / scale
+    min_val = -(2 ** (bits - 1))     / scale
+    with torch.no_grad():
+        for param in policy.parameters():
+            q = torch.round(param * scale) / scale
+            param.copy_(torch.clamp(q, min_val, max_val))
+    return policy
+
 def train(args):
     set_seed(args.seed)
     device = torch.device("cuda" if torch.cuda.is_available() and not args.cpu else "cpu")
     rng = random.Random(args.seed)
 
-    policy = ProfitPolicyNet(input_dim=args.input_dim, hidden_dim=args.hidden_dim, hidden_dim2=args.hidden_dim2, out_dim=3).to(device)
+    if args.legacy_net:
+        policy = LegacyProfitPolicyNet(input_dim=args.input_dim, hidden_dim=args.hidden_dim, hidden_dim2=args.hidden_dim2, out_dim=3).to(device)
+    else:
+        policy = ProfitPolicyNet(input_dim=args.input_dim, hidden_dim=args.hidden_dim, hidden_dim2=args.hidden_dim2, num_regimes=4, out_dim=3).to(device)
     optimizer = optim.Adam(policy.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
     best_avg_mtm = -float("inf")
@@ -754,6 +823,16 @@ def train(args):
         best_avg_mtm = float(checkpoint.get("best_avg_mtm", best_avg_mtm))
         best_excess_vs_mr = float(checkpoint.get("best_excess_vs_mr", best_excess_vs_mr))
         print(f"Loaded checkpoint '{args.resume}' (episode {start_episode}, best_avg_mtm={best_avg_mtm:+.2f}, best_excess_vs_mr={best_excess_vs_mr:+.2f})")
+
+
+    if args.quantize_bits > 0:
+        policy = quantize_model(policy, bits=args.quantize_bits, scale=args.quantize_scale)
+        max_v =  (2 ** (args.quantize_bits - 1) - 1) / args.quantize_scale
+        min_v = -(2 ** (args.quantize_bits - 1))     / args.quantize_scale
+        print(
+            f"Quantized model to {args.quantize_bits}-bit, scale={args.quantize_scale} "
+            f"(representable range [{min_v:.4f}, {max_v:.4f}])"
+        )
 
     if args.eval_only:
         summary = evaluate_policy(policy, device, args)
@@ -787,6 +866,7 @@ def train(args):
             old_log_probs_t = torch.stack(trace.log_probs).detach()
             obs_t = torch.stack(trace.obs)                          # (T, 9)
             actions_t = torch.tensor(trace.actions, dtype=torch.long, device=device)  # (T,)
+            regimes_t = torch.tensor(trace.regimes, dtype=torch.long, device=device)  # (T,)
 
             # PPO update: multiple epochs over the same rollout batch
             for ppo_epoch in range(args.ppo_epochs):
@@ -800,8 +880,9 @@ def train(args):
                     act_b = actions_t[idx]
                     ret_b = returns_t[idx]
                     old_lp_b = old_log_probs_t[idx]
+                    reg_b = regimes_t[idx]
 
-                    logits_b = policy(obs_b)
+                    logits_b = policy(obs_b, reg_b)
                     dist_b = Categorical(logits=logits_b)
                     new_lp_b = dist_b.log_prob(act_b)
                     entropy_b = dist_b.entropy().mean()
@@ -941,6 +1022,22 @@ def build_argparser():
     parser.add_argument("--train-adversarial-weight", default=4.0, type=float, help="sampling weight for ADVERSARIAL during training")
 
     parser.add_argument("--mean-reversion-threshold-q16", default=0x00001999, type=lambda x: int(x, 0), help="baseline mean-reversion threshold in Q16.16 (default $0.10)")
+
+    parser.add_argument(
+        "--legacy-net", action="store_true",
+        help="Use original net.0/2/4/6 architecture to load old checkpoints "
+             "(model_best_v1_profitable.pth.tar). Cannot be combined with --resume on new trunk/heads checkpoints."
+    )
+    parser.add_argument(
+        "--quantize-bits", default=0, type=int,
+        help="If >0 quantize all weights to this bit depth before eval/train. "
+             "0=disabled (float32). Use 8 for current RTL or 4 for 4-bit test."
+    )
+    parser.add_argument(
+        "--quantize-scale", default=64, type=int,
+        help="Fixed-point scale for quantization (default 64 matches export_weights.py). "
+             "Use 8 when --quantize-bits 4."
+    )
     return parser
 
 
