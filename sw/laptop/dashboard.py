@@ -3,6 +3,11 @@
 Laptop Dashboard — dashboard.py
 Robinhood-style real-time portfolio monitor for the Dual-FPGA Trading Engine.
 
+IMPORTANT: This is NOT the Board B TradeMark terminal dashboard. That UI is
+``board_b_dashboard.py`` (same default HTTP port 8050 — only one can run at a time).
+For Book / Events / Diagnostics tabs and terminal-style charts, run:
+``python board_b_dashboard.py --demo --browser``
+
 Reads JSON telemetry from Board B's USB-UART (one JSON object per line emitted
 by sw/board_b/telemetry_server.py) and renders a Plotly Dash web app with:
 
@@ -848,7 +853,11 @@ def main():
         sys.exit("error: must pass one of --port, --stdin, or --demo")
 
     app = build_app(src, sym_cfg, poll_hz=args.poll_hz)
-    print(f"\n  Dashboard URL:  http://{args.host}:{args.http_port}\n", flush=True)
+    print(f"\n  Dashboard URL:  http://{args.host}:{args.http_port}/", flush=True)
+    print(
+        "  (Robinhood-style card grid from dashboard.py — not board_b_dashboard.py)\n",
+        flush=True,
+    )
     app.run(host=args.host, port=args.http_port, debug=False)
 
 
