@@ -17,7 +17,7 @@ new_implementation/
 ├── sw/                     PS + laptop Python scripts
 │   ├── board_a/            config_exchange.py
 │   ├── board_b/            telemetry_server.py, register_map.py (see sw/board_b/README.md)
-│   └── laptop/             board_b_dashboard.py (TradeMark), dashboard.py
+│   └── laptop/             board_b_dashboard.py (TradeMark); see sw/laptop/README.md
 ├── docs/                   Implementation notes
 └── images/                 Diagrams, screenshots
 ```
@@ -40,4 +40,20 @@ See `../docs/updated_design_specification.md` for the full spec.
 ## Board B PYNQ (PS) + laptop UI
 
 - **On the Board B PYNQ:** configure MMIO and stream telemetry — see **[`sw/board_b/README.md`](sw/board_b/README.md)** (`telemetry_server.py`, overlay path, UART/stdout).
-- **On the laptop:** TradeMark terminal — `sw/laptop/board_b_dashboard.py` (see `python3 board_b_dashboard.py -h`). Use **`board_b_dashboard.py`**, not `dashboard.py`, for the terminal layout.
+- **On the laptop:** TradeMark terminal — see **[`sw/laptop/README.md`](sw/laptop/README.md)** (venv, `pip install -r requirements.txt`, demo vs UART). Entrypoint: **`sw/laptop/board_b_dashboard.py`** (`python3 board_b_dashboard.py -h`). Use **`board_b_dashboard.py`**, not **`dashboard.py`**, for the terminal layout (both default to HTTP port **8050** if run at once).
+
+### Laptop quick start (copy-paste)
+
+```bash
+git clone https://github.com/<org-or-fork>/Dual-FPGA-Trading-Engine.git
+cd Dual-FPGA-Trading-Engine
+git checkout my-work-stretch-goals    # or your branch
+
+cd sw/laptop
+python3 -m venv .venv
+source .venv/bin/activate            # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python3 board_b_dashboard.py --demo --browser
+```
+
+Then open **http://127.0.0.1:8050/**. Replace `<org-or-fork>` with the GitHub owner you clone from.
