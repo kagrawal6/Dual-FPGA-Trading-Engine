@@ -91,6 +91,26 @@
   border-radius: 999px;
 }
 
+/* Tighter chrome so KPIs / charts sit higher (walk-by viewport) */
+.bb-toolbar--fold {
+  padding: 8px 12px 10px;
+  margin: 0 12px 6px;
+  gap: 8px;
+}
+
+.bb-tab-page--overview {
+  padding-top: 2px !important;
+}
+
+/* First-screen stack: numbers + pipeline read before regime essay */
+.bb-fold-hero {
+  margin-bottom: 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.28);
+  border-radius: 0 0 16px 16px;
+}
+
 .bb-toolbar-input {
   font-family: "DM Sans", system-ui, sans-serif !important;
   font-size: 14px !important;
@@ -185,6 +205,164 @@ body {
   color: #a1a1a6;
 }
 
+/* —— TradeMark — restrained “terminal” lockup (slow ring, no gimmick flicker) —— */
+.bb-header-title-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 8px 12px 4px;
+  box-sizing: border-box;
+}
+
+.bb-trademark-shell {
+  position: relative;
+  display: inline-block;
+  border-radius: 14px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 0 24px rgba(0, 200, 5, 0.18),
+    0 0 48px rgba(90, 200, 250, 0.1);
+}
+
+.bb-trademark-shell::before {
+  content: "";
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  left: 50%;
+  top: 50%;
+  z-index: 0;
+  /* Cool teal → blue → back: reads “market terminal”, not carnival */
+  background: conic-gradient(
+    from 0deg,
+    #0d3d2a,
+    #00c896,
+    #1a4a6e,
+    #5ac8fa,
+    #0d3d2a
+  );
+  transform: translate(-50%, -50%);
+  animation: bb-crypto-conic-spin 22s linear infinite;
+}
+
+@keyframes bb-crypto-conic-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.bb-trademark-box {
+  position: relative;
+  z-index: 1;
+  margin: 2px;
+  border-radius: 12px;
+  padding: 10px 32px 9px;
+  text-align: center;
+  line-height: 1.05;
+  background-color: #06060b;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    radial-gradient(ellipse 100% 90% at 50% 0%, rgba(0, 200, 5, 0.08) 0%, transparent 50%);
+  background-size: 22px 22px, 22px 22px, 100% 100%;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.65);
+}
+
+.bb-trademark-box::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(transparent 0%, transparent 70%, rgba(255, 255, 255, 0.03) 100%);
+  opacity: 0.5;
+  z-index: 2;
+}
+
+.bb-trademark-word {
+  position: relative;
+  z-index: 3;
+  display: inline-block;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: clamp(28px, 5vw, 44px);
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: none;
+  background: linear-gradient(
+    105deg,
+    #f5f5f7 0%,
+    #e8fff0 35%,
+    #d4ecff 65%,
+    #ffffff 100%
+  );
+  background-size: 180% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: bb-trademark-shimmer 5s ease-in-out infinite;
+  filter: drop-shadow(0 0 14px rgba(0, 200, 5, 0.35));
+}
+
+.bb-trademark-tagline {
+  position: relative;
+  z-index: 3;
+  margin-top: 5px;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: rgba(161, 161, 166, 0.95);
+  text-transform: uppercase;
+}
+
+@keyframes bb-trademark-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.bb-root--light .bb-trademark-shell {
+  box-shadow:
+    0 0 0 1px rgba(99, 102, 241, 0.35),
+    0 0 32px rgba(99, 102, 241, 0.25);
+}
+
+.bb-root--light .bb-trademark-box {
+  background-color: #fafafa;
+  background-image:
+    linear-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.08) 1px, transparent 1px);
+  box-shadow: inset 0 0 32px rgba(255, 255, 255, 0.9);
+}
+
+.bb-root--light .bb-trademark-word {
+  background: linear-gradient(105deg, #0a0a0a 0%, #14532d 40%, #0c4a6e 70%, #0a0a0a 100%);
+  background-size: 180% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 6px rgba(0, 200, 5, 0.2));
+}
+
+.bb-root--light .bb-trademark-tagline {
+  color: rgba(107, 107, 107, 0.95);
+}
+
+.bb-presenter .bb-regime-title {
+  font-size: clamp(20px, 4vw, 26px);
+}
+
 /* Plotly chart chrome */
 .bb-root .js-plotly-plot .plotly,
 .bb-root .js-plotly-plot .plotly .main-svg {
@@ -241,8 +419,31 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .bb-regime-pulse,
-  .bb-confetti-piece {
+  .bb-confetti-piece,
+  .bb-trademark-shell::before,
+  .bb-trademark-word {
     animation: none !important;
+  }
+
+  .bb-trademark-shell::before {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  .bb-trademark-shell {
+    filter: none;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 20px rgba(0, 200, 5, 0.15);
+  }
+
+  .bb-trademark-word {
+    filter: none;
+    color: #f5f5f7;
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+  }
+
+  .bb-root--light .bb-trademark-word {
+    color: #0a0a0a;
   }
 }
 

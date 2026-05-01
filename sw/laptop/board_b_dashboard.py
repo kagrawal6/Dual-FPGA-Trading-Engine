@@ -654,7 +654,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             "https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap",
         ],
     )
-    app.title = "Board B"
+    app.title = "TradeMark"
 
     app.layout = html.Div(
         [
@@ -709,7 +709,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                         className="bb-btn-ghost",
                     ),
                 ],
-                className="bb-toolbar",
+                className="bb-toolbar bb-toolbar--fold",
             ),
             dcc.Tabs(
                 id="main-tabs",
@@ -722,6 +722,31 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                         value="tab-overview",
                         children=html.Div(
                             [
+                                # KPIs + pipeline first: most passersby never scroll.
+                                html.Div(
+                                    [
+                                        html.Div(id="kpi-strip"),
+                                        html.Div(id="flow-strip"),
+                                        dcc.Tabs(
+                                            id="view-tabs",
+                                            value="demo",
+                                            persistence=True,
+                                            children=[
+                                                dcc.Tab(
+                                                    label="Demo View",
+                                                    value="demo",
+                                                ),
+                                                dcc.Tab(
+                                                    label="Debug View",
+                                                    value="debug",
+                                                ),
+                                            ],
+                                            className="bb-main-tabs",
+                                            style={"marginBottom": "4px"},
+                                        ),
+                                    ],
+                                    className="bb-fold-hero",
+                                ),
                                 html.Div(
                                     [
                                         html.Div(
@@ -756,25 +781,6 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                     ],
                                     id="regime-strip",
                                 ),
-                                html.Div(id="flow-strip"),
-                                dcc.Tabs(
-                                    id="view-tabs",
-                                    value="demo",
-                                    persistence=True,
-                                    children=[
-                                        dcc.Tab(
-                                            label="Demo View",
-                                            value="demo",
-                                        ),
-                                        dcc.Tab(
-                                            label="Debug View",
-                                            value="debug",
-                                        ),
-                                    ],
-                                    className="bb-main-tabs",
-                                    style={"marginBottom": "6px"},
-                                ),
-                                html.Div(id="kpi-strip"),
                                 html.Div(id="sys-diagram"),
                                 html.Div(
                                     [
@@ -783,7 +789,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                                 html.H2(
                                                     "Profit & portfolio (live)",
                                                     id="pnl-section-title",
-                                                    style={"marginTop": "6px", "marginBottom": "8px"},
+                                                    style={"marginTop": "2px", "marginBottom": "6px"},
                                                 ),
                                                 html.Div(id="pnl-hero"),
                                                 dcc.Graph(id="fig-pnl", style={"height": "320px"}),
@@ -797,7 +803,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                                     className="bb-section-heading",
                                                     style={"marginTop": "10px", "marginBottom": "10px"},
                                                 ),
-                                                dcc.Graph(id="fig-thr", style={"height": "260px"}),
+                                                dcc.Graph(id="fig-thr", style={"height": "200px"}),
                                                 html.Div(
                                                     "Keys: 1 Overview · 2 Book · 3 EMA · 4 Latency · 5 Debug · ←/→ change symbol",
                                                     style={"color": "#a1a1a6", "fontSize": "12px", "marginTop": "4px"},
@@ -1251,9 +1257,9 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             html.Div(
                 blurb,
                 style={
-                    "fontSize": "17px",
-                    "marginTop": "10px",
-                    "lineHeight": "1.5",
+                    "fontSize": "15px" if presenter else "17px",
+                    "marginTop": "6px" if presenter else "10px",
+                    "lineHeight": "1.45",
                     "maxWidth": "920px",
                     "fontWeight": "500",
                 },
@@ -1278,17 +1284,17 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             inner,
             className="bb-regime-inner" + pulse_cls,
             style={
-                "marginTop": "14px",
-                "padding": "24px 26px",
-                "borderRadius": "20px",
+                "marginTop": "8px" if presenter else "14px",
+                "padding": "14px 16px" if presenter else "24px 26px",
+                "borderRadius": "16px" if presenter else "20px",
                 "backgroundColor": bg,
                 "color": "#fff",
                 "boxShadow": "0 8px 32px rgba(0,0,0,0.35)",
             },
         )
         strip_style = {
-            "padding": "8px 4px 0",
-            "marginBottom": "12px",
+            "padding": "4px 2px 0",
+            "marginBottom": "8px",
             "borderRadius": "0",
             "border": "none",
             "backgroundColor": c["card"],
@@ -1477,12 +1483,12 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         }
 
         _banner_base = {
-            "padding": "12px 20px",
+            "padding": "10px 16px",
             "fontWeight": "600",
             "fontSize": "14px",
             "letterSpacing": "0.01em",
             "borderRadius": "12px",
-            "margin": "12px 16px 0",
+            "margin": "8px 12px 0",
             "maxWidth": "1200px",
         }
 
@@ -1590,16 +1596,20 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         )
 
         title = html.Div(
-            "Board B — Trader Telemetry",
-            style={
-                "fontSize": "22px",
-                "fontWeight": "900",
-                "letterSpacing": "-0.01em",
-                "margin": "14px 0 6px",
-                "maxWidth": "1200px",
-                "marginLeft": "auto",
-                "marginRight": "auto",
-            },
+            html.Div(
+                html.Div(
+                    [
+                        html.Span("TradeMark", className="bb-trademark-word"),
+                        html.Div(
+                            "BOARD B · LIVE TELEMETRY",
+                            className="bb-trademark-tagline",
+                        ),
+                    ],
+                    className="bb-trademark-box",
+                ),
+                className="bb-trademark-shell",
+            ),
+            className="bb-header-title-row",
         )
         root_cls = "bb-root bb-root--dark" if dark else "bb-root bb-root--light"
         if presenter:
@@ -1683,8 +1693,8 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                 )
             )
         pnl_title_style = {
-            "marginTop": "20px",
-            "marginBottom": "6px",
+            "marginTop": "8px",
+            "marginBottom": "4px",
             "fontSize": "13px",
             "fontWeight": "600",
             "letterSpacing": "0.06em",
@@ -2285,7 +2295,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             paper_bgcolor=chart_paper,
             plot_bgcolor=chart_plot,
             font=_plot_font(c),
-            height=300,
+            height=220,
             margin=dict(l=50, r=20, t=44, b=44),
             xaxis=dict(
                 showgrid=True,
