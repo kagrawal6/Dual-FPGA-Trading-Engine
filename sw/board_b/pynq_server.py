@@ -116,10 +116,13 @@ _HTML_TEMPLATE = """<!DOCTYPE html>
     th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #2c2c2e; }
     th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; }
     .pill { display:inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background:#2c2c2e; }
+    .hint { color: var(--muted); font-size: 12px; margin: 10px 0 18px; max-width: 980px; line-height: 1.45; }
+    .hint b { color: var(--txt); }
   </style>
 </head>
 <body>
   <h1>Board B — Hardware Telemetry</h1>
+  <div class="hint" id="hint"></div>
   <div class="grid" id="cards"></div>
   <div class="row">
     <div class="chart-box"><canvas id="chMain"></canvas></div>
@@ -139,6 +142,14 @@ const money = (n) => {
   const s = (n>=0?"+":"") + "$" + Math.abs(n).toFixed(2);
   return s;
 };
+function inventoryAtMid(j) {
+  if (j.inventory_mtm != null && Number.isFinite(Number(j.inventory_mtm))) return Number(j.inventory_mtm);
+  if (!Array.isArray(j.pos) || !Array.isArray(j.mid)) return null;
+  let s = 0;
+  const n = Math.min(j.pos.length, j.mid.length);
+  for (let i = 0; i < n; i++) s += Number(j.pos[i]||0) * Number(j.mid[i]||0);
+  return Number.isFinite(s) ? s : null;
+}
 let chartMain, chartRates;
 function initCharts() {
   const common = { responsive:true, maintainAspectRatio:false,
@@ -165,13 +176,29 @@ function initCharts() {
 }
 function setCards(j) {
   const g = document.getElementById("cards");
+  const hint = document.getElementById("hint");
   const risk = j.risk_halt ? "HALT" : "OK";
   const link = j.link_up ? "UP" : "DOWN";
   const haltCls = j.risk_halt ? "neg" : "pos";
+  const cap = (j.max_order_rate != null && j.ops != null && Number(j.ops) >= Number(j.max_order_rate)) ? "ORDER CAP REACHED" : "";
+  const armed = (j.state === "B_ARMED");
+  const blocked = (j.signal && Array.isArray(j.signal) && j.signal.every(x => x === "RISK_BLOCKED"));
+  let why = "";
+  if (!j.link_up) why = "No quotes arriving (link down).";
+  else if (j.state === "B_HALTED" || j.risk_halt) why = "Risk HALT asserted — orders blocked until reset.";
+  else if (cap) why = "Order cap reached — raise MAX_ORDER_RATE or reset.";
+  else if (armed && blocked) why = "Signals are being blocked because Board B is ARMED, not TRADING. Turn SW0 ON (trading_enable) then pulse START.";
+  else if (armed) why = "Board B is ARMED (quotes OK). Turn SW0 ON and pulse START to enter TRADING.";
+  else if (blocked) why = "Signals blocked by risk checks (position/rate/loss).";
+  else why = "Live. Use /api/telemetry for raw values.";
+  hint.innerHTML = `<b>Status:</b> ${why} <span style="margin-left:10px" class="pill">${j.state||"?"}</span> ${cap?` <span class="pill neg">${cap}</span>`:""}`;
+  const inv = inventoryAtMid(j);
+  const invCls = (inv!=null && inv>=0) ? "pos" : "neg";
   g.innerHTML = `
     <div class="card"><label>Cash</label><div class="v ${j.cash>=0?"pos":"neg"}">${money(j.cash)}</div></div>
+    <div class="card"><label>Inventory @ mid (Σ pos·mid)</label><div class="v ${inv!=null?invCls:""}">${inv!=null?money(inv):"—"}</div></div>
     <div class="card"><label>Total PnL (MTM)</label><div class="v ${j.total_pnl>=0?"pos":"neg"}">${money(j.total_pnl)}</div></div>
-    <div class="card"><label>Port value</label><div class="v">${money(j.port_value)}</div></div>
+    <div class="card"><label>Port value (cash + inv.)</label><div class="v ${j.port_value>=0?"pos":"neg"}">${money(j.port_value)}</div></div>
     <div class="card"><label>FSM</label><div class="v" style="font-size:1rem">${j.state}</div></div>
     <div class="card"><label>Strategy</label><div class="v" style="font-size:1rem">${j.strategy}</div></div>
     <div class="card"><label>Link / Risk</label><div class="v" style="font-size:1rem"><span class="pill">${link}</span> <span class="pill ${haltCls}">${risk}</span></div></div>
@@ -179,6 +206,10 @@ function setCards(j) {
     <div class="card"><label>Orders sent</label><div class="v">${fmt(j.ops,0)}</div></div>
     <div class="card"><label>Fills rcvd</label><div class="v">${fmt(j.fps,0)}</div></div>
     <div class="card"><label>Risk rejects</label><div class="v">${fmt(j.rej,0)}</div></div>
+    <div class="card"><label>Threshold</label><div class="v">${fmt(j.threshold,4)}</div></div>
+    <div class="card"><label>Base qty</label><div class="v">${fmt(j.base_qty,0)}</div></div>
+    <div class="card"><label>Max order rate</label><div class="v">${fmt(j.max_order_rate,0)}</div></div>
+    <div class="card"><label>Max loss</label><div class="v">${money(j.max_loss)}</div></div>
   `;
 }
 function setTable(j) {

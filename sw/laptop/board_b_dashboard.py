@@ -244,6 +244,11 @@ class SerialTelemetryReader(threading.Thread):
         self.history_rate_f: Deque[float] = deque(maxlen=8000)
         self.history_rate_rej: Deque[float] = deque(maxlen=8000)
 
+        # Per-symbol time series for symbol detail screens (EMA vs mid).
+        self.sym_history_t: Deque[float] = deque(maxlen=1200)
+        self.sym_history_mid: List[Deque[float]] = [deque(maxlen=1200) for _ in range(NUM_SYMBOLS)]
+        self.sym_history_ema: List[Deque[float]] = [deque(maxlen=1200) for _ in range(NUM_SYMBOLS)]
+
         self._last_regime_name: str = ""
         self._last_regime_id: int = -1
         self._last_regime_changes: Optional[int] = None
@@ -413,6 +418,23 @@ class SerialTelemetryReader(threading.Thread):
             self.last_mono = now
             self.heartbeat += 1
 
+            # Per-symbol series (only when arrays are present).
+            try:
+                mid_arr = data.get("mid")
+                ema_arr = data.get("ema")
+                if (
+                    isinstance(mid_arr, list)
+                    and isinstance(ema_arr, list)
+                    and len(mid_arr) >= NUM_SYMBOLS
+                    and len(ema_arr) >= NUM_SYMBOLS
+                ):
+                    self.sym_history_t.append(float(data.get("ts", time.time())))
+                    for i in range(NUM_SYMBOLS):
+                        self.sym_history_mid[i].append(float(mid_arr[i] or 0.0))
+                        self.sym_history_ema[i].append(float(ema_arr[i] or 0.0))
+            except Exception:
+                pass
+
             # Transition events: link/risk/state/strategy/regime.
             link_up_now = bool(data.get("link_up", False))
             risk_halt_now = bool(data.get("risk_halt", False))
@@ -521,6 +543,15 @@ class SerialTelemetryReader(threading.Thread):
     def events_snapshot(self) -> List[Dict[str, Any]]:
         with self._lock:
             return list(self._events)
+
+    def symbol_series(self, sym_idx: int) -> Tuple[List[float], List[float], List[float]]:
+        """Return (t, mid, ema) series for one symbol as plain lists."""
+        with self._lock:
+            t = list(self.sym_history_t)
+            mid = list(self.sym_history_mid[sym_idx])
+            ema = list(self.sym_history_ema[sym_idx])
+        n = min(len(t), len(mid), len(ema))
+        return t[-n:], mid[-n:], ema[-n:]
 
     def history_arrays(
         self, window_sec: float
@@ -632,6 +663,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             dcc.Store(id="freeze-store", data={"active": False, "payload": None}),
             dcc.Store(id="hotkey-store", data={}),
             dcc.Store(id="regime-modal", data={"open": False, "topic": 0}),
+            dcc.Store(id="symbol-modal", data={"open": False, "sym": 0}),
             dcc.Store(
                 id="prefs-store",
                 data={
@@ -744,26 +776,79 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                 ),
                                 html.Div(id="kpi-strip"),
                                 html.Div(id="sys-diagram"),
-                                html.H2(
-                                    "Profit & loss (what viewers usually ask first)",
-                                    id="pnl-section-title",
-                                    style={"marginTop": "8px", "marginBottom": "10px"},
+                                html.Div(
+                                    [
+                                        html.Div(
+                                            [
+                                                html.H2(
+                                                    "Profit & portfolio (live)",
+                                                    id="pnl-section-title",
+                                                    style={"marginTop": "6px", "marginBottom": "8px"},
+                                                ),
+                                                html.Div(id="pnl-hero"),
+                                                dcc.Graph(id="fig-pnl", style={"height": "320px"}),
+                                            ],
+                                            style={"flex": "1", "minWidth": "520px"},
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.H3(
+                                                    "Activity & throughput",
+                                                    className="bb-section-heading",
+                                                    style={"marginTop": "10px", "marginBottom": "10px"},
+                                                ),
+                                                dcc.Graph(id="fig-thr", style={"height": "260px"}),
+                                                html.Div(
+                                                    "Keys: 1 Overview · 2 Book · 3 EMA · 4 Latency · 5 Debug · ←/→ change symbol",
+                                                    style={"color": "#a1a1a6", "fontSize": "12px", "marginTop": "4px"},
+                                                ),
+                                            ],
+                                            style={"flex": "0.9", "minWidth": "360px"},
+                                        ),
+                                    ],
+                                    style={
+                                        "display": "flex",
+                                        "flexWrap": "wrap",
+                                        "gap": "14px",
+                                        "alignItems": "flex-start",
+                                    },
                                 ),
-                                html.Div(id="pnl-hero"),
-                                dcc.Graph(id="fig-pnl"),
+                            ],
+                            className="bb-tab-page",
+                            style={"padding": "8px 16px 40px", "maxWidth": "1120px", "margin": "0 auto"},
+                        ),
+                    ),
+                    dcc.Tab(
+                        label="Book",
+                        value="tab-book",
+                        children=html.Div(
+                            [
                                 html.H3(
                                     "Position exposure (shares per symbol)",
                                     id="pos-section-title",
-                                    style={"marginTop": "28px", "marginBottom": "8px"},
+                                    style={"marginTop": "10px", "marginBottom": "8px"},
                                 ),
-                                dcc.Graph(
-                                    id="fig-positions",
-                                    style={"height": "520px", "maxWidth": "1100px"},
+                                dcc.Graph(id="fig-positions", style={"height": "360px"}),
+                                html.H3(
+                                    "Per-symbol book (quotes + exposure)",
+                                    className="bb-section-heading",
+                                    style={"marginTop": "12px", "marginBottom": "10px"},
                                 ),
+                                html.Div(id="symbol-table", style={"width": "100%", "overflowX": "hidden"}),
+                            ],
+                            className="bb-tab-page",
+                            style={"padding": "12px 16px 24px", "maxWidth": "1120px", "margin": "0 auto"},
+                        ),
+                    ),
+                    dcc.Tab(
+                        label="EMA",
+                        value="tab-ema",
+                        children=html.Div(
+                            [
                                 html.H3(
                                     "EMA vs mid (per symbol — why we trade)",
                                     className="bb-section-heading",
-                                    style={"marginTop": "22px", "marginBottom": "6px"},
+                                    style={"marginTop": "10px", "marginBottom": "6px"},
                                 ),
                                 html.Div(
                                     [
@@ -775,66 +860,56 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                             ],
                                             value=0,
                                             clearable=False,
-                                            style={"width": "220px"},
+                                            style={"width": "260px"},
                                         ),
-                                        dcc.Graph(
-                                            id="fig-ema",
-                                            style={"height": "260px", "maxWidth": "720px"},
-                                        ),
+                                        dcc.Graph(id="fig-ema", style={"height": "320px", "flex": "1"}),
                                     ],
                                     style={
                                         "display": "flex",
                                         "flexWrap": "wrap",
                                         "alignItems": "flex-start",
-                                        "gap": "16px",
-                                        "marginBottom": "10px",
+                                        "gap": "14px",
                                     },
                                 ),
-                                html.H3(
-                                    "Per-symbol book (quotes + exposure)",
-                                    className="bb-section-heading",
-                                    style={"marginTop": "18px", "marginBottom": "10px"},
-                                ),
-                                html.Div(id="symbol-table", style={"width": "100%", "overflowX": "hidden"}),
-                                html.H3(
-                                    "Activity & throughput",
-                                    className="bb-section-heading",
-                                    style={
-                                        "marginTop": "28px",
-                                        "marginBottom": "10px",
-                                    },
-                                ),
-                                dcc.Graph(id="fig-thr", style={"maxWidth": "900px"}),
+                            ],
+                            className="bb-tab-page",
+                            style={"padding": "12px 16px 24px", "maxWidth": "1120px", "margin": "0 auto"},
+                        ),
+                    ),
+                    dcc.Tab(
+                        label="Latency",
+                        value="tab-latency",
+                        children=html.Div(
+                            [
                                 html.H3(
                                     "Latency snapshot",
                                     className="bb-section-heading",
-                                    style={
-                                        "marginTop": "24px",
-                                        "marginBottom": "10px",
-                                    },
+                                    style={"marginTop": "10px", "marginBottom": "10px"},
                                 ),
                                 html.Div(
                                     [
                                         html.Div(
                                             dcc.Graph(id="fig-mini-hist"),
-                                            style={
-                                                "width": "58%",
-                                                "minWidth": "300px",
-                                                "display": "inline-block",
-                                            },
+                                            style={"flex": "1", "minWidth": "360px"},
                                         ),
                                         html.Div(
                                             id="scalar-table",
-                                            style={
-                                                "width": "38%",
-                                                "minWidth": "240px",
-                                                "display": "inline-block",
-                                                "verticalAlign": "top",
-                                            },
+                                            style={"flex": "0.9", "minWidth": "320px"},
                                         ),
                                     ],
-                                    style={"marginTop": "4px"},
+                                    style={"display": "flex", "gap": "14px", "flexWrap": "wrap", "alignItems": "flex-start"},
                                 ),
+                                dcc.Graph(id="fig-latency", style={"height": "320px"}),
+                            ],
+                            className="bb-tab-page",
+                            style={"padding": "12px 16px 24px", "maxWidth": "1120px", "margin": "0 auto"},
+                        ),
+                    ),
+                    dcc.Tab(
+                        label="Debug",
+                        value="tab-debug",
+                        children=html.Div(
+                            [
                                 html.Div(
                                     [
                                         html.Div(
@@ -864,21 +939,37 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                         "display": "grid",
                                         "gridTemplateColumns": "minmax(0, 1fr) minmax(360px, 0.9fr)",
                                         "gap": "16px",
-                                        "marginTop": "18px",
                                     },
+                                )
+                                ,
+                                html.H3(
+                                    "Telemetry explorer (all fields)",
+                                    className="bb-section-heading",
+                                    style={"marginTop": "16px", "marginBottom": "10px"},
+                                ),
+                                html.Div(
+                                    [
+                                        html.Div(id="telemetry-keys", style={"color": "#a1a1a6", "fontSize": "12px"}),
+                                        html.Pre(
+                                            id="telemetry-raw",
+                                            style={
+                                                "whiteSpace": "pre-wrap",
+                                                "wordBreak": "break-word",
+                                                "fontSize": "12px",
+                                                "lineHeight": "1.35",
+                                                "background": "rgba(255,255,255,0.04)",
+                                                "border": "1px solid #2c2c2e",
+                                                "borderRadius": "12px",
+                                                "padding": "12px 14px",
+                                                "maxHeight": "38vh",
+                                                "overflowY": "auto",
+                                            },
+                                        ),
+                                    ]
                                 ),
                             ],
                             className="bb-tab-page",
-                            style={"padding": "8px 16px 40px", "maxWidth": "1120px", "margin": "0 auto"},
-                        ),
-                    ),
-                    dcc.Tab(
-                        label="Latency",
-                        value="tab-latency",
-                        children=html.Div(
-                            dcc.Graph(id="fig-latency", style={"height": "520px"}),
-                            className="bb-tab-page",
-                            style={"padding": "16px 20px 40px", "maxWidth": "1120px", "margin": "0 auto"},
+                            style={"padding": "12px 16px 24px", "maxWidth": "1120px", "margin": "0 auto"},
                         ),
                     ),
                     dcc.Tab(
@@ -1024,6 +1115,24 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                     )
                 ],
                 id="regime-modal-overlay",
+                style={"display": "none"},
+            ),
+            html.Div(
+                [
+                    html.Div(
+                        [
+                            html.Button(
+                                "× Close",
+                                id="btn-symbol-close",
+                                n_clicks=0,
+                                className="bb-btn-close",
+                            ),
+                            html.Div(id="symbol-modal-body"),
+                        ],
+                        className="bb-modal-panel",
+                    )
+                ],
+                id="symbol-modal-overlay",
                 style={"display": "none"},
             ),
         ],
@@ -1783,6 +1892,26 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         total_pnl = float(latest.get("total_pnl", 0.0) or 0.0)
         port_value = float(latest.get("port_value", 0.0) or 0.0)
         cash_val = float(latest.get("cash", 0.0) or 0.0)
+        inv_raw = latest.get("inventory_mtm", None)
+        if isinstance(inv_raw, (int, float)) and inv_raw == inv_raw:  # not NaN
+            inventory_mtm = float(inv_raw)
+        else:
+            inventory_mtm = port_value - cash_val
+
+        # Config echo (if present in telemetry; falls back to UNKNOWN when absent).
+        thr = latest.get("threshold", None)
+        base_qty_cfg = latest.get("base_qty", None)
+        max_rate_cfg = latest.get("max_order_rate", None)
+        max_loss_cfg = latest.get("max_loss", None)
+        max_pos_cfg = latest.get("max_position", None)
+        ema_alpha_cfg = latest.get("ema_alpha", None)
+
+        cap_reached = False
+        try:
+            if max_rate_cfg is not None:
+                cap_reached = int(ops) >= int(max_rate_cfg)
+        except (TypeError, ValueError):
+            cap_reached = False
 
         system_row = html.Div(
             [
@@ -1834,7 +1963,23 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
 
         perf_row = html.Div(
             [
-                _kpi_card("CASH", f"${cash_val:,.2f}", c["good"] if cash_val >= 0 else c["bad"], "Board B realized"),
+                _kpi_card(
+                    "CASH BALANCE",
+                    f"${cash_val:,.2f}",
+                    c["muted"],
+                    "Not profit. Cash decreases when buying inventory.",
+                    tooltip=(
+                        "Cash is your cash balance after buys/sells. It often goes negative when holding inventory. "
+                        "Use PORT VALUE (net liquidation) + TOTAL PNL for performance."
+                    ),
+                ),
+                _kpi_card(
+                    "INVENTORY VALUE",
+                    f"${inventory_mtm:+,.2f}",
+                    c["muted"],
+                    "Σ pos·mid",
+                    tooltip="Mark-to-market value of held positions (inventory).",
+                ),
                 _kpi_card(
                     "TOTAL PNL",
                     f"${total_pnl:+,.2f}",
@@ -1850,16 +1995,68 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                         "Hardware-side profit indicator: green if total PnL > 0, red if total PnL < 0, off if 0."
                     ),
                 ),
-                _kpi_card("PORT VALUE", f"${port_value:,.2f}", c["accent"], "Cash + Σ pos·mid"),
+                _kpi_card(
+                    "PORT VALUE",
+                    f"${port_value:+,.2f}",
+                    c["good"] if port_value > 0 else (c["bad"] if port_value < 0 else c["muted"]),
+                    "Cash + Σ pos·mid",
+                ),
                 _kpi_card("QUOTES RX", f"{qps:,}", c["muted"], "Board A → B"),
                 _kpi_card("ORDERS TX", f"{ops:,}", c["muted"], "B → Board A"),
                 _kpi_card("FILLS RX", f"{fps:,}", c["muted"], "Execution results"),
                 _kpi_card("RISK REJECTS", f"{rej:,}", c["bad"] if rej > 0 else c["muted"], "Gate pressure"),
+                _kpi_card(
+                    "ORDER CAP",
+                    ("REACHED" if cap_reached else "OK"),
+                    (c["bad"] if cap_reached else c["muted"]),
+                    (f"max {int(max_rate_cfg):,}" if isinstance(max_rate_cfg, (int, float)) else "max UNKNOWN"),
+                    tooltip=(
+                        "When orders_sent reaches MAX_ORDER_RATE, risk blocks further orders until you reset/restart."
+                        if cap_reached
+                        else "Order cap not reached."
+                    ),
+                ),
             ],
             style={"display": "flex", "flexWrap": "wrap", "gap": "10px"},
         )
 
-        kpis = html.Div([system_row, perf_row], style={"marginBottom": "18px"})
+        config_row = html.Div(
+            [
+                _kpi_card(
+                    "THRESHOLD",
+                    (f"${float(thr):.4f}" if isinstance(thr, (int, float)) else "UNKNOWN"),
+                    c["muted"],
+                    "EMA deviation trigger",
+                ),
+                _kpi_card(
+                    "BASE QTY",
+                    (f"{int(base_qty_cfg):,}" if isinstance(base_qty_cfg, (int, float)) else "UNKNOWN"),
+                    c["muted"],
+                    "Shares per order",
+                ),
+                _kpi_card(
+                    "MAX POSITION",
+                    (f"{int(max_pos_cfg):,}" if isinstance(max_pos_cfg, (int, float)) else "UNKNOWN"),
+                    c["muted"],
+                    "Per-symbol limit",
+                ),
+                _kpi_card(
+                    "MAX LOSS",
+                    (f"${float(max_loss_cfg):,.2f}" if isinstance(max_loss_cfg, (int, float)) else "UNKNOWN"),
+                    c["muted"],
+                    "PnL floor before HALT",
+                ),
+                _kpi_card(
+                    "EMA ALPHA",
+                    (f"{int(ema_alpha_cfg):,}" if isinstance(ema_alpha_cfg, (int, float)) else "UNKNOWN"),
+                    c["muted"],
+                    "Smoothing (Q0.16)",
+                ),
+            ],
+            style={"display": "flex", "flexWrap": "wrap", "gap": "10px", "marginTop": "10px"},
+        )
+
+        kpis = html.Div([system_row, perf_row, config_row], style={"marginBottom": "18px"})
 
         cash = cash_to_dollars(
             int(latest.get("cash_lo", 0)), int(latest.get("cash_hi", 0))
@@ -2876,6 +3073,22 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         )
 
     @callback(
+        Output("telemetry-raw", "children"),
+        Output("telemetry-keys", "children"),
+        Input("telemetry-store", "data"),
+    )
+    def render_telemetry_explorer(telem):
+        latest = (telem or {}).get("latest") if isinstance(telem, dict) else None
+        if not isinstance(latest, dict) or not latest:
+            return "No telemetry yet.", ""
+        try:
+            raw = json.dumps(latest, indent=2, sort_keys=True)
+        except Exception:
+            raw = str(latest)
+        keys = ", ".join(sorted(latest.keys()))
+        return raw, f"Keys: {keys}"
+
+    @callback(
         Output("regime-modal", "data"),
         Input("btn-regime-learn", "n_clicks"),
         Input("btn-regime-close", "n_clicks"),
@@ -2980,6 +3193,156 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         ]
         return overlay_style, body
 
+    @callback(
+        Output("main-tabs", "value"),
+        Output("ema-symbol", "value"),
+        Input("hotkey-store", "data"),
+        State("main-tabs", "value"),
+        State("ema-symbol", "value"),
+    )
+    def keyboard_nav(hk, cur_tab, cur_sym):
+        if not isinstance(hk, dict):
+            return no_update, no_update
+        k = hk.get("key")
+        if not k:
+            return no_update, no_update
+
+        tab_map = {
+            "1": "tab-overview",
+            "2": "tab-book",
+            "3": "tab-ema",
+            "4": "tab-latency",
+            "5": "tab-debug",
+        }
+        if k in tab_map:
+            return tab_map[k], no_update
+
+        if k in ("left", "right"):
+            try:
+                i = int(cur_sym or 0)
+            except (TypeError, ValueError):
+                i = 0
+            i = (i - 1) % NUM_SYMBOLS if k == "left" else (i + 1) % NUM_SYMBOLS
+            return no_update, i
+
+        return no_update, no_update
+
+    @callback(
+        Output("symbol-modal", "data"),
+        Input("btn-symbol-close", "n_clicks"),
+        Input("hotkey-store", "data"),
+        State("symbol-modal", "data"),
+        State("ema-symbol", "value"),
+    )
+    def symbol_modal_ctrl(n_close, hk, cur, ema_sym):
+        cur = cur or {"open": False, "sym": 0}
+        ctx = dash.callback_context
+        if not ctx.triggered:
+            return cur
+        tid = ctx.triggered[0]["prop_id"].split(".")[0]
+        if tid == "btn-symbol-close" and n_close:
+            return {"open": False, "sym": int(cur.get("sym", 0))}
+        if tid == "hotkey-store" and isinstance(hk, dict):
+            k = hk.get("key")
+            if k == "esc":
+                return {"open": False, "sym": int(cur.get("sym", 0))}
+            if k == "enter":
+                try:
+                    s = int(ema_sym or 0)
+                except (TypeError, ValueError):
+                    s = 0
+                return {"open": True, "sym": s % NUM_SYMBOLS}
+        return cur
+
+    @callback(
+        Output("symbol-modal-overlay", "style"),
+        Output("symbol-modal-body", "children"),
+        Input("symbol-modal", "data"),
+        Input("prefs-store", "data"),
+        Input("telemetry-store", "data"),
+        Input("ema-symbol", "value"),
+    )
+    def render_symbol_modal(m, prefs, telem, ema_sym):
+        prefs = prefs or {}
+        dark = prefs.get("dark", True)
+        c = theme_colors(dark)
+        m = m or {"open": False, "sym": 0}
+        if not m.get("open"):
+            return {"display": "none"}, []
+
+        try:
+            idx = int(m.get("sym", ema_sym or 0))
+        except (TypeError, ValueError):
+            idx = 0
+        idx = idx % NUM_SYMBOLS
+        name = SYMBOL_NAMES[idx]
+
+        latest = (telem or {}).get("latest") or {}
+        sig_arr = latest.get("signal") if isinstance(latest, dict) else None
+        sig = (sig_arr[idx] if isinstance(sig_arr, list) and len(sig_arr) > idx else "—")
+        pos_arr = latest.get("pos") if isinstance(latest, dict) else None
+        pos = (pos_arr[idx] if isinstance(pos_arr, list) and len(pos_arr) > idx else 0)
+        pnl_arr = latest.get("pnl_mtm") if isinstance(latest, dict) else None
+        pnl = (pnl_arr[idx] if isinstance(pnl_arr, list) and len(pnl_arr) > idx else 0.0)
+
+        # Pull history from the reader thread (safe snapshot).
+        try:
+            t, mid, ema = reader.symbol_series(idx)
+        except Exception:
+            t, mid, ema = [], [], []
+
+        if len(t) < 2:
+            fig = fig_blank("Waiting for EMA/mid history…", c)
+        else:
+            t0 = t[0]
+            x = [tt - t0 for tt in t]
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x=x, y=mid, mode="lines", name="Mid", line=dict(color=c["text"], width=2)))
+            fig.add_trace(go.Scatter(x=x, y=ema, mode="lines", name="EMA", line=dict(color=c["accent"], width=2)))
+            fig.update_layout(
+                paper_bgcolor=c["card"],
+                plot_bgcolor=c["card"],
+                font=_plot_font(c, 12),
+                height=360,
+                margin=dict(l=40, r=20, t=40, b=40),
+                title=dict(text=f"{name} — EMA vs Mid (live)", font=_plot_font(c, 14)),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+                xaxis=dict(title="seconds", gridcolor=c["grid"]),
+                yaxis=dict(title="price", gridcolor=c["grid"]),
+            )
+
+        overlay_style = {
+            "display": "flex",
+            "position": "fixed",
+            "top": "0",
+            "left": "0",
+            "right": "0",
+            "bottom": "0",
+            "backgroundColor": "rgba(0,0,0,0.55)",
+            "zIndex": "9999",
+            "justifyContent": "center",
+            "alignItems": "flex-start",
+            "paddingTop": "6vh",
+            "overflowY": "auto",
+        }
+        body = [
+            html.H3(f"Symbol detail — {name}", style={"marginTop": "0", "color": c["text"]}),
+            html.P(
+                "Enter opens this view · Esc closes · ←/→ changes symbol selection (then Enter to reopen).",
+                style={"fontSize": "13px", "color": c["muted"], "marginBottom": "10px"},
+            ),
+            html.Div(
+                [
+                    html.Span(f"Signal: {sig}", style={"marginRight": "14px"}),
+                    html.Span(f"Pos: {int(pos):+d}", style={"marginRight": "14px"}),
+                    html.Span(f"PnL MTM: ${float(pnl):+,.2f}"),
+                ],
+                style={"fontSize": "13px", "color": c["text"], "marginBottom": "10px"},
+            ),
+            dcc.Graph(figure=fig, config={"displayModeBar": False}),
+        ]
+        return overlay_style, body
+
     app.clientside_callback(
         """
         function(n) {
@@ -2988,9 +3351,12 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                 document.addEventListener('keydown', function(ev) {
                     var t = ev.target && ev.target.tagName;
                     if (t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT') return;
-                    if (ev.key === '1' || ev.key === '2' || ev.key === '3' || ev.key === '4')
+                    if (ev.key === '1' || ev.key === '2' || ev.key === '3' || ev.key === '4' || ev.key === '5')
                         window.__BOARDB_HOTKEY__ = ev.key;
                     if (ev.key === 'Escape') window.__BOARDB_HOTKEY__ = 'esc';
+                    if (ev.key === 'ArrowLeft') window.__BOARDB_HOTKEY__ = 'left';
+                    if (ev.key === 'ArrowRight') window.__BOARDB_HOTKEY__ = 'right';
+                    if (ev.key === 'Enter') window.__BOARDB_HOTKEY__ = 'enter';
                 });
             }
             var k = window.__BOARDB_HOTKEY__;

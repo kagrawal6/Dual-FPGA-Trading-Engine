@@ -167,6 +167,16 @@
   font-family: "DM Sans", system-ui, sans-serif;
 }
 
+/* Screen-mode: avoid page scrolling; switch views with keys/tabs */
+body {
+  overflow: hidden;
+}
+
+.bb-screen {
+  height: calc(100vh - 220px);
+  overflow: hidden;
+}
+
 .bb-section-heading {
   font-size: 13px;
   font-weight: 600;

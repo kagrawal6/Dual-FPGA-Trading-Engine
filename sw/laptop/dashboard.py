@@ -236,7 +236,8 @@ def demo_reader(src: TelemetrySource) -> None:
         spread = [a - b for b, a in zip(bid, ask)]
         pos_value = [p * m for p, m in zip(pos, mid)]
         pnl_mtm = [pc + p * m for pc, p, m in zip(pnl_cash, pos, mid)]
-        port_value = cash + sum(pos_value)
+        inventory_mtm = sum(pos_value)
+        port_value = cash + inventory_mtm
         elapsed = time.time() - t0
         # Synthetic latency histogram peaked around bin 1-2 (32-95 cy)
         hist = [0] * 16
@@ -254,6 +255,7 @@ def demo_reader(src: TelemetrySource) -> None:
             "cash": round(cash, 2),
             "total_pnl": round(sum(pnl_mtm), 2),
             "port_value": round(port_value, 2),
+            "inventory_mtm": round(inventory_mtm, 2),
             "pos": pos, "bid": bid, "ask": ask, "mid": mid, "spread": spread,
             "pnl_cash": pnl_cash, "pnl_mtm": pnl_mtm, "pos_value": pos_value,
             "last_fill": last_fill, "trades": trades,

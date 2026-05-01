@@ -24,6 +24,7 @@ JSON schema (per line):
   "cash":       <total cash float, dollars>,
   "total_pnl":  <total mark-to-market PnL float, dollars>,
   "port_value": <cash + Σ position[i]*mid[i], float dollars>,
+  "inventory_mtm": <Σ position[i]*mid[i] float dollars; open exposure at mid>,
 
   "pos":        [int, ...]      # signed position per symbol (NUM_SYMBOLS)
   "bid":        [float, ...]    # Board B's view of best bid per symbol
@@ -157,18 +158,34 @@ def read_per_symbol(mmio: MMIO) -> dict:
 def read_telemetry_snapshot(mmio: MMIO) -> dict:
     """One JSON-serializable telemetry sample from Board B AXI (no random data)."""
     st = decode_status(mmio.read(STATUS))
+    # Config registers (read back for UI/debug clarity).
+    threshold_raw = mmio.read(THRESHOLD) & 0xFFFFFFFF
+    ema_alpha_raw = mmio.read(EMA_ALPHA) & 0xFFFFFFFF
+    base_qty_raw = mmio.read(BASE_QTY) & 0xFFFFFFFF
+    max_pos_raw = mmio.read(MAX_POSITION) & 0xFFFFFFFF
+    max_rate_raw = mmio.read(MAX_ORDER_RATE) & 0xFFFFFFFF
+    max_loss_raw = mmio.read(MAX_LOSS) & 0xFFFFFFFF
+
     cash_lo_raw = mmio.read(CASH_LO) & 0xFFFFFFFF
     cash_hi_raw = mmio.read(CASH_HI) & 0xFFFFFFFF
     cash = cash_q32_16(cash_lo_raw, cash_hi_raw)
     psd = read_per_symbol(mmio)
     total_pnl_mtm = sum(psd["pnl_mtm"])
-    port_value = cash + sum(psd["pos_value"])
+    inv_mtm = sum(psd["pos_value"])
+    port_value = cash + inv_mtm
     return {
         "ts": round(time.time(), 3),
         "state": st["fsm_state"],
         "link_up": st["link_up"],
         "risk_halt": st["risk_halt"],
         "strategy": st["strategy"],
+        # Config echo (interpreted for humans).
+        "threshold": round(from_q16_16(threshold_raw), 6),
+        "ema_alpha": int(ema_alpha_raw & 0xFFFF),
+        "base_qty": int(base_qty_raw & 0xFFFF),
+        "max_position": int(max_pos_raw),
+        "max_order_rate": int(max_rate_raw),
+        "max_loss": round(from_q16_16(max_loss_raw), 6),
         "qps": mmio.read(QUOTES_RCVD),
         "ops": mmio.read(ORDERS_SENT),
         "fps": mmio.read(FILLS_RCVD),
@@ -179,6 +196,7 @@ def read_telemetry_snapshot(mmio: MMIO) -> dict:
         "cash": round(cash, 4),
         "total_pnl": round(total_pnl_mtm, 4),
         "port_value": round(port_value, 4),
+        "inventory_mtm": round(inv_mtm, 4),
         "pos": psd["pos"],
         "bid": [round(v, 4) for v in psd["bid"]],
         "ask": [round(v, 4) for v in psd["ask"]],
@@ -252,8 +270,8 @@ def parse_args() -> argparse.Namespace:
                         help="Per-symbol absolute position limit. Default: 500.")
     parser.add_argument("--max-order-rate", type=int, default=1000,
                         help="Total order count cap. Default: 1000.")
-    parser.add_argument("--max-loss", type=int, default=100,
-                        help="Max loss in integer dollars (total_pnl threshold). Default: $100.")
+    parser.add_argument("--max-loss", type=float, default=100.0,
+                        help="Max loss in dollars (Q16.16). Default: $100.00.")
 
     parser.add_argument("--poll-hz", type=float, default=20.0,
                         help="Telemetry polling rate in Hz. Default: 20.")
@@ -288,12 +306,12 @@ def main():
     mmio.write(BASE_QTY,       args.base_qty)
     mmio.write(MAX_POSITION,   args.max_position)
     mmio.write(MAX_ORDER_RATE, args.max_order_rate)
-    mmio.write(MAX_LOSS,       args.max_loss)
+    mmio.write(MAX_LOSS,       q16_16(args.max_loss))
 
     print(f"Config: strategy={STRATEGY_NAMES[args.strategy]}, threshold=${args.threshold:.2f}, "
           f"ema_alpha={args.ema_alpha}, base_qty={args.base_qty}, "
           f"max_pos={args.max_position}, max_rate={args.max_order_rate}, "
-          f"max_loss=${args.max_loss}")
+          f"max_loss=${args.max_loss:,.2f}")
 
     if not args.no_start:
         mmio.write(CTRL, 0x01)
