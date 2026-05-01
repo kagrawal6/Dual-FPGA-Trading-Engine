@@ -2,7 +2,12 @@ obj_*/
 __pycache__/
 *.pyc
 .venv/
+.DS_Store
 vivado/
 
 # Local bundle for copying sw/ to PYNQ (regenerate anytime)
 sw_pynq_upload.zip
+
+# Local simulator artifacts (do not commit)
+*.pb
+tb/_xsim_runner*.tcl

@@ -749,6 +749,184 @@ body {
   flex-shrink: 0;
 }
 
+/* TradingView-style command strip: dense controls + design credit */
+.bb-tv-commandbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.bb-design-ref {
+  font-size: 10px;
+  font-weight: 500;
+  color: #787b86;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+}
+
+.bb-root--dark .bb-design-ref--toolbar {
+  margin-left: auto;
+  max-width: min(480px, 46vw);
+  text-align: right;
+  opacity: 0.9;
+}
+
+.bb-design-footer {
+  flex-shrink: 0;
+  font-size: 10px;
+  color: #787b86;
+  text-align: center;
+  padding: 4px 8px 2px;
+  border-top: 1px solid #2a2e39;
+  letter-spacing: 0.03em;
+}
+
+/* Kraken Pro–inspired markets rail | TradingView–inspired chart column | tools rail */
+.bb-workspace-kraken {
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(220px, 24vw) minmax(0, 1fr) minmax(240px, 26vw);
+  gap: 0;
+  border-top: 1px solid #2a2e39;
+  background: #0b0e14;
+}
+
+@media (max-width: 1180px) {
+  .bb-workspace-kraken {
+    grid-template-columns: minmax(200px, 28vw) minmax(0, 1fr) minmax(220px, 30vw);
+  }
+}
+
+@media (max-width: 960px) {
+  .bb-workspace-kraken {
+    grid-template-columns: 1fr;
+    grid-auto-rows: minmax(0, auto);
+    overflow-y: auto;
+  }
+
+  .bb-root--dark .bb-design-ref--toolbar {
+    margin-left: 0;
+    max-width: none;
+    text-align: left;
+    width: 100%;
+  }
+
+  .bb-kraken-markets {
+    max-height: 42vh;
+  }
+
+  .bb-kraken-stack {
+    max-height: 50vh;
+  }
+}
+
+.bb-panel-rail {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: linear-gradient(180deg, #171a28 0%, #10121a 100%);
+}
+
+.bb-kraken-markets {
+  border-right: 1px solid #2a2e39;
+}
+
+.bb-kraken-stack {
+  border-left: 1px solid #2a2e39;
+}
+
+.bb-kraken-rail-head {
+  flex-shrink: 0;
+  padding: 8px 10px 6px;
+  border-bottom: 1px solid #2a2e39;
+  background: linear-gradient(90deg, rgba(137, 88, 232, 0.14) 0%, rgba(19, 23, 34, 0.4) 100%);
+}
+
+.bb-kraken-rail-title {
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #c4b5fd;
+}
+
+.bb-kraken-rail-sub {
+  font-size: 10px;
+  color: #787b86;
+  margin-top: 2px;
+}
+
+.bb-markets-scroll {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 6px 8px 8px;
+}
+
+.bb-selected-asset-panel {
+  flex-shrink: 0;
+  max-height: min(36vh, 320px);
+  overflow: auto;
+  border-top: 1px solid #2a2e39;
+  padding: 8px 10px 10px;
+  background: rgba(15, 17, 26, 0.98);
+}
+
+.bb-sym-detail-kicker {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: #787b86;
+  margin-bottom: 4px;
+}
+
+.bb-sym-detail-inner {
+  min-height: 0;
+}
+
+.bb-tv-chart-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: #0b0e14;
+}
+
+.bb-tv-chart-rail-label {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #787b86;
+  padding: 6px 10px 4px;
+  border-bottom: 1px solid #2a2e39;
+  background: #131722;
+}
+
+.bb-root--dark .bb-sys-diagram--in-chart {
+  margin: 2px 8px 0;
+  padding: 4px 4px 0;
+  border-bottom: 1px solid #2a2e39;
+}
+
+.bb-kraken-stack.bb-panel-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 0;
+}
+
+.bb-tv-chart-main .bb-screen-stack {
+  flex: 1 1 0;
+  min-height: 0;
+  padding: 0 6px 4px;
+}
+
 .bb-one-screen {
   flex: 1 1 0;
   min-height: 0;
@@ -954,4 +1132,104 @@ body {
   background: #0b0e14;
   color: #e8e8ed;
   overflow: auto;
+}
+
+/* —— One-viewport mode (default): chrome flex + scroll inside rails, not the page —— */
+#root.bb-root {
+  height: 100dvh;
+  max-height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.bb-root-chrome {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.bb-root .bb-toolbar.bb-toolbar--fold {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.bb-viewport-hint {
+  font-size: 10px;
+  color: #5c6070;
+  margin-left: 6px;
+  white-space: nowrap;
+  max-width: min(220px, 28vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1100px) {
+  .bb-viewport-hint {
+    display: none;
+  }
+}
+
+.bb-fit-viewport-toggle {
+  flex: 0 0 auto;
+  margin-left: 4px;
+}
+
+.bb-root--fit .bb-header-title-row {
+  padding: 4px 8px 2px;
+}
+
+.bb-root--fit .bb-trademark-box {
+  padding: 6px 20px 5px;
+}
+
+.bb-root--fit .bb-trademark-word {
+  font-size: clamp(22px, 3.5vw, 34px);
+}
+
+.bb-root--fit .bb-regime-inner--fit .bb-regime-title {
+  font-size: clamp(16px, 3vw, 22px) !important;
+}
+
+.bb-root--fit .bb-fold-hero {
+  margin: 0 2px;
+  padding: 4px 2px 4px;
+}
+
+.bb-root--fit .bb-risk-echo-line {
+  display: none;
+}
+
+.bb-root--fit .bb-risk-console {
+  margin-top: 4px !important;
+  padding: 6px 8px !important;
+}
+
+.bb-root--fit .bb-one-screen {
+  gap: 2px;
+  padding: 0 8px 4px;
+}
+
+.bb-root--fit .bb-selected-asset-panel {
+  max-height: min(22vh, 220px);
+  padding: 6px 8px;
+}
+
+.bb-root--fit .bb-sys-diagram--in-chart {
+  max-height: min(18vh, 200px);
+  overflow-y: auto;
+}
+
+.bb-root--fit .bb-h2-tight {
+  font-size: 12px !important;
+  margin-bottom: 2px !important;
+}
+
+.bb-root--fit .bb-tv-chart-main .bb-screen-stack {
+  gap: 2px;
+  padding: 0 4px 2px;
+}
+
+.bb-root--fit .bb-design-footer {
+  padding: 2px 6px 1px;
+  font-size: 9px;
 }

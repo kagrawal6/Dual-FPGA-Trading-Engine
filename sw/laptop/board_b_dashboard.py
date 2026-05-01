@@ -192,6 +192,39 @@ CHART_H_POS = 205
 CHART_H_BLANK = 120
 CHART_H_SPARK = 72
 
+
+def chart_heights(fit_viewport: bool) -> Dict[str, int]:
+    """Plotly graph heights: compact when fitting the whole terminal in one browser viewport."""
+    if fit_viewport:
+        return {
+            "pnl": 128,
+            "thr": 78,
+            "ema": 76,
+            "mini": 66,
+            "lat": 74,
+            "pos": 120,
+            "spark": 42,
+            "blank": 82,
+        }
+    return {
+        "pnl": CHART_H_PNL,
+        "thr": CHART_H_THR,
+        "ema": CHART_H_EMA,
+        "mini": CHART_H_MINI,
+        "lat": CHART_H_LAT,
+        "pos": CHART_H_POS,
+        "spark": CHART_H_SPARK,
+        "blank": CHART_H_BLANK,
+    }
+
+
+def _row_children(row: Any) -> List[Any]:
+    ch = getattr(row, "children", None)
+    if ch is None:
+        return []
+    return list(ch) if isinstance(ch, (list, tuple)) else [ch]
+
+
 # Strategy codes match sw/board_b/telemetry_server.py STRATEGY_NAMES
 STRATEGY_CODE_LABEL = {0: "MEAN_REV", 1: "MOMENTUM", 2: "NN", 3: "AUTO"}
 
@@ -924,7 +957,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         [
             html.Link(
                 rel="stylesheet",
-                href=app.get_asset_url("boardb_theme.css") + "?v=boardb-terminal-5",
+                href=app.get_asset_url("boardb_theme.css") + "?v=boardb-fit-viewport-1",
             ),
             dcc.Store(id="telemetry-store", data={}),
             dcc.Store(id="freeze-store", data={"active": False, "payload": None}),
@@ -943,6 +976,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                     "reduced_motion": False,
                     "presenter_mode": True,
                     "debug_mode": False,
+                    "fit_viewport": True,
                 },
             ),
             dcc.Interval(id="tick", interval=250, n_intervals=0),
@@ -976,11 +1010,37 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                         className="bb-btn-ghost",
                     ),
                     html.Span(
-                        "TradeMark · Book / Events / Diagnostics →",
+                        "Serial · Pause / Export · Events & Diagnostics (right rail)",
                         className="bb-app-id",
                     ),
+                    html.Span(
+                        "Inspired by Kraken Pro (markets rail) & TradingView (chart workspace) — not affiliated.",
+                        className="bb-design-ref bb-design-ref--toolbar",
+                    ),
+                    dcc.Checklist(
+                        id="set-fit-viewport",
+                        options=[{"label": " One screen", "value": "fit"}],
+                        value=["fit"],
+                        className="bb-fit-viewport-toggle",
+                        inputClassName="bb-fit-viewport-toggle__input",
+                        labelStyle={
+                            "display": "inline-flex",
+                            "alignItems": "center",
+                            "gap": "6px",
+                            "cursor": "pointer",
+                            "fontSize": "11px",
+                            "fontWeight": "600",
+                            "color": "#787b86",
+                            "marginLeft": "8px",
+                            "whiteSpace": "nowrap",
+                        },
+                    ),
+                    html.Span(
+                        "Tip: F11 full-screen adds vertical space.",
+                        className="bb-viewport-hint",
+                    ),
                 ],
-                className="bb-toolbar bb-toolbar--fold",
+                className="bb-toolbar bb-toolbar--fold bb-tv-commandbar",
             ),
             html.Div(
                 [
@@ -1092,73 +1152,112 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                         id="regime-strip",
                         className="bb-regime-strip--compact",
                     ),
-                    html.Div(id="sys-diagram", className="bb-sys-diagram-wrap"),
                     html.Div(
-                        className="bb-screen-grid",
+                        className="bb-workspace-kraken",
                         children=[
                             html.Div(
-                                className="bb-screen-stack bb-screen-main",
+                                className="bb-kraken-markets bb-panel-rail",
                                 children=[
                                     html.Div(
                                         [
-                                            html.H2(
-                                                "Profit & portfolio",
-                                                id="pnl-section-title",
-                                                className="bb-h2-tight",
-                                            ),
-                                            html.Div(id="pnl-hero"),
-                                            html.Div(
-                                                dcc.Graph(
-                                                    id="fig-pnl",
-                                                    config={"displayModeBar": False, "responsive": True},
-                                                    className="bb-plot-slot",
-                                                ),
-                                                className="bb-chart-frame",
-                                            ),
+                                            html.Span("MARKETS", className="bb-kraken-rail-title"),
+                                            html.Span("Watchlist", className="bb-kraken-rail-sub"),
                                         ],
+                                        className="bb-kraken-rail-head",
                                     ),
                                     html.Div(
-                                        [
-                                            html.H3(
-                                                "Activity",
-                                                className="bb-section-heading bb-h3-tight",
-                                            ),
-                                            html.Div(
-                                                dcc.Graph(
-                                                    id="fig-thr",
-                                                    config={"displayModeBar": False, "responsive": True},
-                                                    className="bb-plot-slot",
-                                                ),
-                                                className="bb-chart-frame",
-                                            ),
-                                            html.Div(
-                                                "←/→ symbol · 1–4 regime · Enter symbol map",
-                                                className="bb-key-hint",
-                                            ),
-                                        ],
+                                        id="symbol-table",
+                                        className="bb-markets-scroll bb-mono",
                                     ),
                                     html.Div(
-                                        [
-                                            html.H3(
-                                                "Positions",
-                                                id="pos-section-title",
-                                                className="bb-section-heading bb-h3-tight",
+                                        id="symbol-detail-strip",
+                                        className="bb-selected-asset-panel",
+                                    ),
+                                ],
+                            ),
+                            html.Div(
+                                className="bb-tv-chart-main bb-panel-chart",
+                                children=[
+                                    html.Div(
+                                        "Chart workspace",
+                                        className="bb-tv-chart-rail-label",
+                                    ),
+                                    html.Div(
+                                        id="sys-diagram",
+                                        className="bb-sys-diagram-wrap bb-sys-diagram--in-chart",
+                                    ),
+                                    html.Div(
+                                        className="bb-screen-stack bb-screen-main",
+                                        children=[
+                                            html.Div(
+                                                [
+                                                    html.H2(
+                                                        "Profit & portfolio",
+                                                        id="pnl-section-title",
+                                                        className="bb-h2-tight",
+                                                    ),
+                                                    html.Div(id="pnl-hero"),
+                                                    html.Div(
+                                                        dcc.Graph(
+                                                            id="fig-pnl",
+                                                            config={"displayModeBar": False, "responsive": True},
+                                                            className="bb-plot-slot",
+                                                        ),
+                                                        className="bb-chart-frame",
+                                                    ),
+                                                ],
                                             ),
                                             html.Div(
-                                                dcc.Graph(
-                                                    id="fig-positions",
-                                                    config={"displayModeBar": False, "responsive": True},
-                                                    className="bb-plot-slot",
-                                                ),
-                                                className="bb-chart-frame",
+                                                [
+                                                    html.H3(
+                                                        "Throughput",
+                                                        className="bb-section-heading bb-h3-tight",
+                                                    ),
+                                                    html.Div(
+                                                        dcc.Graph(
+                                                            id="fig-thr",
+                                                            config={"displayModeBar": False, "responsive": True},
+                                                            className="bb-plot-slot",
+                                                        ),
+                                                        className="bb-chart-frame",
+                                                    ),
+                                                    html.Div(
+                                                        "← / → watchlist · 1–4 regime · Enter detail",
+                                                        className="bb-key-hint",
+                                                    ),
+                                                ],
+                                            ),
+                                            html.Div(
+                                                [
+                                                    html.H3(
+                                                        "Positions",
+                                                        id="pos-section-title",
+                                                        className="bb-section-heading bb-h3-tight",
+                                                    ),
+                                                    html.Div(
+                                                        dcc.Graph(
+                                                            id="fig-positions",
+                                                            config={"displayModeBar": False, "responsive": True},
+                                                            className="bb-plot-slot",
+                                                        ),
+                                                        className="bb-chart-frame",
+                                                    ),
+                                                ],
                                             ),
                                         ],
                                     ),
                                 ],
                             ),
                             html.Div(
-                                className="bb-screen-stack bb-screen-side",
+                                className="bb-kraken-stack bb-panel-tools",
                                 children=[
+                                    html.Div(
+                                        [
+                                            html.Span("TOOLS", className="bb-kraken-rail-title"),
+                                            html.Span("EMA · latency · logs", className="bb-kraken-rail-sub"),
+                                        ],
+                                        className="bb-kraken-rail-head",
+                                    ),
                                     html.Div(
                                         [
                                             html.H3(
@@ -1217,61 +1316,55 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                     ),
                                     html.Div(
                                         dcc.Tabs(
-                                        id="detail-tabs",
-                                        className="bb-detail-tabs",
-                                        value="tab-book",
-                                        persistence=True,
-                                        children=[
-                                            dcc.Tab(
-                                                label="Book",
-                                                value="tab-book",
-                                                children=html.Div(
-                                                    html.Div(
-                                                        id="symbol-table",
-                                                        className="bb-tab-panel-inner",
-                                                    ),
-                                                    className="bb-tab-body",
-                                                ),
-                                            ),
-                                            dcc.Tab(
-                                                label="Events",
-                                                value="tab-events",
-                                                children=html.Div(
-                                                    html.Div(
-                                                        id="events-panel",
-                                                        className="bb-tab-panel-inner",
-                                                    ),
-                                                    className="bb-tab-body",
-                                                ),
-                                            ),
-                                            dcc.Tab(
-                                                label="Diagnostics",
-                                                value="tab-diag",
-                                                children=html.Div(
-                                                    [
+                                            id="detail-tabs-v2",
+                                            className="bb-detail-tabs",
+                                            value="tab-events",
+                                            persistence=True,
+                                            persistence_type="local",
+                                            children=[
+                                                dcc.Tab(
+                                                    label="Events",
+                                                    value="tab-events",
+                                                    children=html.Div(
                                                         html.Div(
-                                                            id="diag-panel",
-                                                            className="bb-tab-panel-inner bb-tab-panel-inner--diag",
+                                                            id="events-panel",
+                                                            className="bb-tab-panel-inner",
                                                         ),
-                                                        html.Div(
-                                                            id="telemetry-keys",
-                                                            className="bb-telemetry-keys",
-                                                        ),
-                                                        html.Pre(
-                                                            id="telemetry-raw",
-                                                            className="bb-telemetry-raw",
-                                                        ),
-                                                    ],
-                                                    className="bb-tab-body bb-tab-body--diag",
+                                                        className="bb-tab-body",
+                                                    ),
                                                 ),
-                                            ),
-                                        ],
-                                    ),
+                                                dcc.Tab(
+                                                    label="Diagnostics",
+                                                    value="tab-diag",
+                                                    children=html.Div(
+                                                        [
+                                                            html.Div(
+                                                                id="diag-panel",
+                                                                className="bb-tab-panel-inner bb-tab-panel-inner--diag",
+                                                            ),
+                                                            html.Div(
+                                                                id="telemetry-keys",
+                                                                className="bb-telemetry-keys",
+                                                            ),
+                                                            html.Pre(
+                                                                id="telemetry-raw",
+                                                                className="bb-telemetry-raw",
+                                                            ),
+                                                        ],
+                                                        className="bb-tab-body bb-tab-body--diag",
+                                                    ),
+                                                ),
+                                            ],
+                                        ),
                                         className="bb-detail-tabs-shell",
                                     ),
                                 ],
                             ),
                         ],
+                    ),
+                    html.Div(
+                        "Design inspiration: Kraken Pro & TradingView (live product layouts) — not affiliated.",
+                        className="bb-design-footer",
                     ),
                 ],
                 className="bb-one-screen",
@@ -1423,13 +1516,13 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             ),
         ],
         id="root",
-        className="bb-root bb-root--dark",
+        className="bb-root bb-root--dark bb-root--fit",
         style={
             "width": "100%",
             "maxWidth": "100vw",
-            "height": "100vh",
-            "maxHeight": "100vh",
-            "minHeight": "100vh",
+            "height": "100dvh",
+            "maxHeight": "100dvh",
+            "minHeight": "100dvh",
             "overflow": "hidden",
             "display": "flex",
             "flexDirection": "column",
@@ -1469,9 +1562,10 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         Input("set-reduced", "value"),
         Input("set-presenter", "value"),
         Input("set-debug", "value"),
+        Input("set-fit-viewport", "value"),
         State("prefs-store", "data"),
     )
-    def on_prefs(dark, hist_sec, syms, show_q, sound, confetti, reduced, presenter, debug, cur):
+    def on_prefs(dark, hist_sec, syms, show_q, sound, confetti, reduced, presenter, debug, fit_vp, cur):
         cur = cur or {}
         out = {**cur}
         if dark is not None:
@@ -1492,6 +1586,8 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             out["presenter_mode"] = bool("p" in presenter)
         if debug is not None:
             out["debug_mode"] = bool("d" in debug)
+        if fit_vp is not None:
+            out["fit_viewport"] = bool("fit" in fit_vp)
         return out
 
     @callback(
@@ -1505,6 +1601,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         telem = telem or {}
         dark = prefs.get("dark", True)
         presenter = prefs.get("presenter_mode", True)
+        fit_vp = bool(prefs.get("fit_viewport", True))
         reduced = prefs.get("reduced_motion", False)
         c = theme_colors(dark)
         latest = telem.get("latest") or {}
@@ -1546,9 +1643,9 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             html.Div(
                 blurb,
                 style={
-                    "fontSize": "15px" if presenter else "17px",
-                    "marginTop": "6px" if presenter else "10px",
-                    "lineHeight": "1.45",
+                    "fontSize": ("12px" if fit_vp else ("15px" if presenter else "17px")),
+                    "marginTop": ("4px" if fit_vp else ("6px" if presenter else "10px")),
+                    "lineHeight": "1.35" if fit_vp else "1.45",
                     "maxWidth": "100%",
                     "fontWeight": "500",
                 },
@@ -1571,11 +1668,15 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             )
         children = html.Div(
             inner,
-            className="bb-regime-inner" + pulse_cls,
+            className="bb-regime-inner" + pulse_cls + (" bb-regime-inner--fit" if fit_vp else ""),
             style={
-                "marginTop": "8px" if presenter else "14px",
-                "padding": "14px 16px" if presenter else "24px 26px",
-                "borderRadius": "16px" if presenter else "20px",
+                "marginTop": ("4px" if fit_vp else ("8px" if presenter else "14px")),
+                "padding": (
+                    "8px 10px 10px"
+                    if fit_vp
+                    else ("14px 16px" if presenter else "24px 26px")
+                ),
+                "borderRadius": ("10px" if fit_vp else ("16px" if presenter else "20px")),
                 "backgroundColor": bg,
                 "color": "#fff",
                 "boxShadow": "0 8px 32px rgba(0,0,0,0.35)",
@@ -1583,7 +1684,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         )
         strip_style = {
             "padding": "4px 2px 0",
-            "marginBottom": "8px",
+            "marginBottom": "4px" if fit_vp else "8px",
             "borderRadius": "0",
             "border": "none",
             "backgroundColor": c["card"],
@@ -1676,6 +1777,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         prefs = prefs or {}
         dark = prefs.get("dark", True)
         presenter = prefs.get("presenter_mode", True)
+        fit_vp = bool(prefs.get("fit_viewport", True))
         c = theme_colors(dark)
         latest = telem.get("latest") or {}
         age_ms = float(telem.get("age_ms", 1e9))
@@ -1767,9 +1869,9 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         root_style = {
             "width": "100%",
             "maxWidth": "100vw",
-            "height": "100vh",
-            "maxHeight": "100vh",
-            "minHeight": "100vh",
+            "height": "100dvh",
+            "maxHeight": "100dvh",
+            "minHeight": "100dvh",
             "overflow": "hidden",
             "display": "flex",
             "flexDirection": "column",
@@ -1911,9 +2013,12 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         root_cls = "bb-root bb-root--dark" if dark else "bb-root bb-root--light"
         if presenter:
             root_cls += " bb-presenter"
+        if fit_vp:
+            root_cls += " bb-root--fit"
         return (
             html.Div(
                 [title, banner],
+                className="bb-root-chrome",
                 style={
                     "width": "100%",
                     "maxWidth": "100%",
@@ -1941,6 +2046,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         Output("events-panel", "children"),
         Output("diag-panel", "children"),
         Output("symbol-table", "children"),
+        Output("symbol-detail-strip", "children"),
         Output("sys-diagram", "children"),
         Input("telemetry-store", "data"),
         Input("prefs-store", "data"),
@@ -1958,6 +2064,8 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         sym_filter = prefs.get("symbols", list(range(NUM_SYMBOLS)))
         show_quotes = prefs.get("show_quotes_bar", True)
         c = theme_colors(dark)
+        fit_vp = bool(prefs.get("fit_viewport", True))
+        H = chart_heights(fit_vp)
 
         latest = telem.get("latest") or {}
         rates = telem.get("rates") or {}
@@ -1989,11 +2097,11 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                 html.Div(
                     s.replace("B_", ""),
                     style={
-                        "padding": "5px 10px",
-                        "marginRight": "4px",
+                        "padding": "3px 6px" if fit_vp else "5px 10px",
+                        "marginRight": "3px" if fit_vp else "4px",
                         "borderRadius": "3px",
                         "fontWeight": "600",
-                        "fontSize": "11px",
+                        "fontSize": "10px" if fit_vp else "11px",
                         "fontFamily": FONT_MONO,
                         "backgroundColor": c["accent"] if active else c["grid"],
                         "color": "#fff" if active else c["text"],
@@ -2004,37 +2112,39 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                 )
             )
         pnl_title_style = {
-            "marginTop": "4px",
-            "marginBottom": "2px",
-            "fontSize": "11px",
+            "marginTop": "2px" if fit_vp else "4px",
+            "marginBottom": "1px" if fit_vp else "2px",
+            "fontSize": "10px" if fit_vp else "11px",
             "fontWeight": "600",
             "letterSpacing": "0.1em",
             "textTransform": "uppercase",
             "color": c["muted"],
         }
         pos_title_style = {
-            "marginTop": "8px",
-            "marginBottom": "4px",
-            "fontSize": "11px",
+            "marginTop": "4px" if fit_vp else "8px",
+            "marginBottom": "2px" if fit_vp else "4px",
+            "fontSize": "10px" if fit_vp else "11px",
             "fontWeight": "600",
             "letterSpacing": "0.1em",
             "textTransform": "uppercase",
             "color": c["muted"],
         }
 
-        flow = html.Div(
-            [
-                html.Div(
-                    "Execution pipeline",
-                    style={
-                        "fontWeight": "600",
-                        "marginBottom": "2px",
-                        "fontSize": "12px",
-                        "letterSpacing": "0.08em",
-                        "textTransform": "uppercase",
-                        "color": c["text"],
-                    },
-                ),
+        flow_bits: List[Any] = [
+            html.Div(
+                "Execution pipeline",
+                style={
+                    "fontWeight": "600",
+                    "marginBottom": "1px" if fit_vp else "2px",
+                    "fontSize": "10px" if fit_vp else "12px",
+                    "letterSpacing": "0.08em",
+                    "textTransform": "uppercase",
+                    "color": c["text"],
+                },
+            ),
+        ]
+        if not fit_vp:
+            flow_bits.append(
                 html.Div(
                     "Narrative flow — market data to risk-checked execution",
                     style={
@@ -2044,25 +2154,28 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                         "color": c["muted"],
                     },
                 ),
+            )
+        flow_bits.extend(
+            [
                 html.Div(
                     [
                         html.Span("Quotes", style=_pill_style(c["muted"], c)),
-                        html.Span("→", style={"margin": "0 6px", "color": c["muted"]}),
+                        html.Span("→", style={"margin": "0 4px" if fit_vp else "0 6px", "color": c["muted"]}),
                         html.Span(
                             "Features + strategy", style=_pill_style(c["muted"], c)
                         ),
-                        html.Span("→", style={"margin": "0 6px", "color": c["muted"]}),
+                        html.Span("→", style={"margin": "0 4px" if fit_vp else "0 6px", "color": c["muted"]}),
                         html.Span(
                             "Risk",
                             style=_pill_style(
                                 c["warn"] if risk_halt else c["muted"], c
                             ),
                         ),
-                        html.Span("→", style={"margin": "0 6px", "color": c["muted"]}),
+                        html.Span("→", style={"margin": "0 4px" if fit_vp else "0 6px", "color": c["muted"]}),
                         html.Span(
                             "Orders → Board A", style=_pill_style(c["accent"], c)
                         ),
-                        html.Span("→", style={"margin": "0 6px", "color": c["muted"]}),
+                        html.Span("→", style={"margin": "0 4px" if fit_vp else "0 6px", "color": c["muted"]}),
                         html.Span("Fills", style=_pill_style(c["good"], c)),
                     ],
                     style={"display": "flex", "alignItems": "center", "flexWrap": "wrap"},
@@ -2072,16 +2185,19 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                     style={
                         "display": "flex",
                         "alignItems": "center",
-                        "marginTop": "10px",
+                        "marginTop": "4px" if fit_vp else "10px",
                         "flexWrap": "wrap",
                     },
                 ),
-            ],
+            ]
+        )
+        flow = html.Div(
+            flow_bits,
             style={
                 "backgroundColor": c["card"],
-                "padding": "12px 14px",
+                "padding": "6px 8px" if fit_vp else "12px 14px",
                 "borderRadius": "4px",
-                "marginBottom": "10px",
+                "marginBottom": "4px" if fit_vp else "10px",
                 "border": f"1px solid {c['grid']}",
             },
         )
@@ -2094,13 +2210,23 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             tooltip: str = "",
             clickable: bool = False,
         ) -> html.Div:
-            v_sz = "24px" if presenter else "20px"
+            compact = fit_vp
+            if compact:
+                v_sz = "15px" if presenter else "13px"
+                pad = "6px 8px"
+                min_w = "102px"
+                flex_basis = "120px"
+            else:
+                v_sz = "24px" if presenter else "20px"
+                pad = "10px 12px"
+                min_w = "148px"
+                flex_basis = "160px"
             return html.Div(
                 [
                     html.Div(
                         label,
                         style={
-                            "fontSize": "10px",
+                            "fontSize": "9px" if compact else "10px",
                             "fontWeight": "600",
                             "letterSpacing": "0.1em",
                             "textTransform": "uppercase",
@@ -2115,24 +2241,24 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                             "fontWeight": "700",
                             "fontFamily": FONT_MONO,
                             "lineHeight": "1.12",
-                            "marginTop": "3px",
+                            "marginTop": "2px" if compact else "3px",
                             "color": tone,
                         },
                     ),
                     html.Div(
                         sub,
                         style={
-                            "fontSize": "11px",
-                            "marginTop": "4px",
+                            "fontSize": "10px" if compact else "11px",
+                            "marginTop": "2px" if compact else "4px",
                             "color": c["muted"],
-                            "minHeight": "16px",
+                            "minHeight": "12px" if compact else "16px",
                         },
                     ),
                 ],
                 style={
-                    "flex": "1 1 160px",
-                    "minWidth": "148px",
-                    "padding": "10px 12px",
+                    "flex": f"1 1 {flex_basis}",
+                    "minWidth": min_w,
+                    "padding": pad,
                     "borderRadius": "4px",
                     "backgroundColor": c["card"],
                     "border": f"1px solid {c['grid']}",
@@ -2290,22 +2416,25 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                 "flexWrap": "wrap",
                 "alignItems": "center",
                 "gap": "2px",
-                "marginBottom": "8px",
-                "padding": "6px 8px",
+                "marginBottom": "4px" if fit_vp else "8px",
+                "padding": "4px 6px" if fit_vp else "6px 8px",
                 "borderRadius": "6px",
                 "border": f"1px solid {c['grid']}",
                 "backgroundColor": c["card"],
             },
         )
 
-        risk_echo_line = html.Span(
-            "Register echo — strategy="
-            + str(latest.get("strategy", "—"))
-            + f" threshold={thr} max_position={max_pos_cfg} max_order_rate={max_rate_cfg} max_loss={max_loss_cfg} "
-            f"ema_alpha={ema_alpha_cfg} base_qty={base_qty_cfg} | last_latency(cyc)="
-            + str(latest.get("last_latency", "—"))
-            + " | Per-symbol outputs: JSON field signal[] (RTL packs last decisions per symbol).",
-            style={"color": c["muted"]},
+        risk_echo_line = html.Div(
+            html.Span(
+                "Register echo — strategy="
+                + str(latest.get("strategy", "—"))
+                + f" threshold={thr} max_position={max_pos_cfg} max_order_rate={max_rate_cfg} max_loss={max_loss_cfg} "
+                f"ema_alpha={ema_alpha_cfg} base_qty={base_qty_cfg} | last_latency(cyc)="
+                + str(latest.get("last_latency", "—"))
+                + " | Per-symbol outputs: JSON field signal[] (RTL packs last decisions per symbol).",
+                style={"color": c["muted"], "fontSize": "10px" if fit_vp else "11px", "lineHeight": "1.35"},
+            ),
+            className="bb-risk-echo-line",
         )
 
         cap_reached = False
@@ -2360,7 +2489,12 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                     clickable=True,
                 ),
             ],
-            style={"display": "flex", "flexWrap": "wrap", "gap": "8px", "marginBottom": "8px"},
+            style={
+                "display": "flex",
+                "flexWrap": "wrap",
+                "gap": "4px" if fit_vp else "8px",
+                "marginBottom": "4px" if fit_vp else "8px",
+            },
         )
 
         perf_row = html.Div(
@@ -2419,7 +2553,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                     ),
                 ),
             ],
-            style={"display": "flex", "flexWrap": "wrap", "gap": "8px"},
+            style={"display": "flex", "flexWrap": "wrap", "gap": "4px" if fit_vp else "8px"},
         )
 
         config_row = html.Div(
@@ -2455,7 +2589,12 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                     "Smoothing (Q0.16)",
                 ),
             ],
-            style={"display": "flex", "flexWrap": "wrap", "gap": "8px", "marginTop": "8px"},
+            style={
+                "display": "flex",
+                "flexWrap": "wrap",
+                "gap": "4px" if fit_vp else "8px",
+                "marginTop": "4px" if fit_vp else "8px",
+            },
         )
 
         t_rel, cash_h, pnl_h, port_h = reader.history_profit_arrays(hist_sec)
@@ -2483,10 +2622,15 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                             ),
                             dcc.Graph(
                                 figure=mini_sparkline_fig(
-                                    t_rel, port_h, c=c, dark=dark, line_color=c["accent"]
+                                    t_rel,
+                                    port_h,
+                                    c=c,
+                                    dark=dark,
+                                    line_color=c["accent"],
+                                    height=H["spark"],
                                 ),
                                 config={"displayModeBar": False, "staticPlot": True},
-                                style={"height": f"{CHART_H_SPARK}px"},
+                                style={"height": f"{H['spark']}px"},
                             ),
                         ],
                         style={"flex": "1 1 200px", "minWidth": "160px"},
@@ -2511,9 +2655,10 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                     c=c,
                                     dark=dark,
                                     line_color=c["good"] if pnl_h[-1] >= 0 else c["bad"],
+                                    height=H["spark"],
                                 ),
                                 config={"displayModeBar": False, "staticPlot": True},
-                                style={"height": f"{CHART_H_SPARK}px"},
+                                style={"height": f"{H['spark']}px"},
                             ),
                         ],
                         style={"flex": "1 1 200px", "minWidth": "160px"},
@@ -2533,10 +2678,15 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                             ),
                             dcc.Graph(
                                 figure=mini_sparkline_fig(
-                                    t_rel, cash_h, c=c, dark=dark, line_color=c["muted"]
+                                    t_rel,
+                                    cash_h,
+                                    c=c,
+                                    dark=dark,
+                                    line_color=c["muted"],
+                                    height=H["spark"],
                                 ),
                                 config={"displayModeBar": False, "staticPlot": True},
-                                style={"height": f"{CHART_H_SPARK}px"},
+                                style={"height": f"{H['spark']}px"},
                             ),
                         ],
                         style={"flex": "1 1 200px", "minWidth": "160px"},
@@ -2546,17 +2696,32 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                 style={
                     "display": "flex",
                     "flexWrap": "wrap",
-                    "gap": "10px",
-                    "marginTop": "8px",
-                    "marginBottom": "8px",
+                    "gap": "6px" if fit_vp else "10px",
+                    "marginTop": "4px" if fit_vp else "8px",
+                    "marginBottom": "4px" if fit_vp else "8px",
                 },
             )
         else:
             spark_row = html.Div()
 
-        kpis = html.Div(
-            [system_row, perf_row, spark_row, config_row], style={"marginBottom": "10px"}
-        )
+        if fit_vp:
+            mega_kpi = html.Div(
+                _row_children(system_row) + _row_children(perf_row) + _row_children(config_row),
+                style={
+                    "display": "flex",
+                    "flexWrap": "wrap",
+                    "gap": "5px",
+                    "marginBottom": "4px",
+                },
+            )
+            kpis = html.Div(
+                [mega_kpi, spark_row],
+                style={"marginBottom": "6px"},
+            )
+        else:
+            kpis = html.Div(
+                [system_row, perf_row, spark_row, config_row], style={"marginBottom": "10px"}
+            )
 
         cash = cash_to_dollars(
             int(latest.get("cash_lo", 0)), int(latest.get("cash_hi", 0))
@@ -2574,6 +2739,12 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         delta_color = c["good"] if sess_delta >= 0 else c["bad"]
         cash_color = c["good"] if cash >= 0 else c["bad"]
 
+        _ph_lbl = "10px" if fit_vp else "13px"
+        _ph_cash = ("34px" if fit_vp else ("64px" if presenter else "52px"))
+        _ph_sess = ("22px" if fit_vp else ("42px" if presenter else "36px"))
+        _ph_hi = "13px" if fit_vp else "18px"
+        _ph_pad = ("10px 12px" if fit_vp else "20px 22px")
+        _ph_gap = ("10px" if fit_vp else "18px")
         pnl_hero = html.Div(
             [
                 html.Div(
@@ -2583,7 +2754,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                 html.Div(
                                     "Realized cash (hardware path)",
                                     style={
-                                        "fontSize": "13px",
+                                        "fontSize": _ph_lbl,
                                         "fontWeight": "600",
                                         "color": c["muted"],
                                         "textTransform": "uppercase",
@@ -2594,22 +2765,22 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                     f"${cash:,.2f}",
                                     className="bb-mono",
                                     style={
-                                        "fontSize": "64px" if presenter else "52px",
+                                        "fontSize": _ph_cash,
                                         "fontWeight": "900",
                                         "lineHeight": "1.1",
                                         "color": cash_color,
-                                        "marginTop": "4px",
+                                        "marginTop": "2px" if fit_vp else "4px",
                                     },
                                 ),
                             ],
-                            style={"flex": "1.2", "minWidth": "240px"},
+                            style={"flex": "1.2", "minWidth": "160px" if fit_vp else "240px"},
                         ),
                         html.Div(
                             [
                                 html.Div(
                                     "Session gain / loss",
                                     style={
-                                        "fontSize": "13px",
+                                        "fontSize": _ph_lbl,
                                         "fontWeight": "600",
                                         "color": c["muted"],
                                         "textTransform": "uppercase",
@@ -2620,26 +2791,26 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                     f"{'+' if sess_delta >= 0 else ''}${sess_delta:,.2f}",
                                     className="bb-mono",
                                     style={
-                                        "fontSize": "42px" if presenter else "36px",
+                                        "fontSize": _ph_sess,
                                         "fontWeight": "800",
                                         "color": delta_color,
-                                        "marginTop": "6px",
+                                        "marginTop": "3px" if fit_vp else "6px",
                                     },
                                 ),
                                 html.Div(
                                     "Session delta since dashboard start",
                                     style={
-                                        "fontSize": "12px",
+                                        "fontSize": "10px" if fit_vp else "12px",
                                         "color": c["muted"],
-                                        "marginTop": "6px",
+                                        "marginTop": "3px" if fit_vp else "6px",
                                     },
                                 ),
                             ],
                             style={
                                 "flex": "1",
-                                "minWidth": "200px",
+                                "minWidth": "140px" if fit_vp else "200px",
                                 "borderLeft": f"1px solid {c['grid']}",
-                                "paddingLeft": "22px",
+                                "paddingLeft": "12px" if fit_vp else "22px",
                             },
                         ),
                         html.Div(
@@ -2647,7 +2818,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                 html.Div(
                                     "Session range (cash)",
                                     style={
-                                        "fontSize": "13px",
+                                        "fontSize": _ph_lbl,
                                         "fontWeight": "600",
                                         "color": c["muted"],
                                         "textTransform": "uppercase",
@@ -2657,36 +2828,36 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                                 html.Div(
                                     f"High ${sess_max:,.2f}",
                                     style={
-                                        "fontSize": "18px",
+                                        "fontSize": _ph_hi,
                                         "fontWeight": "700",
                                         "color": c["good"],
-                                        "marginTop": "8px",
+                                        "marginTop": "4px" if fit_vp else "8px",
                                     },
                                 ),
                                 html.Div(
                                     f"Low ${sess_min:,.2f}",
                                     style={
-                                        "fontSize": "18px",
+                                        "fontSize": _ph_hi,
                                         "fontWeight": "700",
                                         "color": c["bad"],
-                                        "marginTop": "4px",
+                                        "marginTop": "2px" if fit_vp else "4px",
                                     },
                                 ),
                             ],
                             style={
                                 "flex": "0.9",
-                                "minWidth": "180px",
+                                "minWidth": "120px" if fit_vp else "180px",
                                 "borderLeft": f"1px solid {c['grid']}",
-                                "paddingLeft": "22px",
+                                "paddingLeft": "12px" if fit_vp else "22px",
                             },
                         ),
                     ],
                     style={
                         "display": "flex",
                         "flexWrap": "wrap",
-                        "gap": "18px",
+                        "gap": _ph_gap,
                         "alignItems": "flex-start",
-                        "padding": "20px 22px",
+                        "padding": _ph_pad,
                         "borderRadius": "8px",
                         "backgroundColor": c["card"],
                         "border": f"1px solid {c['grid']}",
@@ -2703,9 +2874,9 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                         "Positions below show how many shares the engine holds per symbol."
                     ),
                     style={
-                        "marginTop": "12px",
-                        "fontSize": "16px" if presenter else "14px",
-                        "lineHeight": "1.45",
+                        "marginTop": "6px" if fit_vp else "12px",
+                        "fontSize": ("11px" if fit_vp else ("16px" if presenter else "14px")),
+                        "lineHeight": "1.35" if fit_vp else "1.45",
                         "color": c["muted"],
                         "maxWidth": "100%",
                     },
@@ -2733,7 +2904,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                 fig_pnl = fig_blank(
                     "Waiting for trading data...<br>No cash, P&L, or portfolio movement has been observed yet.",
                     c,
-                    CHART_H_PNL,
+                    H["pnl"],
                     dark=dark,
                 )
             else:
@@ -2777,7 +2948,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             fig_pnl = fig_blank(
                 "Waiting for trading data...<br>No cash, P&L, or portfolio movement has been observed yet.",
                 c,
-                CHART_H_PNL,
+                H["pnl"],
                 dark=dark,
             )
         fig_pnl.update_layout(
@@ -2792,7 +2963,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             paper_bgcolor=tv_paper,
             plot_bgcolor=chart_plot,
             font=dict(family=FONT_PLOT, size=10, color=c["text"]),
-            height=CHART_H_PNL,
+            height=H["pnl"],
             margin=dict(l=40, r=8, t=30, b=26),
             xaxis=_tv_axis(dark, c, "window (s)"),
             yaxis={**_tv_axis(dark, c, "USD"), "zeroline": False},
@@ -2819,7 +2990,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             fig_thr = fig_blank(
                 "No traffic yet.<br>Check Board A is running, PMOD cables are connected, and link status is UP.",
                 c,
-                CHART_H_THR,
+                H["thr"],
                 dark=dark,
             )
         else:
@@ -2875,7 +3046,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                 paper_bgcolor=tv_paper,
                 plot_bgcolor=chart_plot,
                 font=_plot_font(c, 10),
-                height=CHART_H_THR,
+                height=H["thr"],
                 margin=dict(l=44, r=6, t=30, b=26),
                 xaxis=_tv_axis(dark, c, "window (s)"),
                 yaxis=_tv_axis(dark, c, "rate / s"),
@@ -2903,7 +3074,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             fig_ema = fig_blank(
                 "EMA telemetry unavailable.<br>Update the PYNQ telemetry server to emit EMA per symbol.",
                 c,
-                CHART_H_EMA,
+                H["ema"],
                 dark=dark,
             )
         else:
@@ -2973,7 +3144,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                     paper_bgcolor=tv_paper,
                     plot_bgcolor=chart_plot,
                     font=_plot_font(c, 10),
-                    height=CHART_H_EMA,
+                    height=H["ema"],
                     margin=dict(l=32, r=6, t=28, b=24),
                     xaxis=_tv_axis(dark, c, "t − t0 (s)"),
                     yaxis=_tv_axis(dark, c, "price"),
@@ -3012,7 +3183,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                     paper_bgcolor=tv_paper,
                     plot_bgcolor=chart_plot,
                     font=_plot_font(c, 10),
-                    height=CHART_H_EMA,
+                    height=H["ema"],
                     margin=dict(l=32, r=6, t=28, b=24),
                     xaxis=_tv_axis(dark, c),
                     yaxis=_tv_axis(dark, c, "price"),
@@ -3039,7 +3210,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             paper_bgcolor=tv_paper,
             plot_bgcolor=chart_plot,
             font=_plot_font(c, 10),
-            height=CHART_H_MINI,
+            height=H["mini"],
             margin=dict(l=40, r=6, t=28, b=24),
             xaxis=_tv_axis(dark, c, "bin start (cyc)"),
             yaxis=_tv_axis(dark, c, "fills"),
@@ -3093,7 +3264,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             style={
                 "width": "100%",
                 "borderCollapse": "collapse",
-                "fontSize": "11px",
+                "fontSize": "10px" if fit_vp else "11px",
                 "backgroundColor": c["card"],
                 "color": c["text"],
             },
@@ -3124,7 +3295,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             paper_bgcolor=tv_paper,
             plot_bgcolor=chart_plot,
             font=_plot_font(c, 10),
-            height=CHART_H_LAT,
+            height=H["lat"],
             xaxis=_tv_axis(dark, c, "bin center (ns)"),
             yaxis=_tv_axis(dark, c, "fill count"),
             margin=dict(l=44, r=8, t=30, b=28),
@@ -3167,7 +3338,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         has_any_traffic = (qps_i > 0) or (ops_i > 0) or (fps_i > 0)
 
         if not has_any_traffic:
-            fig_pos = fig_blank("Waiting for quotes from Board A…", c, CHART_H_POS, dark=dark)
+            fig_pos = fig_blank("Waiting for quotes from Board A…", c, H["pos"], dark=dark)
         else:
             fig_pos = go.Figure(
                 go.Bar(
@@ -3201,22 +3372,22 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                     "tickfont": dict(size=10, color=c["muted"], family=FONT_PLOT),
                 },
                 margin=dict(l=52, r=6, t=32, b=24),
-                height=CHART_H_POS,
+                height=H["pos"],
             )
 
         # Empty-state overlays for throughput and latency
         if not has_any_traffic:
-            fig_thr = fig_blank("No traffic yet.<br>Check that Board A is running.", c, CHART_H_THR, dark=dark)
-            fig_mini = fig_blank("No fills received yet…", c, CHART_H_MINI, dark=dark)
-            fig_lat = fig_blank("No fills received yet…", c, CHART_H_LAT, dark=dark)
+            fig_thr = fig_blank("No traffic yet.<br>Check that Board A is running.", c, H["thr"], dark=dark)
+            fig_mini = fig_blank("No fills received yet…", c, H["mini"], dark=dark)
+            fig_lat = fig_blank("No fills received yet…", c, H["lat"], dark=dark)
         else:
             # Quotes/orders can exist without fills; explain the specific reason latency is empty.
             if fps_i <= 0:
-                fig_mini = fig_blank("No fills received yet…", c, CHART_H_MINI, dark=dark)
+                fig_mini = fig_blank("No fills received yet…", c, H["mini"], dark=dark)
                 fig_lat = fig_blank(
                     "No fills received yet.<br>Latency data will appear after orders are filled.",
                     c,
-                    CHART_H_LAT,
+                    H["lat"],
                     dark=dark,
                 )
 
@@ -3458,6 +3629,16 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                 "Waiting for quotes from Board A…",
                 style={"color": c["muted"], "fontSize": "13px", "lineHeight": "1.5"},
             )
+            symbol_detail_strip = html.Div(
+                [
+                    html.Div("SELECTED", className="bb-sym-detail-kicker"),
+                    html.Div(
+                        "Connect Board A and wait for quotes to populate the watchlist.",
+                        style={"color": c["muted"], "fontSize": "12px", "lineHeight": "1.45"},
+                    ),
+                ],
+                className="bb-sym-detail-inner",
+            )
         else:
             import math
 
@@ -3667,15 +3848,92 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
                 },
             )
 
+            try:
+                di = int(ema_idx) if ema_idx is not None else 0
+            except (TypeError, ValueError):
+                di = 0
+            di = max(0, min(NUM_SYMBOLS - 1, di))
+            tnm = SYMBOL_NAMES[di]
+            b_d = bid[di]
+            a_d = ask[di]
+            m_d = mid[di]
+            spr_d = spread[di]
+            em_d = float(ema_arr[di] or 0.0)
+            pos_d = pos[di]
+            pnl_d = pnl_mtm[di]
+            tr_d = trades[di]
+            lf_d = last_fill[di]
+            sig_d = str(signal_arr[di] or "NONE").upper()
+            qm = (b_d == 0.0 and a_d == 0.0 and m_d == 0.0 and spr_d == 0.0)
+            p_int = int(pos_d)
+            pos_str = "0" if p_int == 0 else (f"+{p_int}" if p_int > 0 else f"{p_int}")
+            dev_d = (float(m_d) - em_d) if not qm else 0.0
+            pnl_c_detail = (
+                c["muted"]
+                if qm
+                else (c["good"] if float(pnl_d) >= 0 else c["bad"])
+            )
+            sig_c_detail = c["muted"]
+            if sig_d == "BUY":
+                sig_c_detail = c["good"]
+            elif sig_d == "SELL":
+                sig_c_detail = c["bad"]
+            elif sig_d == "RISK_BLOCKED":
+                sig_c_detail = c["warn"]
+
+            def _cell(lab: str, val: str, *, color: Optional[str] = None) -> html.Div:
+                st = {
+                    "display": "flex",
+                    "justifyContent": "space-between",
+                    "gap": "8px",
+                    "padding": "4px 0",
+                    "borderBottom": f"1px solid {c['grid']}",
+                    "fontSize": "12px",
+                }
+                return html.Div(
+                    [
+                        html.Span(lab, style={"color": c["muted"], "fontWeight": "600"}),
+                        html.Span(val, className="bb-mono", style={"color": color or c["text"], "fontWeight": "700"}),
+                    ],
+                    style=st,
+                )
+
+            symbol_detail_strip = html.Div(
+                [
+                    html.Div("SELECTED ASSET", className="bb-sym-detail-kicker"),
+                    html.Div(
+                        tnm,
+                        style={
+                            "fontSize": "22px",
+                            "fontWeight": "900",
+                            "letterSpacing": "0.04em",
+                            "color": c["text"],
+                            "marginBottom": "8px",
+                        },
+                    ),
+                    _cell("position", pos_str if not qm else "—"),
+                    _cell("bid / ask", f"{_fmt_money(b_d)} / {_fmt_money(a_d)}" if not qm else "—"),
+                    _cell("mid", _fmt_money(m_d) if not qm else "—"),
+                    _cell("spread", f"{float(spr_d):.4f}" if not qm else "—"),
+                    _cell("ema", _fmt_money(em_d) if not qm else "—"),
+                    _cell("mid − ema", f"{dev_d:+.4f}" if not qm else "—", color=c["good"] if dev_d >= 0 else c["bad"]),
+                    _cell("last fill", _fmt_money(lf_d) if not qm else "—"),
+                    _cell("pnl mtm", _fmt_money_signed(pnl_d) if not qm else "—", color=pnl_c_detail),
+                    _cell("trades", _fmt_count(tr_d) if not qm else "—"),
+                    _cell("signal", sig_d, color=sig_c_detail),
+                ],
+                className="bb-sym-detail-inner",
+            )
+
         # Mini system diagram (demo-friendly, no RTL dependence).
         def _pill(text: str, color: str) -> html.Span:
             return html.Span(
                 text,
                 style={
                     "display": "inline-block",
-                    "padding": "4px 10px",
+                    "padding": "3px 7px" if fit_vp else "4px 10px",
                     "borderRadius": "999px",
-                    "fontSize": "12px",
+                    "fontSize": "10px" if fit_vp else "12px",
                     "fontWeight": "900",
                     "letterSpacing": "0.01em",
                     "color": "#000000" if color in (c["accent"], c["good"]) else "#ffffff",
@@ -3695,61 +3953,74 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
         exchange_status = "RISK HALTED" if risk_halt else "ENABLED"
         exchange_color = c["bad"] if risk_halt else c["good"]
 
+        _d_box = "6px 8px" if fit_vp else "12px 12px"
+        _d_rad = "8px" if fit_vp else "14px"
+        _d_lbl = "10px" if fit_vp else "12px"
+        _d_val = "12px" if fit_vp else "14px"
+        _d_arrow = "15px" if fit_vp else "22px"
+        _d_gap = "6px" if fit_vp else "12px"
         sys_diagram = html.Div(
             [
                 html.Div(
                     "Mini System Diagram",
-                    style={"fontSize": "11px", "color": c["muted"], "textTransform": "uppercase", "letterSpacing": "0.08em", "fontWeight": "800", "marginBottom": "10px"},
+                    style={
+                        "fontSize": "9px" if fit_vp else "11px",
+                        "color": c["muted"],
+                        "textTransform": "uppercase",
+                        "letterSpacing": "0.08em",
+                        "fontWeight": "800",
+                        "marginBottom": "4px" if fit_vp else "10px",
+                    },
                 ),
                 html.Div(
                     [
                         html.Div(
                             [
-                                html.Div("Board A", style={"fontWeight": "900", "fontSize": "12px", "color": c["muted"]}),
-                                html.Div("Market Sim", style={"fontWeight": "900", "fontSize": "14px", "color": c["text"], "marginTop": "2px"}),
+                                html.Div("Board A", style={"fontWeight": "900", "fontSize": _d_lbl, "color": c["muted"]}),
+                                html.Div("Market Sim", style={"fontWeight": "900", "fontSize": _d_val, "color": c["text"], "marginTop": "2px"}),
                                 _pill(board_a_status, board_a_color),
                             ],
-                            style={"padding": "12px 12px", "borderRadius": "14px", "border": f"1px solid {c['grid']}", "backgroundColor": c["card"]},
+                            style={"padding": _d_box, "borderRadius": _d_rad, "border": f"1px solid {c['grid']}", "backgroundColor": c["card"]},
                         ),
-                        html.Div("→", style={"fontWeight": "900", "fontSize": "22px", "color": c["muted"]}),
+                        html.Div("→", style={"fontWeight": "900", "fontSize": _d_arrow, "color": c["muted"]}),
                         html.Div(
                             [
-                                html.Div("PMOD Link", style={"fontWeight": "900", "fontSize": "12px", "color": c["muted"]}),
+                                html.Div("PMOD Link", style={"fontWeight": "900", "fontSize": _d_lbl, "color": c["muted"]}),
                                 _pill(link_status, link_color),
                             ],
-                            style={"padding": "12px 12px", "borderRadius": "14px", "border": f"1px solid {c['grid']}", "backgroundColor": c["card"]},
+                            style={"padding": _d_box, "borderRadius": _d_rad, "border": f"1px solid {c['grid']}", "backgroundColor": c["card"]},
                         ),
-                        html.Div("→", style={"fontWeight": "900", "fontSize": "22px", "color": c["muted"]}),
+                        html.Div("→", style={"fontWeight": "900", "fontSize": _d_arrow, "color": c["muted"]}),
                         html.Div(
                             [
-                                html.Div("FPGA B", style={"fontWeight": "900", "fontSize": "12px", "color": c["muted"]}),
-                                html.Div("Trader", style={"fontWeight": "900", "fontSize": "14px", "color": c["text"], "marginTop": "2px"}),
+                                html.Div("FPGA B", style={"fontWeight": "900", "fontSize": _d_lbl, "color": c["muted"]}),
+                                html.Div("Trader", style={"fontWeight": "900", "fontSize": _d_val, "color": c["text"], "marginTop": "2px"}),
                                 _pill(fsm_lbl if fsm_lbl != "UNKNOWN" else "UNKNOWN", board_b_color),
                             ],
-                            style={"padding": "12px 12px", "borderRadius": "14px", "border": f"1px solid {c['grid']}", "backgroundColor": c["card"]},
+                            style={"padding": _d_box, "borderRadius": _d_rad, "border": f"1px solid {c['grid']}", "backgroundColor": c["card"]},
                         ),
-                        html.Div("→", style={"fontWeight": "900", "fontSize": "22px", "color": c["muted"]}),
+                        html.Div("→", style={"fontWeight": "900", "fontSize": _d_arrow, "color": c["muted"]}),
                         html.Div(
                             [
-                                html.Div("Orders TX", style={"fontWeight": "900", "fontSize": "12px", "color": c["muted"]}),
+                                html.Div("Orders TX", style={"fontWeight": "900", "fontSize": _d_lbl, "color": c["muted"]}),
                                 _pill(orders_status, orders_color),
                             ],
-                            style={"padding": "12px 12px", "borderRadius": "14px", "border": f"1px solid {c['grid']}", "backgroundColor": c["card"]},
+                            style={"padding": _d_box, "borderRadius": _d_rad, "border": f"1px solid {c['grid']}", "backgroundColor": c["card"]},
                         ),
-                        html.Div("→", style={"fontWeight": "900", "fontSize": "22px", "color": c["muted"]}),
+                        html.Div("→", style={"fontWeight": "900", "fontSize": _d_arrow, "color": c["muted"]}),
                         html.Div(
                             [
-                                html.Div("Board A", style={"fontWeight": "900", "fontSize": "12px", "color": c["muted"]}),
-                                html.Div("Exchange", style={"fontWeight": "900", "fontSize": "14px", "color": c["text"], "marginTop": "2px"}),
+                                html.Div("Board A", style={"fontWeight": "900", "fontSize": _d_lbl, "color": c["muted"]}),
+                                html.Div("Exchange", style={"fontWeight": "900", "fontSize": _d_val, "color": c["text"], "marginTop": "2px"}),
                                 _pill(exchange_status, exchange_color),
                             ],
-                            style={"padding": "12px 12px", "borderRadius": "14px", "border": f"1px solid {c['grid']}", "backgroundColor": c["card"]},
+                            style={"padding": _d_box, "borderRadius": _d_rad, "border": f"1px solid {c['grid']}", "backgroundColor": c["card"]},
                         ),
                     ],
-                    style={"display": "flex", "flexWrap": "wrap", "alignItems": "center", "gap": "12px"},
+                    style={"display": "flex", "flexWrap": "wrap", "alignItems": "center", "gap": _d_gap},
                 ),
             ],
-            style={"marginTop": "4px"},
+            style={"marginTop": "2px" if fit_vp else "4px"},
         )
 
         return (
@@ -3769,6 +4040,7 @@ def build_app(reader: SerialTelemetryReader) -> Dash:
             events_panel,
             diag_panel,
             symbol_table,
+            symbol_detail_strip,
             sys_diagram,
         )
 
