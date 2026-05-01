@@ -207,11 +207,22 @@ module tb_nn_inference;
             check($sformatf("LIVE@%0t: signal_symbol < 8 (sym=%0d)", $time, signal_symbol),
                   signal_symbol < 8);
 
-            // 3. Regime-gate check. The NN gates on the CURRENT regime at the
-            //    output stage (not the pipelined input regime), so we only
-            //    require that the firing happened under a tradable regime.
-            check($sformatf("LIVE@%0t: regime tradable (reg=%0d)", $time, regime),
-                  regime === 2'b01 || regime === 2'b11);
+            // 3. Regime-gate check. The NN's output stage (posedge T+3
+            //    relative to input arrival at posedge T) gates on the
+            //    CURRENT `regime` input at THAT posedge -- not the
+            //    pipelined-in regime, and not the regime AT THE MONITOR'S
+            //    posedge (which is one cycle later).
+            //
+            //    Our hist shifter NBA-samples `regime` into `hist[0]` on
+            //    every posedge. At the monitor's posedge T+4, `hist[0].reg_`
+            //    therefore holds the regime the RTL actually gated on at
+            //    posedge T+3. Comparing against the live `regime` here would
+            //    spuriously fail whenever the TB drops regime to CALM in
+            //    `drive_one(0,...)` between phases while in-flight pipeline
+            //    fires drain.
+            check($sformatf("LIVE@%0t: regime tradable at gate (reg=%0d)",
+                            $time, hist[0].reg_),
+                  hist[0].reg_ === 2'b01 || hist[0].reg_ === 2'b11);
 
             // 4. Tag-propagation: symbol must match input from the source cycle.
             check($sformatf("LIVE@%0t: signal_symbol==hist[3].sym (got %0d, exp %0d)",
