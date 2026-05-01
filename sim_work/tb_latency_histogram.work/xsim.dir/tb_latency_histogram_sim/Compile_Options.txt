@@ -1,0 +1,1 @@
+--debug "typical" -L "unisims_ver" -L "secureip" "tb_latency_histogram" -s "tb_latency_histogram_sim" 

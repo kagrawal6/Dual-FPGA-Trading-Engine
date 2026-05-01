@@ -1,0 +1,40 @@
+{
+  "_comment": "Default 16-symbol layout for the dashboard. Must match the order written by sw/board_a/config_symbols.py. Override with --symbols-config to use a different mix.",
+  "tickers": [
+    "AAPL", "MSFT", "NVDA", "GOOGL",
+    "AMZN", "TSLA",
+    "JPM",  "GS",
+    "JNJ",  "UNH",
+    "XOM",  "CVX",
+    "CAT",  "HON",
+    "PG",   "KO"
+  ],
+  "sector_ids": [
+    0, 0, 0, 0,
+    3, 3,
+    4, 4,
+    2, 2,
+    1, 1,
+    5, 5,
+    6, 6
+  ],
+  "init_mid": [
+    180.00, 420.00, 900.00, 175.00,
+    185.00, 250.00,
+    200.00, 480.00,
+    155.00, 520.00,
+    115.00, 160.00,
+    360.00, 200.00,
+    165.00,  60.00
+  ],
+  "_sector_legend": {
+    "0": "Tech",
+    "1": "Energy",
+    "2": "Health",
+    "3": "Cons.Disc",
+    "4": "Financials",
+    "5": "Industrials",
+    "6": "Staples",
+    "7": "Comms"
+  }
+}

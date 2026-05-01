@@ -28,6 +28,10 @@ module tb_quote_book;
     regime_e              regime;
     logic                 book_valid;
 
+    // New: per-symbol AXI-exposed snapshot arrays (B2 changes)
+    price_t               best_bid_arr [TB_NUM_SYM];
+    price_t               best_ask_arr [TB_NUM_SYM];
+
     initial clk = 0;
     always #5 clk = ~clk;
 
@@ -50,7 +54,9 @@ module tb_quote_book;
         .ask_size    (ask_size),
         .symbol_id   (symbol_id),
         .regime      (regime),
-        .book_valid  (book_valid)
+        .book_valid  (book_valid),
+        .best_bid_arr(best_bid_arr),
+        .best_ask_arr(best_ask_arr)
     );
 
     // ── Check task ──────────────────────────────────────────────
@@ -83,7 +89,7 @@ module tb_quote_book;
         quote_valid = 1'b0;
 
         @(posedge rst_n);
-        repeat (2) @(posedge clk);
+        repeat (2) @(posedge clk); #1;
 
         // ────────────────────────────────────────────────────────
         // TEST 1: First round of quotes (cycle 0-3) from golden model
@@ -94,9 +100,9 @@ module tb_quote_book;
         // Cycle 0: sym=0
         quote_frame = 128'h100000B3F81E00B4081E03E803E80000;
         quote_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T1.0: book_valid",        book_valid == 1'b1);
         check("T1.0: symbol_id==0",      symbol_id == 8'd0);
         check("T1.0: regime==CALM",      regime == REGIME_CALM);
@@ -105,15 +111,15 @@ module tb_quote_book;
         check("T1.0: bid_size==1000",    bid_size == 16'd1000);
         check("T1.0: ask_size==1000",    ask_size == 16'd1000);
 
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T1.0: valid deasserts",   book_valid == 1'b0);
 
         // Cycle 1: sym=1
         quote_frame = 128'h101001A3F82101A4082103E803E80000;
         quote_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T1.1: book_valid",        book_valid == 1'b1);
         check("T1.1: symbol_id==1",      symbol_id == 8'd1);
         check("T1.1: bid==0x01A3F821",   bid_price == 32'h01A3F821);
@@ -122,9 +128,9 @@ module tb_quote_book;
         // Cycle 2: sym=2
         quote_frame = 128'h10200383F8160384081603E803E80000;
         quote_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T1.2: book_valid",        book_valid == 1'b1);
         check("T1.2: symbol_id==2",      symbol_id == 8'd2);
         check("T1.2: bid==0x0383F816",   bid_price == 32'h0383F816);
@@ -133,9 +139,9 @@ module tb_quote_book;
         // Cycle 3: sym=3
         quote_frame = 128'h10300072F81D0073081D03E803E80000;
         quote_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T1.3: book_valid",        book_valid == 1'b1);
         check("T1.3: symbol_id==3",      symbol_id == 8'd3);
         check("T1.3: bid==0x0072F81D",   bid_price == 32'h0072F81D);
@@ -149,9 +155,9 @@ module tb_quote_book;
         // Cycle 4: sym=0 updated bid=0x00B3F831 ask=0x00B40831
         quote_frame = 128'h100000B3F83100B4083103E803E80001;
         quote_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T2.0: bid updated",       bid_price == 32'h00B3F831);
         check("T2.0: ask updated",       ask_price == 32'h00B40831);
         check("T2.0: symbol_id==0",      symbol_id == 8'd0);
@@ -159,27 +165,27 @@ module tb_quote_book;
         // Cycle 5: sym=1 bid=0x01A3F816 ask=0x01A40816
         quote_frame = 128'h101001A3F81601A4081603E803E80001;
         quote_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T2.1: bid overwritten",   bid_price == 32'h01A3F816);
         check("T2.1: ask overwritten",   ask_price == 32'h01A40816);
 
         // Cycle 6: sym=2 bid=0x0383F825 ask=0x03840825
         quote_frame = 128'h10200383F8250384082503E803E80001;
         quote_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T2.2: bid overwritten",   bid_price == 32'h0383F825);
         check("T2.2: ask overwritten",   ask_price == 32'h03840825);
 
         // Cycle 7: sym=3 bid=0x0072F82E ask=0x0073082E
         quote_frame = 128'h10300072F82E0073082E03E803E80001;
         quote_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T2.3: bid overwritten",   bid_price == 32'h0072F82E);
         check("T2.3: ask overwritten",   ask_price == 32'h0073082E);
 
@@ -191,20 +197,20 @@ module tb_quote_book;
             // Cycle 8: sym=0, then cycle 9: sym=1 (consecutive)
             quote_frame = 128'h100000B3F81A00B4081A03E803E80002;
             quote_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
 
             // Immediately send next frame
             quote_frame = 128'h101001A3F81801A4081803E803E80002;
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T3a: sym0 output",       bid_price == 32'h00B3F81A);
             check("T3a: sym0 valid",        book_valid == 1'b1);
 
             quote_valid = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T3b: sym1 output",       bid_price == 32'h01A3F818);
             check("T3b: sym1 valid",        book_valid == 1'b1);
 
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T3c: valid deasserts",   book_valid == 1'b0);
         end
 
@@ -220,9 +226,9 @@ module tb_quote_book;
                          16'd500, 16'd500, 16'd0};
             quote_frame = bad_frame;
             quote_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             quote_valid = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T4: book_valid==0",      book_valid == 1'b0);
 
             // symbol=255 (way out of range)
@@ -231,9 +237,9 @@ module tb_quote_book;
                          16'd500, 16'd500, 16'd0};
             quote_frame = bad_frame;
             quote_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             quote_valid = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T4b: sym255 ignored",    book_valid == 1'b0);
         end
 
@@ -243,8 +249,8 @@ module tb_quote_book;
         $display("\n=== TEST 5: Idle (no valid) ===");
         quote_frame = 128'h100000B3F84200B4084203E803E80007;
         quote_valid = 1'b0;
-        @(posedge clk);
-        @(posedge clk);
+        @(posedge clk); #1;
+        @(posedge clk); #1;
         check("T5: no output",             book_valid == 1'b0);
 
         // ────────────────────────────────────────────────────────
@@ -259,9 +265,9 @@ module tb_quote_book;
                          16'd500, 16'd500, 16'd10};
             quote_frame = vol_frame;
             quote_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             quote_valid = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T6a: VOLATILE regime",   regime == REGIME_VOLATILE);
 
             // ADVERSARIAL regime (2'b11)
@@ -270,9 +276,9 @@ module tb_quote_book;
                          16'd200, 16'd300, 16'd20};
             quote_frame = vol_frame;
             quote_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             quote_valid = 1'b0;
-            @(posedge clk);
+            @(posedge clk); #1;
             check("T6b: ADVERSARIAL",       regime == REGIME_ADVERSARIAL);
             check("T6b: bid_size==200",      bid_size == 16'd200);
             check("T6b: ask_size==300",      ask_size == 16'd300);
@@ -285,17 +291,17 @@ module tb_quote_book;
 
         quote_frame = 128'h10200383F81B0384081B03E803E80002;
         quote_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T7.2: sym2 bid=0x0383F81B", bid_price == 32'h0383F81B);
         check("T7.2: sym2 ask=0x0384081B", ask_price == 32'h0384081B);
 
         quote_frame = 128'h10300072F80D0073080D03E803E80002;
         quote_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T7.3: sym3 bid=0x0072F80D", bid_price == 32'h0072F80D);
         check("T7.3: sym3 ask=0x0073080D", ask_price == 32'h0073080D);
 
@@ -307,35 +313,35 @@ module tb_quote_book;
         // Cycle 12: sym=0 bid=0x00B3F80B ask=0x00B4080B
         quote_frame = 128'h100000B3F80B00B4080B03E803E80003;
         quote_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T8.0: bid=0x00B3F80B",     bid_price == 32'h00B3F80B);
         check("T8.0: ask=0x00B4080B",     ask_price == 32'h00B4080B);
 
         // Cycle 13: sym=1 bid=0x01A3F7F4 ask=0x01A407F4
         quote_frame = 128'h101001A3F7F401A407F403E803E80003;
         quote_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T8.1: bid=0x01A3F7F4",     bid_price == 32'h01A3F7F4);
         check("T8.1: ask=0x01A407F4",     ask_price == 32'h01A407F4);
 
         // Cycle 14: sym=2 bid=0x0383F7FE ask=0x038407FE
         quote_frame = 128'h10200383F7FE038407FE03E803E80003;
         quote_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T8.2: bid=0x0383F7FE",     bid_price == 32'h0383F7FE);
 
         // Cycle 15: sym=3 bid=0x0072F80F ask=0x0073080F
         quote_frame = 128'h10300072F80F0073080F03E803E80003;
         quote_valid = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         quote_valid = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check("T8.3: bid=0x0072F80F",     bid_price == 32'h0072F80F);
         check("T8.3: ask=0x0073080F",     ask_price == 32'h0073080F);
 
@@ -347,23 +353,42 @@ module tb_quote_book;
             // 3 consecutive writes to sym=0 with different prices
             quote_frame = 128'h10000001000000020000000000000000;
             quote_valid = 1'b1;
-            @(posedge clk);
+            @(posedge clk); #1;
             quote_frame = 128'h10000003000000040000000000000000;
-            @(posedge clk);
+            @(posedge clk); #1;
             quote_frame = 128'h10000005000000060000000000000000;
-            @(posedge clk);
+            @(posedge clk); #1;
             quote_valid = 1'b0;
 
             // Last one wins
-            repeat (2) @(posedge clk);
+            repeat (2) @(posedge clk); #1;
             check("T9: last bid wins",    bid_price == 32'h00050000);
             check("T9: last ask wins",    ask_price == 32'h00060000);
         end
 
         // ────────────────────────────────────────────────────────
+        // TEST 10: Per-symbol AXI snapshot arrays (B2 addition)
+        // After all writes above, the per-symbol register file should
+        // expose the latest stored bid/ask for each symbol.
+        // ────────────────────────────────────────────────────────
+        $display("\n=== TEST 10: Per-symbol best_bid/ask arrays ===");
+        // Symbol 0 was last written in TEST 9 with bid=0x00050000 ask=0x00060000
+        check("T10: best_bid_arr[0] (last T9)", best_bid_arr[0] == 32'h00050000);
+        check("T10: best_ask_arr[0] (last T9)", best_ask_arr[0] == 32'h00060000);
+        // Symbol 1 was last written in T8 (cycle 13): bid=0x01A3F7F4 ask=0x01A407F4
+        check("T10: best_bid_arr[1]",          best_bid_arr[1] == 32'h01A3F7F4);
+        check("T10: best_ask_arr[1]",          best_ask_arr[1] == 32'h01A407F4);
+        // Symbol 2 was last written in T8.2: bid=0x0383F7FE ask=0x038407FE
+        check("T10: best_bid_arr[2]",          best_bid_arr[2] == 32'h0383F7FE);
+        check("T10: best_ask_arr[2]",          best_ask_arr[2] == 32'h038407FE);
+        // Symbol 3 was last written in T8.3: bid=0x0072F80F ask=0x0073080F
+        check("T10: best_bid_arr[3]",          best_bid_arr[3] == 32'h0072F80F);
+        check("T10: best_ask_arr[3]",          best_ask_arr[3] == 32'h0073080F);
+
+        // ────────────────────────────────────────────────────────
         // SUMMARY
         // ────────────────────────────────────────────────────────
-        repeat (3) @(posedge clk);
+        repeat (3) @(posedge clk); #1;
         $display("\n══════════════════════════════════════════");
         $display("  quote_book testbench complete");
         $display("  PASSED: %0d", pass_count);

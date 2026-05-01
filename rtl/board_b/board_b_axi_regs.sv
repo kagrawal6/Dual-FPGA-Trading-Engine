@@ -3,30 +3,45 @@
 // AXI-Lite slave register interface for Board B.
 //
 // Config registers (write):
-//   0x00 CTRL         — bit[0]=start pulse, bit[1]=reset pulse
-//   0x04 STRATEGY_SEL — [1:0] strategy enum
-//   0x08 THRESHOLD    — Q16.16 deviation threshold
-//   0x0C EMA_ALPHA    — Q0.16 smoothing factor
-//   0x10 BASE_QTY     — order quantity
-//   0x14 MAX_POSITION — per-symbol position limit
-//   0x18 MAX_ORDER_RATE — orders per session
-//   0x1C MAX_LOSS     — Q16.16 loss threshold
+//   0x000 CTRL         — bit[0]=start pulse, bit[1]=reset pulse
+//   0x004 STRATEGY_SEL — [1:0] strategy enum
+//   0x008 THRESHOLD    — Q16.16 deviation threshold
+//   0x00C EMA_ALPHA    — Q0.16 smoothing factor
+//   0x010 BASE_QTY     — order quantity
+//   0x014 MAX_POSITION — per-symbol position limit
+//   0x018 MAX_ORDER_RATE — orders per session
+//   0x01C MAX_LOSS     — Q16.16 loss threshold
 //
 // Status registers (read-only):
-//   0x40 STATUS       — {risk_halt, link_up, fsm_state[2:0], active_strategy[1:0]}
-//   0x44 QUOTES_RCVD
-//   0x48 ORDERS_SENT
-//   0x4C FILLS_RCVD
-//   0x50 RISK_REJECTS
-//   0x54 LINK_ERRORS
-//   0x58..0x94 POS_SYM[0..15] — per-symbol position (NUM_SYM words)
-//   0x98 CASH_LO      — cash[31:0]
-//   0x9C CASH_HI      — cash[47:32] sign-extended to 32 bits
-//   0xA0..0xDC HIST_BIN[0..15]
-//   0xE0 LAT_MIN
-//   0xE4 LAT_MAX
-//   0xE8 LAT_SUM
-//   0xEC LAT_COUNT
+//   0x040 STATUS         — {25'b0, risk_halt, link_up, fsm_state[2:0], active_strategy[1:0]}
+//   0x044 QUOTES_RCVD
+//   0x048 ORDERS_SENT
+//   0x04C FILLS_RCVD
+//   0x050 RISK_REJECTS
+//   0x054 LINK_ERRORS
+//   0x058..0x094 POS_SYM[0..15]      — per-symbol signed position (NUM_SYM words)
+//   0x098 CASH_LO        — cash[31:0]
+//   0x09C CASH_HI        — cash[47:32] sign-extended to 32 bits
+//   0x0A0..0x0DC HIST_BIN[0..15]
+//   0x0E0 LAT_MIN
+//   0x0E4 LAT_MAX
+//   0x0E8 LAT_SUM
+//   0x0EC LAT_COUNT
+//
+// Extended status registers (added — 10-bit address space):
+//   0x100..0x13C BID[0..15]          — Board B's view of best bid (Q16.16)
+//   0x140..0x17C ASK[0..15]          — Board B's view of best ask (Q16.16)
+//   0x180..0x1BC PNL_CASH_LO[0..15]  — per-symbol cash flow [31:0] (Q32.16)
+//   0x1C0..0x1FC PNL_CASH_HI[0..15]  — per-symbol cash flow [47:32] sign-extended
+//   0x200..0x23C LAST_FILL_PRICE[0..15] — per-symbol last execution price (Q16.16)
+//   0x240..0x25C TRADES_PACK[0..7]   — per-symbol fill counts (2× 16b packed/word)
+//
+// B3 extensions:
+//   0x260..0x29C EMA[0..15]            — per-symbol EMA snapshot (Q16.16)
+//   0x2A0, 0x2A4 LAST_SIGNAL_PACK[0..1] — per-symbol last signal classification
+//                                       4 bits per sym, 8 syms per word; encoding:
+//                                       0=NONE 1=BUY 2=SELL 3=RISK_BLOCKED
+//   0x2A8 LAST_LATENCY                 — most recent single latency sample (cycles)
 // ============================================================================
 
 `timescale 1ns / 1ps
@@ -35,7 +50,7 @@ module board_b_axi_regs
     import hft_pkg::*;
 #(
     parameter NUM_SYM            = NUM_SYMBOLS,
-    parameter C_S_AXI_ADDR_WIDTH = 9,
+    parameter C_S_AXI_ADDR_WIDTH = 10,  // bumped 9→10 to expose per-symbol arrays
     parameter C_S_AXI_DATA_WIDTH = 32
 )(
     input  logic        clk,
@@ -93,37 +108,62 @@ module board_b_axi_regs
     input  logic [COUNTER_W-1:0]  lat_min,
     input  logic [COUNTER_W-1:0]  lat_max,
     input  logic [COUNTER_W-1:0]  lat_sum,
-    input  logic [COUNTER_W-1:0]  lat_count
+    input  logic [COUNTER_W-1:0]  lat_count,
+
+    // Per-symbol arrays for laptop dashboard (added)
+    input  price_t                qb_best_bid [NUM_SYM],   // from quote_book
+    input  price_t                qb_best_ask [NUM_SYM],   // from quote_book
+    input  cash_t                 pnl_cash_per_sym [NUM_SYM], // from position_tracker
+    input  price_t                last_fill_price  [NUM_SYM], // from position_tracker
+    input  logic [15:0]           trades_per_sym   [NUM_SYM], // from position_tracker
+
+    // B3 inputs
+    input  price_t                ema_value    [NUM_SYM],   // from feature_compute
+    input  logic [2:0]            last_signal  [NUM_SYM],   // from risk_manager
+    input  logic [COUNTER_W-1:0]  last_latency              // from latency_histogram
 );
 
     // ── Address constants ───────────────────────────────────────
-    localparam logic [8:0] ADDR_CTRL          = 9'h000;
-    localparam logic [8:0] ADDR_STRATEGY_SEL  = 9'h004;
-    localparam logic [8:0] ADDR_THRESHOLD     = 9'h008;
-    localparam logic [8:0] ADDR_EMA_ALPHA     = 9'h00C;
-    localparam logic [8:0] ADDR_BASE_QTY      = 9'h010;
-    localparam logic [8:0] ADDR_MAX_POSITION  = 9'h014;
-    localparam logic [8:0] ADDR_MAX_ORD_RATE  = 9'h018;
-    localparam logic [8:0] ADDR_MAX_LOSS      = 9'h01C;
+    localparam logic [9:0] ADDR_CTRL          = 10'h000;
+    localparam logic [9:0] ADDR_STRATEGY_SEL  = 10'h004;
+    localparam logic [9:0] ADDR_THRESHOLD     = 10'h008;
+    localparam logic [9:0] ADDR_EMA_ALPHA     = 10'h00C;
+    localparam logic [9:0] ADDR_BASE_QTY      = 10'h010;
+    localparam logic [9:0] ADDR_MAX_POSITION  = 10'h014;
+    localparam logic [9:0] ADDR_MAX_ORD_RATE  = 10'h018;
+    localparam logic [9:0] ADDR_MAX_LOSS      = 10'h01C;
 
-    localparam logic [8:0] ADDR_STATUS        = 9'h040;
-    localparam logic [8:0] ADDR_QUOTES_RCVD   = 9'h044;
-    localparam logic [8:0] ADDR_ORDERS_SENT   = 9'h048;
-    localparam logic [8:0] ADDR_FILLS_RCVD    = 9'h04C;
-    localparam logic [8:0] ADDR_RISK_REJECTS  = 9'h050;
-    localparam logic [8:0] ADDR_LINK_ERRORS   = 9'h054;
-    localparam logic [8:0] ADDR_POS_BASE      = 9'h058; // +4*i, 16 symbols → 0x058..0x094
-    localparam logic [8:0] ADDR_CASH_LO       = 9'h098;
-    localparam logic [8:0] ADDR_CASH_HI       = 9'h09C;
-    localparam logic [8:0] ADDR_HIST_BASE     = 9'h0A0; // +4*i, 16 bins → 0x0A0..0x0DC
-    localparam logic [8:0] ADDR_LAT_MIN       = 9'h0E0;
-    localparam logic [8:0] ADDR_LAT_MAX       = 9'h0E4;
-    localparam logic [8:0] ADDR_LAT_SUM       = 9'h0E8;
-    localparam logic [8:0] ADDR_LAT_COUNT     = 9'h0EC;
+    localparam logic [9:0] ADDR_STATUS        = 10'h040;
+    localparam logic [9:0] ADDR_QUOTES_RCVD   = 10'h044;
+    localparam logic [9:0] ADDR_ORDERS_SENT   = 10'h048;
+    localparam logic [9:0] ADDR_FILLS_RCVD    = 10'h04C;
+    localparam logic [9:0] ADDR_RISK_REJECTS  = 10'h050;
+    localparam logic [9:0] ADDR_LINK_ERRORS   = 10'h054;
+    localparam logic [9:0] ADDR_POS_BASE      = 10'h058; // +4*i, 16 syms → 0x058..0x094
+    localparam logic [9:0] ADDR_CASH_LO       = 10'h098;
+    localparam logic [9:0] ADDR_CASH_HI       = 10'h09C;
+    localparam logic [9:0] ADDR_HIST_BASE     = 10'h0A0; // +4*i, 16 bins → 0x0A0..0x0DC
+    localparam logic [9:0] ADDR_LAT_MIN       = 10'h0E0;
+    localparam logic [9:0] ADDR_LAT_MAX       = 10'h0E4;
+    localparam logic [9:0] ADDR_LAT_SUM       = 10'h0E8;
+    localparam logic [9:0] ADDR_LAT_COUNT     = 10'h0EC;
+
+    // Extended per-symbol arrays (added)
+    localparam logic [9:0] ADDR_BID_BASE         = 10'h100; // +4*i, 16 → 0x100..0x13C
+    localparam logic [9:0] ADDR_ASK_BASE         = 10'h140; // +4*i, 16 → 0x140..0x17C
+    localparam logic [9:0] ADDR_PNL_LO_BASE      = 10'h180; // +4*i, 16 → 0x180..0x1BC
+    localparam logic [9:0] ADDR_PNL_HI_BASE      = 10'h1C0; // +4*i, 16 → 0x1C0..0x1FC
+    localparam logic [9:0] ADDR_LAST_FILL_BASE   = 10'h200; // +4*i, 16 → 0x200..0x23C
+    localparam logic [9:0] ADDR_TRADES_PACK_BASE = 10'h240; // +4*j, 8 words, 2 syms each → 0x240..0x25C
+
+    // B3 register windows
+    localparam logic [9:0] ADDR_EMA_BASE             = 10'h260; // +4*i, 16 → 0x260..0x29C
+    localparam logic [9:0] ADDR_LAST_SIGNAL_PACK_BASE = 10'h2A0; // +4*j, 2 words (8 syms × 4b each)
+    localparam logic [9:0] ADDR_LAST_LATENCY         = 10'h2A8;
 
     // ── AXI handshake ───────────────────────────────────────────
     logic write_fire, read_fire;
-    logic [8:0] wr_addr, rd_addr;
+    logic [9:0] wr_addr, rd_addr;
 
     assign wr_addr    = s_axi_awaddr;
     assign rd_addr    = s_axi_araddr;
@@ -162,13 +202,51 @@ module board_b_axi_regs
         else if (rd_addr == ADDR_LAT_MAX)       rd_data_mux = lat_max;
         else if (rd_addr == ADDR_LAT_SUM)       rd_data_mux = lat_sum;
         else if (rd_addr == ADDR_LAT_COUNT)     rd_data_mux = lat_count;
+        // B3: most-recent single latency sample
+        else if (rd_addr == ADDR_LAST_LATENCY)  rd_data_mux = last_latency;
 
-        for (int i = 0; i < NUM_SYM; i++)
-            if (rd_addr == 9'(ADDR_POS_BASE + 4*i))
+        for (int i = 0; i < NUM_SYM; i++) begin
+            if (rd_addr == 10'(ADDR_POS_BASE + 4*i))
                 rd_data_mux = position[i];
+            if (rd_addr == 10'(ADDR_BID_BASE + 4*i))
+                rd_data_mux = qb_best_bid[i];
+            if (rd_addr == 10'(ADDR_ASK_BASE + 4*i))
+                rd_data_mux = qb_best_ask[i];
+            if (rd_addr == 10'(ADDR_PNL_LO_BASE + 4*i))
+                rd_data_mux = pnl_cash_per_sym[i][31:0];
+            if (rd_addr == 10'(ADDR_PNL_HI_BASE + 4*i))
+                rd_data_mux = {{16{pnl_cash_per_sym[i][47]}}, pnl_cash_per_sym[i][47:32]};
+            if (rd_addr == 10'(ADDR_LAST_FILL_BASE + 4*i))
+                rd_data_mux = last_fill_price[i];
+            // B3: per-symbol EMA snapshot
+            if (rd_addr == 10'(ADDR_EMA_BASE + 4*i))
+                rd_data_mux = ema_value[i];
+        end
+
+        for (int j = 0; j < (NUM_SYM+1)/2; j++) begin
+            if (rd_addr == 10'(ADDR_TRADES_PACK_BASE + 4*j)) begin
+                rd_data_mux[15:0]  = trades_per_sym[2*j];
+                rd_data_mux[31:16] = ((2*j+1) < NUM_SYM) ? trades_per_sym[2*j+1] : 16'h0;
+            end
+        end
+
+        // B3: pack per-symbol last_signal (3-bit value zero-extended to 4 bits) into
+        // 32-bit words. 8 symbols per word → 2 words for NUM_SYM=16.
+        // Layout per word j: bits [4*k +:4] = last_signal[8*j + k] for k in 0..7.
+        for (int j = 0; j < (NUM_SYM+7)/8; j++) begin
+            if (rd_addr == 10'(ADDR_LAST_SIGNAL_PACK_BASE + 4*j)) begin
+                rd_data_mux = 32'h0;
+                for (int k = 0; k < 8; k++) begin
+                    int sidx;
+                    sidx = 8*j + k;
+                    if (sidx < NUM_SYM)
+                        rd_data_mux[4*k +: 4] = {1'b0, last_signal[sidx]};
+                end
+            end
+        end
 
         for (int i = 0; i < HIST_BINS; i++)
-            if (rd_addr == 9'(ADDR_HIST_BASE + 4*i))
+            if (rd_addr == 10'(ADDR_HIST_BASE + 4*i))
                 rd_data_mux = hist_bins[i];
     end
 

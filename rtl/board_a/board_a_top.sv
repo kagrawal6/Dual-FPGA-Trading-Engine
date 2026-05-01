@@ -13,7 +13,7 @@ module board_a_top
 #(
     parameter NUM_SYM            = NUM_SYMBOLS,
     parameter LINK_W             = LINK_DATA_W,
-    parameter C_S_AXI_ADDR_WIDTH = 8,
+    parameter C_S_AXI_ADDR_WIDTH = 9,   // bumped 8→9 for extended counter regs (FILLS_SENT, REJECTS_SENT, LINK_ERRORS)
     parameter C_S_AXI_DATA_WIDTH = 32
 )(
     input  logic        clk,
@@ -106,6 +106,7 @@ module board_a_top
     logic [6:0]            fifo_fill_level;
     price_t               best_bid [NUM_SYM];
     price_t               best_ask [NUM_SYM];
+    price_t               cur_mid  [NUM_SYM];   // B3: live per-symbol mid for AXI exposure
     logic [FRAME_W-1:0]   frame_out;
     logic                 frame_out_valid;
 
@@ -208,7 +209,11 @@ module board_a_top
         .fills_sent        (fills_sent),
         .rejects_sent      (rejects_sent),
         .link_errors       (link_errors),
-        .fifo_fill         (fifo_fill_level)
+        .fifo_fill         (fifo_fill_level),
+        // B3: per-symbol live price snapshots from market_sim
+        .live_bid          (best_bid),
+        .live_ask          (best_ask),
+        .live_mid          (cur_mid)
     );
 
     board_a_ctrl u_ctrl (
@@ -250,6 +255,7 @@ module board_a_top
         .quote_ready       (quote_ready_ms),
         .best_bid          (best_bid),
         .best_ask          (best_ask),
+        .cur_mid           (cur_mid),
         .quotes_generated  (quotes_generated)
     );
 

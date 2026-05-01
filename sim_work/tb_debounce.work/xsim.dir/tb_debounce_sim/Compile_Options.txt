@@ -1,0 +1,1 @@
+--debug "typical" -L "unisims_ver" -L "secureip" "tb_debounce" -s "tb_debounce_sim" 

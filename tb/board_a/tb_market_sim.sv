@@ -102,9 +102,9 @@ module tb_market_sim;
 
     task automatic pulse_lfsr_load;
         lfsr_load = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         lfsr_load = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
     endtask
 
     // Golden 128-bit quote frames (first 16 quotes, CALM, seed=0xDEADBEEF)
@@ -158,7 +158,7 @@ module tb_market_sim;
         $dumpvars(0, tb_market_sim);
 
         wait (rst_n === 1'b1);
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 1) Golden quote frames (128-bit comparison)
@@ -176,12 +176,12 @@ module tb_market_sim;
             check($sformatf("gq[%0d] bid_size", q), quote_frame[47:32] == 16'd1000);
             check($sformatf("gq[%0d] ask_size", q), quote_frame[31:16] == 16'd1000);
             check($sformatf("gq[%0d] seq_num=%0d", q, q/4), quote_frame[15:0] == 16'(q/4));
-            if (q < 15) @(posedge clk);
+            if (q < 15) @(posedge clk); #1;
         end
         enable = 1'b0;
         @(posedge clk); #1;
         check32("quotes_generated=16", quotes_generated, 16);
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 2) All 4 regimes: verify spread matches
@@ -204,10 +204,10 @@ module tb_market_sim;
                         spread = ask_u - bid_u;
                         check32($sformatf("regime%0d q%0d spread", r, q), spread, expected_spreads[r]);
                     end
-                    @(posedge clk);
+                    @(posedge clk); #1;
                 end
                 enable = 1'b0;
-                @(posedge clk);
+                @(posedge clk); #1;
             end
         end
 
@@ -218,16 +218,16 @@ module tb_market_sim;
         init_defaults();
         pulse_lfsr_load();
         enable = 1'b1;
-        repeat (4) begin wait_quote(); @(posedge clk); end
+        repeat (4) begin wait_quote(); @(posedge clk); #1; end
         #1;
         check("pre-clr count>0", quotes_generated > 0);
         counter_clr_sig = 1'b1;
-        @(posedge clk);
+        @(posedge clk); #1;
         counter_clr_sig = 1'b0;
         enable = 1'b0;
         @(posedge clk); #1;
         check32("counter_clr: count=0", quotes_generated, 0);
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 4) quote_interval=0: quote every enabled cycle
@@ -237,10 +237,10 @@ module tb_market_sim;
         quote_interval = 32'd0;
         pulse_lfsr_load();
         enable = 1'b1;
-        repeat (10) begin wait_quote(); @(posedge clk); end
+        repeat (10) begin wait_quote(); @(posedge clk); #1; end
         check32("interval0: 10 quotes", quotes_generated, 10);
         enable = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 5) Backpressure: quote_ready=0 freezes generation
@@ -249,11 +249,11 @@ module tb_market_sim;
         init_defaults();
         pulse_lfsr_load();
         enable = 1'b1;
-        repeat (2) begin wait_quote(); @(posedge clk); end
+        repeat (2) begin wait_quote(); @(posedge clk); #1; end
         begin
             logic [COUNTER_W-1:0] cnt_before;
             quote_ready = 1'b0;
-            repeat (2) @(posedge clk);
+            repeat (2) @(posedge clk); #1;
             #1;
             cnt_before = quotes_generated;
             repeat (100) begin
@@ -268,7 +268,7 @@ module tb_market_sim;
             check("bp: count advanced", quotes_generated == cnt_before + 1);
         end
         enable = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 6) active_sym_count transitions: 4→2
@@ -277,17 +277,17 @@ module tb_market_sim;
         init_defaults();
         pulse_lfsr_load();
         enable = 1'b1;
-        repeat (4) begin wait_quote(); @(posedge clk); end
+        repeat (4) begin wait_quote(); @(posedge clk); #1; end
         active_sym_count = 8'd2;
-        repeat (4) @(posedge clk);
+        repeat (4) @(posedge clk); #1;
         for (int q = 0; q < 8; q++) begin
             wait_quote(); #1;
             check($sformatf("active2 q%0d sym<2", q), quote_frame[123:116] < 8'd2);
-            @(posedge clk);
+            @(posedge clk); #1;
         end
         active_sym_count = TB_NUM_SYM[7:0];
         enable = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 7) Price clamping: init near MAX_PRICE
@@ -309,10 +309,10 @@ module tb_market_sim;
                 check($sformatf("clamp q%0d ask<=MAX", q), ask_u <= 32'h2710_0000);
                 check($sformatf("clamp q%0d bid>=MIN", q), bid_u >= 32'h0001_0000);
             end
-            @(posedge clk);
+            @(posedge clk); #1;
         end
         enable = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 8) Mean reversion: prices stay near init_mid
@@ -334,13 +334,13 @@ module tb_market_sim;
                     if (disp < 0) disp = -disp;
                     total_disp += disp;
                 end
-                @(posedge clk);
+                @(posedge clk); #1;
             end
             // Average displacement should be modest (< $50 in Q16.16 = 0x320000)
             check("mean_rev: avg displacement bounded", (total_disp / 200) < 64'sh0032_0000);
         end
         enable = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // 9) lfsr_load reloads state (sym_ptr=0, seq_num=0)
@@ -350,11 +350,11 @@ module tb_market_sim;
         active_sym_count = TB_NUM_SYM[7:0];
         pulse_lfsr_load();
         enable = 1'b1;
-        repeat (5) begin wait_quote(); @(posedge clk); end
+        repeat (5) begin wait_quote(); @(posedge clk); #1; end
         #1;
         check("pre-reload count>0", quotes_generated > 0);
         enable = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         pulse_lfsr_load();
         #1;
         check32("lfsr_load: count=0", quotes_generated, 0);
@@ -364,7 +364,7 @@ module tb_market_sim;
         check("reload: seq_num=0", quote_frame[15:0] == 16'd0);
         check128("reload: matches GQ[0]", quote_frame, GQ[0]);
         enable = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
 
         // ─────────────────────────────────────────────────────
         // Summary

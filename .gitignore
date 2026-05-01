@@ -2,6 +2,7 @@ obj_*/
 __pycache__/
 *.pyc
 .venv/
+vivado/
 
 # Local bundle for copying sw/ to PYNQ (regenerate anytime)
 sw_pynq_upload.zip

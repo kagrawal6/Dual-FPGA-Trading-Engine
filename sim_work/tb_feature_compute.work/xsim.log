@@ -1,0 +1,76 @@
+#-----------------------------------------------------------
+# xsim v2025.2 (64-bit)
+# SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+# IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+# SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+# Start of session at: Tue Apr 28 22:23:01 2026
+# Process ID         : 22136
+# Current directory  : C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/sim_work/tb_feature_compute.work
+# Command line       : xsim.exe -mode tcl -source {xsim.dir/tb_feature_compute_sim/xsim_script.tcl}
+# Log file           : C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/sim_work/tb_feature_compute.work/xsim.log
+# Journal file       : C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/sim_work/tb_feature_compute.work\xsim.jou
+# Running On         : Kushal2009
+# Platform           : Windows Server 2016 or Windows 10
+# Operating System   : 26200
+# Processor Detail   : 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz
+# CPU Frequency      : 2803 MHz
+# CPU Physical cores : 4
+# CPU Logical cores  : 8
+# Host memory        : 16889 MB
+# Swap memory        : 19987 MB
+# Total Virtual      : 36877 MB
+# Available Virtual  : 8634 MB
+#-----------------------------------------------------------
+source xsim.dir/tb_feature_compute_sim/xsim_script.tcl
+# xsim {tb_feature_compute_sim} -autoloadwcfg -tclbatch {_runner.tcl}
+Time resolution is 1 ps
+source _runner.tcl
+## run 50ms
+
+=== TEST 1: First-sample initialization (cycles 0-3) ===
+[FAIL] T1.0: feature_valid at time 156000
+[FAIL] T1.1: feature_valid at time 196000
+[FAIL] T1.2: feature_valid at time 236000
+[FAIL] T1.3: feature_valid at time 276000
+
+=== TEST 2: EMA computation (cycles 4-7) ===
+[FAIL] T2.4: feature_valid at time 316000
+[FAIL] T2.5: feature_valid at time 356000
+[FAIL] T2.6: feature_valid at time 396000
+[FAIL] T2.7: feature_valid at time 436000
+
+=== TEST 3: Third round EMA (cycles 8-11) ===
+
+=== TEST 4: Fourth round EMA (cycles 12-15) ===
+
+=== TEST 5: Clear resets EMA state ===
+[FAIL] T5: feature_valid at time 816000
+[FAIL] T5b: feature_valid at time 856000
+
+=== TEST 6: ema_alpha=0 (EMA frozen) ===
+
+=== TEST 7: ema_alpha=65535 (EMA tracks mid) ===
+
+=== TEST 8: Spread computation ===
+
+=== TEST 9: Multi-symbol EMA independence ===
+
+=== TEST 10: Idle ===
+
+=== TEST 11: Back-to-back quotes ===
+[FAIL] T11a: mid sym0: got 0x01a40021, expected 0x00b4001e at time 1446000
+[FAIL] T11b: mid sym1: got 0x03840016, expected 0x01a40021 at time 1456000
+[FAIL] T11c: mid sym2: got 0x0073001d, expected 0x03840016 at time 1466000
+[FAIL] T11d: valid for sym3 at time 1476000
+
+══════════════════════════════════════════
+  feature_compute testbench complete
+  PASSED: 85
+  FAILED: 14
+══════════════════════════════════════════
+
+Fatal: TESTBENCH FAILED
+Time: 1516 ns  Iteration: 0  Process: /tb_feature_compute/Initial141_10  Scope: tb_feature_compute.Block141_11  File: C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/tb/board_b/tb_feature_compute.sv Line: 403
+$finish called at time : 1516 ns
+## quit
+INFO: [Common 17-206] Exiting xsim at Tue Apr 28 22:23:04 2026...

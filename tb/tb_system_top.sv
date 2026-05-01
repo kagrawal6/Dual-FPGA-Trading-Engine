@@ -21,8 +21,8 @@ module tb_system_top;
 
     localparam int TB_NUM_SYM  = 16;
     localparam int LINK_W      = LINK_DATA_W;
-    localparam int AXI_AW_A    = 8;
-    localparam int AXI_AW_B    = 9;
+    localparam int AXI_AW_A    = 9;   // bumped 8→9 in B2 for FILLS_SENT/REJECTS_SENT/LINK_ERRORS
+    localparam int AXI_AW_B    = 10;  // bumped 9→10 in B2 for per-symbol BID/ASK/PNL/LAST_FILL/TRADES
 
     logic clk, rst_n;
 
@@ -151,7 +151,7 @@ module tb_system_top;
     // ══════════════════════════════════════════════════════════════
     // AXI tasks — Board A (8-bit address)
     // ══════════════════════════════════════════════════════════════
-    task automatic axi_write_a(input logic [7:0] addr, input logic [31:0] data_val);
+    task automatic axi_write_a(input logic [AXI_AW_A-1:0] addr, input logic [31:0] data_val);
         @(posedge clk);
         awaddr_a  = addr;
         awvalid_a = 1'b1;
@@ -168,7 +168,7 @@ module tb_system_top;
     endtask
 
     logic [31:0] axi_rd_a;
-    task automatic axi_read_a(input logic [7:0] addr);
+    task automatic axi_read_a(input logic [AXI_AW_A-1:0] addr);
         @(posedge clk);
         araddr_a  = addr;
         arvalid_a = 1'b1;
@@ -184,7 +184,7 @@ module tb_system_top;
     // ══════════════════════════════════════════════════════════════
     // AXI tasks — Board B (9-bit address)
     // ══════════════════════════════════════════════════════════════
-    task automatic axi_write_b(input logic [8:0] addr, input logic [31:0] data_val);
+    task automatic axi_write_b(input logic [AXI_AW_B-1:0] addr, input logic [31:0] data_val);
         @(posedge clk);
         awaddr_b  = addr;
         awvalid_b = 1'b1;
@@ -201,7 +201,7 @@ module tb_system_top;
     endtask
 
     logic [31:0] axi_rd_b;
-    task automatic axi_read_b(input logic [8:0] addr);
+    task automatic axi_read_b(input logic [AXI_AW_B-1:0] addr);
         @(posedge clk);
         araddr_b  = addr;
         arvalid_b = 1'b1;
@@ -877,6 +877,94 @@ module tb_system_top;
             repeat (200) @(posedge clk);
             axi_write_b(9'h000, 32'h0000_0002);
             repeat (10) @(posedge clk);
+        end
+
+        // ══════════════════════════════════════════════════════════
+        // Phase 27: B2 — exercise newly-exposed AXI signals end-to-end
+        //   Board A: FILLS_SENT (0x100), REJECTS_SENT (0x104), LINK_ERRORS (0x108)
+        //   Board B: BID/ASK arrays (0x100/0x140), PNL_LO/HI (0x180/0x1C0),
+        //            LAST_FILL (0x200), TRADES_PACK (0x240)
+        // ══════════════════════════════════════════════════════════
+        $display("\n=== Phase 27: B2 Extended AXI Exposure ===");
+
+        // Restart traffic so things flow into the new counters
+        axi_write_a(9'h000, 32'h0000_0001);
+        repeat (200) @(posedge clk);
+        sw_b = 8'h01;
+        @(posedge clk);
+        axi_write_b(10'h000, 32'h0000_0001);
+        repeat (3) @(posedge clk);
+        axi_write_b(10'h000, 32'h0000_0001);
+        repeat (8_000) @(posedge clk);
+
+        // ── Board A new counters ──
+        begin
+            logic [31:0] a_fills, a_rejects, a_link_err, a_orders_rcvd;
+            axi_read_a(9'h0FC);  a_orders_rcvd = axi_rd_a;
+            axi_read_a(9'h100);  a_fills        = axi_rd_a;
+            axi_read_a(9'h104);  a_rejects      = axi_rd_a;
+            axi_read_a(9'h108);  a_link_err     = axi_rd_a;
+            $display("  A.ORDERS_RCVD=%0d  FILLS_SENT=%0d  REJECTS_SENT=%0d  LINK_ERR=%0d",
+                     a_orders_rcvd, a_fills, a_rejects, a_link_err);
+            check("P27a: A orders >= fills+rejects",
+                  a_orders_rcvd >= (a_fills + a_rejects));
+            check32("P27b: A link_errors==0", a_link_err, 32'd0);
+        end
+
+        // ── Board B new per-symbol AXI map ──
+        // Board B's quote_book sees one-link-delayed market data; just
+        // verify all 16 BID/ASK readbacks are sane (bid <= ask, both > 0).
+        begin
+            int valid_pairs;
+            logic [31:0] bid_v, ask_v;
+            valid_pairs = 0;
+            for (int i = 0; i < 16; i++) begin
+                axi_read_b(10'h100 + i*4);  bid_v = axi_rd_b;
+                axi_read_b(10'h140 + i*4);  ask_v = axi_rd_b;
+                if (bid_v > 0 && ask_v > 0 && bid_v <= ask_v) valid_pairs++;
+            end
+            $display("  B BID/ASK valid pairs: %0d/16", valid_pairs);
+            check("P27c: B BID/ASK most pairs valid", valid_pairs >= 8);
+        end
+
+        // ── Per-symbol PNL invariant: Σ pnl_cash_per_sym == cash ──
+        begin
+            logic signed [47:0] sum_pnl;
+            logic signed [47:0] cash_v;
+            logic [31:0] cash_lo, cash_hi;
+            sum_pnl = '0;
+
+            for (int i = 0; i < 16; i++) begin
+                logic [31:0] lo_v, hi_v;
+                logic signed [47:0] sym_pnl;
+                axi_read_b(10'h180 + i*4);  lo_v = axi_rd_b;
+                axi_read_b(10'h1C0 + i*4);  hi_v = axi_rd_b;
+                sym_pnl = {hi_v[15:0], lo_v};
+                sum_pnl += sym_pnl;
+            end
+
+            axi_read_b(10'h098);  cash_lo = axi_rd_b;
+            axi_read_b(10'h09C);  cash_hi = axi_rd_b;
+            cash_v = {cash_hi[15:0], cash_lo};
+
+            $display("  Σ pnl_cash_per_sym = %0d (signed)", sum_pnl);
+            $display("  cash               = %0d (signed)", cash_v);
+            check("P27d: Σpnl_cash_per_sym == cash", sum_pnl === cash_v);
+        end
+
+        // ── Trades invariant: Σ trades_per_sym == fills_rcvd ──
+        begin
+            int sum_trades;
+            logic [31:0] fills_rcvd_b;
+            sum_trades = 0;
+            for (int j = 0; j < 8; j++) begin  // 16 symbols, packed 2/word → 8 reads
+                axi_read_b(10'h240 + j*4);
+                sum_trades += axi_rd_b[15:0] + axi_rd_b[31:16];
+            end
+            axi_read_b(10'h04C);  fills_rcvd_b = axi_rd_b;
+            $display("  Σ trades_per_sym = %0d   fills_rcvd = %0d",
+                     sum_trades, fills_rcvd_b);
+            check("P27e: Σtrades == fills_rcvd", sum_trades == fills_rcvd_b);
         end
 
         // ══════════════════════════════════════════════════════════

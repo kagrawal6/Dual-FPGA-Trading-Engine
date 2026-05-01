@@ -5,6 +5,26 @@
 // read-only status registers (STATUS, counters). Generates single-cycle
 // pulses on CTRL write for start/reset triggers.
 // See Appendix D.1 of the design spec for the full register map.
+//
+// Register map (9-bit byte address space, 4-byte aligned):
+//   0x000 CTRL                       (W) [0]=start_pulse, [1]=reset_pulse
+//   0x004 QUOTE_INTERVAL             (W) cycles between quotes
+//   0x008 LFSR_SEED                  (W) loaded on IDLE→RUNNING transition
+//   0x00C REGIME                     (W) [1:0] regime enum from PS
+//   0x010..0x04C INIT_MID[16]        (W) per-symbol initial mid (Q16.16)
+//   0x050..0x08C INIT_SPREAD[16]     (W) per-symbol initial spread (Q16.16)
+//   0x090..0x0CC SECTOR_ID[16]       (W) per-symbol sector id
+//   0x0D0..0x0EC TOKEN_PACK[8]       (W) two 16-bit company tokens per word
+//   0x0F0 ACTIVE_SYM_COUNT           (W) [7:0] clamped to [1, NUM_SYM]
+//   0x0F4 STATUS                     (R) {fifo_fill[6:0], 5'd0, regime[1:0], link_up, running}
+//   0x0F8 QUOTES_SENT                (R)
+//   0x0FC ORDERS_RCVD                (R)
+//   0x100 FILLS_SENT                 (R)  (added — was wired but unexposed)
+//   0x104 REJECTS_SENT               (R)  (added — was wired but unexposed)
+//   0x108 LINK_ERRORS                (R)  (added — was wired but unexposed)
+//   0x110..0x14C LIVE_BID[0..15]     (R)  (B3) per-symbol live bid (Q16.16)
+//   0x150..0x18C LIVE_ASK[0..15]     (R)  (B3) per-symbol live ask (Q16.16)
+//   0x190..0x1CC LIVE_MID[0..15]     (R)  (B3) per-symbol live mid (Q16.16)
 // ============================================================================
 
 `timescale 1ns / 1ps
@@ -13,7 +33,7 @@ module board_a_axi_regs
     import hft_pkg::*;
 #(
     parameter NUM_SYM            = NUM_SYMBOLS,
-    parameter C_S_AXI_ADDR_WIDTH = 8,
+    parameter C_S_AXI_ADDR_WIDTH = 9,   // bumped 8→9 to expose extended counters at 0x100+
     parameter C_S_AXI_DATA_WIDTH = 32
 )(
     input  logic        clk,
@@ -65,7 +85,12 @@ module board_a_axi_regs
     input  logic [COUNTER_W-1:0]           fills_sent,
     input  logic [COUNTER_W-1:0]           rejects_sent,
     input  logic [COUNTER_W-1:0]           link_errors,
-    input  logic [6:0]                     fifo_fill
+    input  logic [6:0]                     fifo_fill,
+
+    // B3: per-symbol live price snapshots (from market_sim)
+    input  price_t                         live_bid [NUM_SYM],
+    input  price_t                         live_ask [NUM_SYM],
+    input  price_t                         live_mid [NUM_SYM]
 );
     // -------------------------------------------------------------------------
     // ADDITION: Extended register map for dynamic symbol metadata (up to NUM_SYM)
@@ -75,26 +100,34 @@ module board_a_axi_regs
     // - per-symbol sector_id
     // - fixed company tokens
     // - runtime active symbol count
-    localparam logic [7:0] ADDR_CTRL             = 8'h00;
-    localparam logic [7:0] ADDR_QUOTE_INTERVAL   = 8'h04;
-    localparam logic [7:0] ADDR_LFSR_SEED        = 8'h08;
-    localparam logic [7:0] ADDR_REGIME           = 8'h0C;
-    localparam logic [7:0] ADDR_INIT_MID_BASE    = 8'h10; // +4*i
-    localparam logic [7:0] ADDR_INIT_SPREAD_BASE = 8'h50; // +4*i
-    localparam logic [7:0] ADDR_SECTOR_BASE      = 8'h90; // +4*i
-    localparam logic [7:0] ADDR_TOKEN_BASE       = 8'hD0; // +4*j, two 16b tokens per word
-    localparam logic [7:0] ADDR_ACTIVE_CNT       = 8'hF0;
-    localparam logic [7:0] ADDR_STATUS           = 8'hF4;
-    localparam logic [7:0] ADDR_QUOTES_SENT      = 8'hF8;
-    localparam logic [7:0] ADDR_ORDERS_RCVD      = 8'hFC;
+    localparam logic [8:0] ADDR_CTRL             = 9'h000;
+    localparam logic [8:0] ADDR_QUOTE_INTERVAL   = 9'h004;
+    localparam logic [8:0] ADDR_LFSR_SEED        = 9'h008;
+    localparam logic [8:0] ADDR_REGIME           = 9'h00C;
+    localparam logic [8:0] ADDR_INIT_MID_BASE    = 9'h010; // +4*i
+    localparam logic [8:0] ADDR_INIT_SPREAD_BASE = 9'h050; // +4*i
+    localparam logic [8:0] ADDR_SECTOR_BASE      = 9'h090; // +4*i
+    localparam logic [8:0] ADDR_TOKEN_BASE       = 9'h0D0; // +4*j, two 16b tokens per word
+    localparam logic [8:0] ADDR_ACTIVE_CNT       = 9'h0F0;
+    localparam logic [8:0] ADDR_STATUS           = 9'h0F4;
+    localparam logic [8:0] ADDR_QUOTES_SENT      = 9'h0F8;
+    localparam logic [8:0] ADDR_ORDERS_RCVD      = 9'h0FC;
+    // Extended counters (added) — exposed for laptop telemetry / verification
+    localparam logic [8:0] ADDR_FILLS_SENT       = 9'h100;
+    localparam logic [8:0] ADDR_REJECTS_SENT     = 9'h104;
+    localparam logic [8:0] ADDR_LINK_ERRORS      = 9'h108;
+    // B3: per-symbol live price snapshots
+    localparam logic [8:0] ADDR_LIVE_BID_BASE    = 9'h110; // +4*i, 16 → 0x110..0x14C
+    localparam logic [8:0] ADDR_LIVE_ASK_BASE    = 9'h150; // +4*i, 16 → 0x150..0x18C
+    localparam logic [8:0] ADDR_LIVE_MID_BASE    = 9'h190; // +4*i, 16 → 0x190..0x1CC
 
     logic write_fire;
     logic read_fire;
-    logic [7:0] wr_addr;
-    logic [7:0] rd_addr;
+    logic [8:0] wr_addr;
+    logic [8:0] rd_addr;
 
-    assign wr_addr = s_axi_awaddr[7:0];
-    assign rd_addr = s_axi_araddr[7:0];
+    assign wr_addr = s_axi_awaddr[8:0];
+    assign rd_addr = s_axi_araddr[8:0];
 
     assign write_fire = s_axi_awvalid && s_axi_wvalid && !s_axi_bvalid;
     assign read_fire  = s_axi_arvalid && !s_axi_rvalid;
@@ -117,17 +150,27 @@ module board_a_axi_regs
             rd_data_mux = {16'd0, fifo_fill, 5'd0, active_regime, link_up, running};
         else if (rd_addr == ADDR_QUOTES_SENT)     rd_data_mux = quotes_sent;
         else if (rd_addr == ADDR_ORDERS_RCVD)     rd_data_mux = orders_rcvd;
+        else if (rd_addr == ADDR_FILLS_SENT)      rd_data_mux = fills_sent;
+        else if (rd_addr == ADDR_REJECTS_SENT)    rd_data_mux = rejects_sent;
+        else if (rd_addr == ADDR_LINK_ERRORS)     rd_data_mux = link_errors;
 
         for (int i = 0; i < NUM_SYM; i++) begin
-            if (rd_addr == 8'(ADDR_INIT_MID_BASE + 4*i))
+            if (rd_addr == 9'(ADDR_INIT_MID_BASE + 4*i))
                 rd_data_mux = sym_init_mid[i];
-            if (rd_addr == 8'(ADDR_INIT_SPREAD_BASE + 4*i))
+            if (rd_addr == 9'(ADDR_INIT_SPREAD_BASE + 4*i))
                 rd_data_mux = sym_init_spread[i];
-            if (rd_addr == 8'(ADDR_SECTOR_BASE + 4*i))
+            if (rd_addr == 9'(ADDR_SECTOR_BASE + 4*i))
                 rd_data_mux = {{(32-SECTOR_ID_W){1'b0}}, sym_sector_id[i]};
+            // B3: live per-symbol price snapshots
+            if (rd_addr == 9'(ADDR_LIVE_BID_BASE + 4*i))
+                rd_data_mux = live_bid[i];
+            if (rd_addr == 9'(ADDR_LIVE_ASK_BASE + 4*i))
+                rd_data_mux = live_ask[i];
+            if (rd_addr == 9'(ADDR_LIVE_MID_BASE + 4*i))
+                rd_data_mux = live_mid[i];
         end
         for (int j = 0; j < (NUM_SYM+1)/2; j++) begin
-            if (rd_addr == 8'(ADDR_TOKEN_BASE + 4*j)) begin
+            if (rd_addr == 9'(ADDR_TOKEN_BASE + 4*j)) begin
                 rd_data_mux[15:0]  = sym_company_token[2*j];
                 rd_data_mux[31:16] = ((2*j+1) < NUM_SYM) ? sym_company_token[2*j+1] : 16'h0;
             end
@@ -179,16 +222,16 @@ module board_a_axi_regs
 
             // ── Per-symbol array writes (for-loop eliminates latches) ─
             for (int i = 0; i < NUM_SYM; i++) begin
-                if (write_fire && wr_addr == 8'(ADDR_INIT_MID_BASE + 4*i))
+                if (write_fire && wr_addr == 9'(ADDR_INIT_MID_BASE + 4*i))
                     sym_init_mid[i] <= price_t'(s_axi_wdata);
 
-                if (write_fire && wr_addr == 8'(ADDR_INIT_SPREAD_BASE + 4*i))
+                if (write_fire && wr_addr == 9'(ADDR_INIT_SPREAD_BASE + 4*i))
                     sym_init_spread[i] <= price_t'((s_axi_wdata == 32'h0) ? 32'h1 : s_axi_wdata);
 
-                if (write_fire && wr_addr == 8'(ADDR_SECTOR_BASE + 4*i))
+                if (write_fire && wr_addr == 9'(ADDR_SECTOR_BASE + 4*i))
                     sym_sector_id[i] <= s_axi_wdata[SECTOR_ID_W-1:0];
 
-                if (write_fire && wr_addr == 8'(ADDR_TOKEN_BASE + 4*(i/2))) begin
+                if (write_fire && wr_addr == 9'(ADDR_TOKEN_BASE + 4*(i/2))) begin
                     if (i[0] == 1'b0)
                         sym_company_token[i] <= s_axi_wdata[15:0];
                     else

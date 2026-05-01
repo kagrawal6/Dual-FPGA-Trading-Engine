@@ -13,7 +13,7 @@ module board_b_top
 #(
     parameter NUM_SYM            = NUM_SYMBOLS,
     parameter LINK_W             = LINK_DATA_W,
-    parameter C_S_AXI_ADDR_WIDTH = 9,
+    parameter C_S_AXI_ADDR_WIDTH = 10,  // bumped 9→10 for per-symbol arrays
     parameter C_S_AXI_DATA_WIDTH = 32
 )(
     input  logic        clk,
@@ -106,6 +106,9 @@ module board_b_top
     symbol_t qb_symbol;
     regime_e qb_regime;
     logic    qb_valid;
+    // Per-symbol BBO snapshot (exposed to AXI for laptop dashboard)
+    price_t  qb_best_bid_arr [NUM_SYM];
+    price_t  qb_best_ask_arr [NUM_SYM];
 
     // Feature compute
     price_t  fc_mid, fc_spread, fc_ema;
@@ -113,6 +116,8 @@ module board_b_top
     price_t  fc_bid_out, fc_ask_out;
     symbol_t fc_symbol_out;
     logic    fc_valid;
+    // B3: per-symbol EMA snapshot
+    price_t  fc_ema_arr [NUM_SYM];
 
     // Strategy engine
     logic    se_valid, se_side;
@@ -127,6 +132,8 @@ module board_b_top
     symbol_t rm_symbol;
     logic    risk_halt;
     logic [COUNTER_W-1:0] risk_rejects;
+    // B3: per-symbol last signal {NONE, BUY, SELL, RISK_BLOCKED}
+    logic [2:0] rm_last_signal [NUM_SYM];
 
     // Position tracker → risk fill feedback
     symbol_t pt_fill_symbol;
@@ -146,10 +153,16 @@ module board_b_top
     timestamp_t  ts_echo;
     logic        fill_processed;
     logic [COUNTER_W-1:0] fills_rcvd;
+    // Per-symbol P&L state (exposed to AXI for laptop dashboard)
+    cash_t       pnl_cash_per_sym [NUM_SYM];
+    price_t      last_fill_price  [NUM_SYM];
+    logic [15:0] trades_per_sym   [NUM_SYM];
 
     // Latency histogram
     logic [HIST_BIN_W-1:0] hist_bins [HIST_BINS];
     logic [COUNTER_W-1:0]  lat_min, lat_max, lat_sum, lat_count;
+    // B3: most recent latency sample
+    logic [COUNTER_W-1:0]  last_latency;
 
     // ════════════════════════════════════════════════════════════
     // 5-STATE FSM
@@ -213,7 +226,16 @@ module board_b_top
         .fills_rcvd(fills_rcvd), .risk_rejects(risk_rejects), .link_errors(link_errors),
         .position(position), .cash(cash),
         .hist_bins(hist_bins), .lat_min(lat_min), .lat_max(lat_max),
-        .lat_sum(lat_sum), .lat_count(lat_count)
+        .lat_sum(lat_sum), .lat_count(lat_count),
+        // Per-symbol arrays for laptop dashboard
+        .qb_best_bid(qb_best_bid_arr), .qb_best_ask(qb_best_ask_arr),
+        .pnl_cash_per_sym(pnl_cash_per_sym),
+        .last_fill_price(last_fill_price),
+        .trades_per_sym(trades_per_sym),
+        // B3: per-symbol EMA, last signal classification, and most-recent latency
+        .ema_value(fc_ema_arr),
+        .last_signal(rm_last_signal),
+        .last_latency(last_latency)
     );
 
     // ── Physical I/O Controller ─────────────────────────────────
@@ -258,7 +280,8 @@ module board_b_top
         .quote_frame(quote_frame_demux), .quote_valid(quote_valid_demux),
         .bid_price(qb_bid), .ask_price(qb_ask),
         .bid_size(qb_bid_size), .ask_size(qb_ask_size),
-        .symbol_id(qb_symbol), .regime(qb_regime), .book_valid(qb_valid)
+        .symbol_id(qb_symbol), .regime(qb_regime), .book_valid(qb_valid),
+        .best_bid_arr(qb_best_bid_arr), .best_ask_arr(qb_best_ask_arr)
     );
 
     // ── Feature Compute ─────────────────────────────────────────
@@ -270,7 +293,8 @@ module board_b_top
         .mid(fc_mid), .spread(fc_spread), .ema(fc_ema),
         .deviation(fc_deviation),
         .bid_out(fc_bid_out), .ask_out(fc_ask_out),
-        .symbol_out(fc_symbol_out), .feature_valid(fc_valid)
+        .symbol_out(fc_symbol_out), .feature_valid(fc_valid),
+        .ema_value(fc_ema_arr)
     );
 
     // ── Strategy Engine ─────────────────────────────────────────
@@ -300,7 +324,8 @@ module board_b_top
         .approved_symbol(rm_symbol),
         .fill_valid(pt_fill_notify), .fill_symbol(pt_fill_symbol),
         .fill_side(pt_fill_side), .fill_qty(pt_fill_qty),
-        .risk_halt(risk_halt), .risk_rejects(risk_rejects)
+        .risk_halt(risk_halt), .risk_rejects(risk_rejects),
+        .last_signal(rm_last_signal)
     );
 
     // ── Order Manager ───────────────────────────────────────────
@@ -334,7 +359,10 @@ module board_b_top
         .ts_echo(ts_echo), .fill_processed(fill_processed),
         .fill_symbol_out(pt_fill_symbol), .fill_side_out(pt_fill_side),
         .fill_qty_out(pt_fill_qty), .fill_notify(pt_fill_notify),
-        .fills_rcvd(fills_rcvd)
+        .fills_rcvd(fills_rcvd),
+        .pnl_cash_per_sym(pnl_cash_per_sym),
+        .last_fill_price(last_fill_price),
+        .trades_per_sym(trades_per_sym)
     );
 
     // ── Latency Histogram ───────────────────────────────────────
@@ -344,7 +372,8 @@ module board_b_top
         .cycle_counter(cycle_counter),
         .hist_bins(hist_bins),
         .lat_min(lat_min), .lat_max(lat_max),
-        .lat_sum(lat_sum), .lat_count(lat_count)
+        .lat_sum(lat_sum), .lat_count(lat_count),
+        .last_latency(last_latency)
     );
 
 endmodule
