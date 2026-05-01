@@ -17,6 +17,8 @@
 # ── Compile everything (same as full regression) ────────────────────────────
 do compile_all.do
 
+do _run_lib.do
+
 set all_pass {}
 set all_fail {}
 
@@ -34,59 +36,13 @@ proc run_group {group_name tb_list} {
     foreach tb $tb_list {
         incr idx
         puts "\n==========================================="
-        puts " \[$idx/$total\] $group_name — $tb"
+        puts " \[$idx/$total\] $group_name -- $tb"
         puts "==========================================="
-
-        onbreak {resume}
-
-        set fsize 0
-        if {[file exists transcript]} {
-            set fsize [file size transcript]
-        }
-
-        if {[catch {
-            vsim -voptargs=+acc work.$tb -quiet -onfinish stop
-            run -all
-            quit -sim
-        } err]} {
-            puts ">>> FAIL: $tb (Tcl error: $err)"
-            lappend all_fail $tb
-            catch {quit -sim}
-            continue
-        }
-
-        set had_fatal 0
-        set saw_pass  0
-        if {[file exists transcript]} {
-            after 200
-            set fp [open transcript r]
-            seek $fp $fsize
-            set new_content [read $fp]
-            close $fp
-
-            foreach pat {"** Fatal:" "TESTBENCH FAILED" "Assertion error"} {
-                if {[string first $pat $new_content] >= 0} {
-                    set had_fatal 1
-                    break
-                }
-            }
-
-            if {!$had_fatal} {
-                if {[string first ": PASS ("        $new_content] >= 0 ||
-                    [string first "ALL TESTS PASSED" $new_content] >= 0 ||
-                    ([string first "FAILED: 0" $new_content] >= 0 &&
-                     [string first "PASSED:"   $new_content] >= 0)} {
-                    set saw_pass 1
-                }
-            }
-        }
-
-        if {$had_fatal || !$saw_pass} {
-            puts ">>> FAIL: $tb"
-            lappend all_fail $tb
-        } else {
-            puts ">>> PASS: $tb"
+        set result [run_one_test $tb]
+        if {$result eq "PASS"} {
             lappend all_pass $tb
+        } else {
+            lappend all_fail $tb
         }
     }
 }

@@ -20,7 +20,6 @@
 ../rtl/board_a/market_sim.sv
 ../rtl/board_a/market_noise_gen.sv
 ../rtl/board_a/exchange_lite.sv
-../rtl/board_a/exchange_plus.sv
 ../rtl/board_a/tx_arbiter.sv
 ../rtl/board_a/board_a_ctrl.sv
 ../rtl/board_a/board_a_axi_regs.sv
@@ -28,6 +27,7 @@
 
 // ── 5. Board A testbenches ─────────────────────────────────────────────────
 ../tb/board_a/tb_market_sim.sv
+../tb/board_a/tb_board_a_axi_regs.sv
 ../tb/board_a/tb_market_noise_gen.sv
 ../tb/board_a/tb_exchange_lite.sv
 ../tb/board_a/tb_tx_arbiter.sv
