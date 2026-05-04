@@ -160,6 +160,16 @@ def create_app() -> FastAPI:
         msg = READER.apply_demo_risk_overrides(body)
         return {"msg": msg}
 
+    @app.post("/api/ingest")
+    def ingest(body: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Accept telemetry dicts pushed from an external producer (e.g. Jupyter notebook).
+        """
+        if READER is None:
+            return {"ok": False, "msg": "reader not initialized"}
+        ok = READER.ingest(body)
+        return {"ok": bool(ok)}
+
     @app.get("/api/export/csv")
     def export_csv(history_sec: float = bbd.DEFAULT_HISTORY_SEC) -> StreamingResponse:
         assert READER is not None
@@ -235,6 +245,11 @@ def create_app() -> FastAPI:
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="FastAPI server for TradeMark React UI")
     p.add_argument("--demo", action="store_true", help="Synthetic telemetry (same as Dash demo)")
+    p.add_argument(
+        "--ingest-http",
+        action="store_true",
+        help="Receive telemetry via POST /api/ingest (for Jupyter / non-UART sources)",
+    )
     p.add_argument("--port", default="", help="UART device when not using --demo")
     p.add_argument("--baud", type=int, default=115200)
     p.add_argument("--host", default="127.0.0.1")
@@ -263,6 +278,11 @@ def main() -> None:
         READER.open_serial()
         READER.start()
         print("Demo mode — synthetic telemetry (no UART).")
+    elif args.ingest_http:
+        READER = bbd.HttpIngestTelemetryReader()
+        READER.open_serial()
+        READER.start()
+        print("HTTP ingest mode — POST telemetry to /api/ingest (no UART).")
     else:
         port = str(args.port or "").strip()
         if not port and sys.platform == "darwin":
@@ -284,8 +304,8 @@ def main() -> None:
     display_host = "127.0.0.1" if args.host in ("0.0.0.0", "::") else args.host
     url = f"http://{display_host}:{args.api_port}/"
     print(f"API + UI: {url}")
-    print("  React dev: cd frontend && npm run dev  →  http://127.0.0.1:5173")
-    print("  React prod: cd frontend && npm run build  →  served from this port")
+    print("  React dev: cd frontend && npm run dev  ->  http://127.0.0.1:5173")
+    print("  React prod: cd frontend && npm run build  ->  served from this port")
     print("  OpenAPI: ", f"http://{display_host}:{args.api_port}/docs")
 
     if args.browser:

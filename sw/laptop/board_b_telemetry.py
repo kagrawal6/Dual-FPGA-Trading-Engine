@@ -143,6 +143,25 @@ class SerialTelemetryReader(threading.Thread):
                 self.connected = False
             return False
 
+    def ingest(self, data: Dict[str, Any]) -> bool:
+        """
+        Ingest one JSON-like telemetry dict from a non-serial source (e.g. notebook / HTTP).
+
+        Returns True if accepted.
+        """
+        if not isinstance(data, dict):
+            return False
+        # Treat external ingest as "connected" so the UI doesn't show a stale disconnect.
+        with self._lock:
+            self.connected = True
+        try:
+            self._ingest(data)
+            return True
+        except Exception:
+            with self._lock:
+                self.parse_errors += 1
+            return False
+
     def pop_regime_edge(self) -> bool:
         with self._lock:
             e = self._regime_edge_pending
@@ -506,4 +525,25 @@ class DemoTelemetryReader(SerialTelemetryReader):
             }
             self._ingest(data)
             time.sleep(0.22)
+
+
+class HttpIngestTelemetryReader(SerialTelemetryReader):
+    """
+    Reader that receives telemetry via explicit `ingest()` calls (no UART).
+
+    Intended for driving the React UI from a notebook or another process that can POST JSON.
+    """
+
+    def __init__(self) -> None:
+        super().__init__("HTTP_INGEST", 0)
+
+    def open_serial(self) -> bool:
+        with self._lock:
+            self.connected = True
+        return True
+
+    def run(self) -> None:
+        # Nothing to read; the producer pushes via `ingest()`.
+        while not self._stop.is_set():
+            time.sleep(0.25)
 
