@@ -1,0 +1,39 @@
+# End time: 10:03:32 on May 01,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_risk_manager -quiet -onfinish stop 
+# Start time: 10:03:32 on May 01,2026
+# 
+# === T1: Basic approval ===
+# 
+# === T2: order_enable off ===
+# 
+# === T3: Position limit ===
+# 
+# === T3d: Position boundary exactly ===
+# 
+# === T4: Rate limit ===
+# 
+# === T5: Max loss halt ===
+# 
+# === T6: SELL position check ===
+# 
+# === T7: Simultaneous signal+fill (same sym/side) ===
+# 
+# === T8: Simultaneous signal+fill (different syms) ===
+# 
+# === T9: Fill overshoot (no underflow) ===
+# 
+# === T10: Clear resets all ===
+# 
+# === T11: Idle ===
+# 
+# ══════════════════════════════════════════
+#   risk_manager testbench complete
+#   PASSED: 40
+#   FAILED: 0
+# ══════════════════════════════════════════
+# 
+# ** Note: $finish    : ../tb/board_b/tb_risk_manager.sv(366)
+#    Time: 606 ns  Iteration: 0  Instance: /tb_risk_manager
+# Break in Module tb_risk_manager at ../tb/board_b/tb_risk_manager.sv line 366
+# Stopped at ../tb/board_b/tb_risk_manager.sv line 366

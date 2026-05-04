@@ -1,0 +1,126 @@
+# End time: 10:04:54 on May 01,2026, Elapsed time: 0:00:07
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_board_b_top -quiet -onfinish stop 
+# Start time: 10:04:54 on May 01,2026
+# 
+# === Phase 1: FSM Transitions ===
+# 
+# === Phase 2: AXI Config ===
+# 
+# === Phase 3: 16-Symbol EMA Seeding ===
+#   quotes_rcvd = 16 (expect 16)
+# 
+# === Phase 4: Price Shifts → Orders ===
+#   quotes_rcvd = 32 (expect 32)
+#   orders_sent = 16
+#   STATUS = 0x0000002c
+# 
+# === Phase 5: Fill Injection (8 symbols) ===
+#   fills_rcvd = 8
+#   --- Position readback ---
+#   pos[ 0] =     100
+#   pos[ 1] =     100
+#   pos[ 2] =     100
+#   pos[ 3] =     100
+#   pos[ 4] =     100
+#   pos[ 5] =     100
+#   pos[ 6] =     100
+#   pos[ 7] =     100
+#   pos[ 8] =       0
+#   pos[ 9] =       0
+#   pos[10] =       0
+#   pos[11] =       0
+#   pos[12] =       0
+#   pos[13] =       0
+#   pos[14] =       0
+#   pos[15] =       0
+# 
+# === Phase 6: SELL Fills (sym 0-3) ===
+#   pos[0] after SELL = 50 (expect 50)
+# 
+# === Phase 7: Cash Readback ===
+#   cash_lo = 0x36ea0000
+#   cash_hi = 0xfffffffd
+# 
+# === Phase 8: Latency Histogram ===
+#   lat_min   = 2679
+#   lat_max   = 3572
+#   lat_count = 12
+#   hist[15] = 12
+#   Total histogram entries: 12
+# 
+# === Phase 9: Strategy Override ===
+#   STATUS w/ override = 0x0000002f
+# 
+# === Phase 10: FSM Control ===
+# 
+# === Phase 11: Risk Halt ===
+# 
+# === Phase 12: Counter Clear ===
+# 
+# === Phase 13: Restart + Stress ===
+#   Final quotes = 65
+#   Final orders = 48
+#   link_errors = 0
+# 
+# === Phase 14: LED/RGB ===
+# 
+# === Phase 15: Rejected Fill ===
+# 
+# === Phase 16: Regime Field ===
+# 
+# === Phase 17: Full 16-sym Position Test ===
+#   pos[8] after partial sell = 100
+# 
+# === Phase 18: Histogram Consistency ===
+#   lat_count=24, sum_bins=24
+# 
+# === Phase 19: Out-of-range Symbol Fill ===
+#   fills after OOR: 24 (was 24)
+# 
+# === Phase 20: Double Halt/Recovery ===
+# 
+# === Phase 21: Link Error Check ===
+# 
+# === Phase 22: Config Persistence ===
+# 
+# === Phase 23: Extra AXI Readback ===
+# 
+# === Phase 24: B2 per-symbol AXI exposure ===
+#   BID[0]  = 0x00b3f000 (expect 0x00b3f000)
+#   ASK[0]  = 0x00b41000 (expect 0x00b41000)
+#   BID[1]  = 0x01a3f000 (expect 0x01a3f000)
+#   ASK[1]  = 0x01a41000 (expect 0x01a41000)
+#   BID[2]  = 0x0383f000 (expect 0x0383f000)
+#   ASK[2]  = 0x03841000 (expect 0x03841000)
+#   BID[3]  = 0x0072f000 (expect 0x0072f000)
+#   ASK[3]  = 0x00731000 (expect 0x00731000)
+#   LAST_FILL[0] = 0x00b40000 (expect 0x00b40000)
+#   TRADES_PACK[0] = 0x00000001 (low=trades[0], high=trades[1])
+#   PNL[0] = HI:0xffffffff LO:0xdcd80000 (signed 48b)
+# 
+# === Phase 25: B3 EMA / LAST_SIGNAL / LAST_LATENCY ===
+#   EMA[0] = 0x00b40000
+#   EMA[1] = 0x01a40000
+#   EMA[2] = 0x03840000
+#   EMA[3] = 0x00730000
+#   EMA[4] = 0x00000000
+#   EMA[5] = 0x00000000
+#   EMA[6] = 0x00000000
+#   EMA[7] = 0x00000000
+#   LAST_SIGNAL_PACK = {0x00000000, 0x00000000} (informational)
+#   LAST_LATENCY = 11230 cycles
+# 
+# === Phase 26: NN strategy selection ===
+#   P26: post-NN-stream STATUS=0x00000026 (link_up=0, strat=2)
+# 
+# ══════════════════════════════════════════
+#   board_b_top testbench complete
+#   PASSED: 117
+#   FAILED: 0
+# ══════════════════════════════════════════
+# 
+# ** Note: $finish    : ../tb/board_b/tb_board_b_top.sv(865)
+#    Time: 123245 ns  Iteration: 1  Instance: /tb_board_b_top
+# Break in Module tb_board_b_top at ../tb/board_b/tb_board_b_top.sv line 865
+# Stopped at ../tb/board_b/tb_board_b_top.sv line 865

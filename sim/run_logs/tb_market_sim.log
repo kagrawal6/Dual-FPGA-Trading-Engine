@@ -1,0 +1,19 @@
+# vsim -voptargs=""+acc"" work.tb_market_sim -quiet -onfinish stop 
+# Start time: 10:04:09 on May 01,2026
+# --- test_golden_quotes ---
+# --- test_all_regimes ---
+# --- test_counter_clr ---
+# --- test_interval_0 ---
+# --- test_backpressure ---
+# --- test_active_transition ---
+# --- test_price_clamp ---
+# --- test_mean_reversion ---
+# --- test_lfsr_load_reload ---
+# 
+# ===================================
+# tb_market_sim: PASS (356 checks passed)
+# ===================================
+# ** Note: $finish    : ../tb/board_a/tb_market_sim.sv(389)
+#    Time: 4436 ns  Iteration: 0  Instance: /tb_market_sim
+# Break in Module tb_market_sim at ../tb/board_a/tb_market_sim.sv line 389
+# Stopped at ../tb/board_a/tb_market_sim.sv line 389

@@ -1,0 +1,20 @@
+# End time: 10:04:11 on May 01,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_tx_arbiter -quiet -onfinish stop 
+# Start time: 10:04:11 on May 01,2026
+# --- test_reset ---
+# --- test_fill_priority ---
+# --- test_quote_only ---
+# --- test_no_preempt ---
+# --- test_starvation ---
+# --- test_back_to_back_quotes ---
+# --- test_ready_toggling ---
+# --- test_mid_reset ---
+# 
+# ===================================
+# tb_tx_arbiter: PASS (39 checks passed)
+# ===================================
+# ** Note: $finish    : ../tb/board_a/tb_tx_arbiter.sv(282)
+#    Time: 836 ns  Iteration: 0  Instance: /tb_tx_arbiter
+# Break in Module tb_tx_arbiter at ../tb/board_a/tb_tx_arbiter.sv line 282
+# Stopped at ../tb/board_a/tb_tx_arbiter.sv line 282

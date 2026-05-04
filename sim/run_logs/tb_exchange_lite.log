@@ -1,0 +1,20 @@
+# End time: 10:04:11 on May 01,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_exchange_lite -quiet -onfinish stop 
+# Start time: 10:04:11 on May 01,2026
+# --- test_golden_fills ---
+# --- test_boundary ---
+# --- test_counter_clr ---
+# --- test_enable_low ---
+# --- test_backpressure ---
+# --- test_wrong_msg_type ---
+# --- test_back_to_back ---
+# --- test_sym3 ---
+# 
+# ===================================
+# tb_exchange_lite: PASS (58 checks passed)
+# ===================================
+# ** Note: $finish    : ../tb/board_a/tb_exchange_lite.sv(314)
+#    Time: 716 ns  Iteration: 0  Instance: /tb_exchange_lite
+# Break in Module tb_exchange_lite at ../tb/board_a/tb_exchange_lite.sv line 314
+# Stopped at ../tb/board_a/tb_exchange_lite.sv line 314

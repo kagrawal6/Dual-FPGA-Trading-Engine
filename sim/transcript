@@ -1,0 +1,137 @@
+# do run_all_shared.do
+# Model Technology ModelSim - Intel FPGA Edition vmap 2020.1 Lib Mapping Utility 2020.02 Feb 28 2020
+# vmap work work 
+# Modifying modelsim.ini
+# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+# Start time: 10:05:45 on May 01,2026
+# vlog -sv -work work ../rtl/shared/hft_pkg.sv 
+# -- Compiling package hft_pkg
+# 
+# Top level modules:
+# 	--none--
+# End time: 10:05:45 on May 01,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+# Start time: 10:05:45 on May 01,2026
+# vlog -sv -work work ../rtl/shared/debounce.sv 
+# -- Compiling module debounce
+# 
+# Top level modules:
+# 	debounce
+# End time: 10:05:46 on May 01,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+# Start time: 10:05:46 on May 01,2026
+# vlog -sv -work work ../rtl/shared/sync_fifo.sv 
+# -- Compiling module sync_fifo
+# 
+# Top level modules:
+# 	sync_fifo
+# End time: 10:05:46 on May 01,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+# Start time: 10:05:46 on May 01,2026
+# vlog -sv -work work ../rtl/shared/lfsr32.sv 
+# -- Compiling module lfsr32
+# -- Importing package hft_pkg
+# 
+# Top level modules:
+# 	lfsr32
+# End time: 10:05:46 on May 01,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+# Start time: 10:05:46 on May 01,2026
+# vlog -sv -work work ../rtl/link/link_tx.sv 
+# -- Compiling module link_tx
+# 
+# Top level modules:
+# 	link_tx
+# End time: 10:05:46 on May 01,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+# Start time: 10:05:46 on May 01,2026
+# vlog -sv -work work ../rtl/link/link_rx.sv 
+# -- Compiling module link_rx
+# 
+# Top level modules:
+# 	link_rx
+# End time: 10:05:46 on May 01,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+# Start time: 10:05:46 on May 01,2026
+# vlog -sv -work work ../tb/shared/tb_debounce.sv 
+# -- Compiling module tb_debounce
+# 
+# Top level modules:
+# 	tb_debounce
+# End time: 10:05:47 on May 01,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+# Start time: 10:05:47 on May 01,2026
+# vlog -sv -work work ../tb/shared/tb_sync_fifo.sv 
+# -- Compiling package tb_sync_fifo_sv_unit
+# -- Importing package hft_pkg
+# -- Compiling module tb_sync_fifo
+# 
+# Top level modules:
+# 	tb_sync_fifo
+# End time: 10:05:47 on May 01,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+# Start time: 10:05:47 on May 01,2026
+# vlog -sv -work work ../tb/shared/tb_lfsr32.sv 
+# -- Compiling package tb_lfsr32_sv_unit
+# -- Importing package hft_pkg
+# -- Compiling module tb_lfsr32
+# 
+# Top level modules:
+# 	tb_lfsr32
+# End time: 10:05:47 on May 01,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+# Start time: 10:05:47 on May 01,2026
+# vlog -sv -work work ../tb/link/tb_link_tx.sv 
+# ** Warning: ../tb/link/tb_link_tx.sv(173): (vlog-2244) Variable 'timeout' is implicitly static. You must either explicitly declare it as static or automatic
+# or remove the initialization in the declaration of variable.
+# -- Compiling package tb_link_tx_sv_unit
+# -- Importing package hft_pkg
+# -- Compiling module tb_link_tx
+# ** Warning: ../tb/link/tb_link_tx.sv(173): (vlog-2244) Variable 'timeout' is implicitly static. You must either explicitly declare it as static or automatic
+# or remove the initialization in the declaration of variable.
+# 
+# Top level modules:
+# 	tb_link_tx
+# End time: 10:05:47 on May 01,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 2
+# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+# Start time: 10:05:47 on May 01,2026
+# vlog -sv -work work ../tb/link/tb_link_rx.sv 
+# -- Compiling package tb_link_rx_sv_unit
+# -- Importing package hft_pkg
+# -- Compiling module tb_link_rx
+# 
+# Top level modules:
+# 	tb_link_rx
+# End time: 10:05:48 on May 01,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+# Start time: 10:05:48 on May 01,2026
+# vlog -sv -work work ../tb/link/tb_link_loopback.sv 
+# -- Compiling package tb_link_loopback_sv_unit
+# -- Importing package hft_pkg
+# -- Compiling module tb_link_loopback
+# 
+# Top level modules:
+# 	tb_link_loopback
+# End time: 10:05:48 on May 01,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# 
+#     tb_debounce
+#     tb_sync_fifo
+#     tb_lfsr32
+#     tb_link_tx
+#     tb_link_rx
+#     tb_link_loopback
+# 
+# 6
+# 0

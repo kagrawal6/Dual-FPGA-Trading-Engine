@@ -1,0 +1,23 @@
+# End time: 10:05:49 on May 01,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_lfsr32 -quiet -onfinish stop 
+# Start time: 10:05:49 on May 01,2026
+# --- test_reset ---
+# --- test_load_hold ---
+# --- test_golden_deadbeef ---
+# --- test_golden_seed1 ---
+# --- test_zero_seed_remap ---
+# --- test_all_ones_seed ---
+# --- test_load_during_enable ---
+# --- test_simultaneous_load_enable ---
+# --- test_rapid_toggle ---
+# --- test_determinism ---
+# --- test_never_zero ---
+# 
+# ===================================
+# tb_lfsr32: PASS (1180 checks passed)
+# ===================================
+# ** Note: $finish    : ../tb/shared/tb_lfsr32.sv(286)
+#    Time: 12335 ns  Iteration: 1  Instance: /tb_lfsr32
+# Break in Module tb_lfsr32 at ../tb/shared/tb_lfsr32.sv line 286
+# Stopped at ../tb/shared/tb_lfsr32.sv line 286

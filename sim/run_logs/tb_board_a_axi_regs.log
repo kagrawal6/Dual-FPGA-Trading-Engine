@@ -1,0 +1,44 @@
+# End time: 10:04:12 on May 01,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_board_a_axi_regs -quiet -onfinish stop 
+# Start time: 10:04:12 on May 01,2026
+# === tb_board_a_axi_regs: start ===
+# 
+# === T1: Scalar config write/read ===
+# 
+# === T2: CTRL pulses ===
+# 
+# === T3: STATUS register packing ===
+# 
+# === T4: Counter readbacks ===
+# 
+# === T5: INIT_MID array ===
+# 
+# === T6: INIT_SPREAD array (with 0 saturation) ===
+# 
+# === T7: SECTOR_ID array ===
+# 
+# === T8: TOKEN_PACK ===
+# 
+# === T9: ACTIVE_SYM_COUNT clamp ===
+# 
+# === T10: Reset defaults ===
+# 
+# === T11: B3 LIVE_BID readback ===
+# 
+# === T12: B3 LIVE_ASK readback ===
+# 
+# === T13: B3 LIVE_MID readback ===
+# 
+# === T14: Unmapped read returns 0 ===
+# 
+# ══════════════════════════════════════════
+#   tb_board_a_axi_regs complete
+#   PASSED: 229
+#   FAILED: 0
+# ══════════════════════════════════════════
+# tb_board_a_axi_regs: PASS (229 checks passed)
+# ** Note: $finish    : ../tb/board_a/tb_board_a_axi_regs.sv(439)
+#    Time: 5705 ns  Iteration: 1  Instance: /tb_board_a_axi_regs
+# Break in Module tb_board_a_axi_regs at ../tb/board_a/tb_board_a_axi_regs.sv line 439
+# Stopped at ../tb/board_a/tb_board_a_axi_regs.sv line 439

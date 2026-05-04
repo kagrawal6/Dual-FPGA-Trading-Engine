@@ -1,0 +1,20 @@
+# End time: 10:05:49 on May 01,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_sync_fifo -quiet -onfinish stop 
+# Start time: 10:05:49 on May 01,2026
+# --- test_reset ---
+# --- test_fill_drain ---
+# --- test_concurrent_rdwr ---
+# --- test_overflow ---
+# --- test_underflow ---
+# --- test_flush_during_write ---
+# --- test_almost_full ---
+# --- test_small_fifo ---
+# 
+# ===================================
+# tb_sync_fifo: PASS (67 checks passed)
+# ===================================
+# ** Note: $finish    : ../tb/shared/tb_sync_fifo.sv(326)
+#    Time: 2786 ns  Iteration: 0  Instance: /tb_sync_fifo
+# Break in Module tb_sync_fifo at ../tb/shared/tb_sync_fifo.sv line 326
+# Stopped at ../tb/shared/tb_sync_fifo.sv line 326

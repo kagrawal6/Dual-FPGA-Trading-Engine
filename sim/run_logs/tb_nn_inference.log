@@ -1,0 +1,34 @@
+# End time: 10:03:35 on May 01,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_nn_inference -quiet -onfinish stop 
+# Start time: 10:03:35 on May 01,2026
+# === tb_nn_inference: NN strategy unit checks ===
+# 
+# --- Phase 1: post-reset values ---
+# 
+# --- Phase 2: pipeline latency (16 cycles) ---
+# 
+# --- Phase 3: symbol gating (sym >= 4 → no signal) ---
+# 
+# --- Phase 4: regime gating (CALM, BURST → no signal) ---
+# 
+# --- Phase 5: liveness on tradable stream ---
+# P5: fires=80 (BUY=80, SELL=0) over 400 inputs
+# 
+# --- Phase 6: position-aware sanity ---
+# P6: flat_fires=13 long_fires=13 (informational)
+# 
+# --- Phase 7: mid-pipeline reset ---
+# 
+# --- Phase 8: saturated continuous stream (backpressure) ---
+# P8: fires=40 over 200 back-to-back valid cycles
+# 
+# ==============================
+# tb_nn_inference: PASSED: 912
+# tb_nn_inference: FAILED: 0
+# ==============================
+# tb_nn_inference: PASS (912 checks passed)
+# ** Note: $finish    : ../tb/board_b/tb_nn_inference.sv(622)
+#    Time: 12366 ns  Iteration: 0  Instance: /tb_nn_inference
+# Break in Module tb_nn_inference at ../tb/board_b/tb_nn_inference.sv line 622
+# Stopped at ../tb/board_b/tb_nn_inference.sv line 622

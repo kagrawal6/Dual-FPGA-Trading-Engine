@@ -1,0 +1,41 @@
+# End time: 10:03:34 on May 01,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_latency_histogram -quiet -onfinish stop 
+# Start time: 10:03:34 on May 01,2026
+# 
+# === GM Sample 0: lat=40 ===
+# 
+# === GM Sample 1: lat=64 ===
+# 
+# === GM Sample 2: lat=5 ===
+# 
+# === GM Sample 3: lat=32 ===
+# 
+# === GM Sample 4: lat=96 ===
+# 
+# === GM Sample 5: lat=31 ===
+# 
+# === GM Sample 6: lat=0 ===
+# 
+# === GM Sample 7: lat=63 ===
+# 
+# === T8: Clear ===
+# 
+# === T9: Idle ===
+# 
+# === T10: Large latency (bin overflow) ===
+# 
+# === T11: 16-bit timestamp wrap ===
+# 
+# === T12: Zero latency ===
+# 
+# ══════════════════════════════════════════
+#   latency_histogram testbench complete
+#   PASSED: 54
+#   FAILED: 0
+# ══════════════════════════════════════════
+# 
+# ** Note: $finish    : ../tb/board_b/tb_latency_histogram.sv(228)
+#    Time: 496 ns  Iteration: 0  Instance: /tb_latency_histogram
+# Break in Module tb_latency_histogram at ../tb/board_b/tb_latency_histogram.sv line 228
+# Stopped at ../tb/board_b/tb_latency_histogram.sv line 228

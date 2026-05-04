@@ -3,8 +3,8 @@
 # SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
 # IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
 # SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
-# Start of session at: Wed Apr 29 02:24:22 2026
-# Process ID         : 9544
+# Start of session at: Fri May  1 10:21:22 2026
+# Process ID         : 7564
 # Current directory  : C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1
 # Command line       : vivado.exe -log system_wrapper.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source system_wrapper.tcl
 # Log file           : C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/system_wrapper.vds
@@ -17,12 +17,12 @@
 # CPU Physical cores : 4
 # CPU Logical cores  : 8
 # Host memory        : 16889 MB
-# Swap memory        : 22338 MB
-# Total Virtual      : 39228 MB
-# Available Virtual  : 17411 MB
+# Swap memory        : 13655 MB
+# Total Virtual      : 30545 MB
+# Available Virtual  : 10290 MB
 #-----------------------------------------------------------
 source system_wrapper.tcl -notrace
-create_project: Time (s): cpu = 00:00:11 ; elapsed = 00:00:07 . Memory (MB): peak = 531.363 ; gain = 219.730
+create_project: Time (s): cpu = 00:00:13 ; elapsed = 00:00:09 . Memory (MB): peak = 531.820 ; gain = 218.570
 INFO: [IP_Flow 19-234] Refreshing IP repositories
 INFO: [IP_Flow 19-1704] No user IP repositories specified
 INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'C:/AMDDesignTools/2025.2/Vivado/data/ip'.
@@ -33,46 +33,46 @@ INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xczu3eg
 INFO: [Device 21-403] Loading part xczu3eg-sfvc784-2-e
 INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 2 processes.
 INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
-INFO: [Synth 8-7075] Helper process launched with PID 20812
+INFO: [Synth 8-7075] Helper process launched with PID 24156
 ---------------------------------------------------------------------------------
-Starting RTL Elaboration : Time (s): cpu = 00:00:06 ; elapsed = 00:00:07 . Memory (MB): peak = 1782.184 ; gain = 205.484
+Starting RTL Elaboration : Time (s): cpu = 00:00:11 ; elapsed = 00:00:11 . Memory (MB): peak = 1783.074 ; gain = 205.199
 ---------------------------------------------------------------------------------
 INFO: [Synth 8-6157] synthesizing module 'system_wrapper' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.gen/sources_1/bd/system/hdl/system_wrapper.v:13]
 INFO: [Synth 8-6157] synthesizing module 'system' [c:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.gen/sources_1/bd/system/synth/system.v:13]
-INFO: [Synth 8-6157] synthesizing module 'system_axi_sc_0' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/.Xil/Vivado-9544-Kushal2009/realtime/system_axi_sc_0_stub.v:6]
-INFO: [Synth 8-6155] done synthesizing module 'system_axi_sc_0' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/.Xil/Vivado-9544-Kushal2009/realtime/system_axi_sc_0_stub.v:6]
-INFO: [Synth 8-6157] synthesizing module 'system_hft_core_0' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/.Xil/Vivado-9544-Kushal2009/realtime/system_hft_core_0_stub.v:6]
-INFO: [Synth 8-6155] done synthesizing module 'system_hft_core_0' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/.Xil/Vivado-9544-Kushal2009/realtime/system_hft_core_0_stub.v:6]
-INFO: [Synth 8-6157] synthesizing module 'system_rst_sys_0' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/.Xil/Vivado-9544-Kushal2009/realtime/system_rst_sys_0_stub.v:6]
-INFO: [Synth 8-6155] done synthesizing module 'system_rst_sys_0' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/.Xil/Vivado-9544-Kushal2009/realtime/system_rst_sys_0_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'system_axi_sc_0' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/.Xil/Vivado-7564-Kushal2009/realtime/system_axi_sc_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_axi_sc_0' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/.Xil/Vivado-7564-Kushal2009/realtime/system_axi_sc_0_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'system_hft_core_0' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/.Xil/Vivado-7564-Kushal2009/realtime/system_hft_core_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_hft_core_0' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/.Xil/Vivado-7564-Kushal2009/realtime/system_hft_core_0_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'system_rst_sys_0' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/.Xil/Vivado-7564-Kushal2009/realtime/system_rst_sys_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_rst_sys_0' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/.Xil/Vivado-7564-Kushal2009/realtime/system_rst_sys_0_stub.v:6]
 WARNING: [Synth 8-7071] port 'mb_reset' of module 'system_rst_sys_0' is unconnected for instance 'rst_sys' [c:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.gen/sources_1/bd/system/synth/system.v:205]
 WARNING: [Synth 8-7071] port 'bus_struct_reset' of module 'system_rst_sys_0' is unconnected for instance 'rst_sys' [c:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.gen/sources_1/bd/system/synth/system.v:205]
 WARNING: [Synth 8-7071] port 'peripheral_reset' of module 'system_rst_sys_0' is unconnected for instance 'rst_sys' [c:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.gen/sources_1/bd/system/synth/system.v:205]
 WARNING: [Synth 8-7071] port 'interconnect_aresetn' of module 'system_rst_sys_0' is unconnected for instance 'rst_sys' [c:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.gen/sources_1/bd/system/synth/system.v:205]
 WARNING: [Synth 8-7023] instance 'rst_sys' of module 'system_rst_sys_0' has 10 connections declared, but only 6 given [c:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.gen/sources_1/bd/system/synth/system.v:205]
-INFO: [Synth 8-6157] synthesizing module 'system_zynq_ps_0' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/.Xil/Vivado-9544-Kushal2009/realtime/system_zynq_ps_0_stub.v:6]
-INFO: [Synth 8-6155] done synthesizing module 'system_zynq_ps_0' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/.Xil/Vivado-9544-Kushal2009/realtime/system_zynq_ps_0_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'system_zynq_ps_0' [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/.Xil/Vivado-7564-Kushal2009/realtime/system_zynq_ps_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_zynq_ps_0' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/.Xil/Vivado-7564-Kushal2009/realtime/system_zynq_ps_0_stub.v:6]
 INFO: [Synth 8-6155] done synthesizing module 'system' (0#1) [c:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.gen/sources_1/bd/system/synth/system.v:13]
 INFO: [Synth 8-6155] done synthesizing module 'system_wrapper' (0#1) [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.gen/sources_1/bd/system/hdl/system_wrapper.v:13]
 ---------------------------------------------------------------------------------
-Finished RTL Elaboration : Time (s): cpu = 00:00:08 ; elapsed = 00:00:09 . Memory (MB): peak = 1905.539 ; gain = 328.840
+Finished RTL Elaboration : Time (s): cpu = 00:00:14 ; elapsed = 00:00:15 . Memory (MB): peak = 1908.219 ; gain = 330.344
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Handling Custom Attributes
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Handling Custom Attributes : Time (s): cpu = 00:00:08 ; elapsed = 00:00:09 . Memory (MB): peak = 1905.539 ; gain = 328.840
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:14 ; elapsed = 00:00:15 . Memory (MB): peak = 1908.219 ; gain = 330.344
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:08 ; elapsed = 00:00:09 . Memory (MB): peak = 1905.539 ; gain = 328.840
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:14 ; elapsed = 00:00:15 . Memory (MB): peak = 1908.219 ; gain = 330.344
 ---------------------------------------------------------------------------------
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.005 . Memory (MB): peak = 1905.539 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.005 . Memory (MB): peak = 1908.219 ; gain = 0.000
 INFO: [Project 1-570] Preparing netlist for logic optimization
 
 Processing XDC Constraints
 Initializing timing engine
 Parsing XDC File [c:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.gen/sources_1/bd/system/ip/system_zynq_ps_0/system_zynq_ps_0/system_zynq_ps_0_in_context.xdc] for cell 'system_i/zynq_ps'
-create_clock: Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1905.941 ; gain = 0.402
+create_clock: Time (s): cpu = 00:00:07 ; elapsed = 00:00:08 . Memory (MB): peak = 1917.320 ; gain = 0.699
 Finished Parsing XDC File [c:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.gen/sources_1/bd/system/ip/system_zynq_ps_0/system_zynq_ps_0/system_zynq_ps_0_in_context.xdc] for cell 'system_i/zynq_ps'
 Parsing XDC File [c:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.gen/sources_1/bd/system/ip/system_hft_core_0/system_hft_core_0/system_hft_core_0_in_context.xdc] for cell 'system_i/hft_core'
 Finished Parsing XDC File [c:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.gen/sources_1/bd/system/ip/system_hft_core_0/system_hft_core_0/system_hft_core_0_in_context.xdc] for cell 'system_i/hft_core'
@@ -88,13 +88,13 @@ Parsing XDC File [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Tradi
 Finished Parsing XDC File [C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/dont_touch.xdc]
 Completed Processing XDC Constraints
 
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 1905.941 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 1917.320 ; gain = 0.000
 INFO: [Project 1-111] Unisim Transformation Summary:
 No Unisim elements were transformed.
 
-Constraint Validation Runtime : Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.011 . Memory (MB): peak = 1905.941 ; gain = 0.000
+Constraint Validation Runtime : Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.027 . Memory (MB): peak = 1917.320 ; gain = 0.000
 ---------------------------------------------------------------------------------
-Finished Constraint Validation : Time (s): cpu = 00:00:25 ; elapsed = 00:00:26 . Memory (MB): peak = 1905.941 ; gain = 329.242
+Finished Constraint Validation : Time (s): cpu = 00:00:34 ; elapsed = 00:00:36 . Memory (MB): peak = 1917.320 ; gain = 339.445
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Loading Part and Timing Information
@@ -102,16 +102,16 @@ Start Loading Part and Timing Information
 Loading part: xczu3eg-sfvc784-2-e
 INFO: [Synth 8-6742] Reading net delay rules and data
 ---------------------------------------------------------------------------------
-Finished Loading Part and Timing Information : Time (s): cpu = 00:00:25 ; elapsed = 00:00:26 . Memory (MB): peak = 1905.941 ; gain = 329.242
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:34 ; elapsed = 00:00:36 . Memory (MB): peak = 1917.320 ; gain = 339.445
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Applying 'set_property' XDC Constraints
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:25 ; elapsed = 00:00:26 . Memory (MB): peak = 1905.941 ; gain = 329.242
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:34 ; elapsed = 00:00:36 . Memory (MB): peak = 1917.320 ; gain = 339.445
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:25 ; elapsed = 00:00:26 . Memory (MB): peak = 1905.941 ; gain = 329.242
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:34 ; elapsed = 00:00:36 . Memory (MB): peak = 1917.320 ; gain = 339.445
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start RTL Component Statistics 
@@ -133,25 +133,25 @@ Finished Part Resource Summary
 Start Cross Boundary and Area Optimization
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:28 ; elapsed = 00:00:29 . Memory (MB): peak = 1919.258 ; gain = 342.559
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:37 ; elapsed = 00:00:39 . Memory (MB): peak = 1927.844 ; gain = 349.969
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Applying XDC Timing Constraints
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:41 ; elapsed = 00:00:43 . Memory (MB): peak = 2619.516 ; gain = 1042.816
+Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:53 ; elapsed = 00:00:57 . Memory (MB): peak = 2631.070 ; gain = 1053.195
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Timing Optimization
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Timing Optimization : Time (s): cpu = 00:00:41 ; elapsed = 00:00:43 . Memory (MB): peak = 2619.516 ; gain = 1042.816
+Finished Timing Optimization : Time (s): cpu = 00:00:53 ; elapsed = 00:00:57 . Memory (MB): peak = 2631.070 ; gain = 1053.195
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Technology Mapping
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Technology Mapping : Time (s): cpu = 00:00:41 ; elapsed = 00:00:43 . Memory (MB): peak = 2629.406 ; gain = 1052.707
+Finished Technology Mapping : Time (s): cpu = 00:00:54 ; elapsed = 00:00:57 . Memory (MB): peak = 2641.051 ; gain = 1063.176
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start IO Insertion
@@ -169,37 +169,37 @@ Start Final Netlist Cleanup
 Finished Final Netlist Cleanup
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished IO Insertion : Time (s): cpu = 00:00:46 ; elapsed = 00:00:48 . Memory (MB): peak = 2880.250 ; gain = 1303.551
+Finished IO Insertion : Time (s): cpu = 00:00:59 ; elapsed = 00:01:03 . Memory (MB): peak = 2891.641 ; gain = 1313.766
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Renaming Generated Instances
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Instances : Time (s): cpu = 00:00:46 ; elapsed = 00:00:48 . Memory (MB): peak = 2880.250 ; gain = 1303.551
+Finished Renaming Generated Instances : Time (s): cpu = 00:00:59 ; elapsed = 00:01:03 . Memory (MB): peak = 2891.641 ; gain = 1313.766
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Rebuilding User Hierarchy
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Rebuilding User Hierarchy : Time (s): cpu = 00:00:46 ; elapsed = 00:00:48 . Memory (MB): peak = 2880.250 ; gain = 1303.551
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:00:59 ; elapsed = 00:01:03 . Memory (MB): peak = 2891.641 ; gain = 1313.766
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Renaming Generated Ports
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Ports : Time (s): cpu = 00:00:46 ; elapsed = 00:00:48 . Memory (MB): peak = 2880.250 ; gain = 1303.551
+Finished Renaming Generated Ports : Time (s): cpu = 00:00:59 ; elapsed = 00:01:03 . Memory (MB): peak = 2891.641 ; gain = 1313.766
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Handling Custom Attributes
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Handling Custom Attributes : Time (s): cpu = 00:00:46 ; elapsed = 00:00:48 . Memory (MB): peak = 2880.250 ; gain = 1303.551
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:59 ; elapsed = 00:01:03 . Memory (MB): peak = 2891.641 ; gain = 1313.766
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Renaming Generated Nets
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
-Finished Renaming Generated Nets : Time (s): cpu = 00:00:46 ; elapsed = 00:00:48 . Memory (MB): peak = 2880.250 ; gain = 1303.551
+Finished Renaming Generated Nets : Time (s): cpu = 00:00:59 ; elapsed = 00:01:03 . Memory (MB): peak = 2891.641 ; gain = 1313.766
 ---------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------
 Start Writing Synthesis Report
@@ -227,18 +227,18 @@ Report Cell Usage:
 |6     |OBUF            |    20|
 +------+----------------+------+
 ---------------------------------------------------------------------------------
-Finished Writing Synthesis Report : Time (s): cpu = 00:00:46 ; elapsed = 00:00:48 . Memory (MB): peak = 2880.250 ; gain = 1303.551
+Finished Writing Synthesis Report : Time (s): cpu = 00:00:59 ; elapsed = 00:01:03 . Memory (MB): peak = 2891.641 ; gain = 1313.766
 ---------------------------------------------------------------------------------
 Synthesis finished with 0 errors, 0 critical warnings and 0 warnings.
-Synthesis Optimization Runtime : Time (s): cpu = 00:00:29 ; elapsed = 00:00:40 . Memory (MB): peak = 2880.250 ; gain = 1303.148
-Synthesis Optimization Complete : Time (s): cpu = 00:00:47 ; elapsed = 00:00:49 . Memory (MB): peak = 2880.250 ; gain = 1303.551
+Synthesis Optimization Runtime : Time (s): cpu = 00:00:36 ; elapsed = 00:00:52 . Memory (MB): peak = 2891.641 ; gain = 1304.664
+Synthesis Optimization Complete : Time (s): cpu = 00:01:00 ; elapsed = 00:01:04 . Memory (MB): peak = 2891.641 ; gain = 1313.766
 INFO: [Project 1-571] Translating synthesized netlist
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.006 . Memory (MB): peak = 2880.250 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.007 . Memory (MB): peak = 2891.641 ; gain = 0.000
 INFO: [Netlist 29-17] Analyzing 18 Unisim elements for replacement
 INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
 INFO: [Project 1-570] Preparing netlist for logic optimization
 INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
-Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 2880.250 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 2891.641 ; gain = 0.000
 INFO: [Project 1-111] Unisim Transformation Summary:
   A total of 18 instances were transformed.
   IBUF => IBUF (IBUFCTRL, INBUF): 18 instances
@@ -247,8 +247,8 @@ Synth Design complete | Checksum: f123a751
 INFO: [Common 17-83] Releasing license: Synthesis
 31 Infos, 5 Warnings, 0 Critical Warnings and 0 Errors encountered.
 synth_design completed successfully
-synth_design: Time (s): cpu = 00:00:55 ; elapsed = 00:01:00 . Memory (MB): peak = 2880.250 ; gain = 2285.180
-Write ShapeDB Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.002 . Memory (MB): peak = 2880.250 ; gain = 0.000
+synth_design: Time (s): cpu = 00:01:11 ; elapsed = 00:01:20 . Memory (MB): peak = 2891.641 ; gain = 2296.141
+Write ShapeDB Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.005 . Memory (MB): peak = 2891.641 ; gain = 0.000
 INFO: [Common 17-1381] The checkpoint 'C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/vivado/hft_board_a/hft_board_a.runs/synth_1/system_wrapper.dcp' has been generated.
 INFO: [Vivado 12-24828] Executing command : report_utilization -file system_wrapper_utilization_synth.rpt -pb system_wrapper_utilization_synth.pb
-INFO: [Common 17-206] Exiting Vivado at Wed Apr 29 02:25:37 2026...
+INFO: [Common 17-206] Exiting Vivado at Fri May  1 10:23:00 2026...

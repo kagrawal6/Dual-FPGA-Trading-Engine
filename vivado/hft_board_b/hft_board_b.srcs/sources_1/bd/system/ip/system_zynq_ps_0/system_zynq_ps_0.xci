@@ -243,8 +243,8 @@
         "SUBPRESET1": [ { "value": "Custom", "resolve_type": "user", "usage": "all" } ],
         "SUBPRESET2": [ { "value": "Custom", "resolve_type": "user", "usage": "all" } ],
         "PSU_UIPARAM_GENERATE_SUMMARY": [ { "value": "<Select>", "resolve_type": "user", "usage": "all" } ],
-        "PSU_MIO_TREE_PERIPHERALS": [ { "value": "#############################################################################", "resolve_type": "user", "usage": "all" } ],
-        "PSU_MIO_TREE_SIGNALS": [ { "value": "#############################################################################", "resolve_type": "user", "usage": "all" } ],
+        "PSU_MIO_TREE_PERIPHERALS": [ { "value": "", "resolve_type": "user", "usage": "all" } ],
+        "PSU_MIO_TREE_SIGNALS": [ { "value": "", "resolve_type": "user", "usage": "all" } ],
         "PSU_PERIPHERAL_BOARD_PRESET": [ { "value": "", "resolve_type": "user", "usage": "all" } ],
         "PSU__NAND__PERIPHERAL__IO": [ { "value": "<Select>", "resolve_type": "user", "enabled": false, "usage": "all" } ],
         "PSU__NAND__PERIPHERAL__ENABLE": [ { "value": "0", "resolve_type": "user", "usage": "all" } ],
@@ -1615,7 +1615,7 @@
         "PSU__NUM_F2P0__INTR__INPUTS": [ { "value": "1", "value_permission": "bd", "resolve_type": "user", "format": "long", "enabled": false, "usage": "all" } ],
         "PSU__NUM_F2P1__INTR__INPUTS": [ { "value": "1", "value_permission": "bd", "resolve_type": "user", "format": "long", "enabled": false, "usage": "all" } ],
         "PSU__NUM_FABRIC_RESETS": [ { "value": "1", "value_src": "user", "resolve_type": "user", "format": "long", "usage": "all" } ],
-        "PSU__GPIO_EMIO_WIDTH": [ { "value": "1", "value_src": "user", "resolve_type": "user", "format": "long", "usage": "all" } ],
+        "PSU__GPIO_EMIO_WIDTH": [ { "value": "1", "resolve_type": "user", "format": "long", "usage": "all" } ],
         "PSU__HPM0_FPD__NUM_WRITE_THREADS": [ { "value": "4", "resolve_type": "user", "format": "long", "usage": "all" } ],
         "PSU__HPM0_FPD__NUM_READ_THREADS": [ { "value": "4", "resolve_type": "user", "format": "long", "usage": "all" } ],
         "PSU__HPM1_FPD__NUM_WRITE_THREADS": [ { "value": "4", "resolve_type": "user", "format": "long", "usage": "all" } ],
@@ -2075,5 +2075,5 @@
       }
     }
   },
-  "checksum": "3b15709a"
+  "checksum": "746b2ea5"
 }

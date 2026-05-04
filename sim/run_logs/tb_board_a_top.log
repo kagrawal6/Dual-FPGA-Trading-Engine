@@ -1,0 +1,59 @@
+# vsim -voptargs=""+acc"" work.tb_board_a_top -quiet -onfinish stop 
+# Start time: 10:04:47 on May 01,2026
+# --- test_axi_config_16sym ---
+# --- test_fsm_start ---
+# --- test_quote_generation_16sym ---
+#   quotes_sent = 153
+# --- test_symbol_diversity ---
+#   Unique symbols seen: 16 / 16
+# --- test_status_decode ---
+#   fifo_fill=0 link_up=0
+# --- test_link_order_sym0 ---
+#   Captured: sym=5 ask=0x009b07b8
+#   orders_rcvd = 1
+# --- test_multi_order ---
+#   orders_rcvd after multi = 5 (was 1)
+# --- test_regime_change ---
+# --- test_active_sym_change ---
+# --- test_fsm_stop ---
+# --- test_fsm_resume ---
+# --- test_reset_clears ---
+# --- test_restart_new_seed ---
+#   quotes after restart = 92
+# --- test_sell_order ---
+#   SELL order for sym=13, orders_rcvd=1
+# --- test_single_symbol ---
+#   With 1 symbol: sym0 quotes = 8 / 8
+# --- test_zero_sym_clamp ---
+# --- test_oversized_sym_clamp ---
+# --- test_quote_fields ---
+#   Valid quote frames: 8 / 8
+# --- test_fill_response ---
+# --- test_burst_regime ---
+# --- test_led_running ---
+# --- test_spread_readback ---
+# --- test_slow_interval ---
+#   With interval=500: quotes = 6 (expect ~5-6)
+# --- test_rapid_orders ---
+#   rapid orders: before=0 after=4 (expect +4)
+# --- test_led_stopped ---
+# --- test_rgb0_regimes ---
+# --- test_link_no_errors ---
+# --- test_b2_extended_counters ---
+#   ORDERS_RCVD  = 4
+#   FILLS_SENT   = 4
+#   REJECTS_SENT = 0
+#   LINK_ERRORS  = 0
+# --- test_b3_live_prices ---
+#   sym[0]: BID=0x00b3f848  ASK=0x00b40848  MID=0x00b40048
+#   sym[1]: BID=0x01a3f7e8  ASK=0x01a407e8  MID=0x01a3ffe8
+#   sym[2]: BID=0x0383f7da  ASK=0x038407da  MID=0x0383ffda
+#   sym[3]: BID=0x0072f7e2  ASK=0x007307e2  MID=0x0072ffe2
+# 
+# ===================================
+# tb_board_a_top: PASS (89 checks passed)
+# ===================================
+# ** Note: $finish    : ../tb/board_a/tb_board_a_top.sv(886)
+#    Time: 955656 ns  Iteration: 0  Instance: /tb_board_a_top
+# Break in Module tb_board_a_top at ../tb/board_a/tb_board_a_top.sv line 886
+# Stopped at ../tb/board_a/tb_board_a_top.sv line 886

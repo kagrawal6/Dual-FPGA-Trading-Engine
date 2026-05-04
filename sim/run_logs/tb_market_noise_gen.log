@@ -1,0 +1,20 @@
+# End time: 10:04:10 on May 01,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_market_noise_gen -quiet -onfinish stop 
+# Start time: 10:04:10 on May 01,2026
+# --- test_reset ---
+# --- test_golden_vectors ---
+# --- test_enable_gating ---
+# --- test_active_1 ---
+# --- test_determinism ---
+# --- test_pop_scaling ---
+# --- test_drift_saturation ---
+# --- test_lfsr_load_clears_drift ---
+# 
+# ===================================
+# tb_market_noise_gen: PASS (238 checks passed)
+# ===================================
+# ** Note: $finish    : ../tb/board_a/tb_market_noise_gen.sv(291)
+#    Time: 84956 ns  Iteration: 0  Instance: /tb_market_noise_gen
+# Break in Module tb_market_noise_gen at ../tb/board_a/tb_market_noise_gen.sv line 291
+# Stopped at ../tb/board_a/tb_market_noise_gen.sv line 291

@@ -1,0 +1,17 @@
+# End time: 10:05:50 on May 01,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_link_tx -quiet -onfinish stop 
+# Start time: 10:05:50 on May 01,2026
+# --- test_single_quote ---
+# --- test_all_msg_types ---
+# --- test_multi_frame_burst ---
+# --- test_nibble_order ---
+# --- test_backpressure ---
+# 
+# ===================================
+# tb_link_tx: PASS (16 checks passed)
+# ===================================
+# ** Note: $finish    : ../tb/link/tb_link_tx.sv(223)
+#    Time: 6335 ns  Iteration: 1  Instance: /tb_link_tx
+# Break in Module tb_link_tx at ../tb/link/tb_link_tx.sv line 223
+# Stopped at ../tb/link/tb_link_tx.sv line 223

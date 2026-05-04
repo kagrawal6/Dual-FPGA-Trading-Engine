@@ -1,0 +1,27 @@
+# End time: 10:03:31 on May 01,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_strategy_engine -quiet -onfinish stop 
+# Start time: 10:03:31 on May 01,2026
+# 
+# === Golden model vectors (9 cases) ===
+# 
+# === T10: One tick above +threshold ===
+# 
+# === T11: One tick below -threshold ===
+# 
+# === T12: Back-to-back feature_valid ===
+# 
+# === T13: Different threshold ===
+# 
+# === T14: Idle ===
+# 
+# ══════════════════════════════════════════
+#   strategy_engine testbench complete
+#   PASSED: 39
+#   FAILED: 0
+# ══════════════════════════════════════════
+# 
+# ** Note: $finish    : ../tb/board_b/tb_strategy_engine.sv(238)
+#    Time: 316 ns  Iteration: 0  Instance: /tb_strategy_engine
+# Break in Module tb_strategy_engine at ../tb/board_b/tb_strategy_engine.sv line 238
+# Stopped at ../tb/board_b/tb_strategy_engine.sv line 238

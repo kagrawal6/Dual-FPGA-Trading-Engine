@@ -40,6 +40,8 @@ set rtl_files [list \
     $rtl_dir/board_a/board_a_axi_regs.sv \
     $rtl_dir/board_a/board_a_ctrl.sv    \
     $rtl_dir/board_a/board_a_top.sv     \
+    $rtl_dir/board_b/policy_weights_4bit.sv \
+    $rtl_dir/board_b/nn_inference.sv    \
     $rtl_dir/board_b/msg_demux.sv       \
     $rtl_dir/board_b/quote_book.sv      \
     $rtl_dir/board_b/feature_compute.sv \
@@ -78,6 +80,7 @@ set tb_list [list \
     {tb_latency_histogram  $tb_dir/board_b/tb_latency_histogram.sv 0} \
     {tb_board_b_axi_regs   $tb_dir/board_b/tb_board_b_axi_regs.sv  1} \
     {tb_board_b_ctrl       $tb_dir/board_b/tb_board_b_ctrl.sv      0} \
+    {tb_nn_inference       $tb_dir/board_b/tb_nn_inference.sv      1} \
     {tb_board_b_pipeline   $tb_dir/board_b/tb_board_b_pipeline.sv  1} \
     {tb_board_b_top        $tb_dir/board_b/tb_board_b_top.sv       1} \
     {tb_system_top         $tb_dir/tb_system_top.sv                1} \

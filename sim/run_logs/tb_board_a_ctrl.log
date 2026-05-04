@@ -1,0 +1,21 @@
+# End time: 10:04:12 on May 01,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_board_a_ctrl -quiet -onfinish stop 
+# Start time: 10:04:12 on May 01,2026
+# --- test_regime_switch ---
+# --- test_sw_override ---
+# --- test_all_buttons ---
+# --- test_led_idle ---
+# --- test_led_running ---
+# --- test_rgb0 ---
+# --- test_rgb1 ---
+# --- test_blink ---
+# --- test_debounce_rejection ---
+# 
+# ===================================
+# tb_board_a_ctrl: PASS (39 checks passed)
+# ===================================
+# ** Note: $finish    : ../tb/board_a/tb_board_a_ctrl.sv(272)
+#    Time: 6005 ns  Iteration: 1  Instance: /tb_board_a_ctrl
+# Break in Module tb_board_a_ctrl at ../tb/board_a/tb_board_a_ctrl.sv line 272
+# Stopped at ../tb/board_a/tb_board_a_ctrl.sv line 272

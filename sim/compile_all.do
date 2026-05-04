@@ -36,7 +36,7 @@ vlog -sv -work work ../rtl/board_a/board_a_top.sv
 
 # 5. Board B RTL
 #    NN package + module compiled BEFORE board_b_top so the import resolves.
-vlog -sv -work work ../rtl/board_b/policy_weights.sv
+vlog -sv -work work ../rtl/board_b/policy_weights_4bit.sv
 vlog -sv -work work ../rtl/board_b/nn_inference.sv
 vlog -sv -work work ../rtl/board_b/msg_demux.sv
 vlog -sv -work work ../rtl/board_b/quote_book.sv

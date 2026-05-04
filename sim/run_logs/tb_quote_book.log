@@ -1,0 +1,35 @@
+# End time: 10:03:30 on May 01,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_quote_book -quiet -onfinish stop 
+# Start time: 10:03:30 on May 01,2026
+# 
+# === TEST 1: First round (cycles 0-3) ===
+# 
+# === TEST 2: Second round (cycles 4-7) — overwrite ===
+# 
+# === TEST 3: Back-to-back (no gap) ===
+# 
+# === TEST 4: Out-of-range symbol ===
+# 
+# === TEST 5: Idle (no valid) ===
+# 
+# === TEST 6: Regime field ===
+# 
+# === TEST 7: Golden model 3rd round ===
+# 
+# === TEST 8: Golden model 4th round (cycles 12-15) ===
+# 
+# === TEST 9: Triple overwrite same symbol ===
+# 
+# === TEST 10: Per-symbol best_bid/ask arrays ===
+# 
+# ══════════════════════════════════════════
+#   quote_book testbench complete
+#   PASSED: 62
+#   FAILED: 0
+# ══════════════════════════════════════════
+# 
+# ** Note: $finish    : ../tb/board_b/tb_quote_book.sv(402)
+#    Time: 606 ns  Iteration: 0  Instance: /tb_quote_book
+# Break in Module tb_quote_book at ../tb/board_b/tb_quote_book.sv line 402
+# Stopped at ../tb/board_b/tb_quote_book.sv line 402

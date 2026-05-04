@@ -1,0 +1,55 @@
+# End time: 10:03:37 on May 01,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_board_b_pipeline -quiet -onfinish stop 
+# Start time: 10:03:37 on May 01,2026
+# 
+# === Phase 1: Seed EMA (16 symbols, round 1) ===
+# 
+# === Phase 2: Price UP → SELL signals (16 symbols) ===
+#   orders_sent = 16 (was 0)
+# 
+# === Phase 3: Price DOWN → BUY signals (16 symbols) ===
+#   orders_sent = 32 (was 16)
+# 
+# === Phase 4: Fill injection (4 symbols) ===
+#   total_pnl = -161500
+# 
+# === Phase 5: SELL fills (4 symbols) ===
+# 
+# === Phase 6: Rejected fill (no position change) ===
+# 
+# === Phase 7: Order-enable off → rejects ===
+# 
+# === Phase 8: Position limit enforcement ===
+#   orders_sent=32, risk_rejects=7 (was 4)
+# 
+# === Phase 9: Rate limit enforcement ===
+#   orders_sent=34 (was 32, rate limit = 34)
+# 
+# === Phase 10: Max-loss risk halt ===
+#   total_pnl after loss = -559550
+#   risk_halt = 1
+# 
+# === Phase 11: Clear and verify ===
+# 
+# === Phase 12: Back-to-back stress (80 quotes) ===
+#   orders_sent = 64
+#   risk_rejects = 0
+# 
+# === Phase 13: Fills for all 16 symbols ===
+#   Non-zero positions: 16 / 16
+# 
+# === Phase 14: Order integrity ===
+#   Total orders observed by monitor: 98 (since clear: 64)
+# 
+# ══════════════════════════════════════════
+#   board_b_pipeline testbench complete
+#   PASSED: 26
+#   FAILED: 0
+#   Orders observed: 98
+# ══════════════════════════════════════════
+# 
+# ** Note: $finish    : ../tb/board_b/tb_board_b_pipeline.sv(622)
+#    Time: 5606 ns  Iteration: 0  Instance: /tb_board_b_pipeline
+# Break in Module tb_board_b_pipeline at ../tb/board_b/tb_board_b_pipeline.sv line 622
+# Stopped at ../tb/board_b/tb_board_b_pipeline.sv line 622

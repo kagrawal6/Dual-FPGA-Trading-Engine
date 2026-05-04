@@ -1,0 +1,35 @@
+# End time: 10:03:33 on May 01,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_position_tracker -quiet -onfinish stop 
+# Start time: 10:03:33 on May 01,2026
+# 
+# === GM Step 0: BUY sym=0 ===
+# 
+# === GM Step 1: SELL sym=1 ===
+# 
+# === GM Step 2: SELL sym=0 ===
+# 
+# === GM Step 3: REJECTED ===
+# 
+# === GM Step 4: BUY sym=0, qty=200 ===
+# 
+# === T5: Clear ===
+# 
+# === T6: ts_echo extraction ===
+# 
+# === T7: Out-of-range symbol ===
+# 
+# === T8: Back-to-back fills ===
+# 
+# === T9: Accumulating fills ===
+# 
+# ══════════════════════════════════════════
+#   position_tracker testbench complete
+#   PASSED: 58
+#   FAILED: 0
+# ══════════════════════════════════════════
+# 
+# ** Note: $finish    : ../tb/board_b/tb_position_tracker.sv(362)
+#    Time: 386 ns  Iteration: 0  Instance: /tb_position_tracker
+# Break in Module tb_position_tracker at ../tb/board_b/tb_position_tracker.sv line 362
+# Stopped at ../tb/board_b/tb_position_tracker.sv line 362

@@ -1,0 +1,18 @@
+# vsim -voptargs=""+acc"" work.tb_debounce -quiet -onfinish stop 
+# Start time: 10:05:48 on May 01,2026
+# --- test_reset ---
+# --- test_glitch ---
+# --- test_rising_edge ---
+# --- test_held_high ---
+# --- test_falling_edge ---
+# --- test_double_press ---
+# --- test_reset_during_bounce ---
+# --- test_fast_debounce ---
+# 
+# ===================================
+# tb_debounce: PASS (13 checks passed)
+# ===================================
+# ** Note: $finish    : ../tb/shared/tb_debounce.sv(216)
+#    Time: 4055 ns  Iteration: 1  Instance: /tb_debounce
+# Break in Module tb_debounce at ../tb/shared/tb_debounce.sv line 216
+# Stopped at ../tb/shared/tb_debounce.sv line 216

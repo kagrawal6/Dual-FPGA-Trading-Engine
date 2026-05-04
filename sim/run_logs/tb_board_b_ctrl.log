@@ -1,0 +1,33 @@
+# End time: 10:03:34 on May 01,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_board_b_ctrl -quiet -onfinish stop 
+# Start time: 10:03:34 on May 01,2026
+# 
+# === T1: Switch mapping ===
+# 
+# === T2: Button debounce ===
+# 
+# === T3: LED state encoding ===
+# 
+# === T4: RGB0 PnL ===
+# 
+# === T5: RGB1 risk/link ===
+# 
+# === T6: All 4 strategy values ===
+# 
+# === T7: All FSM state LED encodings ===
+# 
+# === T8: Double button press ===
+# 
+# === T9: Stop and reset buttons ===
+# 
+# ══════════════════════════════════════════
+#   board_b_ctrl testbench complete
+#   PASSED: 30
+#   FAILED: 0
+# ══════════════════════════════════════════
+# 
+# ** Note: $finish    : ../tb/board_b/tb_board_b_ctrl.sv(248)
+#    Time: 2365 ns  Iteration: 1  Instance: /tb_board_b_ctrl
+# Break in Module tb_board_b_ctrl at ../tb/board_b/tb_board_b_ctrl.sv line 248
+# Stopped at ../tb/board_b/tb_board_b_ctrl.sv line 248

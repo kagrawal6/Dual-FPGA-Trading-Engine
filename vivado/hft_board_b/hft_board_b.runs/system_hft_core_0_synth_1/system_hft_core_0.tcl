@@ -94,6 +94,8 @@ read_verilog -library xil_defaultlib -sv {
   {C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/link/link_rx.sv}
   {C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/link/link_tx.sv}
   {C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_b/msg_demux.sv}
+  {C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_b/policy_weights_4bit.sv}
+  {C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_b/nn_inference.sv}
   {C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_b/order_manager.sv}
   {C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_b/position_tracker.sv}
   {C:/Users/Kushal Agrawal/UW-madison school work/Dual-FPGA-Trading-Engine/rtl/board_b/quote_book.sv}

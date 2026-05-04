@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="synth_1" LaunchPart="xczu3eg-sfvc784-2-e" LaunchTime="1777448092">
+<GenRun Id="synth_1" LaunchPart="xczu3eg-sfvc784-2-e" LaunchTime="1777649630">
   <File Type="PA-TCL" Name="system_wrapper.tcl"/>
   <File Type="RDS-PROPCONSTRS" Name="system_wrapper_drc_synth.rpt"/>
   <File Type="REPORTS-TCL" Name="system_wrapper_reports.tcl"/>
@@ -97,6 +97,20 @@
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
     </File>
+    <File Path="$PPRDIR/../../rtl/board_b/policy_weights_4bit.sv">
+      <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="implementation"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PPRDIR/../../rtl/board_b/nn_inference.sv">
+      <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="implementation"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
     <File Path="$PPRDIR/../../rtl/board_b/order_manager.sv">
       <FileInfo>
         <Attr Name="UsedIn" Val="synthesis"/>
@@ -182,8 +196,8 @@
     </StratHandle>
     <Step Id="synth_design"/>
   </Strategy>
-  <BlockFileSet Type="BlockSrcs" Name="system_rst_sys_0"/>
   <BlockFileSet Type="BlockSrcs" Name="system_hft_core_0"/>
   <BlockFileSet Type="BlockSrcs" Name="system_zynq_ps_0"/>
   <BlockFileSet Type="BlockSrcs" Name="system_axi_sc_0"/>
+  <BlockFileSet Type="BlockSrcs" Name="system_rst_sys_0"/>
 </GenRun>

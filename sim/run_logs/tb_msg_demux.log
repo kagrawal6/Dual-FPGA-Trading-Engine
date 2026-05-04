@@ -1,0 +1,37 @@
+# vsim -voptargs=""+acc"" work.tb_msg_demux -quiet -onfinish stop 
+# Start time: 10:03:29 on May 01,2026
+# 
+# === TEST 1: Single QUOTE frame ===
+# 
+# === TEST 2: Single FILL frame ===
+# 
+# === TEST 3: Unknown msg_type ===
+# 
+# === TEST 4: Back-to-back QUOTEs ===
+# 
+# === TEST 5: Interleaved QUOTE/FILL ===
+# 
+# === TEST 6: Counter clear ===
+# 
+# === TEST 7: Idle (no valid) ===
+# 
+# === TEST 8: Rejected FILL routing ===
+# 
+# === TEST 9: Golden model reference frames ===
+# 
+# === TEST 10: 10-frame back-to-back stress ===
+# 
+# === TEST 11: Clear mid-stream ===
+# 
+# === TEST 12: Alternating QUOTE/FILL burst ===
+# 
+# ══════════════════════════════════════════
+#   msg_demux testbench complete
+#   PASSED: 70
+#   FAILED: 0
+# ══════════════════════════════════════════
+# 
+# ** Note: $finish    : ../tb/board_b/tb_msg_demux.sv(451)
+#    Time: 916 ns  Iteration: 0  Instance: /tb_msg_demux
+# Break in Module tb_msg_demux at ../tb/board_b/tb_msg_demux.sv line 451
+# Stopped at ../tb/board_b/tb_msg_demux.sv line 451

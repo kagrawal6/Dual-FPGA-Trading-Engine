@@ -243,8 +243,8 @@
         "SUBPRESET1": [ { "value": "Custom", "resolve_type": "user", "usage": "all" } ],
         "SUBPRESET2": [ { "value": "Custom", "resolve_type": "user", "usage": "all" } ],
         "PSU_UIPARAM_GENERATE_SUMMARY": [ { "value": "<Select>", "resolve_type": "user", "usage": "all" } ],
-        "PSU_MIO_TREE_PERIPHERALS": [ { "value": "#############################################################################", "resolve_type": "user", "usage": "all" } ],
-        "PSU_MIO_TREE_SIGNALS": [ { "value": "#############################################################################", "resolve_type": "user", "usage": "all" } ],
+        "PSU_MIO_TREE_PERIPHERALS": [ { "value": "", "resolve_type": "user", "usage": "all" } ],
+        "PSU_MIO_TREE_SIGNALS": [ { "value": "", "resolve_type": "user", "usage": "all" } ],
         "PSU_PERIPHERAL_BOARD_PRESET": [ { "value": "", "resolve_type": "user", "usage": "all" } ],
         "PSU__NAND__PERIPHERAL__IO": [ { "value": "<Select>", "resolve_type": "user", "enabled": false, "usage": "all" } ],
         "PSU__NAND__PERIPHERAL__ENABLE": [ { "value": "0", "resolve_type": "user", "usage": "all" } ],
@@ -2075,5 +2075,5 @@
       }
     }
   },
-  "checksum": "aa81e9f9"
+  "checksum": "7788e70b"
 }

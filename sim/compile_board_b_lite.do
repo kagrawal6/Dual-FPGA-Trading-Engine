@@ -6,8 +6,8 @@
 # position_tracker → latency_histogram, plus their AXI/control wrappers.
 #
 # OMITS:
-#   - rtl/board_b/policy_weights.sv     (~210 KB, 3,357 lines of weight ROMs)
-#   - rtl/board_b/nn_inference.sv       (~26k unrolled MACs)
+#   - rtl/board_b/policy_weights_4bit.sv (~3,300 lines of 4-bit weight ROMs)
+#   - rtl/board_b/nn_inference.sv        (time-multiplexed 9->128->128->64->3 MLP)
 #   - tb/board_b/tb_nn_inference.sv     (depends on nn_inference)
 #   - tb/board_b/tb_board_b_top.sv      (instantiates nn_inference)
 #   - tb/board_b/tb_board_b_pipeline.sv (instantiates feature_compute_nn)

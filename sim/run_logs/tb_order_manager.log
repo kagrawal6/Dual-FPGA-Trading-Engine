@@ -1,0 +1,31 @@
+# End time: 10:03:32 on May 01,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_order_manager -quiet -onfinish stop 
+# Start time: 10:03:32 on May 01,2026
+# 
+# === T1: BUY order frame packing ===
+# 
+# === T2: SELL order, order_id=1 ===
+# 
+# === T3: Backpressure ===
+# 
+# === T4: Simultaneous held-release + new order ===
+# 
+# === T5: Rapid 3-order burst ===
+# 
+# === T6: Clear ===
+# 
+# === T7: Order ID wrap-around ===
+# 
+# === T8: Idle ===
+# 
+# ══════════════════════════════════════════
+#   order_manager testbench complete
+#   PASSED: 42
+#   FAILED: 0
+# ══════════════════════════════════════════
+# 
+# ** Note: $finish    : ../tb/board_b/tb_order_manager.sv(295)
+#    Time: 606 ns  Iteration: 0  Instance: /tb_order_manager
+# Break in Module tb_order_manager at ../tb/board_b/tb_order_manager.sv line 295
+# Stopped at ../tb/board_b/tb_order_manager.sv line 295

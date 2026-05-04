@@ -17,6 +17,10 @@
 ../rtl/link/link_rx.sv
 
 // ── 4. Board B RTL (order doesn't matter after package) ────────────────────
+// NN policy package + module must come BEFORE board_b_top so the
+// `import policy_net_pkg::*;` in nn_inference resolves at elaboration.
+../rtl/board_b/policy_weights_4bit.sv
+../rtl/board_b/nn_inference.sv
 ../rtl/board_b/msg_demux.sv
 ../rtl/board_b/quote_book.sv
 ../rtl/board_b/feature_compute.sv
@@ -40,5 +44,6 @@
 ../tb/board_b/tb_latency_histogram.sv
 ../tb/board_b/tb_board_b_ctrl.sv
 ../tb/board_b/tb_board_b_axi_regs.sv
+../tb/board_b/tb_nn_inference.sv
 ../tb/board_b/tb_board_b_top.sv
 ../tb/board_b/tb_board_b_pipeline.sv

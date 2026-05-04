@@ -1,0 +1,37 @@
+# End time: 10:03:30 on May 01,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -voptargs=""+acc"" work.tb_feature_compute -quiet -onfinish stop 
+# Start time: 10:03:31 on May 01,2026
+# 
+# === TEST 1: First-sample initialization (cycles 0-3) ===
+# 
+# === TEST 2: EMA computation (cycles 4-7) ===
+# 
+# === TEST 3: Third round EMA (cycles 8-11) ===
+# 
+# === TEST 4: Fourth round EMA (cycles 12-15) ===
+# 
+# === TEST 5: Clear resets EMA state ===
+# 
+# === TEST 6: ema_alpha=0 (EMA frozen) ===
+# 
+# === TEST 7: ema_alpha=65535 (EMA tracks mid) ===
+# 
+# === TEST 8: Spread computation ===
+# 
+# === TEST 9: Multi-symbol EMA independence ===
+# 
+# === TEST 10: Idle ===
+# 
+# === TEST 11: Back-to-back quotes ===
+# 
+# ══════════════════════════════════════════
+#   feature_compute testbench complete
+#   PASSED: 99
+#   FAILED: 0
+# ══════════════════════════════════════════
+# 
+# ** Note: $finish    : ../tb/board_b/tb_feature_compute.sv(421)
+#    Time: 1226 ns  Iteration: 0  Instance: /tb_feature_compute
+# Break in Module tb_feature_compute at ../tb/board_b/tb_feature_compute.sv line 421
+# Stopped at ../tb/board_b/tb_feature_compute.sv line 421
