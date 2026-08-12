@@ -11,7 +11,7 @@ This document is a **step-by-step** path from **no bitstream** to **Python on th
 - Board A PS scripts: `sw/board_a/`
 - Board B PS scripts: `sw/board_b/`
 - Laptop dashboard: `sw/laptop/`
-- Full design narrative: `docs/updated_design_specification.md` (especially §5.6 demo, §6 Vivado, §7.4 bring-up phases)
+- Full design narrative: [`design_specification.md`](../design_specification.md) (especially §5.6 demo, §6 Vivado, §7.4 bring-up phases)
 
 ---
 
@@ -448,7 +448,7 @@ Adjust **baud** to match the image / design (115200 is the spec default).
 
 ## 16. Expected demo sequence
 
-This mirrors `docs/updated_design_specification.md` §5.6 at a high level:
+This mirrors [`design_specification.md`](../design_specification.md) §5.6 at a high level:
 
 1. Power both boards; connect USB; confirm PMOD **JA** and **JB** between A and B.
 2. **Board A:** run `config_symbols.py` with `--start` (or equivalent).
